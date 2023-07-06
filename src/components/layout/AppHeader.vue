@@ -1,6 +1,35 @@
 <script setup lang="ts">
     import {isCollapse} from "./isCollapse"
-    const circleUrl = "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png";
+    import { getProfile,logout } from "@/api/users/users";
+    import { useRouter } from "vue-router";
+    import { useTokenStore } from "@/stores/token";
+
+    const router = useRouter();
+    
+    const userInfoRef = reactive({
+        userName: "",
+        icon:"https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png"
+    });
+
+    // 获取个人信息处理
+    getProfile().then((userProfile)=>{
+        if(userProfile.code == 200) {
+            userInfoRef.userName = userProfile.data.userName;
+        }
+    });
+
+    // 退出事件处理
+    const handlerLogout = ()=>{
+        const tokenStore  = useTokenStore();
+
+        // 调用后端退出
+        logout();
+
+        // 清除token
+        tokenStore.removeToken();
+        // 跳转到登录页面
+        router.push("/login");
+    }
 </script>   
 
 <template>
@@ -21,15 +50,15 @@
         <!-- 用户信息 -->
         <el-dropdown>
             <span class="el-dropdown-link">
-                <el-avatar :size="32" :src="circleUrl" />
+                <el-avatar :size="32" :src="userInfoRef.icon" />
                 <el-icon class="el-icon--right">
                     <arrow-down />
                 </el-icon>
             </span>
             <template #dropdown>
                 <el-dropdown-menu>
-                    <el-dropdown-item>张三</el-dropdown-item>
-                    <el-dropdown-item divided>退出</el-dropdown-item>
+                    <el-dropdown-item>{{ userInfoRef.userName }}</el-dropdown-item>
+                    <el-dropdown-item divided @click="handlerLogout">退出</el-dropdown-item>
                 </el-dropdown-menu>
             </template>
         </el-dropdown>

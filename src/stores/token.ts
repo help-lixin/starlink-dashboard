@@ -28,6 +28,11 @@ export const useTokenStore = defineStore('token', () => {
         window.localStorage.setItem("_token",data);
     }
 
+    function removeToken(){
+        tokenJson.value = "";
+        window.localStorage.removeItem("_token");
+    }
+
     // 向外暴露
-    return { token, saveToken}
+    return { token, saveToken , removeToken}
 })

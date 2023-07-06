@@ -1,12 +1,18 @@
-import axios from "axios";
+import axios, { AxiosHeaders, type AxiosHeaderValue } from "axios";
+import { useTokenStore } from "@/stores/token";
 
-export const headers = {
-    // Authorization: "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3R5cGUiOiIwMCIsInVzZXJfaWQiOjEsInVzZXJfbmFtZSI6ImFkbWluIiwic2NvcGUiOlsiYWxsIl0sIm5pY2tfbmFtZSI6IueuoeeQhuWRmCIsImF2YXRhciI6IiIsImV4cCI6MTY4ODQ4NTk4OCwiZGVwdF9pZCI6MTAzLCJhdXRob3JpdGllcyI6WyJhZG1pbiJdLCJqdGkiOiJFVWE0dFNPVHNxRG1FZFJyMlBJYzE2SWpQMVEiLCJjbGllbnRfaWQiOiJjbGllbnQxIiwiZW1haWwiOiJhZG1pbkAxNjMuY29tIn0.a9dpPeiWgPXdjtuC8-14-WjncEgMZIm0a4tYgnPsC3Ovl8VJGOkBNxkndUQvJVBuN1xaYsL4YLE09mWR8HJuDalR8wicm96Lco__1Tm4_J6tK9NFwo7S56pQQxv1PBD-ssFvEmPCBQ4RhTCwl52xF57c_b9vf8oDWnqgh4yKdeNRpM1Tx06tmuNIi6DQtl71t208pOmh_tgu1RjLHF5bEp84F285rFhaoIxldjZ5I_Tc6T-Et1sVVwO8prAB71_RC1U7OM3znV2cN83C6hSHuw7k_Z9fsDQzw_86BxAXhf8GQKfjncOccMYszb-3o9gVMsKwePa8ier-4hADLFv2ZQ"
-}
+const request = axios.create({});
 
-const request = axios.create({
-    headers :headers
+request.interceptors.request.use((config)=>{
+    if(!config.headers){
+        config.headers = {} as AxiosHeaders;
+    }
+    const tokenStore = useTokenStore();
+    const accessToken = tokenStore.token.accessToken
+    const type = tokenStore.token.tokenType;
+    // 配置协议头
+    config.headers["Authorization"] = type + " " + accessToken;
+    return config;
 });
-
 
 export default request;

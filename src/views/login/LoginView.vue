@@ -1,12 +1,12 @@
 <script setup lang="ts">
-    import {headers} from "@/utils/request";
     import { login,authorize } from "@/api/login/login";
     import { useTokenStore } from "@/stores/token";
     import type { FormInstance, FormRules } from 'element-plus'
-    import { useRouter } from "vue-router";
+    import { useRouter,useRoute } from "vue-router";
 
     const tokenStore  = useTokenStore();
     const router = useRouter();
+    const route = useRoute();
 
     const form = reactive({
         username : 'admin',
@@ -53,8 +53,9 @@
                     });
                     // 保存token信息(先把token信息转换成json字符串)
                     tokenStore.saveToken(JSON.stringify(authorizeRes.data));
+
                     // 跳转到首页
-                    router.push("/");
+                    router.push( (route.query.redirect as string) || "/");
                 }
             }else{
                 let msg = loginRes.msg;
