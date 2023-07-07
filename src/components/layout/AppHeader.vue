@@ -8,13 +8,18 @@
     
     const userInfoRef = reactive({
         userName: "",
-        icon:"https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png"
+        avatar: "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png"
     });
 
     // 获取个人信息处理
     getProfile().then((userProfile)=>{
         if(userProfile.code == 200) {
-            userInfoRef.userName = userProfile.data.userName;
+            userInfoRef.userName = userProfile?.data?.userName;
+            if(userProfile?.data?.avatar != ""){
+                userInfoRef.avatar = userProfile?.data?.avatar; 
+            }else{
+                userInfoRef.avatar = "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png";
+            }
         }
     });
 
@@ -50,7 +55,7 @@
         <!-- 用户信息 -->
         <el-dropdown>
             <span class="el-dropdown-link">
-                <el-avatar :size="32" :src="userInfoRef.icon" />
+                <el-avatar :size="32" :src="userInfoRef.avatar" />
                 <el-icon class="el-icon--right">
                     <arrow-down />
                 </el-icon>

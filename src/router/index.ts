@@ -45,7 +45,7 @@ router.beforeEach((to,from,next)=>{
   // 目标地址是否需要进行登录判断
   if(to.matched.some(r=>r.meta?.requiresAuth)) {
     const token = useTokenStore().token;
-    if(!token.accessToken){ // token不存在,跳转到login
+    if(!token?.accessToken){ // token不存在,跳转到login
         next({name : "login", query: { redirect: to.fullPath }});
     }
    }

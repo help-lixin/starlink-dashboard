@@ -1,11 +1,11 @@
 import request from "@/utils/request";
 
-interface LoginRequest {
+type LoginRequest = {
     username:string
     password:string
 }
 
-interface ResponseResult {
+type ResponseResult =  {
     code:number
     data:string
     msg:string
