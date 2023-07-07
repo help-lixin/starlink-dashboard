@@ -1,5 +1,4 @@
 export const getEnv = function (key) {
-    console.log(import.meta.env);
     const value = import.meta.env[key];
     return value || "";
 }
