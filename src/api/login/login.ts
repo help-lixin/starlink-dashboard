@@ -1,4 +1,6 @@
 import request from "@/utils/request";
+import {PASSPORT_BASE_URL,GATEWAY_BASE_URL} from "@/utils/env"
+
 
 type LoginRequest = {
     username:string
@@ -14,7 +16,7 @@ type ResponseResult =  {
 // 请求获取验证码
 export const captcha = function(){
     return  request<ResponseResult>({
-            url : import.meta.env.VITE_PASSPORT_API_PREFIX_PATH + '/captcha',
+            url : PASSPORT_BASE_URL + '/captcha',
             method : 'GET',
             withCredentials: true
     }).then(res=>{
@@ -27,7 +29,7 @@ export const captcha = function(){
 // 登录
 export const login = function(requsetData:LoginRequest){
     return  request<ResponseResult>({
-        url : '/passport/api/login',
+        url : PASSPORT_BASE_URL + '/login',
         maxRedirects: 0,
         method : 'POST',
         headers : {
@@ -62,7 +64,7 @@ export const login = function(requsetData:LoginRequest){
 // oauth authorize
 export const authorize = function(url:string){
     const urlObj = new URL(url);
-    const newUrl =  "/passport/api" + urlObj.pathname + urlObj.search;
+    const newUrl =  PASSPORT_BASE_URL + urlObj.pathname + urlObj.search;
 
     return request<ResponseResult>({
         url: newUrl,

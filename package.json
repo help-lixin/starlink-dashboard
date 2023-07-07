@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "vite --mode development",
+    "pro": "vite --mode production",
     "build": "run-p type-check build-only",
     "preview": "vite preview",
     "build-only": "vite build --mode production",
@@ -31,6 +32,7 @@
     "@vue/tsconfig": "^0.4.0",
     "eslint": "^8.39.0",
     "eslint-plugin-vue": "^9.11.0",
+    "lodash": "^4.17.21",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.8.8",
     "typescript": "~5.0.4",

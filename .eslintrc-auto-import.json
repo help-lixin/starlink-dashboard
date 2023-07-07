@@ -1,6 +1,5 @@
 {
   "globals": {
-    "ElMessage": true,
     "Component": true,
     "ComponentPublicInstance": true,
     "ComputedRef": true,
@@ -64,6 +63,7 @@
     "watch": true,
     "watchEffect": true,
     "watchPostEffect": true,
-    "watchSyncEffect": true
+    "watchSyncEffect": true,
+    "ElMessage": true
   }
 }

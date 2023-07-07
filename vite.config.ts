@@ -10,9 +10,12 @@ import IconsResolver from 'unplugin-icons/resolver'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+import _ from 'lodash';
 
 const pathSrc = path.resolve(__dirname, 'src')
 
+const mode =  _.last(process.argv);
+console.log(mode);
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -52,12 +55,12 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: loadEnv("development",process.cwd()).VITE_GATEWAY_API_URL,
+        target: loadEnv(mode,process.cwd()).VITE_GATEWAY_API_URL,
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
       '/passport/api': {
-        target: loadEnv("development",process.cwd()).VITE_PASSPORT_API_URL,
+        target: loadEnv(mode,process.cwd()).VITE_PASSPORT_API_URL,
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/passport\/api/, ''),
       }

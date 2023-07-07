@@ -1,5 +1,7 @@
 import { useTokenStore } from "@/stores/token";
 import request from "@/utils/request";
+import {PASSPORT_BASE_URL,GATEWAY_BASE_URL} from "@/utils/env"
+
 
 type Response<T=string> = {
     code:number,
@@ -25,7 +27,7 @@ type RefreshTokenResult =  Response<{
 // 获取个人信息
 export const getProfile = ()=> {
     return request<Profile>({
-        url : import.meta.env.VITE_GATEWAY_API_PREFIX_PATH + '/system-service/system/user/getProfile'
+        url : GATEWAY_BASE_URL + '/system-service/system/user/getProfile'
     }).then((res)=>{
        return res.data; 
     });
@@ -34,7 +36,7 @@ export const getProfile = ()=> {
 // http://passport.lixin.help/logout
 export const logout = ()=> {
     request({
-        url : import.meta.env.VITE_PASSPORT_API_PREFIX_PATH + '/logout'
+        url : PASSPORT_BASE_URL + '/logout'
     }).then((res)=>{
         if(res.status == 200){
             console.log("退出成功");
@@ -56,7 +58,7 @@ export const refreshToken = ()=>{
     isRefreshTokenOperator = true;
     const tokenStore = useTokenStore();
     promiseRefresh =  request<RefreshTokenResult>({
-        url : import.meta.env.VITE_GATEWAY_API_PREFIX_PATH + '/refresh/token',
+        url : GATEWAY_BASE_URL + '/refresh/token',
         method: 'GET',
         params: {
             refresh_token : tokenStore.token?.refreshToken

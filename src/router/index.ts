@@ -20,6 +20,11 @@ const router = createRouter({
           component: IndexView
         },
         {
+          path : '/menu',
+          name : 'menu',
+          component: ()=> import("../views/menu/MenuIndex.vue")
+        },
+        {
           path : '/about',
           name : 'about',
           component: ()=> import("../views/AboutView.vue")
