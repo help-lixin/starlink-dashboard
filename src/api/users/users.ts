@@ -1,7 +1,5 @@
 import request from "@/utils/request";
 
-// {"code":200,"msg":null,"data":{"postGroup":"","userName":"admin","roleGroup":""}}lixin-macbook:gateway-service lixin$
-
 interface Profile  {
     postGroup:string,
     userName:string,
@@ -18,7 +16,7 @@ interface GetProfileResult {
 // 获取个人信息
 export const getProfile = ()=> {
     return request<GetProfileResult>({
-        url : '/api/system-service/system/user/getProfile'
+        url : import.meta.env.VITE_GATEWAY_API_PREFIX_PATH + '/system-service/system/user/getProfile'
     }).then((res)=>{
        return res.data; 
     });
@@ -27,7 +25,7 @@ export const getProfile = ()=> {
 // http://passport.lixin.help/logout
 export const logout = ()=> {
     request({
-        url : '/passport/api/logout'
+        url : import.meta.env.VITE_PASSPORT_API_PREFIX_PATH + '/logout'
     }).then((res)=>{
         if(res.status == 200){
             console.log("退出成功");

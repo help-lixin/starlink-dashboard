@@ -13,6 +13,7 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
 const pathSrc = path.resolve(__dirname, 'src')
 
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
@@ -40,6 +41,9 @@ export default defineConfig({
       autoInstall: true,
     }),
   ],
+  // define :{
+  //   'process.env' : process.env
+  // },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
@@ -48,12 +52,12 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: loadEnv("",process.cwd()).VITE_SYSTEM_API_URL,
+        target: loadEnv("development",process.cwd()).VITE_GATEWAY_API_URL,
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
       '/passport/api': {
-        target: loadEnv("",process.cwd()).VITE_PASSPORT_API_URL,
+        target: loadEnv("development",process.cwd()).VITE_PASSPORT_API_URL,
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/passport\/api/, ''),
       }

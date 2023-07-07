@@ -14,7 +14,7 @@ interface ResponseResult {
 // 请求获取验证码
 export const captcha = function(){
     return  request<ResponseResult>({
-            url : '/passport/api/captcha',
+            url : import.meta.env.VITE_PASSPORT_API_PREFIX_PATH + '/captcha',
             method : 'GET',
             withCredentials: true
     }).then(res=>{
