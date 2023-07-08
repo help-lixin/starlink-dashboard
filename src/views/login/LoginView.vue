@@ -3,7 +3,7 @@
     import { useTokenStore } from "@/stores/token";
     import { useRouter,useRoute } from "vue-router";
     import type { FormInstance, FormRules } from 'element-plus'
-
+    
     const tokenStore  = useTokenStore();
     const router = useRouter();
     const route = useRoute();
