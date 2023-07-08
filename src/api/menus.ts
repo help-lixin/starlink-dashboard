@@ -97,6 +97,37 @@ export function handleTree(data, id, parentId, children) {
   }
 
 
+export function toTree(menus:any,root:string) {
+  const menuParentIdGroup = {};
+	// 提取出parentId相同的扔在一个数组里
+	for(const menuItem of menus){
+		if(menuParentIdGroup[menuItem.parentId] == undefined){
+			menuParentIdGroup[menuItem.parentId] = [];
+		}
+		 menuParentIdGroup[menuItem.parentId].push({ value: menuItem.menuId , label : menuItem.menuName , children:[] , parent_id: menuItem.parentId });
+	}
+	
+	
+	// 把所有的子节点,添加到父节点上
+	for(const menuPropertyName in menuParentIdGroup){
+		const propertyName = menuPropertyName;
+		const menuArray = menuParentIdGroup[propertyName];
+		for(const menu of menuArray) {
+			const menuid = menu.value;
+			let childMenus = menuParentIdGroup[menuid];
+			if(childMenus == undefined){
+				childMenus = [];
+			}
+			menu.children = childMenus;
+		}
+	}
+
+  // 拿取第一个元素
+	const tree = menuParentIdGroup[root];
+	return tree;
+} 
+
+
 export function parseTime(time, pattern) {
     if (arguments.length === 0 || !time) {
       return null
