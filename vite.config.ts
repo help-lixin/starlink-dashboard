@@ -15,7 +15,7 @@ import _ from 'lodash';
 const pathSrc = path.resolve(__dirname, 'src')
 
 const mode =  _.last(process.argv);
-console.log(mode);
+console.log("当前环境为:"+mode);
 
 // https://vitejs.dev/config/
 export default defineConfig({

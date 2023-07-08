@@ -1,8 +1,8 @@
 <script setup lang="ts">
     import { login,authorize } from "@/api/users";
     import { useTokenStore } from "@/stores/token";
-    import type { FormInstance, FormRules } from 'element-plus'
     import { useRouter,useRoute } from "vue-router";
+    import type { FormInstance, FormRules } from 'element-plus'
 
     const tokenStore  = useTokenStore();
     const router = useRouter();
@@ -42,7 +42,7 @@
         });
 
         if(validate){
-            let loginRes = await login(form);
+            let loginRes:any = await login(form);
             if(loginRes.code == 200) {
                 let  authorizeRes = await authorize(loginRes.url);
                 if(authorizeRes.code == 200){

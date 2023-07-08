@@ -11,7 +11,8 @@ type Response<T=string> = {
 type Profile  = Response<{
     postGroup:string,
     userName:string,
-    roleGroup:string
+    roleGroup:string,
+    avatar:string
 }>;
 
 type RefreshTokenResult =  Response<{
@@ -28,8 +29,9 @@ type LoginRequest = {
     password:string
 }
 
-type ResponseResult =  {
+export type ResponseResult =  {
     code:number
+    url:string
     data:string
     msg:string
 }
