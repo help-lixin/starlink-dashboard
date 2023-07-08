@@ -1,7 +1,6 @@
 import { useTokenStore } from "@/stores/token";
 import request from "@/utils/request";
-import {PASSPORT_BASE_URL,GATEWAY_BASE_URL} from "@/utils/env"
-
+import {GATEWAY_BASE_URL} from "@/utils/env"
 
 type Response<T=string> = {
     code:number,
@@ -23,6 +22,81 @@ type RefreshTokenResult =  Response<{
     jti:string
 }>
 
+
+type LoginRequest = {
+    username:string
+    password:string
+}
+
+type ResponseResult =  {
+    code:number
+    data:string
+    msg:string
+}
+
+// 请求获取验证码
+export const captcha = function(){
+    return  request<ResponseResult>({
+            url : GATEWAY_BASE_URL + '/authorization-service/captcha',
+            method : 'GET',
+            withCredentials: true
+    }).then(res=>{
+        return res.data;
+    });
+}
+
+
+
+// 登录
+export const login = function(requsetData:LoginRequest){
+    return  request<ResponseResult>({
+        url : GATEWAY_BASE_URL + '/authorization-service/login',
+        maxRedirects: 0,
+        method : 'POST',
+        headers : {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        withCredentials: true, 
+        params : requsetData
+    }).then((res)=>{
+        const loginFailJson = {
+            code: 500,
+            msg: "登录失败,用户名或密码错误"
+        };
+        // http status
+        if(res.status == 200){
+            const data = res.data;
+            if(data.code != undefined &&  data.code == 200) {
+                return data;
+            }else{
+                return loginFailJson;
+            }
+        }
+    }).catch((err)=>{
+        console.error(err);
+        const loginFailJson = {
+            code: 500,
+            msg: "请求失败"
+        };
+        Promise.reject(loginFailJson);
+    });
+}
+
+// oauth authorize
+export const authorize = function(url:string){
+    const urlObj = new URL(url);
+    const newUrl =  GATEWAY_BASE_URL + "/authorization-service" + urlObj.pathname + urlObj.search;
+
+    return request<ResponseResult>({
+        url: newUrl,
+        method: 'GET',
+        maxRedirects: 0,
+        withCredentials: true
+    }).then((res)=>{
+        return res.data;
+    });
+}
+
 // /system-service/system/user/getProfile
 // 获取个人信息
 export const getProfile = ()=> {
@@ -36,11 +110,13 @@ export const getProfile = ()=> {
 // http://passport.lixin.help/logout
 export const logout = ()=> {
     request({
-        url : PASSPORT_BASE_URL + '/logout'
+        url : GATEWAY_BASE_URL + '/authorization-service/logout'
     }).then((res)=>{
         if(res.status == 200){
             console.log("退出成功");
         }
+    }).catch((error)=>{
+        // 把异常吃掉.
     });
 }
 
@@ -58,6 +134,7 @@ export const refreshToken = ()=>{
     isRefreshTokenOperator = true;
     const tokenStore = useTokenStore();
     promiseRefresh =  request<RefreshTokenResult>({
+        // 刷token交给了gateway做处理,并不属于某个具体的业务系统.
         url : GATEWAY_BASE_URL + '/refresh/token',
         method: 'GET',
         params: {

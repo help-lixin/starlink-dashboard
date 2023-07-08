@@ -1,5 +1,5 @@
 import request from "@/utils/request"
-import {PASSPORT_BASE_URL,GATEWAY_BASE_URL} from "@/utils/env"
+import {GATEWAY_BASE_URL} from "@/utils/env"
 
 
 // POST  /system-service/system/menu/list
@@ -9,7 +9,7 @@ type Response<T> = {
     data:T
 }
 
-type SysMenuItem = {
+export type SysMenuItem = {
     menuId:number,
     menuName:string,
     parentName:string,

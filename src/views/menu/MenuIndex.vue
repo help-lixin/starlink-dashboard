@@ -1,11 +1,18 @@
 <script setup lang="ts">
-    import {queryMenuList} from "@/api/menu/menu"
-    // 存储数据的引用
-    const menuListRef = ref("");
+    import {queryMenuList} from "@/api/menus"
+    import type {SysMenuItem} from "@/api/menus"
 
-    const  queryMenus = async (params={})=> {
-        const menuList = await queryMenuList(params);
-        return menuList;
+    // 存储数据的引用
+    const menuListRef = ref<SysMenuItem[]>([] as SysMenuItem[]);
+
+    const  queryMenus = async (params:any={})=> {
+        const menuResult = await queryMenuList(params);
+        if(menuResult.code == 200){
+            // 给菜单引用赋值
+            menuListRef.value = menuResult.data;
+        } else {
+            ElMessage.error("获取菜单信息失败");
+        }
     }
 
     queryMenus();
@@ -17,4 +24,4 @@
 
 <style lang="scss" scoped>
 
-</style>
+</style>@/api/menu@/api/menu

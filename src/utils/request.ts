@@ -1,6 +1,6 @@
 import axios, { AxiosHeaders, type AxiosHeaderValue } from "axios";
 import { useTokenStore } from "@/stores/token";
-import { refreshToken } from "@/api/users/users";
+import { refreshToken } from "@/api/users";
 import router from "@/router/index";
 
 const request = axios.create({});

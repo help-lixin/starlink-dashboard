@@ -1,6 +1,6 @@
 <script setup lang="ts">
     import {isCollapse} from "./isCollapse"
-    import { getProfile,logout } from "@/api/users/users";
+    import { getProfile,logout } from "@/api/users";
     import { useRouter } from "vue-router";
     import { useTokenStore } from "@/stores/token";
 
@@ -87,4 +87,4 @@
         margin-left: auto;
     }
 }
-</style>
+</style>@/api/users

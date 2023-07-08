@@ -58,11 +58,6 @@ export default defineConfig({
         target: loadEnv(mode,process.cwd()).VITE_GATEWAY_API_URL,
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
-      },
-      '/passport/api': {
-        target: loadEnv(mode,process.cwd()).VITE_PASSPORT_API_URL,
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/passport\/api/, ''),
       }
     }
   }

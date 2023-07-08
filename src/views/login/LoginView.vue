@@ -1,5 +1,5 @@
 <script setup lang="ts">
-    import { login,authorize } from "@/api/login/login";
+    import { login,authorize } from "@/api/users";
     import { useTokenStore } from "@/stores/token";
     import type { FormInstance, FormRules } from 'element-plus'
     import { useRouter,useRoute } from "vue-router";
@@ -31,7 +31,7 @@
         isLoading.value = true;
 
         let validate = await formRef.value?.validate()
-        .catch((err)=>{
+        .catch((err:Error)=>{
             ElMessage({
                 showClose: true,
                 message: '表单验证失败',
@@ -123,4 +123,4 @@
 
     }
 }
-</style>
+</style>@/api/users
