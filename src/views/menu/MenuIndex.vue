@@ -24,4 +24,4 @@
 
 <style lang="scss" scoped>
 
-</style>@/api/menu@/api/menu
+</style>
