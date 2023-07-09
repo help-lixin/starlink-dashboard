@@ -38,6 +38,20 @@ type SysMenuRequest = {
     status:string
 }
 
+export type MenuRequest = {
+  menuId: number,
+  perms : string,
+  parentId: number,
+  menuName: string,
+  icon: string,
+  menuType: string,
+  orderNum: number,
+  isFrame: string,
+  isCache: string,
+  visible: string,
+  status: string
+}
+
 // POST  /system-service/system/menu/list
 export const queryMenuList = (params:SysMenuRequest)=>{
     return request<SysMenuListResult>({
@@ -52,20 +66,6 @@ export const queryMenuList = (params:SysMenuRequest)=>{
     });
 }
 
-export type MenuRequest = {
-    menuId: number,
-    perms : string,
-    parentId: number,
-    menuName: string,
-    icon: string,
-    menuType: string,
-    orderNum: number,
-    isFrame: string,
-    isCache: string,
-    visible: string,
-    status: string
-}
-
 export const addMenu = (menu:MenuRequest)=>{
   return request({
     url : GATEWAY_BASE_URL + "/system-service/system/menu/add",
@@ -77,3 +77,29 @@ export const addMenu = (menu:MenuRequest)=>{
   });
 }
 
+
+export const updateMenu = (menu:MenuRequest)=>{
+  return request({
+    url : GATEWAY_BASE_URL + "/system-service/system/menu/edit",
+    method:'PUT',
+    headers: {
+        "content-type" : "application/json"
+    },
+    data : menu
+  });
+}
+
+export const getMenu = (menuId:number) => {
+  return request({
+    url: GATEWAY_BASE_URL + '/system-service/system/menu/' + menuId,
+    method: 'GET'
+  })
+}
+
+// 删除菜单
+export function delMenu(menuId) {
+  return request({
+    url: GATEWAY_BASE_URL + '/system-service/system/menu/' + menuId,
+    method: 'DELETE'
+  })
+}

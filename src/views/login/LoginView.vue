@@ -46,11 +46,7 @@
             if(loginRes.code == 200) {
                 let  authorizeRes = await authorize(loginRes.url);
                 if(authorizeRes.code == 200){
-                    ElMessage({
-                        showClose: true,
-                        message: '登录成功',
-                        type: 'success',
-                    });
+                    ElMessage.error('登录成功');
                     // 保存token信息(先把token信息转换成json字符串)
                     tokenStore.saveToken(JSON.stringify(authorizeRes.data));
 
