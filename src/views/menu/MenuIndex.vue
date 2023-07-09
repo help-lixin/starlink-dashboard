@@ -307,9 +307,9 @@
       </el-table>
     </el-card>
     
+    <!-- 添加/修改菜单 -->
     <el-dialog :title="title" v-model="open" width="680px" append-to-body>
       <el-form ref="formRef" :model="menuForm" :rules="rules"  label-width="100px">
-        
         <el-row>
           <el-col :span="24">
             <el-form-item label="上级菜单" prop="parentId">
@@ -321,7 +321,6 @@
                 size="large"
                 :render-after-expand="true"
                 @node-click="selectMenu"
-                
                 :show-count="true"
                 placeholder="选择上级菜单"
               />
