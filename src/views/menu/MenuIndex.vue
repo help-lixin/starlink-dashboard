@@ -1,57 +1,23 @@
 <script setup lang="ts">
     // @ts-nocheck  
-    import { Plus ,Delete, Edit, Search , RefreshRight , Sort} from '@element-plus/icons-vue'
-    import { queryMenuList , handleTree , toTree , parseTime} from "@/api/menus"
-    
-    import type {SysMenuItem} from "@/api/menus"
+    import {nextTick} from 'vue';
+    import { Plus ,Delete, Edit, Search , RefreshRight , Sort , QuestionFilled} from '@element-plus/icons-vue'
+    import { queryMenuList,addMenu } from "@/api/menus"
+    import { handleTree , toTree , parseTime , statusDicts , menuStatus , showStatus} from "@/utils/common"
+    import type {SysMenuItem , MenuRequest} from "@/api/menus"
 
     let loading = true;
-    let isExpandAll = false;
-    let refreshTable = true;
+    let isExpandAll = ref(false);
+    let refreshTable = ref(true);
     // 显示搜索条件
     let showSearch = true;
-
-    // 状态字典值
-    const statusDicts = [
-      {
-        value: '0',
-        label: '正常',
-      },
-      {
-        value: '1',
-        label: '停用',
-      }];
-
-    // 菜单字典值
-    const menuStatus = [
-      {
-        value: '0',
-        label: '正常',
-      },
-      {
-        value: '1',
-        label: '停用',
-      }
-    ];
-
-    // 显示状态
-    const showStatus = [
-    {
-        value: '0',
-        label: '显示',
-      },
-      {
-        value: '1',
-        label: '隐藏',
-      }
-    ];
 
     // 要定义成:reactive,否则,无法输入内容
     const queryParams = reactive({
       menuName : "",
       status: "0"
     });
-    const queryForm = queryParams;
+    const queryForm = ref(null);
 
     // 存储数据的引用
     const menuListRef = ref<SysMenuItem[]>([] as SysMenuItem[]);
@@ -67,6 +33,7 @@
         loading = false;
     }
 
+
     // 查询处理
     function handleQuery(){
       queryMenus(queryParams);
@@ -74,13 +41,17 @@
 
     // 重置处理
     function resetQuery(){
-      queryForm.menuName = "";
-      queryForm.status = "0";
+      queryForm.value.resetFields();
       handleQuery();
     }
 
+    // 展开/折叠
     function toggleExpandAll(){
-      // TODO lixin
+      refreshTable.value = false;
+      isExpandAll.value = !isExpandAll.value;
+      nextTick(() => {
+        refreshTable.value = true;
+      });
     }
     
     // 更新
@@ -99,8 +70,22 @@
     // 弹出层标题
     let title = ref("");
 
-    const menuForm = reactive({
+    // 表单验证规则
+    const rules = reactive<FormRules>({
+        menuName: [
+          { required: true, message: "菜单名称不能为空", trigger: "blur" }
+        ],
+        orderNum: [
+          { required: true, message: "菜单顺序不能为空", trigger: "blur" }
+        ],
+        path: [
+          { required: true, message: "路由地址不能为空", trigger: "blur" }
+        ]
+    });
+
+    const menuForm = reactive<MenuRequest>({
       menuId: undefined,
+      perms : undefined,
       parentId: 0,
       menuName: undefined,
       icon: undefined,
@@ -156,9 +141,45 @@
       }
     }
 
+    // 是否加载中
+    const isLoading = ref(false);
+    const formRef = ref<FormInstance>();
     // 提交表单
-    function submitForm(){
+    async function submitForm(){
+      isLoading.value = true;
 
+      await formRef.value?.validate()
+        .catch((err:Error)=>{
+            ElMessage({
+                showClose: true,
+                message: '表单验证失败',
+                type: 'success',
+            });
+            isLoading.value = false;
+            throw err;
+        });
+
+        if (menuForm.menuId != undefined) {
+          // 修改
+          
+        }else{
+          // 新增
+          addMenu(menuForm)
+          .then((response)=>{
+            if(response.data.code == 200){
+              ElMessage({
+                showClose: true,
+                message: '添加菜单成功',
+                type: 'success',
+            });
+            open.value = false;
+            reset();
+            // 重新触发查询
+            queryMenus();
+            }
+          });
+        }
+      isLoading.value = false;
     }
 
     // 取消
@@ -256,10 +277,9 @@
           </el-table-column>
       </el-table>
     </el-card>
-
     
     <el-dialog :title="title" v-model="open" width="680px" append-to-body>
-      <el-form ref="form" :model="menuForm"  label-width="100px">
+      <el-form ref="formRef" :model="menuForm" :rules="rules"  label-width="100px">
         
         <el-row>
           <el-col :span="24">
@@ -301,13 +321,12 @@
               <el-input-number v-model="menuForm.orderNum" controls-position="right" :min="0" />
             </el-form-item>
           </el-col>
-          
-          
+
           <el-col :span="12" v-if="menuForm.menuType != 'F'">
             <el-form-item prop="isFrame">
               <span slot="label">
                 <el-tooltip content="选择是外链则路由地址需要以`http(s)://`开头" placement="top">
-                <i class="el-icon-question"></i>
+                <el-icon><QuestionFilled /></el-icon> 
                 </el-tooltip>
                 是否外链
               </span>
@@ -318,25 +337,23 @@
             </el-form-item>
           </el-col>
 
-          
           <el-col :span="12" v-if="menuForm.menuType != 'F'">
             <el-form-item prop="path">
               <span slot="label">
                 <el-tooltip content="访问的路由地址，如：`user`，如外网地址需内链访问则以`http(s)://`开头" placement="top">
-                <i class="el-icon-question"></i>
+                <el-icon><QuestionFilled /></el-icon> 
                 </el-tooltip>
                 路由地址
               </span>
-              <el-input v-model="menuForm.path" placeholder="请输入路由地址" />
+              <el-input v-model="menuForm.path"  placeholder="请输入路由地址"/>
             </el-form-item>
           </el-col>
 
-          
           <el-col :span="12" v-if="menuForm.menuType == 'C'">
             <el-form-item prop="component">
               <span slot="label">
                 <el-tooltip content="访问的组件路径，如：`system/user/index`，默认在`views`目录下" placement="top">
-                <i class="el-icon-question"></i>
+                <el-icon><QuestionFilled /></el-icon> 
                 </el-tooltip>
                 组件路径
               </span>
@@ -346,10 +363,10 @@
 
           <el-col :span="12" v-if="menuForm.menuType != 'M'">
             <el-form-item prop="perms">
-              <el-input v-model="form.perms" placeholder="请输入权限标识" maxlength="100" />
+              <el-input v-model="menuForm.perms" placeholder="请输入权限标识" maxlength="100" />
               <span slot="label">
                 <el-tooltip content="控制器中定义的权限字符，如：@PreAuthorize(`@ss.hasPermi('system:user:list')`)" placement="top">
-                <i class="el-icon-question"></i>
+                <el-icon><QuestionFilled /></el-icon> 
                 </el-tooltip>
                 权限字符
               </span>
@@ -361,7 +378,7 @@
               <el-input v-model="menuForm.query" placeholder="请输入路由参数" maxlength="255" />
               <span slot="label">
                 <el-tooltip content='访问路由的默认传递参数，如：`{"id": 1, "name": "ry"}`' placement="top">
-                <i class="el-icon-question"></i>
+                  <el-icon><QuestionFilled /></el-icon> 
                 </el-tooltip>
                 路由参数
               </span>
@@ -372,7 +389,7 @@
             <el-form-item prop="isCache">
               <span slot="label">
                 <el-tooltip content="选择是则会被`keep-alive`缓存，需要匹配组件的`name`和地址保持一致" placement="top">
-                <i class="el-icon-question"></i>
+                <el-icon><QuestionFilled /></el-icon> 
                 </el-tooltip>
                 是否缓存
               </span>
@@ -383,11 +400,12 @@
             </el-form-item>
           </el-col>
 
+
           <el-col :span="12" v-if="menuForm.menuType != 'F'">
             <el-form-item prop="visible">
               <span slot="label">
                 <el-tooltip content="选择隐藏则路由将不会出现在侧边栏，但仍然可以访问" placement="top">
-                <i class="el-icon-question"></i>
+                <el-icon><QuestionFilled /></el-icon> 
                 </el-tooltip>
                 显示状态
               </span>
@@ -401,13 +419,12 @@
             </el-form-item>
           </el-col>
 
-
           <el-col :span="12" v-if="menuForm.menuType != 'F'">
             <el-form-item prop="status">
               <span slot="label">
                 <el-tooltip content="选择停用则路由将不会出现在侧边栏，也不能被访问" placement="top">
-                <i class="el-icon-question"></i>
-                </el-tooltip>
+                  <el-icon><QuestionFilled /></el-icon> 
+                </el-tooltip> 
                 菜单状态
               </span>
               <el-radio-group v-model="menuForm.status">
@@ -419,11 +436,12 @@
               </el-radio-group>
             </el-form-item>
           </el-col>
-
+        
         </el-row>
       </el-form>
+
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
+        <el-button type="primary" @click="submitForm" :loading="isLoading">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
@@ -449,5 +467,4 @@
 .box-card {
   width: auto;
 }
-
 </style>
