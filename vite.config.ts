@@ -11,6 +11,7 @@ import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import _ from 'lodash';
+import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 
 const pathSrc = path.resolve(__dirname, 'src')
 
@@ -19,6 +20,7 @@ console.log("当前环境为:"+mode);
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: './',
   plugins: [
     vue(),
     AutoImport({
@@ -30,6 +32,22 @@ export default defineConfig({
       ],
       dts: path.resolve(pathSrc, 'auto-imports.d.ts'),
       eslintrc: { enabled: true }
+    }),
+    createSvgIconsPlugin({
+      iconDirs: [path.resolve(__dirname, "src/assets/icons")],
+      symbolId: "icon-[dir]-[name]", // 注意这里的icon- 前缀我在svgIcon.vue中写死了的，如果调整了记得同步改一下
+      // 有特殊需求可不进行该配置
+      svgoOptions: {
+        // 删除一些填充的属性
+        plugins: [
+          {
+            name: "removeAttrs",
+            params: { attrs: ["class", "data-name", "fill", "stroke"] },
+          },
+          // 删除样式标签
+          "removeStyleElement",
+        ],
+      },
     }),
     Components({
       resolvers: [ 

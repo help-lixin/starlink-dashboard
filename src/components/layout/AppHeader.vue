@@ -5,8 +5,14 @@
     import { useTokenStore } from "@/stores/token";
 
     const router = useRouter();
-    
-    const userInfoRef = reactive({
+
+
+    type UserInfo = {
+      userName:string,
+      avatar:string
+    };
+
+    const userInfoRef:UserInfo = reactive({
         userName: "",
         avatar: "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png"
     });
@@ -16,7 +22,7 @@
         if(userProfile.code == 200) {
             userInfoRef.userName = userProfile?.data?.userName;
             if(userProfile?.data?.avatar != ""){
-                userInfoRef.avatar = userProfile?.data?.avatar; 
+                userInfoRef.avatar = userProfile?.data?.avatar;
             }else{
                 userInfoRef.avatar = "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png";
             }
@@ -35,7 +41,7 @@
         // 跳转到登录页面
         router.push("/login");
     }
-</script>   
+</script>
 
 <template>
     <el-header>
@@ -67,7 +73,7 @@
                 </el-dropdown-menu>
             </template>
         </el-dropdown>
-        
+
     </el-header>
 </template>
 

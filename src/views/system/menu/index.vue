@@ -5,7 +5,7 @@
     import { queryMenuList , addMenu , getMenu , updateMenu , delMenu } from "@/api/menus"
     import { handleTree , toTree , parseTime , statusDicts , menuStatus , showStatus} from "@/utils/common"
     import type {SysMenuItem , MenuRequest} from "@/api/menus"
-
+    
     let loading = true;
     let isExpandAll = ref(false);
     let refreshTable = ref(true);

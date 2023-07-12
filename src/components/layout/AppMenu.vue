@@ -15,6 +15,7 @@
                     <img src="@/assets/logo.svg" alt=""/>
                     <h1>星链管理平台</h1>
                 </a>
+                
                 <el-sub-menu index="1">
                     <template #title>
                         <el-icon><i-ep-setting/></el-icon>

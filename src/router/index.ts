@@ -22,7 +22,7 @@ const router = createRouter({
         {
           path : '/menu',
           name : 'menu',
-          component: ()=> import("../views/menu/MenuIndex.vue")
+          component: ()=> import("../views/system/menu/index.vue")
         },
         {
           path : '/about',
@@ -54,6 +54,7 @@ router.beforeEach((to,from,next)=>{
         next({name : "login", query: { redirect: to.fullPath }});
     }
    }
+
   // 继续往下走
   next();
 });
