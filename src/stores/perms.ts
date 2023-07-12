@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { getPerms } from '@/api/perms'
 
 /**
  * 1. 方式修改store数据<br/>
@@ -62,8 +63,6 @@ import { defineStore } from 'pinia'
  *   console.log(permsStore.perms);
  */
 
-const localStoragePermsKey:string = "_perms";
-
 export const usePermsStore = defineStore('perms', {
     state:()=>{ // state 为存储数据的仓库
         return {
@@ -78,28 +77,20 @@ export const usePermsStore = defineStore('perms', {
     actions: { // actions为提供的方法
         savePerms(perms:Set<string>){
             if(perms != undefined){
-                window.localStorage.setItem(localStoragePermsKey , JSON.stringify(perms));
-                this.$state.perms = perms;
+                this.$state.perms = new Set<string>(perms);
             }
         },
-        hasPerms(perms:string) {
-            if(this.$state.perms.size == 0) {
-                try{
-                    const _perms:string = window.localStorage.getItem(localStoragePermsKey) as string;
-                    if(_perms != undefined){
-                        const _permsArray:string[] = JSON.parse(_perms || "[]") as string[];
-                        if(_permsArray.length > 0){
-                            const _perms = new Set<string>(_permsArray);
-                            this.$state.perms = _perms;
-                        }
-                    }
-                }catch(err){  console.log("parse localStorage _perms error " , err) };
+        async hasPerms(perms:string) {
+            if(this.$state.perms.size == 0){
+                  // 加载用户对应的权限信息
+                const permsSets = await getPerms();
+                // 双重检查,避免后面的数据覆盖前面的数据.
+                if(undefined != permsSets && this.$state.perms.size == 0) {
+                    this.savePerms(permsSets);
+                }
             }
-            return this.$state.perms.has(perms);
-        },
-        clean() {
-            this.$state.perms = new Set<string>();
-            window.localStorage.removeItem(localStoragePermsKey);
+            const res = this.$state.perms.has(perms)
+            return res;
         }
     }
 });

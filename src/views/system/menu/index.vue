@@ -253,11 +253,11 @@
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary"  @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
+          <el-button type="primary"  @click="handleQuery" v-hasPerms="['/system/menu/list']"><el-icon><Search /></el-icon>搜索</el-button>
           <el-button   @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary"  @click="handleAdd"><el-icon><Plus /></el-icon>新增</el-button>
+          <el-button type="primary"  @click="handleAdd" v-hasPerms="['/system/menu/add']"><el-icon><Plus /></el-icon>新增</el-button>
           <el-button   @click="toggleExpandAll"><el-icon><Sort /></el-icon>展开/折叠</el-button>
         </el-form-item>
       </el-form>

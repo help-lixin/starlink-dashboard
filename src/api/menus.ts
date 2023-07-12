@@ -53,20 +53,16 @@ export type MenuRequest = {
 
 // POST  /system-service/system/menu/list
 export const queryMenuList = (params: SysMenuRequest) => {
-	return (
-		request <
-		SysMenuListResult >
-		{
+	return  request <SysMenuListResult>({
 			url: GATEWAY_BASE_URL + '/system-service/system/menu/list',
 			method: 'POST',
 			headers: {
 				'content-type': 'application/json'
 			},
 			data: params
-		}.then(res => {
+		}).then(res => {
 			return res.data;
-		})
-	);
+		});
 };
 
 // 添加菜单

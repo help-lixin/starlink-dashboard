@@ -1,5 +1,5 @@
 <script setup lang="ts">
-    import  AppMenu from "./AppMenu.vue";
+    import  AppMenu from "./AppMenu.vue"
     import  AppHeader from "./AppHeader.vue"
 </script>
 
