@@ -3,7 +3,10 @@
     import { useTokenStore } from "@/stores/token";
     import { useRouter,useRoute } from "vue-router";
     import type { FormInstance, FormRules } from 'element-plus'
+    import { processRoutes } from "@/api/router";
     
+    
+
     const tokenStore  = useTokenStore();
     const router = useRouter();
     const route = useRoute();
@@ -49,7 +52,8 @@
                     ElMessage({message:'登录成功',type:'success'});
                     // 保存token信息(先把token信息转换成json字符串)
                     tokenStore.saveToken(JSON.stringify(authorizeRes.data));
-
+                    // 对路由进行处理
+                    processRoutes();
                     // 跳转到首页
                     router.push( (route.query.redirect as string) || "/");
                 }

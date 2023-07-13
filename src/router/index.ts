@@ -3,6 +3,45 @@ import AppLayoutVue from '@/components/layout/AppLayout.vue'
 import IndexView from "@/views/IndexView.vue";
 import { useTokenStore } from "@/stores/token";
 
+const publicRoutes = [
+  {
+      path : '',
+      name: 'index',
+      component: IndexView,
+      meta: {
+          requiresAuth: false, 
+      }
+  },
+  {
+      path : '/about',
+      name : 'about',
+      component: ()=> import("@/views/AboutView.vue"),
+      meta: {
+          requiresAuth: false, 
+      }
+  },
+  { 
+      path: '/:xxx(.*)*', 
+      name : '404' , 
+      component: ()=> import("@/views/ErrorPage.vue"),
+      meta: {
+          requiresAuth: false, 
+      }
+  }
+];
+
+export const dynamicRoutes = [
+  {
+      path : '/menu',
+      name : 'menu',
+      component: ()=> import("../views/system/menu/index.vue"),
+      meta: {
+          requiresAuth: true,
+          perms: '/system/menu/list'
+      }
+  }
+];
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -10,36 +49,12 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: AppLayoutVue,
-      meta: {
-        requiresAuth: true // auth管理
-      },
-      children: [
-        {
-          path : '',
-          name: 'index',
-          component: IndexView
-        },
-        {
-          path : '/menu',
-          name : 'menu',
-          component: ()=> import("../views/system/menu/index.vue")
-        },
-        {
-          path : '/about',
-          name : 'about',
-          component: ()=> import("../views/AboutView.vue")
-        },
-        {
-          path : '/:xxx(.*)*',
-          name : "404",
-          component: ()=> import("../views/ErrorPage.vue")
-        }
-      ]
+      children: publicRoutes.concat(dynamicRoutes)
     },
     {
       path : '/login',
       name : 'login',
-      component: ()=> import("../views/login/LoginView.vue")
+      component: ()=> import("@/views/login/LoginView.vue")
     }
   ]
 })
@@ -54,7 +69,6 @@ router.beforeEach((to,from,next)=>{
         next({name : "login", query: { redirect: to.fullPath }});
     }
    }
-
   // 继续往下走
   next();
 });
