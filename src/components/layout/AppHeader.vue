@@ -55,7 +55,6 @@
             <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
             <el-breadcrumb-item><a href="/">promotion management</a></el-breadcrumb-item>
             <el-breadcrumb-item>promotion list</el-breadcrumb-item>
-            <el-breadcrumb-item>promotion detail</el-breadcrumb-item>
         </el-breadcrumb>
 
         <!-- 用户信息 -->
@@ -63,7 +62,7 @@
             <span class="el-dropdown-link">
                 <el-avatar :size="32" :src="userInfoRef.avatar" />
                 <el-icon class="el-icon--right">
-                    <arrow-down />
+                    <!-- <arrow-down /> -->
                 </el-icon>
             </span>
             <template #dropdown>

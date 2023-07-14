@@ -47,7 +47,7 @@
                 </a>
                 
                 <template v-for="(menu,index) in menus">
-                    <el-sub-menu :index="index">
+                    <el-sub-menu :index="index+''">
                         <template #title v-if="menu.menuType == 'M'">
                             <el-icon><i-ep-setting/></el-icon>
                             <span>{{  menu.menuName  }}</span>
