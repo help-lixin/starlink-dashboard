@@ -32,14 +32,21 @@ const publicRoutes = [
 
 export const dynamicRoutes = [
   {
-      path : '/menu',
+      path : '/system/menu/index',
       name : 'menu',
       component: ()=> import("../views/system/menu/index.vue"),
       meta: {
-          requiresAuth: true,
-          perms: '/system/menu/list'
+          requiresAuth: true
       }
+  },
+  {
+    path : '/system/user/index',
+    name : 'user',
+    component: ()=> import("../views/system/user/index.vue"),
+    meta: {
+        requiresAuth: true
   }
+}
 ];
 
 const router = createRouter({

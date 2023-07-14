@@ -6,6 +6,12 @@ import {GATEWAY_BASE_URL} from "@/utils/env"
 
 type Perms = Set<string>;
 
+export type RouteInfo = Array<{
+  component:string,
+  menuName:string,
+  path:string
+}>;
+
 let promiseGetPerms: Promise<any>;
 let lockGetPermsOperator = false;
 // 获取当前登录人的权限列表
@@ -43,7 +49,7 @@ export const getRouters = () => {
   }
   lockRouterOperator = true;
 
-	promiseGetRouters =  request({
+	promiseGetRouters =  request<RouteInfo>({
 	  url: GATEWAY_BASE_URL + '/system-service/getRouters',
 	  method: 'get'
 	}).then((res)=>{

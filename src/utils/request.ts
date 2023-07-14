@@ -25,6 +25,15 @@ request.interceptors.response.use((respose)=>{
     // 针对401进行独立处理
     if(err.response.status == 401) {
         const tokenStore = useTokenStore();
+        if(Object.keys(tokenStore?.token).length == 0){
+            ElMessage.error("刷新token失败,您将重新登录");
+            // 清除token信息
+            tokenStore.removeToken();
+            //  跳转到登录页面
+            router.push({name:'login',query : { redirect: router.currentRoute.value.fullPath}});
+            return;
+        }
+    
         // 刷新refresh_token
         const res = await refreshToken();
         if(res?.code == 200){
