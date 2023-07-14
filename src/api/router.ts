@@ -50,7 +50,6 @@ export const processRoutes =  async ()=> {
 
 function filter(userRoutes:RouteInfo[]):Set<string>{
     const res:Set<string> = new Set<string>();
-
     // 取出userRoutes里所有的component
     const components = new Set<string>(userRoutes.map((routeInfo:RouteInfo)=>{
         let component:string = routeInfo.component as string;

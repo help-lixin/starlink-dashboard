@@ -23,6 +23,12 @@
         console.log("从pinina中获取以上菜单信息,即将进行渲染");
         Object.assign(menus,menuStore.menus);
     }
+
+    const menuSelect = (path:string)=>{
+        // 通过常量:改变面包屑内容,建议保存到store里
+        console.log(path);
+    }
+
     // 处理url
     const processUrl =  (component:string) => {
         if(!component.startsWith("/")){
@@ -38,8 +44,11 @@
             <el-menu  
             router 
             unique-opened
+            :default-active="0+''"
+            :default-openeds="['0']"
             class="el-menu-vertical"
             :collapse="isCollapse" 
+            @select="menuSelect"
             >
                 <a href="/" class="logo">
                     <img src="@/assets/logo.svg" alt=""/>
@@ -47,7 +56,7 @@
                 </a>
                 
                 <template v-for="(menu,index) in menus">
-                    <el-sub-menu :index="index+''">
+                    <el-sub-menu :index="index+''" >
                         <template #title v-if="menu.menuType == 'M'">
                             <el-icon><i-ep-setting/></el-icon>
                             <span>{{  menu.menuName  }}</span>
@@ -55,7 +64,7 @@
                         
                         <template v-if="menu.children?.length > 0">
                             <template v-for="childMenu in menu.children">
-                                <el-menu-item :index="processUrl(childMenu.component)" >
+                                <el-menu-item :index="processUrl(childMenu.component)">
                                     <el-icon><i-ep-setting/></el-icon>
                                     <span>{{ childMenu.menuName }}</span>    
                                 </el-menu-item>
