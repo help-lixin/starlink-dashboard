@@ -3,8 +3,15 @@
     import { getProfile,logout } from "@/api/users";
     import { useRouter } from "vue-router";
     import { useTokenStore } from "@/stores/token";
+    import { useMenuStore } from "@/stores/menu";
+    import { usePermsStore } from "@/stores/perms";
+    import { useRouteStore } from "@/stores/route";
 
+    
     const router = useRouter();
+    const routeStore = useRouteStore();
+    const menuStore = useMenuStore();
+    const permsStore = usePermsStore();
 
 
     type UserInfo = {
@@ -36,8 +43,12 @@
         // 调用后端退出
         logout();
 
-        // 清除token
+        // 清除store数据
         tokenStore.removeToken();
+        menuStore.removeMenus();
+        routeStore.removeRoutes();
+        permsStore.removePerms();
+        
         // 跳转到登录页面
         router.push("/login");
     }

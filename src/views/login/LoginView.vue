@@ -5,8 +5,6 @@
     import type { FormInstance, FormRules } from 'element-plus'
     import { processRoutes } from "@/api/router";
     
-    
-
     const tokenStore  = useTokenStore();
     const router = useRouter();
     const route = useRoute();
@@ -123,4 +121,4 @@
 
     }
 }
-</style>@/api/users
+</style>

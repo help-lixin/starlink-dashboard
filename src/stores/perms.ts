@@ -80,6 +80,9 @@ export const usePermsStore = defineStore('perms', {
                 this.$state.perms = new Set<string>(perms);
             }
         },
+        removePerms(){
+            this.$state.perms = new Set<string>();
+        },
         async hasPerms(perms:string) {
             if(this.$state.perms.size == 0){
                   // 加载用户对应的权限信息
