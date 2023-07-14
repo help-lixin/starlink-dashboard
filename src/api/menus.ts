@@ -51,6 +51,32 @@ export type MenuRequest = {
 	status: string
 };
 
+
+export type Menu = {
+	menuId:string,
+	parentId:string,
+	menuName:string,
+	component:string,
+	orderNum:number,
+	icon:string,
+	children: Array<Menu>
+}
+
+export type MenuList = Array<Menu>;
+
+// 获取菜单树
+export const getMenuTree = ()=> {
+	return request<MenuList>({
+		url: GATEWAY_BASE_URL + '/system-service/system/menu/menuTree',
+		method: 'GET'
+	}).then(res => {
+		if(res.data?.code == 200){
+			return res.data?.data;
+		}
+		return [];
+	});
+}
+
 // POST  /system-service/system/menu/list
 export const queryMenuList = (params: SysMenuRequest) => {
 	return  request <SysMenuListResult>({
