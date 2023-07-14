@@ -71,6 +71,7 @@ export default defineConfig({
     }
   },
   server: {
+    host: '0.0.0.0',
     proxy: {
       '/api': {
         target: loadEnv(mode,process.cwd()).VITE_GATEWAY_API_URL,
