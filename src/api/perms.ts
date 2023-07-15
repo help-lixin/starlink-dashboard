@@ -26,6 +26,10 @@ export const getPerms = function() {
         method: 'GET',
         withCredentials: true
     }).then((res:any) => {
+      console.log("=====================================================================")
+      console.log("获取Perms数据结果如下:")
+      console.log(res.data);
+      console.log("=====================================================================")
         if(res.status == 200){
             if(res.data?.code == 200) {
                 return res.data?.data;
@@ -53,6 +57,10 @@ export const getRouters = () => {
 	  url: GATEWAY_BASE_URL + '/system-service/getRouters',
 	  method: 'get'
 	}).then((res)=>{
+    console.log("=====================================================================")
+    console.log("获取路由数据结果如下:")
+    console.log(res.data)
+    console.log("=====================================================================")
     return res.data;
 	}).finally(()=>{
     lockRouterOperator = false;
