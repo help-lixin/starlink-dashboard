@@ -2,6 +2,10 @@
     import { useMenuStore } from "@/stores/menu";
     import {isCollapse} from "./isCollapse"
     import { getMenuTree, type MenuList } from "@/api/menus";
+    import { navigation } from "@/api/constant";
+    import { useNavStore } from "@/stores/nav";
+
+    const navStore = useNavStore();
     const menuStore = useMenuStore();
     const menus = reactive<MenuList>([]);
 
@@ -25,8 +29,14 @@
     }
 
     const menuSelect = (path:string)=>{
+        console.log("选择菜单:",path);
         // 通过常量:改变面包屑内容,建议保存到store里
-        console.log(path);
+        const navArray =  navigation.get(path);
+        if(undefined != navArray){
+            const navArrayJson = JSON.stringify(navArray);
+            console.log(navArrayJson);
+            navStore.saveNavigation(navArrayJson);
+        }
     }
 
     // 处理url

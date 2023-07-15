@@ -6,13 +6,17 @@
     import { useMenuStore } from "@/stores/menu";
     import { usePermsStore } from "@/stores/perms";
     import { useRouteStore } from "@/stores/route";
+    import { useNavStore } from "@/stores/nav";
 
     
     const router = useRouter();
     const routeStore = useRouteStore();
     const menuStore = useMenuStore();
     const permsStore = usePermsStore();
+    const navStore = useNavStore();
 
+    // 手工触发一次解析
+    navStore.triggerParse();
 
     type UserInfo = {
       userName:string,
@@ -48,7 +52,7 @@
         menuStore.removeMenus();
         routeStore.removeRoutes();
         permsStore.removePerms();
-        
+        navStore.removeNavigation();
         // 跳转到登录页面
         router.push("/login");
     }
@@ -64,8 +68,7 @@
 
         <el-breadcrumb separator="/">
             <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-            <el-breadcrumb-item><a href="/">promotion management</a></el-breadcrumb-item>
-            <el-breadcrumb-item>promotion list</el-breadcrumb-item>
+            <el-breadcrumb-item v-for="nav in navStore.navArray"> {{  nav  }} </el-breadcrumb-item>
         </el-breadcrumb>
 
         <!-- 用户信息 -->
