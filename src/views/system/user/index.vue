@@ -3,7 +3,7 @@
   import {nextTick , Ref} from 'vue';
   import { Plus ,Delete, Edit, EditPen, Search , RefreshRight , Sort , QuestionFilled} from '@element-plus/icons-vue'
   import { parseTime , statusDicts , sexDicts , addDateRange } from "@/utils/common"
-  import { listUser , getUser , addUser , updateUser , delUser , changeUserStatus } from "@/api/users"
+  import { listUser , getUser , addUser , updateUser , delUser , changeUserStatus , resetUserPwd } from "@/api/users"
   import { getRoles } from "@/api/roles"
 
 
@@ -203,7 +203,6 @@
 
   const handleStatusChange = (row)=>{
       let text = row.status === "0" ? "启用" : "停用";
-      
       ElMessageBox.confirm(
         '确认要"' + text + '""' + row.userName + '"用户吗？',
         'Warning',
@@ -214,7 +213,6 @@
         }
     ).then(() => {
         changeUserStatus(row.userId, row.status);
-
         ElMessage({
           type: 'success',
           message: text + '成功',
@@ -223,6 +221,49 @@
       row.status = row.status === "0" ? "1" : "0";
     })
   }
+
+  // 命令处理
+  const handleCommand = (command, row)=>{
+    console.log("command: ",command)
+
+    switch (command) {
+        case "handleResetPwd":
+          handleResetPwd(row);
+          break;
+        case "handleAuthRole":
+          handleAuthRole(row);
+          break;
+        default:
+          break;
+      }
+  }
+
+  /** 重置密码按钮操作 */
+  const handleResetPwd = (row) => {
+      ElMessageBox.prompt('请输入"' + row.userName + '"的新密码', "提示", {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          inputPattern: /^.{5,20}$/,
+          inputErrorMessage: '用户密码长度必须介于 5 和 20 之间',
+      }).then(({ value }) => {
+            resetUserPwd(row.userId, value).then(response => {
+              if(response?.code == 200){
+                ElMessage({
+                  type: 'success',
+                  message: "修改成功，新密码是：" + value,
+                })
+              }
+            });
+
+      }).catch(() => { })  
+  }
+
+    /** 分配角色操作 */
+    const handleAuthRole = (row) => {
+
+      // const userId = row.userId;
+      // this.$router.push("/system/user-auth/role/" + userId);
+    }  
 
   // 表单取消处理
   const cancel = ()=>{
@@ -350,21 +391,21 @@
                 size="default"
                 icon="el-icon-edit"
                 @click="handleUpdate(scope.row)"
-                v-hasPerms="['system:user:edit']"
+                v-hasPerms="['/system:user:edit']"
               >修改</el-button>
               <el-button
                 size="default"
                 icon="el-icon-delete"
                 @click="handleDelete(scope.row)"
-                v-hasPerms="['system:user:remove']"
+                v-hasPerms="['/system:user:remove']"
               >删除</el-button>
-              <el-dropdown size="default" @command="(command) => handleCommand(command, scope.row)" v-hasPerms="['system:user:resetPwd', 'system:user:edit']">
+              <el-dropdown size="default" @command="(command) => handleCommand(command, scope.row)" v-hasPerms="['/system:user:resetPwd', '/system:user:edit']">
                 <el-button size="default"  icon="el-icon-d-arrow-right">更多</el-button>
                 <el-dropdown-menu slot="dropdown">
                   <el-dropdown-item command="handleResetPwd" icon="el-icon-key"
-                    v-hasPerms="['system:user:resetPwd']">重置密码</el-dropdown-item>
+                    v-hasPerms="['/system:user:resetPwd']">重置密码</el-dropdown-item>
                   <el-dropdown-item command="handleAuthRole" icon="el-icon-circle-check"
-                    v-hasPerms="['system:user:edit']">分配角色</el-dropdown-item>
+                    v-hasPerms="['/system:user:edit']">分配角色</el-dropdown-item>
                 </el-dropdown-menu>
               </el-dropdown>
             </template>

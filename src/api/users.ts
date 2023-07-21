@@ -221,6 +221,24 @@ export function changeUserStatus(userId:any, status:any) {
         url: GATEWAY_BASE_URL + '/system-service/system/user/changeStatus',
         method: 'put',
         data: data
-    })
+    }).then((res)=>{
+        return res?.data;
+    });
 }
+
+
+// 用户密码重置
+export function resetUserPwd(userId:string, password:string) {
+    const data = {
+      userId,
+      password
+    }
+    return request({
+      url: GATEWAY_BASE_URL + '/system-service/system/user/resetPwd',
+      method: 'put',
+      data: data
+    }).then((res)=>{
+        return res?.data;
+    });
+  }
   
