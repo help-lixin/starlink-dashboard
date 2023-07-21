@@ -1,6 +1,8 @@
 import {useTokenStore} from "@/stores/token";
 import request from "@/utils/request";
 import {GATEWAY_BASE_URL} from "@/utils/env"
+import { parseStrEmpty } from "@/utils/common";
+
 
 type Response<T = string> = {
     code: number,
@@ -150,3 +152,75 @@ export const refreshToken = () => {
     return promiseRefresh;
 }
 
+// 查询用户列表
+export function listUser(query:any) {
+    return request({
+      url: GATEWAY_BASE_URL + '/system-service/system/user/list',
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json'
+      },
+     data: query
+    }).then((res)=>{
+        return res?.data;
+    });
+}
+
+// 查询用户详细
+export function getUser(userId:string) {
+    return request({
+        url: GATEWAY_BASE_URL + '/system-service/system/user/' + parseStrEmpty(userId),
+        method: 'get'
+    }).then((res)=>{
+        return res?.data;
+    });
+}
+
+
+
+// 新增用户
+export function addUser(data:any) {
+return request({
+        url: GATEWAY_BASE_URL + '/system-service/system/user/add',
+        method: 'post',
+        data: data
+    }).then((res)=>{
+        return res?.data;
+    });
+}
+  
+// 修改用户
+export function updateUser(data:any) {
+return request({
+        url: GATEWAY_BASE_URL + '/system-service/system/user/edit',
+        method: 'put',
+        data: data
+    }).then((res)=>{
+        return res?.data;
+    });
+}
+  
+  // 删除用户
+export function delUser(userId:string) {
+return request({
+        url: GATEWAY_BASE_URL + '/system-service/system/user/' + userId,
+        method: 'delete'
+    }).then((res)=>{
+        return res?.data;
+    });
+}
+
+
+// 用户状态修改
+export function changeUserStatus(userId:any, status:any) {
+    const data = {
+        userId,
+        status
+    }
+    return request({
+        url: GATEWAY_BASE_URL + '/system-service/system/user/changeStatus',
+        method: 'put',
+        data: data
+    })
+}
+  

@@ -117,6 +117,20 @@ export function parseTime(time, pattern) {
     return time_str
   }  
 
+export const sexDicts = [
+  {
+    value: '0',
+    label: '男',
+  },
+  {
+    value: '1',
+    label: '女',
+  },
+  {
+    value: '2',
+    label: '未知',
+  }
+]
 
 
 // 状态字典值
@@ -153,3 +167,25 @@ export const showStatus = [
     label: '隐藏',
   }
 ];
+
+
+export function addDateRange(params, dateRange, propName) {
+  const search = params;
+  search.params = typeof (search.params) === 'object' && search.params !== null && !Array.isArray(search.params) ? search.params : {};
+  dateRange = Array.isArray(dateRange) ? dateRange : [];
+  if (typeof (propName) === 'undefined') {
+    search.params['beginTime'] = dateRange[0];
+    search.params['endTime'] = dateRange[1];
+  } else {
+    search.params['begin' + propName] = dateRange[0];
+    search.params['end' + propName] = dateRange[1];
+  }
+  return search;
+}
+
+export function parseStrEmpty(str) {
+  if (!str || str == "undefined" || str == "null") {
+    return "";
+  }
+  return str;
+}
