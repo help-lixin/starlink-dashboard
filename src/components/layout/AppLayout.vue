@@ -10,9 +10,10 @@
         <el-container class="hader-and-main">
           <AppHeader/>
           <el-main>
-            <el-scrollbar>
+            <!-- <el-scrollbar>
               <RouterView/>
-            </el-scrollbar>
+            </el-scrollbar> -->
+              <RouterView/>
           </el-main>
         </el-container>
       </el-container>

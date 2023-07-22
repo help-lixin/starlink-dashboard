@@ -11,7 +11,7 @@
 
   const queryParams = reactive({
     pageNum: 1,
-    pageSize: 2,
+    pageSize: 1,
     userName: undefined,
     phonenumber: undefined,
     status: undefined
@@ -277,10 +277,10 @@
 
 <template>
   <div class="main-wrapp">
-    <!--sousuo  -->
-    <el-form class="form-wrap" :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-row :gutter="20">
-        <el-col :span="8">
+    <el-row :gutter="20">
+      <!--用户数据-->
+      <el-col :span="20" :xs="24">
+        <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
           <el-form-item label="用户名称" prop="userName">
             <el-input
               v-model="queryParams.userName"
@@ -290,8 +290,6 @@
               @keyup.enter.native="handleQuery"
             />
           </el-form-item>
-        </el-col> 
-        <el-col :span="8">
           <el-form-item label="手机号码" prop="phonenumber">
             <el-input
               v-model="queryParams.phonenumber"
@@ -301,13 +299,8 @@
               @keyup.enter.native="handleQuery"
             />
           </el-form-item>
-        </el-col> 
-      </el-row>
-      <el-row :gutter="20">
-        <el-col :span="8">
           <el-form-item label="状态" prop="status">
             <el-select
-            class="search-select"
               v-model="queryParams.status"
               placeholder="用户状态"
               clearable
@@ -320,8 +313,6 @@
             />
             </el-select>
           </el-form-item>
-        </el-col> 
-        <el-col :span="8">
           <el-form-item label="创建时间">
             <el-date-picker
               v-model="dateRange"
@@ -333,49 +324,49 @@
               end-placeholder="结束日期"
             ></el-date-picker>
           </el-form-item>
-        </el-col> 
-        <el-col :span="8">
-          <div>
-            <el-button type="primary" size="small" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
-            <el-button  size="small" @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
-          </div>
-        </el-col>
-      </el-row>
-    
-    </el-form>
-    <!--  option-->
-    <div class="option-wrap">
-      <el-button
-        type="primary"
-        plain
-        size="default"
-        @click="handleAdd"
-        v-hasPerms="['system:user:add']"
-      ><el-icon><Plus /></el-icon>新增</el-button>
-      <el-button
-        type="success"
-        plain
-        size="default"
-        @click="handleUpdate"
-        v-hasPerms="['system:user:edit']"
-      ><el-icon><EditPen /></el-icon>修改</el-button>
-      <el-button
-        type="danger"
-        plain
-        size="default"
-        @click="handleDelete"
-        v-hasPerms="['system:user:remove']"
-      ><el-icon><Delete /></el-icon>删除</el-button>
-    </div>
-    <!--table  -->
-    <div class="table-wrap">
-      <el-table v-loading="loading" :data="userList" @selection-change="handleSelectionChange">
+          <el-form-item>
+            <el-button type="primary" size="default" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
+            <el-button  size="default" @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
+          </el-form-item>
+        </el-form>
+
+        <el-row :gutter="10" class="mb8">
+          <el-col :span="1.5">
+            <el-button
+              type="primary"
+              plain
+              size="default"
+              @click="handleAdd"
+              v-hasPerms="['system:user:add']"
+            ><el-icon><Plus /></el-icon>新增</el-button>
+          </el-col>
+          <el-col :span="1.5">
+            <el-button
+              type="success"
+              plain
+              size="default"
+              @click="handleUpdate"
+              v-hasPerms="['system:user:edit']"
+            ><el-icon><EditPen /></el-icon>修改</el-button>
+          </el-col>
+          <el-col :span="1.5">
+            <el-button
+              type="danger"
+              plain
+              size="default"
+              @click="handleDelete"
+              v-hasPerms="['system:user:remove']"
+            ><el-icon><Delete /></el-icon>删除</el-button>
+          </el-col>
+        </el-row>
+        
+        <el-table v-loading="loading" :data="userList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="50" align="center" />
           <el-table-column label="用户编号" align="center" key="userId" prop="userId"  />
-          <el-table-column label="用户名称" align="center" key="userName" prop="userName"  :show-overflow-tooltip="true"  width="100" />
-          <el-table-column label="用户昵称" align="center" key="nickName" prop="nickName" :show-overflow-tooltip="true"  width="100" />
+          <el-table-column label="用户名称" align="center" key="userName" prop="userName"  :show-overflow-tooltip="true" />
+          <el-table-column label="用户昵称" align="center" key="nickName" prop="nickName" :show-overflow-tooltip="true" />
           <el-table-column label="手机号码" align="center" key="phonenumber" prop="phonenumber"  width="120" />
-          <el-table-column label="状态" align="center" key="status"  width="100">
+          <el-table-column label="状态" align="center" key="status" >
             <template v-slot="scope">
               <el-switch
                 v-model="scope.row.status"
@@ -385,7 +376,7 @@
               ></el-switch>
             </template>
           </el-table-column>
-          <el-table-column label="创建时间" align="center" prop="createTime"  width="180">
+          <el-table-column label="创建时间" align="center" prop="createTime"  width="160">
             <template v-slot="scope">
               <span>{{ parseTime(scope.row.createTime) }}</span>
             </template>
@@ -393,49 +384,46 @@
           <el-table-column
             label="操作"
             align="center"
-            width="220"
+            width="160"
+            class-name="small-padding fixed-width"
           >
             <template v-slot="scope">
-             <div class="action-btn">
               <el-button
                 size="default"
                 icon="el-icon-edit"
-                type="text"
                 @click="handleUpdate(scope.row)"
                 v-hasPerms="['/system:user:edit']"
               >修改</el-button>
               <el-button
                 size="default"
                 icon="el-icon-delete"
-                type="text"
                 @click="handleDelete(scope.row)"
                 v-hasPerms="['/system:user:remove']"
               >删除</el-button>
               <el-dropdown size="default" @command="(command) => handleCommand(command, scope.row)" v-hasPerms="['/system:user:resetPwd', '/system:user:edit']">
-                <el-button size="default" type="text" icon="el-icon-d-arrow-right">更多</el-button>
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <el-dropdown-item command="handleResetPwd" icon="el-icon-key">重置密码</el-dropdown-item>
-                    <el-dropdown-item command="handleAuthRole" icon="el-icon-circle-check">分配角色</el-dropdown-item>
-                  </el-dropdown-menu>
-                </template>
+                <el-button size="default"  icon="el-icon-d-arrow-right">更多</el-button>
+                <el-dropdown-menu slot="dropdown">
+                  <el-dropdown-item command="handleResetPwd" icon="el-icon-key"
+                    v-hasPerms="['/system:user:resetPwd']">重置密码</el-dropdown-item>
+                  <el-dropdown-item command="handleAuthRole" icon="el-icon-circle-check"
+                    v-hasPerms="['/system:user:edit']">分配角色</el-dropdown-item>
+                </el-dropdown-menu>
               </el-dropdown>
-             </div>
             </template>
           </el-table-column>
-    </el-table>
-    </div>
-    <div class="page-wrap">
-      <el-pagination
-      v-show="total>0"
-      :total="total"
-      :page-sizes=[10,20]
-      background layout="prev, pager, next" 
-      v-model:current-page="queryParams.pageNum"
-      v-model:page-size="queryParams.pageSize"
-      @current-change="getList"
-    />
-    </div>
+        </el-table>
+
+        <el-pagination
+          v-show="total>0"
+          :total="total"
+          :page-sizes=[10,20]
+          background layout="prev, pager, next" 
+          v-model:current-page="queryParams.pageNum"
+          v-model:page-size="queryParams.pageSize"
+          @current-change="getList"
+        />
+      </el-col>
+    </el-row>      
 
 
     <!-- 添加或修改用户配置对话框 -->
@@ -529,45 +517,6 @@
 <style lang="scss" scoped>
 .main-wrap {
   height: 100%;
-  width: 100%;
-  box-sizing: border-box;
   background: #fff;
-
-}
-
-.option-wrap {
-  margin-bottom: 8px;
-  .el-button {
-    // margin-right: 6px;
-  }
-}
-.table-wrap {
-  width: 100%;
-  box-sizing: border-box;
-  overflow-y: auto;
-  .action-btn {
-    display: flex;
-  }
-}
-
-.page-wrap {
-  padding: 20px 0;
-  .el-pagination {
-    display: flex;
-    align-items: center;
-    justify-content: end;
-  }
-
-}
-
-
-</style>
-<style>
- .el-form-item__label {
-  font-size: 14px;
- }
-
-.search-select .el-input {
-  --el-input-width: 240px;
 }
 </style>
