@@ -87,6 +87,7 @@
     .then(response => {
           loading.value = false
           if(response?.data?.records.length > 0){
+            userList.splice(0,userList.length);
             Object.assign(userList, response?.data?.records)
             total.value = response?.data?.total
           }else{
@@ -250,11 +251,10 @@
               if(response?.code == 200){
                 ElMessage({
                   type: 'success',
-                  message: "修改成功，新密码是：" + value,
+                  message: "修改成功,新密码是:" + value,
                 })
               }
             });
-
       }).catch(() => { })  
   }
 
@@ -399,24 +399,20 @@
              <div class="action-btn">
               <el-button
                 size="default"
-                icon="el-icon-edit"
-                type="text"
                 @click="handleUpdate(scope.row)"
                 v-hasPerms="['/system:user:edit']"
               >修改</el-button>
               <el-button
                 size="default"
-                icon="el-icon-delete"
-                type="text"
                 @click="handleDelete(scope.row)"
                 v-hasPerms="['/system:user:remove']"
               >删除</el-button>
               <el-dropdown size="default" @command="(command) => handleCommand(command, scope.row)" v-hasPerms="['/system:user:resetPwd', '/system:user:edit']">
-                <el-button size="default" type="text" icon="el-icon-d-arrow-right">更多</el-button>
+                <el-button size="default">更多</el-button>
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <el-dropdown-item command="handleResetPwd" icon="el-icon-key">重置密码</el-dropdown-item>
-                    <el-dropdown-item command="handleAuthRole" icon="el-icon-circle-check">分配角色</el-dropdown-item>
+                    <el-dropdown-item command="handleResetPwd" v-hasPerms="['/system:user:resetPwd']">重置密码</el-dropdown-item>
+                    <!-- <el-dropdown-item command="handleAuthRole" v-hasPerms="['/system:user:edit']">分配角色</el-dropdown-item> -->
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
