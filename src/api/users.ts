@@ -169,7 +169,7 @@ export function listUser(query:any) {
 // 查询用户详细
 export function getUser(userId:string) {
     return request({
-        url: GATEWAY_BASE_URL + '/system-service/system/user/' + parseStrEmpty(userId),
+        url: GATEWAY_BASE_URL + '/system-service/system/user/info/' + parseStrEmpty(userId),
         method: 'get'
     }).then((res)=>{
         return res?.data;
@@ -203,7 +203,7 @@ return request({
   // 删除用户
 export function delUser(userId:string) {
 return request({
-        url: GATEWAY_BASE_URL + '/system-service/system/user/remove/' + userId,
+        url: GATEWAY_BASE_URL + '/system-service/system/user/del/' + userId,
         method: 'delete'
     }).then((res)=>{
         return res?.data;

@@ -126,7 +126,7 @@ export const getMenu = (menuId: number) => {
 // 删除菜单
 export function delMenu(menuId) {
 	return request({
-		url: GATEWAY_BASE_URL + '/system-service/system/menu/' + menuId,
+		url: GATEWAY_BASE_URL + '/system-service/system/menu/del/' + menuId,
 		method: 'DELETE'
 	});
 }

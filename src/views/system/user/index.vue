@@ -376,7 +376,7 @@
         plain
         size="default"
         :disabled="multiple"
-        @click="handleDelete" v-hasPerms="['/system/user/remove/*']" ><el-icon><Delete /></el-icon>删除</el-button>
+        @click="handleDelete" v-hasPerms="['/system/user/del/*']" ><el-icon><Delete /></el-icon>删除</el-button>
 
     </div>
 
@@ -419,7 +419,7 @@
               <el-button
                 size="default"
                 @click="handleDelete(scope.row)"
-                v-hasPerms="['/system/user/remove/*']" 
+                v-hasPerms="['/system/user/del/*']" 
               >删除</el-button>
             
 
