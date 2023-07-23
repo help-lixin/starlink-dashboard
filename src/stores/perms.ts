@@ -63,6 +63,8 @@ import { getPerms } from '@/api/perms'
  *   console.log(permsStore.perms);
  */
 
+
+const localStoragePermsKey = "_perms";
 export const usePermsStore = defineStore('perms', {
     state:()=>{ // state 为存储数据的仓库
         return {
@@ -77,7 +79,33 @@ export const usePermsStore = defineStore('perms', {
     actions: { // actions为提供的方法
         savePerms(perms:Set<string>){
             if(perms != undefined){
+                const permsString = JSON.stringify(Array.from(perms));
+                window.localStorage.setItem(localStoragePermsKey,permsString);
                 this.$state.perms = new Set<string>(perms);
+            }
+        },
+         async initPermList(){
+            try{
+                if (this.$state.perms.size > 0 ){
+                    return this.$state.perms;
+                }else{
+                    const storePermsString:any = window.localStorage.getItem(localStoragePermsKey);
+                    if(storePermsString && this.$state.perms.size == 0){ // 双重检查
+                        const storePermsArray = JSON.parse(storePermsString)
+                        this.$state.perms = new Set<string>(storePermsArray);
+                        return;
+                    } else {
+                        const permsSets = await getPerms();
+                        if(undefined != permsSets && this.$state.perms.size == 0) { // 双重检查
+                            this.savePerms(permsSets);
+                        }
+                        return;
+                    }
+                }
+            }catch(err){
+                ElMessage.error("数据格式不对,转换成Set对象失败");
+                window.localStorage.setItem(localStoragePermsKey,"");
+                throw err;
             }
         },
         removePerms(){
@@ -85,12 +113,7 @@ export const usePermsStore = defineStore('perms', {
         },
         async hasPerms(perms:string) {
             if(this.$state.perms.size == 0){
-                  // 加载用户对应的权限信息
-                const permsSets = await getPerms();
-                // 双重检查,避免后面的数据覆盖前面的数据.
-                if(undefined != permsSets && this.$state.perms.size == 0) {
-                    this.savePerms(permsSets);
-                }
+                this.initPermList()
             }
             const res = this.$state.perms.has(perms)
             return res;

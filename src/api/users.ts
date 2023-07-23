@@ -203,7 +203,7 @@ return request({
   // 删除用户
 export function delUser(userId:string) {
 return request({
-        url: GATEWAY_BASE_URL + '/system-service/system/user/' + userId,
+        url: GATEWAY_BASE_URL + '/system-service/system/user/remove/' + userId,
         method: 'delete'
     }).then((res)=>{
         return res?.data;

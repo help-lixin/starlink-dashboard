@@ -45,8 +45,16 @@ export const dynamicRoutes = [
     component: ()=> import("../views/system/user/index.vue"),
     meta: {
         requiresAuth: true
-  }
-}
+    },
+  },
+  {
+    path : '/system/role/index',
+    name : 'role',
+    component: ()=> import("../views/system/role/index.vue"),
+    meta: {
+        requiresAuth: true
+    },
+  },
 ];
 
 const router = createRouter({

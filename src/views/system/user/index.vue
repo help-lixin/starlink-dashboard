@@ -329,8 +329,7 @@
             <el-option v-for="dict in statusDicts"
               :key="dict.value"
               :label="dict.label"
-              :value="dict.value"
-            />
+              :value="dict.value"/>
             </el-select>
           </el-form-item>
         </el-col> 
@@ -353,34 +352,32 @@
             <el-button  size="small" @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
           </div>
         </el-col>
-      </el-row>
-    
+      </el-row>  
     </el-form>
+
     <!--  option-->
     <div class="option-wrap">
       <el-button
         type="primary"
         plain
         size="default"
-        @click="handleAdd"
-        v-hasPerms="['system:user:add']"
-      ><el-icon><Plus /></el-icon>新增</el-button>
+        @click="handleAdd" v-hasPerms="['/system/user/add']" ><el-icon><Plus /></el-icon>新增</el-button>
+
+
       <el-button
         type="success"
         plain
         size="default"
         :disabled="single"
-        @click="handleUpdate"
-        v-hasPerms="['system:user:edit']"
-      ><el-icon><EditPen /></el-icon>修改</el-button>
+        @click="handleUpdate" v-hasPerms="['/system/user/edit']" ><el-icon><EditPen /></el-icon>修改</el-button>  
+
       <el-button
         type="danger"
         plain
         size="default"
         :disabled="multiple"
-        @click="handleDelete"
-        v-hasPerms="['system:user:remove']"
-      ><el-icon><Delete /></el-icon>删除</el-button>
+        @click="handleDelete" v-hasPerms="['/system/user/remove/*']" ><el-icon><Delete /></el-icon>删除</el-button>
+
     </div>
 
     <!--table  -->
@@ -416,22 +413,26 @@
               <el-button
                 size="default"
                 @click="handleUpdate(scope.row)"
-                v-hasPerms="['/system:user:edit']"
+                v-hasPerms="['/system/user/edit']"
               >修改</el-button>
+              
               <el-button
                 size="default"
                 @click="handleDelete(scope.row)"
-                v-hasPerms="['/system:user:remove']"
+                v-hasPerms="['/system/user/remove/*']" 
               >删除</el-button>
-              <el-dropdown size="default" @command="(command) => handleCommand(command, scope.row)" v-hasPerms="['/system:user:resetPwd', '/system:user:edit']">
+            
+
+              <el-dropdown size="default" @command="(command) => handleCommand(command, scope.row)" v-hasPerms="['/system/user/resetPwd', '/system/user/edit']">
                 <el-button size="default">更多</el-button>
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <el-dropdown-item command="handleResetPwd" v-hasPerms="['/system:user:resetPwd']">重置密码</el-dropdown-item>
+                    <el-dropdown-item command="handleResetPwd" v-hasPerms="['/system/user/resetPwd']" >重置密码</el-dropdown-item>
                     <!-- <el-dropdown-item command="handleAuthRole" v-hasPerms="['/system:user:edit']">分配角色</el-dropdown-item> -->
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
+              
              </div>
             </template>
           </el-table-column>
