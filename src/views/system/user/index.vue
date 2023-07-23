@@ -1,6 +1,5 @@
 <script setup lang="ts">
   // @ts-nocheck  
-  import {nextTick , Ref} from 'vue';
   import { Plus ,Delete, Edit, EditPen, Search , RefreshRight , Sort , QuestionFilled} from '@element-plus/icons-vue'
   import { parseTime , statusDicts , sexDicts , addDateRange } from "@/utils/common"
   import { listUser , getUser , addUser , updateUser , delUser , changeUserStatus , resetUserPwd } from "@/api/users"
@@ -24,6 +23,12 @@
   // 日期范围
   const dateRange = ref([])
 
+  // 选中数组
+  const ids = ref([])
+  // 非单个禁用
+  const single = ref(true)
+  // 非多个禁用
+  const multiple = ref(true)
 
   const total= ref(0)
   const userList = reactive([])
@@ -65,6 +70,7 @@
         ]
     })
 
+  // 重置表单
   const reset = ()=> {
       Object.assign(form,{
         userId: undefined,
@@ -80,7 +86,7 @@
   }
 
 
-
+  // 获取列表
   const getList = ()=>{
     loading.value = true;
     listUser(addDateRange(queryParams, dateRange))
@@ -98,16 +104,19 @@
     );
   }
 
+  // 处理搜索按钮
   const handleQuery = function(){
     getList()
   }
 
+  // 处理查询按钮
   const resetQuery = function(){
     dateRange.value = [];
     queryForm.value.resetFields();
     handleQuery();
   }
 
+  // 处理新增按钮
   const handleAdd = function(){
     reset();
 
@@ -121,9 +130,10 @@
     });
   }
 
+  // 处理更新按钮
   const handleUpdate = function(row){
     reset();
-    const userId = row.userId
+    const userId = row.userId || ids.value
     getUser(userId).then(response => {
       if(response?.code == 200){
         Object.assign(form,response?.data?.user)
@@ -137,7 +147,7 @@
   }
   
   const handleDelete = function(row){
-    const userIds = row.userId;
+    const userIds = row.userId || ids.value;
 
     ElMessageBox.confirm(
       '是否确认删除用户编号为"' + userIds + '"的数据项？',
@@ -161,8 +171,11 @@
 
   }
 
-  const handleSelectionChange = function(){
-
+  // 多选框选中数据
+  const handleSelectionChange = function(selection){
+    ids.value = selection.map(item => item.userId);
+    single.value = selection.length != 1;
+    multiple.value = !selection.length;
   }
 
   // 表单提交处理
@@ -356,6 +369,7 @@
         type="success"
         plain
         size="default"
+        :disabled="single"
         @click="handleUpdate"
         v-hasPerms="['system:user:edit']"
       ><el-icon><EditPen /></el-icon>修改</el-button>
@@ -363,15 +377,17 @@
         type="danger"
         plain
         size="default"
+        :disabled="multiple"
         @click="handleDelete"
         v-hasPerms="['system:user:remove']"
       ><el-icon><Delete /></el-icon>删除</el-button>
     </div>
+
     <!--table  -->
     <div class="table-wrap">
       <el-table v-loading="loading" :data="userList" @selection-change="handleSelectionChange">
-          <el-table-column type="selection" width="50" align="center" />
-          <el-table-column label="用户编号" align="center" key="userId" prop="userId"  />
+          <el-table-column type="selection" width="30" align="center" />
+          <el-table-column label="用户编号" align="center" key="userId" prop="userId"/>
           <el-table-column label="用户名称" align="center" key="userName" prop="userName"  :show-overflow-tooltip="true"  width="100" />
           <el-table-column label="用户昵称" align="center" key="nickName" prop="nickName" :show-overflow-tooltip="true"  width="100" />
           <el-table-column label="手机号码" align="center" key="phonenumber" prop="phonenumber"  width="120" />
