@@ -133,12 +133,17 @@ export function delMenu(menuId) {
 
 // 菜单树
 export function treeSelect(params: SysMenuRequest) {
+	params = params || {};
 	return request({
-		url: GATEWAY_BASE_URL + '/system-service/system/menu/treeselect',
+		url: GATEWAY_BASE_URL + '/system-service/system/menu/treeSelect',
 		method: 'POST',
 		headers: {
 			'content-type': 'application/json'
 		},
 		data: params
+	}).then((res)=>{
+		if(res.data?.code == 200){
+			return res.data.data;
+		}
 	});
 }

@@ -4,8 +4,10 @@
     import { useRouter,useRoute } from "vue-router";
     import type { FormInstance, FormRules } from 'element-plus'
     import { processRoutes } from "@/api/router";
+    import { usePermsStore } from "@/stores/perms";
     
     const tokenStore  = useTokenStore();
+    const permsStore = usePermsStore();
     const router = useRouter();
     const route = useRoute();
 
@@ -50,6 +52,8 @@
                     ElMessage({message:'登录成功',type:'success'});
                     // 保存token信息(先把token信息转换成json字符串)
                     tokenStore.saveToken(JSON.stringify(authorizeRes.data));
+                    // 初始化权限列表
+                    permsStore.initPermList();
                     // 对路由进行处理
                     processRoutes();
                     // 跳转到首页

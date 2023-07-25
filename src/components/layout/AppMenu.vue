@@ -17,24 +17,18 @@
                 // 深拷贝
                 Object.assign(menus,res);
                 const menuJson = JSON.stringify(Array.from(res));
-                console.log("将保存菜单信息到pinina中");
-                console.log(menuJson)
                 menuStore.saveMenus(menuJson);
             }
         });
     } else {
-        console.log(menuStore.menus);
-        console.log("从pinina中获取以上菜单信息,即将进行渲染");
         Object.assign(menus,menuStore.menus);
     }
 
     const menuSelect = (path:string)=>{
-        console.log("选择菜单:",path);
         // 通过常量:改变面包屑内容,建议保存到store里
         const navArray =  navigation.get(path);
         if(undefined != navArray){
             const navArrayJson = JSON.stringify(navArray);
-            console.log(navArrayJson);
             navStore.saveNavigation(navArrayJson);
         }
     }

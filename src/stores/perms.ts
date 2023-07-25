@@ -110,6 +110,7 @@ export const usePermsStore = defineStore('perms', {
         },
         removePerms(){
             this.$state.perms = new Set<string>();
+            window.localStorage.removeItem(localStoragePermsKey);
         },
         async hasPerms(perms:string) {
             if(this.$state.perms.size == 0){
