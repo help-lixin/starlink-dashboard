@@ -1,7 +1,7 @@
 <script setup lang="ts">
   // @ts-nocheck  
   import { Plus ,Delete, Edit, EditPen, Search , RefreshRight , Sort , QuestionFilled} from '@element-plus/icons-vue'
-  import { parseTime , statusDicts , sexDicts , addDateRange } from "@/utils/common"
+  import { parseTime , statusDicts , sexDicts , addDateRangeRuoyi } from "@/utils/common"
   import { listUser , getUser , addUser , updateUser , delUser , changeUserStatus , resetUserPwd } from "@/api/users"
   import { getRoles } from "@/api/roles"
 
@@ -10,7 +10,7 @@
 
   const queryParams = reactive({
     pageNum: 1,
-    pageSize: 2,
+    pageSize: 10,
     userName: undefined,
     phonenumber: undefined,
     status: undefined
@@ -89,7 +89,7 @@
   // 获取列表
   const getList = ()=>{
     loading.value = true;
-    listUser(addDateRange(queryParams, dateRange))
+    listUser(addDateRangeRuoyi(queryParams, dateRange.value))
     .then(response => {
           loading.value = false
           if(response?.data?.records.length > 0){
@@ -338,7 +338,7 @@
             <el-date-picker
               v-model="dateRange"
               style="width: 240px"
-              value-format="yyyy-MM-dd"
+              value-format="YYYY-MM-DD"
               type="daterange"
               range-separator="-"
               start-placeholder="开始日期"

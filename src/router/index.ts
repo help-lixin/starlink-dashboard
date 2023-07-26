@@ -55,6 +55,14 @@ export const dynamicRoutes = [
         requiresAuth: true
     },
   },
+  {
+    path : '/system/env/index',
+    name : 'env',
+    component: ()=> import("../views/system/env/index.vue"),
+    meta: {
+        requiresAuth: true
+    },
+  },
 ];
 
 const router = createRouter({

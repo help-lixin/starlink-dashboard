@@ -132,8 +132,19 @@ export const sexDicts = [
   }
 ]
 
+export const status = [
+  {
+    value: 1,
+    label: '启用',
+  },
+  {
+    value: 0,
+    label: '停用',
+  }
+];
 
-// 状态字典值
+
+// 诺依状态字典值
 export const statusDicts = [
   {
     value: '0',
@@ -169,7 +180,7 @@ export const showStatus = [
 ];
 
 
-export function addDateRange(params, dateRange, propName) {
+export function addDateRangeRuoyi(params, dateRange, propName) {
   const search = params;
   search.params = typeof (search.params) === 'object' && search.params !== null && !Array.isArray(search.params) ? search.params : {};
   dateRange = Array.isArray(dateRange) ? dateRange : [];
@@ -179,6 +190,20 @@ export function addDateRange(params, dateRange, propName) {
   } else {
     search.params['begin' + propName] = dateRange[0];
     search.params['end' + propName] = dateRange[1];
+  }
+  return search;
+}
+
+
+export function addDateRange(params, dateRange, propName) {
+  const search = params;
+  dateRange = Array.isArray(dateRange) ? dateRange : [];
+  if (typeof (propName) === 'undefined') {
+    search['beginTime'] = dateRange[0];
+    search['endTime'] = dateRange[1];
+  } else {
+    search['begin' + propName] = dateRange[0];
+    search['end' + propName] = dateRange[1];
   }
   return search;
 }

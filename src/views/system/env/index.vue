@@ -1,0 +1,443 @@
+<script setup lang="ts">
+  // @ts-nocheck  
+  import { Plus ,Delete, Edit, EditPen, Search , RefreshRight , Sort , QuestionFilled} from '@element-plus/icons-vue'
+  import { parseTime , status ,addDateRange  } from "@/utils/common"
+  import { listEnv , getEnv , updateEnv, addEnv , changeStatus } from "@/api/envs"
+  
+  // 查询的表单引用
+  const queryFormRef = ref({});
+  const queryParams = reactive({
+    pageNum: 1,
+    pageSize: 10,
+    envCode: undefined,
+    envName: undefined,
+    status : undefined
+  })
+
+  // 加载中
+  const loading = ref(false)
+  // 显示搜索条件
+  const showSearch = ref(true)
+  // 日期范围
+  const daterangeArray = ref('')
+
+  // 选中数组
+  const ids = ref([])
+  // 非单个禁用
+  const single = ref(true)
+  // 非多个禁用
+  const multiple = ref(true)
+
+  const total= ref(0)
+  const envList = reactive([])
+
+  // 表单
+  const open = ref(false);
+  const formRef = ref<FormInstance>();
+  const form = reactive({
+        id: undefined,
+        envCode: undefined,
+        envName: undefined,
+        status: 1
+      })
+  const title = ref("")
+
+  // 表单规则
+  const rules = reactive<FormRules>({
+        envCode: [
+          { required: true, message: "环境编码不能为空", trigger: "blur" },
+          { min: 2, max: 20, message: '环境编码长度必须介于 2 和 20 之间', trigger: 'blur' }
+        ],
+        envName: [
+          { required: true, message: "环境名称不能为空", trigger: "blur" },
+          { min: 2, max: 20, message: '环境名称长度必须介于 2 和 20 之间', trigger: 'blur' }
+        ]
+    })
+
+  // 重置表单
+  const reset = ()=> {
+      Object.assign(form,{
+        id: undefined,
+        envCode: undefined,
+        envName: undefined,
+        status: 1
+      })
+  }
+
+
+  // 获取列表
+  const getList = ()=>{
+    loading.value = true;
+
+    listEnv(addDateRange(queryParams, daterangeArray.value)).then(response => {
+          loading.value = false
+          if(response?.data?.records.length > 0){
+            envList.splice(0 , envList.length);
+            Object.assign(envList, response?.data?.records)
+            total.value = response?.data?.total
+          }else{
+            envList.splice(0 , envList.length);
+            total.value = 0;
+          }
+        }
+    );
+  }
+
+  // 处理搜索按钮
+  const handleQuery = function(){
+    getList()
+  }
+
+  // 处理查询按钮
+  const resetQuery = function(){
+    daterangeArray.value = ""
+    queryFormRef.value.resetFields()
+    handleQuery();
+  }
+
+  // 处理新增按钮
+  const handleAdd = function(){
+    reset();
+    open.value = true;
+    title.value = "添加环境";
+  }
+
+  // 处理更新按钮(仅仅只是把数据拿出来展示一下)
+  const handleUpdate = function(row){
+    reset();
+    const id = row.id || ids.value
+    getEnv(id).then(response => {
+      if(response?.code == 200){
+        Object.assign(form,response?.data)
+        open.value = true;
+        title.value = "修改环境";
+      } 
+    });
+  }
+  
+  const handleDelete = function(row){
+    const envIds = row.id || ids.value;
+    const status = row.status
+    let msg = ""
+    if(status == 1){
+      msg = '是否禁用编号为"' + envIds + '"的数据项？'
+    }else{
+      msg = '是否启用编号为"' + envIds + '"的数据项？'
+    }
+
+    ElMessageBox.confirm(
+      msg,
+      'Warning',
+      {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    ).then(() => {
+        let tmpStatus;
+        if(status == 0){
+          tmpStatus = 1
+        }else{
+          tmpStatus = 0
+        }
+
+        changeStatus(envIds,tmpStatus)
+        // 重置查询表单,并进行查询
+        queryParams.pageNum=1
+
+        getList()
+        ElMessage({
+          type: 'success',
+          message: '操作成功',
+        })
+    }).catch(() => { })
+
+  }
+
+  // 多选框选中数据
+  const handleSelectionChange = function(selection){
+    ids.value = selection.map(item => item.id);
+    single.value = selection.length != 1;
+    multiple.value = !selection.length;
+  }
+
+  // 表单提交处理
+  const submitForm = async ()=>{
+    loading.value = true;
+    await formRef.value?.validate()
+        .catch((err:Error)=>{
+            ElMessage.error('表单验证失败');
+            loading.value = false;
+            throw err;
+        });
+
+    if (form.id != undefined) {
+        updateEnv(form).then(response => {
+          if(response?.code == 200){
+            ElMessage({
+                  showClose: true,
+                  message: '修改成功',
+                  type: 'success',
+            });
+            open.value = false;
+            getList();
+          }
+        });
+      } else {
+        addEnv(form).then(response => {
+          if(response?.code){
+            ElMessage({
+                  showClose: true,
+                  message: '新增成功',
+                  type: 'success',
+            });
+            open.value = false;
+            getList();
+          }
+        });
+      }
+  }
+
+  // 表单取消处理
+  const cancel = ()=>{
+    open.value = false;
+    reset();
+  }
+
+  // 触发查询
+  getList()
+</script>
+
+<template>
+  <div class="main-wrapp">
+    <!--sousuo  -->
+    <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" size="small" :inline="true" v-show="showSearch" label-width="68px">
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-form-item label="环境代码" prop="envCode">
+            <el-input
+              v-model="queryParams.envCode"
+              placeholder="请输入环境代码"
+              clearable
+              style="width: 240px"
+              @keyup.enter.native="handleQuery"
+            />
+          </el-form-item>
+        </el-col> 
+        <el-col :span="8">
+          <el-form-item label="环境名称" prop="envName">
+            <el-input
+              v-model="queryParams.envName"
+              placeholder="请输入环境名称"
+              clearable
+              style="width: 240px"
+              @keyup.enter.native="handleQuery"
+            />
+          </el-form-item>
+        </el-col> 
+      </el-row>
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-form-item label="状态" prop="status">
+            <el-select
+            class="search-select"
+              v-model="queryParams.status"
+              placeholder="用户状态"
+              clearable
+              style="width: 240px"
+            >
+            <el-option v-for="dict in status"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"/>
+            </el-select>
+          </el-form-item>
+        </el-col> 
+        <el-col :span="8">
+          <el-form-item label="创建时间">
+            <el-date-picker
+              v-model="daterangeArray"
+              style="width: 240px"
+              value-format="YYYY-MM-DD"
+              type="daterange"
+              range-separator="-"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+            ></el-date-picker>
+          </el-form-item>
+        </el-col> 
+        <el-col :span="8">
+          <div>
+            <el-button type="primary" size="small" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
+            <el-button  size="small" @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
+          </div>
+        </el-col>
+      </el-row>  
+    </el-form>
+
+    <!--  option-->
+    <div class="option-wrap">
+      <el-button
+        type="primary"
+        plain
+        size="default"
+        @click="handleAdd" v-hasPerms="['/system/env/add']" ><el-icon><Plus /></el-icon>新增</el-button>
+
+
+      <el-button
+        type="success"
+        plain
+        size="default"
+        :disabled="single"
+        @click="handleUpdate" v-hasPerms="['/system/env/edit']" ><el-icon><EditPen /></el-icon>修改</el-button>  
+    </div>
+
+    <!--table  -->
+    <div class="table-wrap">
+      <el-table v-loading="loading" :data="envList" @selection-change="handleSelectionChange">
+          <el-table-column type="selection" width="30" align="center" />
+          <el-table-column label="环境代码" align="center" key="envCode" prop="envCode"/>
+          <el-table-column label="环境名称" align="center" key="envName" prop="envName"  :show-overflow-tooltip="true"  width="100" />
+          <el-table-column label="状态" align="center" key="status"  width="100">
+            <template v-slot="scope">
+              <span v-if="scope.row.status == 1">
+                启用
+              </span>
+              <span v-else>
+                停用
+              </span>
+            </template>
+          </el-table-column>
+          <el-table-column label="创建时间" align="center" prop="createdTime"  width="180">
+            <template v-slot="scope">
+              <span>{{ parseTime(scope.row.createdTime) }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="操作"
+            align="center"
+            width="220"
+          >
+            <template v-slot="scope">
+             <div class="action-btn">
+              <el-button
+                size="default"
+                @click="handleUpdate(scope.row)"
+                v-hasPerms="['/system/env/edit']"
+              >修改</el-button>
+              
+              <el-button
+                size="default"
+                @click="handleDelete(scope.row)"
+                v-hasPerms="['/system/env/del/*']"
+              >
+                <span v-if="scope.row.status == 1">
+                  停用
+                </span>
+                <span v-else>
+                  启用
+                </span>
+              </el-button>
+
+             </div>
+            </template>
+          </el-table-column>
+    </el-table>
+    </div>
+    <div class="page-wrap">
+      <el-pagination
+      v-show="total>0"
+      :total="total"
+      :page-sizes=[10,20]
+      background layout="prev, pager, next" 
+      v-model:current-page="queryParams.pageNum"
+      v-model:page-size="queryParams.pageSize"
+      @current-change="getList"
+    />
+    </div>
+
+
+    <!-- 添加或修改用户配置对话框 -->
+    <el-dialog :title="title" v-model="open" width="600px" append-to-body>
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="环境编码" prop="envCode">
+              <el-input v-model="form.envCode" placeholder="请输入环境编码" maxlength="30" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="环境名称" prop="envCode">
+              <el-input v-model="form.envName" placeholder="请输入环境名称" maxlength="30" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="状态">
+              <el-radio-group v-model="form.status">
+                <el-radio
+                  v-for="dict in status"
+                  :key="dict.value"
+                  :label="dict.value"
+                >{{dict.label}}</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitForm">确 定</el-button>
+        <el-button @click="cancel">取 消</el-button>
+      </div>
+    </el-dialog>
+  </div>
+</template>
+
+<style lang="scss" scoped>
+.main-wrap {
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  background: #fff;
+
+}
+
+.option-wrap {
+  margin-bottom: 8px;
+  .el-button {
+    // margin-right: 6px;
+  }
+}
+.table-wrap {
+  width: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+  .action-btn {
+    display: flex;
+  }
+}
+
+.page-wrap {
+  padding: 20px 0;
+  .el-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: end;
+  }
+
+}
+
+
+</style>
+<style>
+ .el-form-item__label {
+  font-size: 14px;
+ }
+
+.search-select .el-input {
+  --el-input-width: 240px;
+}
+</style>
