@@ -1,4 +1,5 @@
 <script setup lang="ts">
+    // @ts-nocheck  
     import { useMenuStore } from "@/stores/menu";
     import {isCollapse} from "./isCollapse"
     import { getMenuTree, type MenuList } from "@/api/menus";

@@ -214,3 +214,19 @@ export function parseStrEmpty(str) {
   }
   return str;
 }
+
+export  function showStatusFun(status:number):string {
+  if(status == 1){
+    return "启用";
+  }else{
+    return "停用";
+  }
+}
+
+export function showStatusOperateFun(status:number):string {
+  if(status == 1){
+    return "停用";
+  }else{
+    return "启用";
+  }
+}

@@ -4,10 +4,9 @@
 import request from "@/utils/request"
 import { GATEWAY_BASE_URL } from '@/utils/env';
 
-
-export const listEnv = (queryParams:any)=>{
+export const list = (queryParams:any)=>{
     return request({
-		url: GATEWAY_BASE_URL + '/system-service/system/env/list',
+		url: GATEWAY_BASE_URL + '/system-service/system/group/list',
 		method: 'GET',
 		params: queryParams
 	}).then((res)=>{
@@ -16,9 +15,9 @@ export const listEnv = (queryParams:any)=>{
 }
 
 // 根据环境id获得环信息
-export const getEnv = (envId:any)=>{
+export const get = (envId:any)=>{
     return request({
-		url: GATEWAY_BASE_URL + '/system-service/system/env/info/' + envId,
+		url: GATEWAY_BASE_URL + '/system-service/system/group/info/' + envId,
 		method: 'GET'
 	}).then((res)=>{
         return res.data;
@@ -28,7 +27,7 @@ export const getEnv = (envId:any)=>{
 
 export const changeStatus = (envId:any,status:any)=>{
     return request({
-		url: GATEWAY_BASE_URL + '/system-service/system/env/changeStatus/' + envId + "/"+status,
+		url: GATEWAY_BASE_URL + '/system-service/system/group/changeStatus/' + envId + "/"+status,
 		method: 'PUT'
 	}).then((res)=>{
         return res.data;
@@ -37,9 +36,9 @@ export const changeStatus = (envId:any,status:any)=>{
 
 
 // 更新环境
-export function updateEnv(params:any) {
+export function update(params:any) {
     return request({
-      url: GATEWAY_BASE_URL + '/system-service/system/env/edit',
+      url: GATEWAY_BASE_URL + '/system-service/system/group/edit',
       method: 'put',
 	  headers: {
 		'content-type': 'application/json'
@@ -51,9 +50,9 @@ export function updateEnv(params:any) {
 }
 
 // 新增环境
-export function addEnv(data:any) {
+export function add(data:any) {
     return request({
-        url: GATEWAY_BASE_URL + '/system-service/system/env/add',
+        url: GATEWAY_BASE_URL + '/system-service/system/group/add',
         method: 'post',
         headers: {
             'content-type': 'application/json'

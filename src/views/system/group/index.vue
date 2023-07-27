@@ -2,15 +2,15 @@
   // @ts-nocheck  
   import { Plus ,Delete, Edit, EditPen, Search , RefreshRight , Sort , QuestionFilled} from '@element-plus/icons-vue'
   import { parseTime , status ,addDateRange , showStatusFun , showStatusOperateFun  } from "@/utils/common"
-  import { listEnv , getEnv , updateEnv, addEnv , changeStatus } from "@/api/envs"
+  import { list , get , update , add , changeStatus } from "@/api/groups"
   
   // 查询的表单引用
   const queryFormRef = ref({});
   const queryParams = reactive({
     pageNum: 1,
     pageSize: 10,
-    envCode: undefined,
-    envName: undefined,
+    groupCode: undefined,
+    groupName: undefined,
     status : undefined
   })
 
@@ -36,21 +36,21 @@
   const formRef = ref<FormInstance>();
   const form = reactive({
         id: undefined,
-        envCode: undefined,
-        envName: undefined,
+        groupCode: undefined,
+        groupName: undefined,
         status: 1
       })
   const title = ref("")
 
   // 表单规则
   const rules = reactive<FormRules>({
-        envCode: [
-          { required: true, message: "环境编码不能为空", trigger: "blur" },
-          { min: 2, max: 20, message: '环境编码长度必须介于 2 和 20 之间', trigger: 'blur' }
+        groupCode: [
+          { required: true, message: "环境组编码不能为空", trigger: "blur" },
+          { min: 2, max: 20, message: '环境组编码长度必须介于 2 和 20 之间', trigger: 'blur' }
         ],
-        envName: [
-          { required: true, message: "环境名称不能为空", trigger: "blur" },
-          { min: 2, max: 20, message: '环境名称长度必须介于 2 和 20 之间', trigger: 'blur' }
+        groupName: [
+          { required: true, message: "环境组名称不能为空", trigger: "blur" },
+          { min: 2, max: 20, message: '环境组名称长度必须介于 2 和 20 之间', trigger: 'blur' }
         ]
     })
 
@@ -58,8 +58,8 @@
   const reset = ()=> {
       Object.assign(form,{
         id: undefined,
-        envCode: undefined,
-        envName: undefined,
+        groupCode: undefined,
+        groupName: undefined,
         status: 1
       })
   }
@@ -69,7 +69,7 @@
   const getList = ()=>{
     loading.value = true;
 
-    listEnv(addDateRange(queryParams, daterangeArray.value)).then(response => {
+    list(addDateRange(queryParams, daterangeArray.value)).then(response => {
           loading.value = false
           if(response?.data?.records.length > 0){
             envList.splice(0 , envList.length);
@@ -99,30 +99,30 @@
   const handleAdd = function(){
     reset();
     open.value = true;
-    title.value = "添加环境";
+    title.value = "添加环境组";
   }
 
   // 处理更新按钮(仅仅只是把数据拿出来展示一下)
   const handleUpdate = function(row){
     reset();
     const id = row.id || ids.value
-    getEnv(id).then(response => {
+    get(id).then(response => {
       if(response?.code == 200){
         Object.assign(form,response?.data)
         open.value = true;
-        title.value = "修改环境";
+        title.value = "修改环境组";
       } 
     });
   }
   
   const handleDelete = function(row){
-    const envIds = row.id || ids.value;
+    const tmpId = row.id || ids.value;
     const status = row.status
     let msg = ""
     if(status == 1){
-      msg = '是否禁用编号为"' + envIds + '"的数据项？'
+      msg = '是否禁用编号为"' + tmpId + '"的数据项？'
     }else{
-      msg = '是否启用编号为"' + envIds + '"的数据项？'
+      msg = '是否启用编号为"' + tmpId + '"的数据项？'
     }
 
     ElMessageBox.confirm(
@@ -140,7 +140,7 @@
         }else{
           tmpStatus = 0
         }
-        changeStatus(envIds,tmpStatus).then((res)=>{
+        changeStatus(tmpId,tmpStatus).then((res)=>{
             if(res.code == 200){
                 // 重置查询表单,并进行查询
                 queryParams.pageNum=1
@@ -173,7 +173,7 @@
         });
 
     if (form.id != undefined) {
-        updateEnv(form).then(response => {
+        update(form).then(response => {
           if(response?.code == 200){
             ElMessage({
                   showClose: true,
@@ -187,7 +187,7 @@
           }
         });
       } else {
-        addEnv(form).then(response => {
+        add(form).then(response => {
           if(response?.code == 200){
             ElMessage({
                   showClose: true,
@@ -219,10 +219,10 @@
     <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" size="small" :inline="true" v-show="showSearch" label-width="68px">
       <el-row :gutter="20">
         <el-col :span="8">
-          <el-form-item label="环境编码" prop="envCode">
+          <el-form-item label="环境组编码" prop="groupCode">
             <el-input
-              v-model="queryParams.envCode"
-              placeholder="请输入环境编码"
+              v-model="queryParams.groupCode"
+              placeholder="请输入环境组编码"
               clearable
               style="width: 240px"
               @keyup.enter.native="handleQuery"
@@ -230,10 +230,10 @@
           </el-form-item>
         </el-col> 
         <el-col :span="8">
-          <el-form-item label="环境名称" prop="envName">
+          <el-form-item label="环境组名称" prop="groupName">
             <el-input
-              v-model="queryParams.envName"
-              placeholder="请输入环境名称"
+              v-model="queryParams.groupName"
+              placeholder="请输入环境组名称"
               clearable
               style="width: 240px"
               @keyup.enter.native="handleQuery"
@@ -286,7 +286,7 @@
         type="primary"
         plain
         size="default"
-        @click="handleAdd" v-hasPerms="['/system/env/add']" ><el-icon><Plus /></el-icon>新增</el-button>
+        @click="handleAdd" v-hasPerms="['/system/group/add']" ><el-icon><Plus /></el-icon>新增</el-button>
 
 
       <el-button
@@ -294,15 +294,15 @@
         plain
         size="default"
         :disabled="single"
-        @click="handleUpdate" v-hasPerms="['/system/env/edit']" ><el-icon><EditPen /></el-icon>修改</el-button>  
+        @click="handleUpdate" v-hasPerms="['/system/group/edit']" ><el-icon><EditPen /></el-icon>修改</el-button>  
     </div>
 
     <!--table  -->
     <div class="table-wrap">
       <el-table v-loading="loading" :data="envList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="30" align="center" />
-          <el-table-column label="环境代码" align="center" key="envCode" prop="envCode"/>
-          <el-table-column label="环境名称" align="center" key="envName" prop="envName"  :show-overflow-tooltip="true"  width="100" />
+          <el-table-column label="环境组编码" align="center" key="groupCode" prop="groupCode"/>
+          <el-table-column label="环境组名称" align="center" key="groupName" prop="groupName"  :show-overflow-tooltip="true"  width="100" />
           <el-table-column label="状态" align="center" key="status"  width="100">
             <template v-slot="scope">
               {{  showStatusFun(scope.row.status) }}
@@ -323,13 +323,13 @@
               <el-button
                 size="default"
                 @click="handleUpdate(scope.row)"
-                v-hasPerms="['/system/env/edit']"
+                v-hasPerms="['/system/group/edit']"
               >修改</el-button>
               
               <el-button
                 size="default"
                 @click="handleDelete(scope.row)"
-                v-hasPerms="['/system/env/changeStatus/**']"
+                v-hasPerms="['/system/group/changeStatus/**']"
               >
                 {{ showStatusOperateFun(scope.row.status)  }}
               </el-button>
@@ -357,15 +357,15 @@
       <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
         <el-row>
           <el-col :span="12">
-            <el-form-item label="环境编码" prop="envCode">
-              <el-input v-model="form.envCode" placeholder="请输入环境编码" maxlength="30" />
+            <el-form-item label="环境组编码" prop="groupCode">
+              <el-input v-model="form.groupCode" placeholder="请输入环境组编码" maxlength="30" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
           <el-col :span="12">
-            <el-form-item label="环境名称" prop="envCode">
-              <el-input v-model="form.envName" placeholder="请输入环境名称" maxlength="30" />
+            <el-form-item label="环境组名称" prop="groupName">
+              <el-input v-model="form.groupName" placeholder="请输入环境组名称" maxlength="30" />
             </el-form-item>
           </el-col>
         </el-row>

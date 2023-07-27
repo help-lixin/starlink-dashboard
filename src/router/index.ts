@@ -63,6 +63,14 @@ export const dynamicRoutes = [
         requiresAuth: true
     },
   },
+  {
+    path : '/system/group/index',
+    name : 'group',
+    component: ()=> import("../views/system/group/index.vue"),
+    meta: {
+        requiresAuth: true
+    },
+  },
 ];
 
 const router = createRouter({

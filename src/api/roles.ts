@@ -5,7 +5,7 @@ import {GATEWAY_BASE_URL} from "@/utils/env"
 // 查询角色
 export function getRoles() {
     return request({
-        url: GATEWAY_BASE_URL + '/system-service/system/role/optionselect',
+        url: GATEWAY_BASE_URL + '/system-service/system/role/optionSelect',
         method: 'get'
     }).then((res)=>{
         return res?.data;
