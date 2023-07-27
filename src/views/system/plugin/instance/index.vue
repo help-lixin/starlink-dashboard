@@ -2,18 +2,15 @@
   // @ts-nocheck  
   import { Plus ,Delete, Edit, EditPen, Search , RefreshRight , Sort , QuestionFilled} from '@element-plus/icons-vue'
   import { parseTime , status ,addDateRange , showStatusFun , showStatusOperateFun  } from "@/utils/common"
-  import {envOptionSelect} from "@/api/common-api"
-  import { list , get , update , add , changeStatus } from "@/api/groups"
+  import { list , get , update , add , changeStatus } from "@/api/pluginInstance"
   
   // 查询的表单引用
-  const queryEnvs = ref([]);
   const queryFormRef = ref({});
   const queryParams = reactive({
     pageNum: 1,
     pageSize: 10,
-    envCode: undefined,
-    groupCode: undefined,
-    groupName: undefined,
+    pluginCode: undefined,
+    pluginName: undefined,
     status : undefined
   })
 
@@ -39,25 +36,22 @@
   const formRef = ref<FormInstance>();
   const form = reactive({
         id: undefined,
-        envCode: undefined,
-        groupCode: undefined,
-        groupName: undefined,
+        pluginCode: undefined,
+        pluginName: undefined,
+        pluginMeta: undefined,
         status: 1
       })
   const title = ref("")
 
   // 表单规则
   const rules = reactive<FormRules>({
-        envCode :[
-          { required: true, message: "环境编码不能为空", trigger: "blur" },
+        pluginCode: [
+          { required: true, message: "插件编码不能为空", trigger: "blur" },
+          { min: 2, max: 20, message: '插件编码长度必须介于 2 和 20 之间', trigger: 'blur' }
         ],
-        groupCode: [
-          { required: true, message: "环境组编码不能为空", trigger: "blur" },
-          { min: 2, max: 20, message: '环境组编码长度必须介于 2 和 20 之间', trigger: 'blur' }
-        ],
-        groupName: [
-          { required: true, message: "环境组名称不能为空", trigger: "blur" },
-          { min: 2, max: 20, message: '环境组名称长度必须介于 2 和 20 之间', trigger: 'blur' }
+        pluginName: [
+          { required: true, message: "插件名称不能为空", trigger: "blur" },
+          { min: 2, max: 20, message: '插件名称长度必须介于 2 和 20 之间', trigger: 'blur' }
         ]
     })
 
@@ -65,7 +59,6 @@
   const reset = ()=> {
       Object.assign(form,{
         id: undefined,
-        envCode: undefined,
         groupCode: undefined,
         groupName: undefined,
         status: 1
@@ -107,7 +100,7 @@
   const handleAdd = function(){
     reset();
     open.value = true;
-    title.value = "添加环境组";
+    title.value = "添加插件";
   }
 
   // 处理更新按钮(仅仅只是把数据拿出来展示一下)
@@ -118,7 +111,7 @@
       if(response?.code == 200){
         Object.assign(form,response?.data)
         open.value = true;
-        title.value = "修改环境组";
+        title.value = "修改插件";
       } 
     });
   }
@@ -219,12 +212,6 @@
 
   // 触发查询
   getList()
-  // 获取环境列表
-  envOptionSelect().then((res)=>{
-    if(res?.code == 200){
-      queryEnvs.value = res?.data;
-    }
-  })
 </script>
 
 <template>
@@ -233,26 +220,21 @@
     <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" size="small" :inline="true" v-show="showSearch" label-width="68px">
       <el-row :gutter="20">
         <el-col :span="8">
-          <el-form-item label="环境编码" prop="envCode">
-            <el-select
-            class="search-select"
-              v-model="queryParams.envCode"
-              placeholder="环境编码"
+          <el-form-item label="插件编码" prop="pluginCode">
+            <el-input
+              v-model="queryParams.pluginCode"
+              placeholder="请输入插件编码"
               clearable
               style="width: 240px"
-            >
-            <el-option v-for="env in queryEnvs"
-              :key="env.value"
-              :label="env.label"
-              :value="env.value"/>
-            </el-select>
+              @keyup.enter.native="handleQuery"
+            />
           </el-form-item>
         </el-col> 
         <el-col :span="8">
-          <el-form-item label="环境组编码" prop="groupCode">
+          <el-form-item label="插件名称" prop="pluginName">
             <el-input
-              v-model="queryParams.groupCode"
-              placeholder="请输入环境组编码"
+              v-model="queryParams.pluginName"
+              placeholder="请输入插件名称"
               clearable
               style="width: 240px"
               @keyup.enter.native="handleQuery"
@@ -260,19 +242,7 @@
           </el-form-item>
         </el-col> 
       </el-row>
-
       <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="环境组名称" prop="groupName">
-            <el-input
-              v-model="queryParams.groupName"
-              placeholder="请输入环境组名称"
-              clearable
-              style="width: 240px"
-              @keyup.enter.native="handleQuery"
-            />
-          </el-form-item>
-        </el-col> 
         <el-col :span="8">
           <el-form-item label="状态" prop="status">
             <el-select
@@ -289,9 +259,6 @@
             </el-select>
           </el-form-item>
         </el-col> 
-      </el-row>
-
-      <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="创建时间">
             <el-date-picker
@@ -320,7 +287,7 @@
         type="primary"
         plain
         size="default"
-        @click="handleAdd" v-hasPerms="['/system/group/add']" ><el-icon><Plus /></el-icon>新增</el-button>
+        @click="handleAdd" v-hasPerms="['/system/plugin/definition/add']" ><el-icon><Plus /></el-icon>新增</el-button>
 
 
       <el-button
@@ -328,15 +295,16 @@
         plain
         size="default"
         :disabled="single"
-        @click="handleUpdate" v-hasPerms="['/system/group/edit']" ><el-icon><EditPen /></el-icon>修改</el-button>  
+        @click="handleUpdate" v-hasPerms="['/system/plugin/definition/edit']" ><el-icon><EditPen /></el-icon>修改</el-button>  
     </div>
 
     <!--table  -->
     <div class="table-wrap">
       <el-table v-loading="loading" :data="envList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="30" align="center" />
-          <el-table-column label="环境组编码" align="center" key="groupCode" prop="groupCode"/>
-          <el-table-column label="环境组名称" align="center" key="groupName" prop="groupName"  :show-overflow-tooltip="true"  width="100" />
+          <el-table-column label="插件编码" align="center" key="pluginCode" prop="pluginCode"/>
+          <el-table-column label="插件名称" align="center" key="pluginName" prop="pluginName"  :show-overflow-tooltip="true"  width="100" />
+          <el-table-column label="插件元数据" align="center" key="pluginMeta" prop="pluginMeta"  :show-overflow-tooltip="true"  width="100" />
           <el-table-column label="状态" align="center" key="status"  width="100">
             <template v-slot="scope">
               {{  showStatusFun(scope.row.status) }}
@@ -357,13 +325,13 @@
               <el-button
                 size="default"
                 @click="handleUpdate(scope.row)"
-                v-hasPerms="['/system/group/edit']"
+                v-hasPerms="['/system/plugin/definition/edit']"
               >修改</el-button>
               
               <el-button
                 size="default"
                 @click="handleDelete(scope.row)"
-                v-hasPerms="['/system/group/changeStatus/**']"
+                v-hasPerms="['/system/plugin/definition/changeStatus/**']"
               >
                 {{ showStatusOperateFun(scope.row.status)  }}
               </el-button>
@@ -391,33 +359,22 @@
       <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
         <el-row>
           <el-col :span="12">
-            <el-form-item label="环境编码" prop="envCode">
-              <el-select
-                class="search-select"
-                  v-model="form.envCode"
-                  placeholder="环境编码"
-                  clearable
-                  style="width: 240px"
-                >
-                <el-option v-for="env in queryEnvs"
-                  :key="env.value"
-                  :label="env.label"
-                  :value="env.value"/>
-                </el-select>
+            <el-form-item label="插件编码" prop="pluginCode">
+              <el-input v-model="form.pluginCode" placeholder="请输入插件编码" maxlength="30" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
           <el-col :span="12">
-            <el-form-item label="环境组编码" prop="groupCode">
-              <el-input v-model="form.groupCode" placeholder="请输入环境组编码" maxlength="30" />
+            <el-form-item label="插件名称" prop="pluginName">
+              <el-input v-model="form.pluginName" placeholder="请输入插件名称" maxlength="30" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
           <el-col :span="12">
-            <el-form-item label="环境组名称" prop="groupName">
-              <el-input v-model="form.groupName" placeholder="请输入环境组名称" maxlength="30" />
+            <el-form-item label="插件元数据" prop="pluginMeta">
+              <el-input v-model="form.pluginMeta" placeholder="请输入插件元数据" type="textarea" maxlength="500" />
             </el-form-item>
           </el-col>
         </el-row>

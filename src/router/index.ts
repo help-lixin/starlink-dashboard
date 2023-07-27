@@ -79,6 +79,14 @@ export const dynamicRoutes = [
         requiresAuth: true
     },
   },
+  {
+    path : '/system/plugin/instance/index',
+    name : 'plugin-instance',
+    component: ()=> import("../views/system/plugin/instance/index.vue"),
+    meta: {
+        requiresAuth: true
+    },
+  },
 ];
 
 const router = createRouter({
