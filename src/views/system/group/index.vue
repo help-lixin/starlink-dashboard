@@ -32,7 +32,7 @@
   const multiple = ref(true)
 
   const total= ref(0)
-  const envList = reactive([])
+  const dataList = reactive([])
 
   // 表单
   const open = ref(false);
@@ -80,11 +80,11 @@
     list(addDateRange(queryParams, daterangeArray.value)).then(response => {
           loading.value = false
           if(response?.data?.records.length > 0){
-            envList.splice(0 , envList.length);
-            Object.assign(envList, response?.data?.records)
+            dataList.splice(0 , dataList.length);
+            Object.assign(dataList, response?.data?.records)
             total.value = response?.data?.total
           }else{
-            envList.splice(0 , envList.length);
+            dataList.splice(0 , dataList.length);
             total.value = 0;
           }
         }
@@ -333,7 +333,7 @@
 
     <!--table  -->
     <div class="table-wrap">
-      <el-table v-loading="loading" :data="envList" @selection-change="handleSelectionChange">
+      <el-table v-loading="loading" :data="dataList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="30" align="center" />
           <el-table-column label="环境组编码" align="center" key="groupCode" prop="groupCode"/>
           <el-table-column label="环境组名称" align="center" key="groupName" prop="groupName"  :show-overflow-tooltip="true"  width="100" />

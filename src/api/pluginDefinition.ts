@@ -62,3 +62,14 @@ export function add(data:any) {
         return res.data;
     })
 }
+
+
+// 根据插件code,获得插件元数据信息
+export const getPluginMeta = (pluginCode:any)=>{
+    return request({
+		url: GATEWAY_BASE_URL + '/system-service/system/plugin/definition/meta/' + pluginCode,
+		method: 'GET'
+	}).then((res)=>{
+        return res.data;
+    })
+}

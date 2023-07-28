@@ -24,6 +24,16 @@ export const groupOptionSelect = (envCode:string)=>{
     })
 }
 
+// 插件下拉列表
+export const pluginOptionSelect = ()=>{
+    return request({
+		url: GATEWAY_BASE_URL + '/system-service/system/plugin/definition/optionSelects',
+		method: 'GET'
+	}).then((res)=>{
+        return res.data;
+    })
+}
+
 
 // 根据环境组编码,获取所有的group下拉列表
 export const instanceOptionSelect = (groupCode:string)=>{

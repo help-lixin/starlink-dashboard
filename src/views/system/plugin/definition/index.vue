@@ -29,7 +29,7 @@
   const multiple = ref(true)
 
   const total= ref(0)
-  const envList = reactive([])
+  const dataList = reactive([])
 
   // 表单
   const open = ref(false);
@@ -39,6 +39,7 @@
         pluginCode: undefined,
         pluginName: undefined,
         pluginMeta: undefined,
+        pluginRules : undefined,
         status: 1
       })
   const title = ref("")
@@ -59,8 +60,10 @@
   const reset = ()=> {
       Object.assign(form,{
         id: undefined,
-        groupCode: undefined,
-        groupName: undefined,
+        pluginCode: undefined,
+        pluginName: undefined,
+        pluginMeta: undefined,
+        pluginRules : undefined,
         status: 1
       })
   }
@@ -73,11 +76,11 @@
     list(addDateRange(queryParams, daterangeArray.value)).then(response => {
           loading.value = false
           if(response?.data?.records.length > 0){
-            envList.splice(0 , envList.length);
-            Object.assign(envList, response?.data?.records)
+            dataList.splice(0 , dataList.length);
+            Object.assign(dataList, response?.data?.records)
             total.value = response?.data?.total
           }else{
-            envList.splice(0 , envList.length);
+            dataList.splice(0 , dataList.length);
             total.value = 0;
           }
         }
@@ -300,7 +303,7 @@
 
     <!--table  -->
     <div class="table-wrap">
-      <el-table v-loading="loading" :data="envList" @selection-change="handleSelectionChange">
+      <el-table v-loading="loading" :data="dataList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="30" align="center" />
           <el-table-column label="插件编码" align="center" key="pluginCode" prop="pluginCode"/>
           <el-table-column label="插件名称" align="center" key="pluginName" prop="pluginName"  :show-overflow-tooltip="true"  width="100" />
@@ -374,7 +377,14 @@
         <el-row>
           <el-col :span="12">
             <el-form-item label="插件元数据" prop="pluginMeta">
-              <el-input v-model="form.pluginMeta" placeholder="请输入插件元数据" type="textarea" maxlength="500" />
+              <el-input v-model="form.pluginMeta" placeholder="请输入插件元数据" type="textarea" maxlength="5000" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="插件验证规则" prop="pluginRules">
+              <el-input v-model="form.pluginRules" placeholder="请输入插件验证规则" type="textarea" maxlength="5000" />
             </el-form-item>
           </el-col>
         </el-row>
