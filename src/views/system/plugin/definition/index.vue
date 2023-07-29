@@ -39,7 +39,6 @@
         pluginCode: undefined,
         pluginName: undefined,
         pluginMeta: undefined,
-        pluginRules : undefined,
         status: 1
       })
   const title = ref("")
@@ -63,7 +62,6 @@
         pluginCode: undefined,
         pluginName: undefined,
         pluginMeta: undefined,
-        pluginRules : undefined,
         status: 1
       })
   }
@@ -378,13 +376,6 @@
           <el-col :span="12">
             <el-form-item label="插件元数据" prop="pluginMeta">
               <el-input v-model="form.pluginMeta" placeholder="请输入插件元数据" type="textarea" maxlength="5000" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="12">
-            <el-form-item label="插件验证规则" prop="pluginRules">
-              <el-input v-model="form.pluginRules" placeholder="请输入插件验证规则" type="textarea" maxlength="5000" />
             </el-form-item>
           </el-col>
         </el-row>
