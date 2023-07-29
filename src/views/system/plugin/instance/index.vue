@@ -5,6 +5,7 @@
   import { getPluginMeta } from '@/api/pluginDefinition';
   import {envOptionSelect, groupOptionSelect , pluginOptionSelect } from "@/api/common-api"
   import { list , get , update , add , changeStatus } from "@/api/pluginInstance"
+import { fromPairs } from 'lodash';
   
   // 加载中
   const loading = ref(false)
@@ -120,8 +121,6 @@ const getList = ()=>{
 
   const open = ref(false)
   const pluginForm = ref()
-  // 动态表单内容
-  const dynamicFormHtml = ref()
   const title = ref("")
   const formRef = ref<FormInstance>();
   const form = reactive({
@@ -131,6 +130,7 @@ const getList = ()=>{
         pluginCode: undefined,
         instanceCode: undefined,
         instanceName: undefined,
+        items: [ ],
         content : undefined,    // 动态内容
         remarks: undefined,
         status: 1,
@@ -162,6 +162,7 @@ const getList = ()=>{
         pluginCode: undefined,
         instanceCode: undefined,
         instanceName: undefined,
+        items: [],
         content : undefined,    // 动态内容
         remarks: undefined,
         status: 1,
@@ -185,7 +186,41 @@ const getList = ()=>{
     const id = row.instanceId || ids.value
     get(id).then(response => {
       if(response?.code == 200){
-        Object.assign(form,response?.data)
+        Object.assign(form , response?.data?.instance)
+
+        // 插件元数据在页面上展示
+        try{
+          const metaString = response?.data?.pluginMeta
+          const metaArray = JSON.parse(metaString);
+          form.items = []
+          form.items = form.items.concat(metaArray)
+        } catch(error) {
+          console.log("解析元数据出错")
+          throw error;
+        }
+
+        // 根据插件元数据,渲染成表单后,保存的内容
+        try{
+          const contentString = response?.data?.instance?.content;
+          if(contentString != undefined){
+            const resultForm = JSON.parse(contentString);
+          
+            // 遍历赋值
+            form.items.forEach((item)=>{
+              const key = item.key;
+              if(resultForm[key]){
+                item.name = resultForm[key];
+              }
+            });
+          }          
+        }catch(error){
+          console.log("解析元数据内容出错")
+          throw error;
+        }
+         
+        // 根据pluginCode获取元数据.
+        // 把元数据填充到:form.items
+        // 把form.items数组里的name填上,用户填写的值.
         open.value = true;
         title.value = "修改插件实例";
       } 
@@ -245,13 +280,21 @@ const getList = ()=>{
   const handleFormPlugin = (pluginCode:String)=>{
     if(pluginCode != ""){
       getPluginMeta(pluginCode).then((res)=>{
-        if(res?.code == 200){
-          dynamicFormHtml.value = res?.data?.pluginMeta
-          console.log("=========================================")
-          console.log(formRef);
-          console.log("=========================================")
+        if(res?.code == 200 && res?.data?.pluginMeta){
+          try {
+            const pluginMetaArray:[] = JSON.parse(res?.data?.pluginMeta);  
+            // 先清空
+            form.items =[]
+            // 再重新进生赋值
+            form.items = form.items.concat(pluginMetaArray)
+          } catch (error) {
+            console.log("处理异常", error)
+            throw error;
+          }
         }
       });
+    }else{
+      form.items = []
     }
   }
 
@@ -265,8 +308,18 @@ const getList = ()=>{
             loading.value = false;
             throw err;
         });
-
-    if (form.id != undefined) {
+    
+    // content
+    const dynamicFormBody = {}    
+    // 把items打平,然后,配置到
+    form.items.forEach((obj)=>{
+      dynamicFormBody[obj.key] = obj.name;
+    })
+    form.content = JSON.stringify(dynamicFormBody)
+    // 可删,可不删来着
+    // delete form.items;
+    
+    if (form.instanceId != undefined) {
         update(form).then(response => {
           if(response?.code == 200){
             ElMessage({
@@ -597,6 +650,7 @@ const getList = ()=>{
             </el-form-item>
           </el-col>
         </el-row>
+
         <el-row>
           <el-col :span="12">
             <el-form-item label="实例名称" prop="instanceName">
@@ -604,7 +658,17 @@ const getList = ()=>{
             </el-form-item>
           </el-col>
         </el-row>
-
+      
+        <el-row v-for="(item,index) in form.items"> 
+          <el-col :span="12">
+            <el-form-item 
+               :label="item.label" 
+               :prop="`items.${index}.name`" 
+               :rules="item.rules">
+              <el-input :type="item.type" v-model="item.name" :key="item.key" :placeholder="item.placeholder"/>
+            </el-form-item>
+          </el-col>
+        </el-row> 
 
         <el-row>
           <el-col :span="12">
@@ -627,9 +691,6 @@ const getList = ()=>{
           </el-col>
         </el-row>
       </el-form>
-      <div v-html="dynamicFormHtml">
-          hello world
-      </div>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
