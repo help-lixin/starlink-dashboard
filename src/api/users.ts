@@ -89,7 +89,6 @@ export const login = function (requsetData: LoginRequest) {
 export const authorize = function (url: string) {
     const urlObj = new URL(url);
     const newUrl = GATEWAY_BASE_URL + "/authorization-service" + urlObj.pathname + urlObj.search;
-
     return request<ResponseResult>({
         url: newUrl,
         method: 'GET',
