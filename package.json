@@ -13,6 +13,10 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "bpmn-js": "^6.0.4",
+    "bpmn-js-properties-panel": "^0.33.0",
+    "camunda-bpmn-moddle": "^4.3.0",
+
     "@element-plus/icons-vue": "^2.1.0",
     "axios": "^1.4.0",
     "element-plus": "^2.3.7",

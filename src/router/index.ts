@@ -9,7 +9,7 @@ const publicRoutes = [
       name: 'index',
       component: IndexView,
       meta: {
-          requiresAuth: false, 
+          requiresAuth: false,
       }
   },
   {
@@ -17,15 +17,15 @@ const publicRoutes = [
       name : 'about',
       component: ()=> import("@/views/AboutView.vue"),
       meta: {
-          requiresAuth: false, 
+          requiresAuth: false,
       }
   },
-  { 
-      path: '/:xxx(.*)*', 
-      name : '404' , 
+  {
+      path: '/:xxx(.*)*',
+      name : '404' ,
       component: ()=> import("@/views/ErrorPage.vue"),
       meta: {
-          requiresAuth: false, 
+          requiresAuth: false,
       }
   }
 ];
@@ -83,6 +83,14 @@ export const dynamicRoutes = [
     path : '/system/plugin/instance/index',
     name : 'plugin-instance',
     component: ()=> import("../views/system/plugin/instance/index.vue"),
+    meta: {
+        requiresAuth: true
+    },
+  },
+  {
+    path : '/workflow/definition/index',
+    name : 'workflow-definition',
+    component: ()=> import("../views/workflow/definition/index.vue"),
     meta: {
         requiresAuth: true
     },

@@ -9,11 +9,9 @@ import router from './router'
 
 import { usePermsStore } from './stores/perms';
 
-
 import '@/styles/index.scss'
 
 import "virtual:svg-icons-register";
-
 
 const app = createApp(App)
 
@@ -24,7 +22,7 @@ app.use(router)
 app.directive('hasPerms',{
     async mounted(el, binding, vnode) {
         // 引用pinina
-        const permsStore =  usePermsStore();        
+        const permsStore =  usePermsStore();
         // 节点上配置的权限标识
         const elementPermArray:string[] = binding.value;
 

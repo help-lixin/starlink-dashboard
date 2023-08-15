@@ -6,4 +6,5 @@ export const navigation = new Map<string,string[]>([
     [ "/system/group/index" ,  ["系统管理","环境组管理"] ],
     [ "/system/plugin/definition/index" ,  ["系统管理","插件管理"] ],
     [ "/system/plugin/instance/index" ,  ["系统管理","插件实例管理"] ],
+    [ "/workflow/definition/index" ,  ["流水线管理","流水线定义管理"] ],
 ]);
