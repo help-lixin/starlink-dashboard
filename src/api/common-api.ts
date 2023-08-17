@@ -35,6 +35,17 @@ export const pluginOptionSelect = ()=>{
 }
 
 
+// 根据pluginCode,获得插件下拉列表
+export const pluginInstanceOptionSelect = (pluginCode:string)=>{
+    return request({
+		url: GATEWAY_BASE_URL + '/system-service/system/plugin/instance/optionSelects/' + pluginCode,
+		method: 'GET'
+	}).then((res)=>{
+        return res.data;
+    })
+}
+
+
 // 根据环境组编码,获取所有的group下拉列表
 export const instanceOptionSelect = (groupCode:string)=>{
     return request({
