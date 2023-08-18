@@ -47,6 +47,7 @@ const selectedElements = ref([])
 const element = ref(null)
 // 动态元数数组
 const items = ref([])
+const itemsMap = ref({})
 
 
 // 插件code
@@ -68,6 +69,10 @@ function init() {
 		if (element.value?.businessObject?.$attrs?._meta) {
 			const meta = JSON.parse(element.value?.businessObject?.$attrs?._meta)
 			items.value = meta;
+			items.value.forEach(item => {
+				const propertyName = item.key
+				itemsMap.value[propertyName] = item
+			});
 		}
 
 		// 节点名称
@@ -137,21 +142,23 @@ async function selectInstance(event) {
 
 
 	// 把相关对象塞到上下文里
-	const ctx = {
-		"items": items.value,
+	const globalCtx = {
+		"request": request,
+		"items": itemsMap.value,
 		"item": undefined,
 		"element": element,
 		"env": properties,
 		"modeling": props.modeler
 	}
 
+
 	// 过滤出,依赖节点的所有数据
-	const dependencieInstanceNodes = ctx.items.filter((item) => {
+	const dependencieInstanceNodes = items.value.filter((item) => {
 		var isDependencies = false;
 		if (item?.dependencies) {
 			if (item.dependencies instanceof Array) {
 				const dependencies = item.dependencies;
-				for (const i = 0; i < dependencies.length; i++) {
+				for (var i = 0; i < dependencies.length; i++) {
 					if (dependencies[i] == "instanceSelect") {
 						isDependencies = true;
 						break;
@@ -165,7 +172,7 @@ async function selectInstance(event) {
 	if (dependencieInstanceNodes.length > 0) {
 		for (var i = 0; i < dependencieInstanceNodes.length; i++) {
 			const dependencieInstanceNode = dependencieInstanceNodes[i]
-			ctx.item = dependencieInstanceNode;
+			globalCtx.item = dependencieInstanceNode;
 
 			// 发起请求的上下文
 			const requestCtx = {
@@ -175,23 +182,23 @@ async function selectInstance(event) {
 				params: {}
 			}
 			// 拷贝必要参数
-			Object.assign(requestCtx.params, ctx.env);
+			Object.assign(requestCtx.params, globalCtx.env);
 
 
-			if (ctx.item?.requestUrl) {
-				requestCtx.url = ctx.item.requestUrl
+			if (globalCtx.item?.requestUrl) {
+				requestCtx.url = globalCtx.item.requestUrl
 			}
-			if (ctx.item?.requestParams) {
-				Object.assign(requestCtx.params, ctx.item.requestParams);
+			if (globalCtx.item?.requestParams) {
+				Object.assign(requestCtx.params, globalCtx.item.requestParams);
 			}
-			if (ctx.item?.requestHeader) {
-				Object.assign(requestCtx.headers, ctx.item.requestHeader);
+			if (globalCtx.item?.requestHeader) {
+				Object.assign(requestCtx.headers, globalCtx.item.requestHeader);
 			}
 
 			//  请求之前的拦截器
 			if (dependencieInstanceNode?.requestBefore) {
 				const runRequestBefore = eval(dependencieInstanceNode.requestBefore)
-				runRequestBefore(requestCtx, ctx);
+				runRequestBefore(requestCtx, globalCtx);
 			}
 
 			const requestData = await request(requestCtx).then((res) => {
@@ -199,14 +206,10 @@ async function selectInstance(event) {
 			});
 
 			if (requestData?.code == 200) {
-				ctx.item.values = requestData.data;
+				globalCtx.item.values = requestData.data;
 			}
 		}
 	}
-
-	// console.log("==============================================");
-	// console.log(element.value?.businessObject?.$attrs);
-	// console.log("==============================================");
 }
 
 /**
@@ -214,21 +217,50 @@ async function selectInstance(event) {
  * @param { Object } input的Event
  * @param { String } 要修改的属性的名称
  */
-function changeField(event, type) {
+function changeField(event, propertyName) {
 	const value = event.target.value
 
 	const item = items.value.filter(item => item.key == event.target.id).shift();
 	item.name = value
 
-	console.log("========================================================");
-	console.log(item)
-	console.log(type);
-	console.log("========================================================");
+	const envProperties = {
+		"envCode": element.value["envCode"],
+		"groupCode": element.value["groupCode"],
+		"pluginCode": element.value["instanceCode"],
+		"instanceCode": element.value["pluginCode"],
+	}
 
-	element.value[type] = value
+	const globalCtx = {
+		"request": request,
+		"items": itemsMap.value,
+		"item": item,
+		"element": element,
+		"env": envProperties,
+		"modeling": props.modeler
+	}
+
+	if (item?.changeCallback) {
+		if (item.changeCallback instanceof Array) {
+			item.changeCallback.forEach(item => {
+				const callbackFunction = changeCallbackFunction(item)
+				callbackFunction(globalCtx);
+			});
+		} else if (typeof (item.changeCallback) == "string") {
+			const callbackFunction = changeCallbackFunction(item.changeCallback)
+			callbackFunction(globalCtx);
+		}
+	}
+
+	element.value[propertyName] = value
 	const properties = {}
-	properties[type] = value
+	properties[propertyName] = value
 	updateProperties(properties)
+}
+
+
+function changeCallbackFunction(changeCallbackItem) {
+	const callback = eval(changeCallbackItem);
+	return callback;
 }
 
 /**

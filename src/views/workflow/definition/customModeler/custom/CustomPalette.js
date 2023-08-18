@@ -107,7 +107,7 @@ PaletteProvider.prototype.getPaletteEntries = function (element) {
 	const actions = actionMetasStore.getActions
 	actions.forEach((value, key) => {
 		const pluginItem = JSON.parse(value)
-		const pluginMeta = { "_name": pluginItem?.title, "_pluginCode": pluginItem?.pluginCode, "_meta": JSON.stringify(pluginItem?._meta) };
+		const pluginMeta = { "plugin": key, "_name": pluginItem?.title, "_pluginCode": pluginItem?.pluginCode, "_meta": JSON.stringify(pluginItem?._meta) };
 
 		paletteObj[key] = {
 			group: pluginItem.group,
