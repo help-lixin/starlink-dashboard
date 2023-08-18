@@ -45,21 +45,29 @@ const props = defineProps({
 
 const selectedElements = ref([])
 const element = ref(null)
-// 动态元数数组
+// 动态UI数据
 const items = ref([])
 const itemsMap = ref({})
 
-
 // 插件code
 const pluginCode = ref("")
-// 根据环境coe/环境组code/插件code,获取所有的实例.
+// 插件code,插件所有的实例信息
 const instances = ref([])
 
 function init() {
+	props.modeler.on('element.click', e => {
+		const { element } = e
+		console.log("=========================================================")
+		console.log(element);
+		console.log("=========================================================")
+	});
+
 	props.modeler.on('selection.changed', e => {
 		// 先清空数据
 		items.value = []
 		pluginCode.value = ""
+		itemsMap.value = {}
+		instances.value = []
 
 		// 所有的节点
 		selectedElements.value = e.newSelection
@@ -69,6 +77,7 @@ function init() {
 		if (element.value?.businessObject?.$attrs?._meta) {
 			const meta = JSON.parse(element.value?.businessObject?.$attrs?._meta)
 			items.value = meta;
+
 			items.value.forEach(item => {
 				const propertyName = item.key
 				itemsMap.value[propertyName] = item
@@ -78,7 +87,7 @@ function init() {
 		// 节点名称
 		if (element.value?.businessObject?.$attrs?._name) {
 			element.value.businessObject.name = element.value?.businessObject?.$attrs?._name
-			element.value['name'] = element.value.businessObject.name
+			// element.value['name'] = element.value.businessObject.name
 		}
 
 		// 插件编码
@@ -271,10 +280,6 @@ function updateProperties(properties) {
 	const modeling = props.modeler.get('modeling')
 	modeling.updateProperties(toRaw(element.value), properties)
 }
-
-
-
-
 </script>
 
 <style scoped lang="scss">
