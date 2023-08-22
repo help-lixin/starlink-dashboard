@@ -1,36 +1,43 @@
 <template>
 	<div v-if="selectedElements.length === 1" class="custom-properties-panel">
-		<div class="element-item">
-			<div class="attr">任务名称</div>
-			<input :value="element.name" @change="event => changeField(event, 'name')" />
+
+		<el-form :inline="true" :model="form" class="demo-form-inline">
+			<el-form-item label="任务名称">
+				<el-input v-model="form.name" placeholder="请输入任务名称" clearable
+					@change="event => changeField(event, 'name')" />
+			</el-form-item>
 
 			<template v-if="element.type === 'bpmn:ServiceTask'">
-				<div class="attr">实例</div>
-				<select id="instanceCode" @change="event => selectInstance(event)">
-					<option value="">----请选择----</option>
-					<option v-for="(option, index) in instances" :value="option.instanceCode">{{ option.instanceName }}
-					</option>
-				</select>
+				<el-form-item label="实例">
+					<el-select v-model="form.instanceCode" placeholder="请选择实例" @change="event => selectInstance(event)"
+						clearable>
+						<el-option v-for="(option, index) in   form.instances  " :label="option.instanceName"
+							:value="option.instanceCode" />
+					</el-select>
+				</el-form-item>
 			</template>
 
-			<template v-for="(item, index) in items">
-				<!-- 下拉列表框处理 -->
+			<!-- 动态表单 -->
+			<template v-for="(item, index) in form.items">
 				<template v-if="item.type === 'select'">
-					<div class="attr">{{ item.label }}</div>
-					<select :id="item.key" @change="event => changeField(event, item.key)">
-						<option value="">----请选择----</option>
-						<option v-for="(option, index) in item.values" :value="option.value">{{ option.label }}</option>
-					</select>
+					<el-form-item :label="item.label" :prop="`items.${index}.name`">
+						<el-select v-model="item.name" :placeholder="item.placeholder"
+							@change="event => changeField(event, item.key)" clearable>
+							<el-option v-for="(option, index) in item.values" :label="option.label" :key="option.value"
+								:value="option.value" />
+						</el-select>
+					</el-form-item>
 				</template>
 
-				<!-- 普通文本框处理 -->
 				<template v-if="item.type === 'text'">
-					<div class="attr">{{ item.label }}</div>
-					<input :name="item.key" :placeholder="item.placeholder" :value="item.name"
-						@change="event => changeField(event, item.key)" />
+					<el-form-item :label="item.label" :prop="`items.${index}.name`">
+						<el-input v-model="item.name" :placeholder="item.placeholder" clearable
+							@change="event => changeField(event, item.key)" />
+					</el-form-item>
 				</template>
 			</template>
-		</div>
+		</el-form>
+
 	</div>
 </template>
 
@@ -45,59 +52,93 @@ const props = defineProps({
 
 const selectedElements = ref([])
 const element = ref(null)
-// 动态UI数据
-const items = ref([])
-const itemsMap = ref({})
-
-// 插件code
-const pluginCode = ref("")
-// 插件code,插件所有的实例信息
-const instances = ref([])
+const form = ref({
+	name: undefined,
+	envCode: undefined,
+	groupCode: undefined,
+	pluginCode: undefined,
+	instanceCode: undefined,
+	instances: [],
+	itemsMap: {}
+})
 
 function init() {
-	props.modeler.on('selection.changed', e => {
-		// 先清空数据
-		items.value = []
-		pluginCode.value = ""
-		itemsMap.value = {}
-		instances.value = []
-
+	props.modeler.on('selection.changed', async e => {
 		// 所有的节点
 		selectedElements.value = e.newSelection
 		// 被选中的节点
 		element.value = e.newSelection[0]
-		// 元数据对象
+
+		// 先清空数据
+		form.value = {
+			name: undefined,
+			envCode: undefined,
+			groupCode: undefined,
+			pluginCode: undefined,
+			instanceCode: undefined,
+			instances: [],
+			itemsMap: {}
+		}
+
+		// 元数据对象(右侧表单动态展示)
 		if (element.value?.businessObject?.$attrs?._meta) {
 			const meta = JSON.parse(element.value?.businessObject?.$attrs?._meta)
-			items.value = meta;
-
-			items.value.forEach(item => {
+			form.value.items = meta;
+			// 转换成map,方便业务对象使用.
+			meta.forEach(item => {
 				const propertyName = item.key
-				itemsMap.value[propertyName] = item
+				form.value.itemsMap[propertyName] = item
 			});
 		}
 
 		// 节点名称
-		if (element.value?.businessObject?.$attrs?._name) {
-			element.value.businessObject.name = element.value?.businessObject?.$attrs?._name
-			element.value['name'] = element.value.businessObject.name
+		if (element.value?.businessObject?.$attrs?.name) {
+			form.value.name = element.value?.businessObject?.$attrs?.name;
+			element.value['name'] = element.value?.businessObject?.$attrs?.name
 			// 注意哈,要调用更新,才能真正的render
-			updateProperties({ "name": element.value['name'] })
+			updateProperties({ "name": form.value.name })
 		}
 
-		// 插件编码
-		if (element.value?.businessObject?.$attrs?._pluginCode) {
-			pluginCode.value = element.value?.businessObject?.$attrs?._pluginCode
+		// 环境编码
+		if (element.value?.businessObject?.$attrs?.envCode) {
+			form.value.envCode = element.value?.businessObject?.$attrs?.envCode;
+		}
+		// 环境组编码
+		if (element.value?.businessObject?.$attrs?.groupCode) {
+			form.value.groupCode = element.value?.businessObject?.$attrs?.groupCode;
+		}
+		//插件编码
+		if (element.value?.businessObject?.$attrs?.pluginCode) {
+			form.value.pluginCode = element.value?.businessObject?.$attrs?.pluginCode;
+		}
+		//实例编码
+		if (element.value?.businessObject?.$attrs?.instanceCode) {
+			form.value.instanceCode = element.value?.businessObject?.$attrs?.instanceCode;
 		}
 
-
-		if (pluginCode.value != "") {
+		if (form.value.pluginCode) {
 			// 初始化插件对应的实例列表
-			pluginInstanceOptionSelect(pluginCode.value).then((res) => {
+			pluginInstanceOptionSelect(form.value.pluginCode).then((res) => {
 				if (res?.code == 200) {
-					instances.value = res?.data;
+					form.value.instances = res?.data
+					if (form.value.instanceCode) {
+						// 触发选择
+						selectInstance(form.value.instanceCode)
+					}
 				}
 			})
+		}
+
+		// 如果: $attrs有用户填充的数据, 且, 表单的动态元数据大于零的情况下, 遍历动态表单的每一项, 进行赋值操作.
+		if (element.value?.businessObject?.$attrs && form?.value?.items.length > 0) {
+			form.value.items.forEach((item) => {
+				const propertyName = item.key
+				const propertyValue = element.value.businessObject.$attrs[propertyName]
+				console.log("name:", propertyName, " value:", propertyValue)
+				if (propertyValue) {
+					item.name = propertyValue
+				}
+			});
 		}
 
 		//  为节点配置默认属性
@@ -124,31 +165,30 @@ function setDefaultProperties() {
 }
 
 // 选择实例
-async function selectInstance(event) {
-	const value = event.target.value
+async function selectInstance(value) {
 	if (value == "") {
 		return;
 	}
 
-	const instance = instances.value.filter(item => item.instanceCode === value).shift()
+	const instance = form.value.instances.filter(item => item.instanceCode === value).shift()
 	const properties = {
 		"envCode": instance.envCode,
 		"groupCode": instance.groupCode,
 		"pluginCode": instance.pluginCode,
 		"instanceCode": instance.instanceCode,
-	}
+	};
 
-	element.value["envCode"] = properties.envCode
-	element.value["groupCode"] = properties.groupCode
-	element.value["instanceCode"] = properties.instanceCode
-	element.value["pluginCode"] = properties.pluginCode
+	// element.value["envCode"] = properties.envCode
+	// element.value["groupCode"] = properties.groupCode
+	// element.value["instanceCode"] = properties.instanceCode
+	// element.value["pluginCode"] = properties.pluginCode
 	updateProperties(properties)
 
 
 	// 把相关对象塞到上下文里
 	const globalCtx = {
 		"request": request,
-		"items": itemsMap.value,
+		"items": form.value.itemsMap,
 		"item": undefined,
 		"element": element,
 		"env": properties,
@@ -156,8 +196,8 @@ async function selectInstance(event) {
 	}
 
 
-	// 过滤出,依赖节点的所有数据
-	const dependencieInstanceNodes = items.value.filter((item) => {
+	// 过滤出,依赖插件实例的动态数据
+	const dependencieInstanceNodes = form.value.items.filter((item) => {
 		var isDependencies = false;
 		if (item?.dependencies) {
 			if (item.dependencies instanceof Array) {
@@ -187,7 +227,6 @@ async function selectInstance(event) {
 			}
 			// 拷贝必要参数
 			Object.assign(requestCtx.params, globalCtx.env);
-
 
 			if (globalCtx.item?.requestUrl) {
 				requestCtx.url = globalCtx.item.requestUrl
@@ -221,10 +260,8 @@ async function selectInstance(event) {
  * @param { Object } input的Event
  * @param { String } 要修改的属性的名称
  */
-function changeField(event, propertyName) {
-	const value = event.target.value
-
-	const item = items.value.filter(item => item.key == event.target.id).shift();
+function changeField(value, propertyName) {
+	const item = form.value.items.filter(item => item.key == propertyName).shift();
 	if (item) {
 		item.name = value
 		const envProperties = {
@@ -236,7 +273,7 @@ function changeField(event, propertyName) {
 
 		const globalCtx = {
 			"request": request,
-			"items": itemsMap.value,
+			"items": form.value.itemsMap,
 			"item": item,
 			"element": element,
 			"env": envProperties,
