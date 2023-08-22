@@ -55,13 +55,6 @@ const pluginCode = ref("")
 const instances = ref([])
 
 function init() {
-	props.modeler.on('element.click', e => {
-		const { element } = e
-		console.log("=========================================================")
-		console.log(element);
-		console.log("=========================================================")
-	});
-
 	props.modeler.on('selection.changed', e => {
 		// 先清空数据
 		items.value = []
@@ -87,7 +80,9 @@ function init() {
 		// 节点名称
 		if (element.value?.businessObject?.$attrs?._name) {
 			element.value.businessObject.name = element.value?.businessObject?.$attrs?._name
-			// element.value['name'] = element.value.businessObject.name
+			element.value['name'] = element.value.businessObject.name
+			// 注意哈,要调用更新,才能真正的render
+			updateProperties({ "name": element.value['name'] })
 		}
 
 		// 插件编码
@@ -230,33 +225,34 @@ function changeField(event, propertyName) {
 	const value = event.target.value
 
 	const item = items.value.filter(item => item.key == event.target.id).shift();
-	item.name = value
+	if (item) {
+		item.name = value
+		const envProperties = {
+			"envCode": element.value["envCode"],
+			"groupCode": element.value["groupCode"],
+			"pluginCode": element.value["pluginCode"],
+			"instanceCode": element.value["instanceCode"],
+		}
 
-	const envProperties = {
-		"envCode": element.value["envCode"],
-		"groupCode": element.value["groupCode"],
-		"pluginCode": element.value["instanceCode"],
-		"instanceCode": element.value["pluginCode"],
-	}
+		const globalCtx = {
+			"request": request,
+			"items": itemsMap.value,
+			"item": item,
+			"element": element,
+			"env": envProperties,
+			"modeling": props.modeler
+		}
 
-	const globalCtx = {
-		"request": request,
-		"items": itemsMap.value,
-		"item": item,
-		"element": element,
-		"env": envProperties,
-		"modeling": props.modeler
-	}
-
-	if (item?.changeCallback) {
-		if (item.changeCallback instanceof Array) {
-			item.changeCallback.forEach(item => {
-				const callbackFunction = changeCallbackFunction(item)
+		if (item?.changeCallback) {
+			if (item.changeCallback instanceof Array) {
+				item.changeCallback.forEach(item => {
+					const callbackFunction = changeCallbackFunction(item)
+					callbackFunction(globalCtx);
+				});
+			} else if (typeof (item.changeCallback) == "string") {
+				const callbackFunction = changeCallbackFunction(item.changeCallback)
 				callbackFunction(globalCtx);
-			});
-		} else if (typeof (item.changeCallback) == "string") {
-			const callbackFunction = changeCallbackFunction(item.changeCallback)
-			callbackFunction(globalCtx);
+			}
 		}
 	}
 
