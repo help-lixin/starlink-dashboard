@@ -45,6 +45,8 @@
 import { ref, toRaw } from 'vue'
 import { pluginInstanceOptionSelect } from '@/api/common-api'
 import request from "@/utils/request"
+import mitt from "@/mitt/bus"
+
 
 const props = defineProps({
 	modeler: Object,
@@ -61,6 +63,7 @@ const form = ref({
 	instances: [],
 	itemsMap: {}
 })
+
 
 function init() {
 	props.modeler.on('selection.changed', async e => {
@@ -196,7 +199,7 @@ async function selectInstance(value) {
 	}
 
 
-	// 过滤出,依赖插件实例的动态数据
+	// 过滤出,依赖插件实例的节点
 	const dependencieInstanceNodes = form.value.items.filter((item) => {
 		var isDependencies = false;
 		if (item?.dependencies) {

@@ -6,7 +6,6 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 
-
 import { usePermsStore } from './stores/perms';
 
 import '@/styles/index.scss'
@@ -15,8 +14,11 @@ import "virtual:svg-icons-register";
 
 const app = createApp(App)
 
+
 app.use(createPinia())
 app.use(router)
+
+
 
 // 自定义指令,进行权限控制.
 app.directive('hasPerms',{
