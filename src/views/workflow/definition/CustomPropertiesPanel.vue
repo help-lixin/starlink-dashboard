@@ -264,9 +264,6 @@ function changeField(value, propertyName) {
 			"eventName": eventName,
 			"value": value
 		}
-
-		console.log("====================client event=================================");
-		console.log(eventName);
 		mitt.emit(eventName, ctx)
 	}
 
