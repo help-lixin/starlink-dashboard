@@ -66,6 +66,31 @@ const form = ref({
 })
 
 
+// 事件网桥
+function eventBridgeFun(ctx) {
+	const items = ctx.items;
+	const eventName = ctx.eventName;
+
+	Object.values(items).forEach(item => {
+		if (item?.events && item.events instanceof Array && item.events.includes(eventName)) {
+			if (item?.eventHandler) {
+				if (typeof item.eventHandler === "object") {
+					if (item.eventHandler instanceof Array) {
+						item?.eventHandler.forEach(bridgeJs => {
+							const bridgeFun = eval(bridgeJs);
+							bridgeFun(ctx);
+						});
+					}
+				} else if (typeof item.eventHandler === "string") {
+					const bridgeFun = eval(item.eventHandler);
+					bridgeFun(ctx);
+				}
+			}
+		}
+	});
+}
+
+
 function init() {
 	props.modeler.on('selection.changed', async e => {
 		// 所有的节点
@@ -87,34 +112,17 @@ function init() {
 		// 元数据对象(右侧表单动态展示)
 		if (element.value?.businessObject?.$attrs?._meta) {
 			const meta = JSON.parse(element.value?.businessObject?.$attrs?._meta)
-			form.value.items = meta;
+			form.value.items = meta
 			// 转换成map,方便业务对象使用.
 			meta.forEach(item => {
 				const propertyName = item.key
 				form.value.itemsMap[propertyName] = item
 
 				// 订阅事件
-				if (item?.event) {
-					const keys = Object.keys(item.event)
-					if (keys.length > 0) {
-						for (const key of keys) {
-							const value = item.event[key]
-							if (typeof value === "object") {
-								if (Array.isArray(value)) {
-									for (let i = 0; i < value.length; i++) {
-										const eventSubscribe = eval(value[i])
-										const eventName = key
-										mitt.off(eventName)
-										mitt.on(eventName, eventSubscribe)
-									}
-								}
-							} else if (typeof value === "string") {
-								const eventSubscribe = eval(value)
-								const eventName = key
-								mitt.off(eventName)
-								mitt.on(key, eventSubscribe)
-							}
-						}
+				if (item?.events) {
+					for (const eventName of item.events) {
+						mitt.off(eventName)
+						mitt.on(eventName, eventBridgeFun)
 					}
 				}
 			});
@@ -215,14 +223,16 @@ async function selectInstance(value) {
 
 
 	// 把相关对象塞到上下文里
+	const eventName = instance.pluginCode + "." + "instance" + "." + "change"
 	const ctx = {
 		"request": request,
 		"bus": mitt,
 		"items": form.value.itemsMap,
 		"env": properties,
+		"eventName": eventName,
 		"value": value
 	}
-	const eventName = instance.pluginCode + "." + "instance" + "." + "change"
+
 	mitt.emit(eventName, ctx);
 }
 
@@ -244,16 +254,20 @@ function changeField(value, propertyName) {
 			"instanceCode": element.value["instanceCode"],
 		}
 
+		// 
+		const eventName = envProperties.pluginCode + "." + propertyName + "." + "change"
 		const ctx = {
 			"request": request,
 			"bus": mitt,
 			"items": form.value.itemsMap,
 			"env": envProperties,
+			"eventName": eventName,
 			"value": value
 		}
-		// 
-		const eventName = envProperties.pluginCode + "." + propertyName + "." + "change"
-		mitt.emit(eventName, ctx);
+
+		console.log("====================client event=================================");
+		console.log(eventName);
+		mitt.emit(eventName, ctx)
 	}
 
 	element.value[propertyName] = value
