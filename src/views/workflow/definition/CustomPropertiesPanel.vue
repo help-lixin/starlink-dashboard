@@ -42,6 +42,7 @@
 </template>
 
 <script setup>
+
 import { ref, toRaw } from 'vue'
 import { pluginInstanceOptionSelect } from '@/api/common-api'
 import request from "@/utils/request"
@@ -91,6 +92,31 @@ function init() {
 			meta.forEach(item => {
 				const propertyName = item.key
 				form.value.itemsMap[propertyName] = item
+
+				// 订阅事件
+				if (item?.event) {
+					const keys = Object.keys(item.event)
+					if (keys.length > 0) {
+						for (const key of keys) {
+							const value = item.event[key]
+							if (typeof value === "object") {
+								if (Array.isArray(value)) {
+									for (let i = 0; i < value.length; i++) {
+										const eventSubscribe = eval(value[i])
+										const eventName = key
+										mitt.off(eventName)
+										mitt.on(eventName, eventSubscribe)
+									}
+								}
+							} else if (typeof value === "string") {
+								const eventSubscribe = eval(value)
+								const eventName = key
+								mitt.off(eventName)
+								mitt.on(key, eventSubscribe)
+							}
+						}
+					}
+				}
 			});
 		}
 
@@ -124,20 +150,19 @@ function init() {
 			pluginInstanceOptionSelect(form.value.pluginCode).then((res) => {
 				if (res?.code == 200) {
 					form.value.instances = res?.data
+					// 触发下拉列表被动改变
 					if (form.value.instanceCode) {
-						// 触发选择
-						selectInstance(form.value.instanceCode)
+						selectInstance(form.value.instanceCode);
 					}
 				}
 			})
 		}
 
 		// 如果: $attrs有用户填充的数据, 且, 表单的动态元数据大于零的情况下, 遍历动态表单的每一项, 进行赋值操作.
-		if (element.value?.businessObject?.$attrs && form?.value?.items.length > 0) {
+		if (element.value?.businessObject?.$attrs && form?.value?.items?.length > 0) {
 			form.value.items.forEach((item) => {
 				const propertyName = item.key
 				const propertyValue = element.value.businessObject.$attrs[propertyName]
-				console.log("name:", propertyName, " value:", propertyValue)
 				if (propertyValue) {
 					item.name = propertyValue
 				}
@@ -179,83 +204,26 @@ async function selectInstance(value) {
 		"groupCode": instance.groupCode,
 		"pluginCode": instance.pluginCode,
 		"instanceCode": instance.instanceCode,
-	};
+	}
 
-	// element.value["envCode"] = properties.envCode
-	// element.value["groupCode"] = properties.groupCode
-	// element.value["instanceCode"] = properties.instanceCode
-	// element.value["pluginCode"] = properties.pluginCode
+	element.value["envCode"] = instance.envCode;
+	element.value["groupCode"] = instance.groupCode;
+	element.value["pluginCode"] = instance.pluginCode;
+	element.value["instanceCode"] = instance.instanceCode;
+
 	updateProperties(properties)
 
 
 	// 把相关对象塞到上下文里
-	const globalCtx = {
+	const ctx = {
 		"request": request,
+		"bus": mitt,
 		"items": form.value.itemsMap,
-		"item": undefined,
-		"element": element,
 		"env": properties,
-		"modeling": props.modeler
+		"value": value
 	}
-
-
-	// 过滤出,依赖插件实例的节点
-	const dependencieInstanceNodes = form.value.items.filter((item) => {
-		var isDependencies = false;
-		if (item?.dependencies) {
-			if (item.dependencies instanceof Array) {
-				const dependencies = item.dependencies;
-				for (var i = 0; i < dependencies.length; i++) {
-					if (dependencies[i] == "instanceSelect") {
-						isDependencies = true;
-						break;
-					}
-				}
-			}
-		}
-		return isDependencies;
-	});
-
-	if (dependencieInstanceNodes.length > 0) {
-		for (var i = 0; i < dependencieInstanceNodes.length; i++) {
-			const dependencieInstanceNode = dependencieInstanceNodes[i]
-			globalCtx.item = dependencieInstanceNode;
-
-			// 发起请求的上下文
-			const requestCtx = {
-				url: undefined,
-				method: 'GET',
-				headers: {},
-				params: {}
-			}
-			// 拷贝必要参数
-			Object.assign(requestCtx.params, globalCtx.env);
-
-			if (globalCtx.item?.requestUrl) {
-				requestCtx.url = globalCtx.item.requestUrl
-			}
-			if (globalCtx.item?.requestParams) {
-				Object.assign(requestCtx.params, globalCtx.item.requestParams);
-			}
-			if (globalCtx.item?.requestHeader) {
-				Object.assign(requestCtx.headers, globalCtx.item.requestHeader);
-			}
-
-			//  请求之前的拦截器
-			if (dependencieInstanceNode?.requestBefore) {
-				const runRequestBefore = eval(dependencieInstanceNode.requestBefore)
-				runRequestBefore(requestCtx, globalCtx);
-			}
-
-			const requestData = await request(requestCtx).then((res) => {
-				return res.data;
-			});
-
-			if (requestData?.code == 200) {
-				globalCtx.item.values = requestData.data;
-			}
-		}
-	}
+	const eventName = instance.pluginCode + "." + "instance" + "." + "change"
+	mitt.emit(eventName, ctx);
 }
 
 /**
@@ -264,9 +232,11 @@ async function selectInstance(value) {
  * @param { String } 要修改的属性的名称
  */
 function changeField(value, propertyName) {
-	const item = form.value.items.filter(item => item.key == propertyName).shift();
+	const item = form.value.itemsMap[propertyName];
 	if (item) {
 		item.name = value
+
+		// 环境信息
 		const envProperties = {
 			"envCode": element.value["envCode"],
 			"groupCode": element.value["groupCode"],
@@ -274,26 +244,16 @@ function changeField(value, propertyName) {
 			"instanceCode": element.value["instanceCode"],
 		}
 
-		const globalCtx = {
+		const ctx = {
 			"request": request,
+			"bus": mitt,
 			"items": form.value.itemsMap,
-			"item": item,
-			"element": element,
 			"env": envProperties,
-			"modeling": props.modeler
+			"value": value
 		}
-
-		if (item?.changeCallback) {
-			if (item.changeCallback instanceof Array) {
-				item.changeCallback.forEach(item => {
-					const callbackFunction = changeCallbackFunction(item)
-					callbackFunction(globalCtx);
-				});
-			} else if (typeof (item.changeCallback) == "string") {
-				const callbackFunction = changeCallbackFunction(item.changeCallback)
-				callbackFunction(globalCtx);
-			}
-		}
+		// 
+		const eventName = envProperties.pluginCode + "." + propertyName + "." + "change"
+		mitt.emit(eventName, ctx);
 	}
 
 	element.value[propertyName] = value
@@ -302,11 +262,6 @@ function changeField(value, propertyName) {
 	updateProperties(properties)
 }
 
-
-function changeCallbackFunction(changeCallbackItem) {
-	const callback = eval(changeCallbackItem);
-	return callback;
-}
 
 /**
  * 更新元素属性
