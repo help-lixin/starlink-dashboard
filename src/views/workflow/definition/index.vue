@@ -281,27 +281,31 @@ function jsonToXml(json) {
 		for (const node of nodes) {
 			xml += `    <${node.nodeType} id="${node.id}"`
 
-			if (node.name) xml += ` name="${node.name}"`
+			if (node.name) {
+				xml += ` name="${node.name}"`
+				xml += ` _name="${node.name}"`
+			}
+
+			if (node.plugin) xml += ` plugin="${node.plugin}"`
+			if (node.pluginCode) xml += ` pluginCode="${node.pluginCode}"`
+
 			if (node.source) xml += ` sourceRef="${node.source}"`
 			if (node.target) xml += ` targetRef="${node.target}"`
 
-			xml += `>\n`
-
-			if (node.nodeType === 'serviceTask' && (node.plugin || node.params)) {
-				xml += `      <extensionElements>\n`
-
-				if (node.plugin) {
-					xml += `        <camunda:property name="plugin" value="${node.plugin}"/>\n`
-				}
-
+			if (node.nodeType === 'serviceTask' && (node.params)) {
 				if (node.params) {
-					xml += `        <camunda:property name="pluginParams" value="${escapeXml(
-						node.params,
-					)}"/>\n`
+					const paramsObject = JSON.parse(node.params)
+					Object.keys(paramsObject).forEach(key => {
+						const propertyName = key
+						const propertyValue = paramsObject[key]
+						if (propertyValue != undefined && propertyName != undefined) {
+							xml += ` ${propertyName}="${propertyValue}" `
+						}
+					})
 				}
-
-				xml += `      </extensionElements>\n`
 			}
+
+			xml += `>\n`
 
 			if (node.sources && node.sources.length > 0) {
 				xml += `      <incoming>${node.sources[0]}</incoming>\n`
@@ -413,9 +417,7 @@ function handleJsonInput() {
 		const file = event.target.files[0]
 		readFile(file, function (json) {
 			if (json) {
-				console.log(JSON.parse(json))
 				const xmlString = jsonToXml(JSON.parse(json))
-				console.log(xmlString, 'dsasdasd')
 				setDiagram(xmlString)
 			} else {
 				console.log('无法读取文件。')
@@ -435,7 +437,7 @@ function getJson() {
 		if (!err) {
 			console.log(xml)
 			const json = xmlToJson(xml)
-			console.log(json)
+			console.log(JSON.stringify(json))
 		}
 	})
 }
