@@ -282,8 +282,8 @@ function jsonToXml(json) {
 			xml += `    <${node.nodeType} id="${node.id}"`
 
 			if (node.name) {
-				xml += ` name="${node.name}"`
-				xml += ` _name="${node.name}"`
+				xml += ` name="${node.name}" `
+				xml += ` _name="${node.name}" `
 			}
 
 			if (node.plugin) xml += ` plugin="${node.plugin}"`
