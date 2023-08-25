@@ -43,6 +43,11 @@
 
 <script setup>
 
+import { useActionMetasStore } from "@/stores/plugin";
+
+const actionMetasStore = useActionMetasStore();
+
+
 import { ref, toRaw } from 'vue'
 import { pluginInstanceOptionSelect } from '@/api/common-api'
 import request from "@/utils/request"
@@ -110,28 +115,33 @@ function init() {
 		}
 
 		// 元数据对象(右侧表单动态展示)
-		if (element.value?.businessObject?.$attrs?._meta) {
-			const meta = JSON.parse(element.value?.businessObject?.$attrs?._meta)
-			form.value.items = meta
-			// 转换成map,方便业务对象使用.
-			meta.forEach(item => {
-				const propertyName = item.key
-				form.value.itemsMap[propertyName] = item
+		if (element.value?.businessObject?.$attrs?.plugin) {
+			// 从store里拿数据
+			const plugins = actionMetasStore.getActions
+			const pluginInfoStr = plugins.get(element.value.businessObject.$attrs.plugin)
+			if (pluginInfoStr) {
+				const pluginItem = JSON.parse(pluginInfoStr)
+				form.value.items = pluginItem?._meta
+				// 转换成map,方便业务对象使用.
+				form.value.items.forEach(item => {
+					const propertyName = item.key
+					form.value.itemsMap[propertyName] = item
 
-				// 订阅事件
-				if (item?.events) {
-					for (const eventName of item.events) {
-						mitt.off(eventName)
-						mitt.on(eventName, eventBridgeFun)
+					// 订阅事件
+					if (item?.events) {
+						for (const eventName of item.events) {
+							mitt.off(eventName)
+							mitt.on(eventName, eventBridgeFun)
+						}
 					}
-				}
-			});
+				});
+			}
 		}
 
 		// 节点名称
-		if (element.value?.businessObject?.$attrs?.name) {
-			form.value.name = element.value?.businessObject?.$attrs?.name;
-			element.value['name'] = element.value?.businessObject?.$attrs?.name
+		if (element.value?.businessObject?.$attrs?._name) {
+			form.value.name = element.value?.businessObject?.$attrs?._name;
+			element.value['name'] = element.value?.businessObject?.$attrs?._name
 			// 注意哈,要调用更新,才能真正的render
 			updateProperties({ "name": form.value.name })
 		}

@@ -123,6 +123,7 @@ function xmlToJson(xmlString) {
 		},
 	}
 
+
 	// 处理节点
 	for (let i = 0; i < processNode.children.length; i++) {
 		const el = processNode.children[i]
@@ -146,22 +147,33 @@ function xmlToJson(xmlString) {
 		const targets = el.getElementsByTagName('outgoing')?.[0]?.textContent
 		if (targets) obj.targets = [targets]
 
+
+
 		if (el.nodeName === 'serviceTask') {
-			const properties = el.getElementsByTagName('camunda:property')
-			let plugin = ''
-			for (let j = 0; j < properties.length; j++) {
-				const property = properties[j]
-				const propertyName = property.getAttribute('name')
-				const propertyValue = property.getAttribute('value')
-				if (propertyName === 'plugin') {
-					plugin = propertyValue
-				}
-			}
-			if (plugin) obj.plugin = plugin
+			obj.nodeType = "serviceTask"
+
+			// 只有serviceTask的情况下才会有plugin属性和pluginCode属性
+			const plugin = el.getAttribute('plugin')
+			if (plugin) obj.plugin = plugin;
+
+			const pluginCode = el.getAttribute('pluginCode')
+			if (pluginCode) obj.pluginCode = pluginCode;
+
+			// const properties = el.getElementsByTagName('camunda:property')
+			// let plugin = ''
+			// for (let j = 0; j < properties.length; j++) {
+			// 	const property = properties[j]
+			// 	const propertyName = property.getAttribute('name')
+			// 	const propertyValue = property.getAttribute('value')
+			// 	if (propertyName === 'plugin') {
+			// 		plugin = propertyValue
+			// 	}
+			// }
+			// if (plugin) obj.plugin = plugin
 		}
 
 		// 收集所有的属性和属性值,转换成json字符串.
-		const excludeAttributeNames = Object.keys(obj).concat(["sourceRef", "targetRef"]);
+		const excludeAttributeNames = Object.keys(obj).concat(["sourceRef", "targetRef", "plugin", "pluginCode", "nodeType", "_name"]);
 		const nodeAttributeNames = el.getAttributeNames();
 		const nodeOtherAllAttributeNames = nodeAttributeNames.filter((item) => {
 			const index = excludeAttributeNames.indexOf(item)

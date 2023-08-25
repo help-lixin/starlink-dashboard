@@ -3,6 +3,7 @@
  */
 
 import { useActionMetasStore } from "@/stores/plugin";
+
 const actionMetasStore = useActionMetasStore();
 
 export default function PaletteProvider(
@@ -107,7 +108,7 @@ PaletteProvider.prototype.getPaletteEntries = function (element) {
 	const actions = actionMetasStore.getActions
 	actions.forEach((value, key) => {
 		const pluginItem = JSON.parse(value)
-		const pluginMeta = { "plugin": key, "name": pluginItem?.title, "pluginCode": pluginItem?.pluginCode, "_meta": JSON.stringify(pluginItem?._meta) };
+		const pluginMeta = { "plugin": key, "_name": pluginItem?.title, "pluginCode": pluginItem?.pluginCode };
 
 		paletteObj[key] = {
 			group: pluginItem.group,
