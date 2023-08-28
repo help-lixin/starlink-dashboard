@@ -4,16 +4,38 @@
 		<CustomPropertiesPanel v-if="bpmnModeler" :modeler="bpmnModeler" />
 
 		<div class="action">
-			<label for="jsonInput">选择json：</label>
+			<!-- <label for="jsonInput">选择json：</label>
 			<input id="jsonInput" type="file" />
 			<label for="xmlInput">选择xml：</label>
 			<input id="xmlInput" type="file" />
-			<button @click="getJson">打印当前图的json</button>
+			<button @click="getJson">打印当前图的json</button> -->
+			<button @click="dialogSavePipelineVisible = true">保存</button>
+			<button @click="dialogSavePipelineVisible = true">保存&运行</button>
 		</div>
 	</div>
+
+	<!-- 弹出层 -->
+	<el-dialog v-model="dialogSavePipelineVisible" title="保存流水线">
+		<el-form :model="pipelineForm" :rules="rules" ref="pipelineFormRef">
+			<el-form-item label="流水线Key" :label-width="formLabelWidth">
+				<el-input v-model="pipelineForm.key" autocomplete="off" />
+			</el-form-item>
+			<el-form-item label="流水线名称" :label-width="formLabelWidth">
+				<el-input v-model="pipelineForm.name" autocomplete="off" />
+			</el-form-item>
+		</el-form>
+		<template #footer>
+			<span class="dialog-footer">
+				<el-button @click="dialogSavePipelineVisible = false">取消</el-button>
+				<el-button type="primary" @click="save()">
+					保存
+				</el-button>
+			</span>
+		</template>
+	</el-dialog>
 </template>
 
-<script setup>
+<script setup lang="ts">
 
 // bpmn 相关依赖
 import 'bpmn-js/dist/assets/diagram-js.css'
@@ -33,8 +55,34 @@ import CustomPropertiesPanel from './CustomPropertiesPanel.vue'
 import workflowXml from './xmlStr'
 import customTranslate from './customTranslate'
 
+
+const dialogSavePipelineVisible = ref(false)
+const pipelineFormRef = ref<FormInstance>({})
+
+const pipelineForm = ref({
+	key: undefined,
+	name: undefined
+})
+const formLabelWidth = '140px'
+
+
 const bpmnModeler = ref()
 const canvasRef = ref()
+
+
+// 表单规则
+const rules = reactive<FormRules>({
+	key: [
+		{ required: true, message: "流水线key不能为空", trigger: "blur" },
+		{ pattern: /[0-9a-zA-Z]{1,6}/, message: '只可以输入数字和字母', trigger: 'blur' },
+		{ min: 2, max: 20, message: '流水线key长度必须介于 2 和 20 之间', trigger: 'blur' }
+	],
+	name: [
+		{ required: true, message: "流水线名称不能为空", trigger: "blur" },
+		{ min: 2, max: 20, message: '流水线名称长度必须介于 2 和 20 之间', trigger: 'blur' }
+	]
+})
+
 
 // 获取xml
 function getXml(cb) {
@@ -51,9 +99,9 @@ function setDiagram(bpmn) {
 			// 这里是成功之后的回调, 可以在这里做一系列事情
 			// getXml((_err: any, xml: string) => console.log(xml))
 
-			bpmnModeler.value.on('commandStack.changed', function () {
-				getXml((_err, xml) => console.log(xml))
-			})
+			// bpmnModeler.value.on('commandStack.changed', function () {
+			// 	getXml((_err, xml) => console.log(xml))
+			// })
 		}
 	})
 }
@@ -378,58 +426,58 @@ function generateUniqueId() {
 }
 
 // 读取文件
-function readFile(file, callback) {
-	const reader = new FileReader()
+// function readFile(file, callback) {
+// 	const reader = new FileReader()
 
-	reader.onload = function (event) {
-		const fileContent = event.target.result
-		callback(fileContent)
-	}
+// 	reader.onload = function (event) {
+// 		const fileContent = event.target.result
+// 		callback(fileContent)
+// 	}
 
-	reader.onerror = function (event) {
-		console.error('Error reading file:', event.target.error)
-		callback(null)
-	}
+// 	reader.onerror = function (event) {
+// 		console.error('Error reading file:', event.target.error)
+// 		callback(null)
+// 	}
 
-	reader.readAsText(file)
-}
+// 	reader.readAsText(file)
+// }
 
-function handleXmlInput() {
-	const input = document.getElementById('xmlInput')
-	input.addEventListener('change', function (event) {
-		const file = event.target.files[0]
-		readFile(file, function (xmlString) {
-			if (xmlString) {
-				console.log(xmlString)
-				setDiagram(xmlString)
-				const json = xmlToJson(xmlString)
-				console.log(json)
-			} else {
-				console.log('无法读取文件。')
-			}
-		})
-	})
-}
+// function handleXmlInput() {
+// 	const input = document.getElementById('xmlInput')
+// 	input.addEventListener('change', function (event) {
+// 		const file = event.target.files[0]
+// 		readFile(file, function (xmlString) {
+// 			if (xmlString) {
+// 				console.log(xmlString)
+// 				setDiagram(xmlString)
+// 				const json = xmlToJson(xmlString)
+// 				console.log(json)
+// 			} else {
+// 				console.log('无法读取文件。')
+// 			}
+// 		})
+// 	})
+// }
 
-function handleJsonInput() {
-	const input = document.getElementById('jsonInput')
-	input.addEventListener('change', function (event) {
-		const file = event.target.files[0]
-		readFile(file, function (json) {
-			if (json) {
-				const xmlString = jsonToXml(JSON.parse(json))
-				setDiagram(xmlString)
-			} else {
-				console.log('无法读取文件。')
-			}
-		})
-	})
-}
+// function handleJsonInput() {
+// 	const input = document.getElementById('jsonInput')
+// 	input.addEventListener('change', function (event) {
+// 		const file = event.target.files[0]
+// 		readFile(file, function (json) {
+// 			if (json) {
+// 				const xmlString = jsonToXml(JSON.parse(json))
+// 				setDiagram(xmlString)
+// 			} else {
+// 				console.log('无法读取文件。')
+// 			}
+// 		})
+// 	})
+// }
 
 onMounted(() => {
 	init()
-	handleXmlInput()
-	handleJsonInput()
+	// handleXmlInput()
+	// handleJsonInput()
 })
 
 function getJson() {
@@ -440,6 +488,32 @@ function getJson() {
 			console.log(JSON.stringify(json))
 		}
 	})
+}
+
+
+function save() {
+	dialogSavePipelineVisible.value = false;
+	const rootElement = bpmnModeler.value?._definitions?.rootElements[0]
+	if (rootElement) {
+		rootElement["id"] = pipelineForm.value.key
+		rootElement["name"] = pipelineForm.value.name
+	}
+
+	// 弹出层,提示输入流程定义名称
+	const result = getXml((err, xml) => {
+		if (!err) {
+			console.log("=================xml========================")
+			console.log(xml)
+			const json = xmlToJson(xml)
+			console.log("*****************json***************************")
+			console.log(json)
+			return json;
+		}
+	})
+}
+
+function saveAndRun() {
+	// TODO lixin
 }
 </script>
 

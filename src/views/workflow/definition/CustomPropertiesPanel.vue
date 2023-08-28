@@ -140,10 +140,14 @@ function init() {
 
 		// 节点名称
 		if (element.value?.businessObject?.$attrs?._name) {
-			form.value.name = element.value?.businessObject?.$attrs?._name;
+			form.value.name = element.value?.businessObject?.$attrs?._name
 			element.value['name'] = element.value?.businessObject?.$attrs?._name
 			// 注意哈,要调用更新,才能真正的render
 			updateProperties({ "name": form.value.name })
+		} else {
+			if (element.value?.businessObject?.name) {
+				form.value.name = element.value?.businessObject?.name
+			}
 		}
 
 		// 环境编码
