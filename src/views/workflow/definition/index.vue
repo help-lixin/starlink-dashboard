@@ -2,31 +2,25 @@
 	<div class="bpmn">
 		<div ref="canvasRef" class="canvas"></div>
 		<CustomPropertiesPanel v-if="bpmnModeler" :modeler="bpmnModeler" />
-
 		<div class="action">
-			<!-- <label for="jsonInput">选择json：</label>
-			<input id="jsonInput" type="file" />
-			<label for="xmlInput">选择xml：</label>
-			<input id="xmlInput" type="file" />
-			<button @click="getJson">打印当前图的json</button> -->
-			<button @click="dialogSavePipelineVisible = true">保存</button>
-			<button @click="dialogSavePipelineVisible = true">保存&运行</button>
+			<button @click="showSavePage()">保存</button>
+			<button @click="showSavePage()">保存&运行</button>
 		</div>
 	</div>
 
 	<!-- 弹出层 -->
-	<el-dialog v-model="dialogSavePipelineVisible" title="保存流水线">
-		<el-form :model="pipelineForm" :rules="rules" ref="pipelineFormRef">
-			<el-form-item label="流水线Key" :label-width="formLabelWidth">
+	<el-dialog v-model="open" title="保存流水线">
+		<el-form :model="pipelineForm" :rules="pipelineFormRules" ref="pipelineFormRef">
+			<el-form-item label="流水线Key" :label-width="formLabelWidth" prop="key">
 				<el-input v-model="pipelineForm.key" autocomplete="off" />
 			</el-form-item>
-			<el-form-item label="流水线名称" :label-width="formLabelWidth">
+			<el-form-item label="流水线名称" :label-width="formLabelWidth" prop="name">
 				<el-input v-model="pipelineForm.name" autocomplete="off" />
 			</el-form-item>
 		</el-form>
 		<template #footer>
 			<span class="dialog-footer">
-				<el-button @click="dialogSavePipelineVisible = false">取消</el-button>
+				<el-button @click="open = false">取消</el-button>
 				<el-button type="primary" @click="save()">
 					保存
 				</el-button>
@@ -45,7 +39,9 @@ import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css'
 // 左边工具栏以及编辑节点的样式
 import 'bpmn-js-properties-panel/dist/assets/bpmn-js-properties-panel.css'
 
+import { deploy } from '@/api/workflowDefinition'
 
+import type { FormInstance, FormRules } from 'element-plus'
 import { ref, onMounted } from 'vue'
 import CustomModeler from './customModeler'
 import propertiesPanelModule from 'bpmn-js-properties-panel'
@@ -55,23 +51,19 @@ import CustomPropertiesPanel from './CustomPropertiesPanel.vue'
 import workflowXml from './xmlStr'
 import customTranslate from './customTranslate'
 
+const bpmnModeler = ref()
+const canvasRef = ref()
 
-const dialogSavePipelineVisible = ref(false)
-const pipelineFormRef = ref<FormInstance>({})
 
+const open = ref(false)
 const pipelineForm = ref({
 	key: undefined,
 	name: undefined
 })
 const formLabelWidth = '140px'
-
-
-const bpmnModeler = ref()
-const canvasRef = ref()
-
-
+const pipelineFormRef = ref<FormInstance>()
 // 表单规则
-const rules = reactive<FormRules>({
+const pipelineFormRules = reactive<FormRules>({
 	key: [
 		{ required: true, message: "流水线key不能为空", trigger: "blur" },
 		{ pattern: /[0-9a-zA-Z]{1,6}/, message: '只可以输入数字和字母', trigger: 'blur' },
@@ -85,23 +77,20 @@ const rules = reactive<FormRules>({
 
 
 // 获取xml
-function getXml(cb) {
+function getXml(cb: any) {
 	bpmnModeler.value.saveXML({ format: true }, (err, xml) => cb(err, xml))
 }
 
 // 渲染xml
-function setDiagram(bpmn) {
+function setDiagram(bpmn: any) {
 	// 将字符串转换成图显示出来
 	bpmnModeler.value.importXML(bpmn, err => {
 		if (err) {
 			console.error(err)
 		} else {
-			// 这里是成功之后的回调, 可以在这里做一系列事情
-			// getXml((_err: any, xml: string) => console.log(xml))
-
-			// bpmnModeler.value.on('commandStack.changed', function () {
-			// 	getXml((_err, xml) => console.log(xml))
-			// })
+			bpmnModeler.value.on('commandStack.changed', function () {
+				getXml((_err, xml) => console.log(xml))
+			})
 		}
 	})
 }
@@ -115,12 +104,7 @@ function init() {
 
 	// 建模
 	bpmnModeler.value = new CustomModeler({
-		// 容器
 		container: canvasRef.value,
-		//添加控制板
-		// propertiesPanel: {
-		// 	parent: '#properties-panel',
-		// },
 		additionalModules: [
 			// 属性栏
 			propertiesPanelModule,
@@ -417,7 +401,6 @@ function jsonToXml(json) {
       </bpmndi:BPMNPlane>
     </bpmndi:BPMNDiagram>
 </definitions>`
-
 	return xml
 }
 
@@ -425,63 +408,12 @@ function generateUniqueId() {
 	return Math.random().toString(36).substr(2, 9)
 }
 
-// 读取文件
-// function readFile(file, callback) {
-// 	const reader = new FileReader()
-
-// 	reader.onload = function (event) {
-// 		const fileContent = event.target.result
-// 		callback(fileContent)
-// 	}
-
-// 	reader.onerror = function (event) {
-// 		console.error('Error reading file:', event.target.error)
-// 		callback(null)
-// 	}
-
-// 	reader.readAsText(file)
-// }
-
-// function handleXmlInput() {
-// 	const input = document.getElementById('xmlInput')
-// 	input.addEventListener('change', function (event) {
-// 		const file = event.target.files[0]
-// 		readFile(file, function (xmlString) {
-// 			if (xmlString) {
-// 				console.log(xmlString)
-// 				setDiagram(xmlString)
-// 				const json = xmlToJson(xmlString)
-// 				console.log(json)
-// 			} else {
-// 				console.log('无法读取文件。')
-// 			}
-// 		})
-// 	})
-// }
-
-// function handleJsonInput() {
-// 	const input = document.getElementById('jsonInput')
-// 	input.addEventListener('change', function (event) {
-// 		const file = event.target.files[0]
-// 		readFile(file, function (json) {
-// 			if (json) {
-// 				const xmlString = jsonToXml(JSON.parse(json))
-// 				setDiagram(xmlString)
-// 			} else {
-// 				console.log('无法读取文件。')
-// 			}
-// 		})
-// 	})
-// }
-
 onMounted(() => {
 	init()
-	// handleXmlInput()
-	// handleJsonInput()
 })
 
 function getJson() {
-	getXml((err, xml) => {
+	getXml((err: any, xml: any) => {
 		if (!err) {
 			console.log(xml)
 			const json = xmlToJson(xml)
@@ -491,29 +423,58 @@ function getJson() {
 }
 
 
-function save() {
-	dialogSavePipelineVisible.value = false;
+// 显示保存
+function showSavePage() {
+	open.value = true;
+	// 找到root节点
+	const rootElement = bpmnModeler.value?._definitions?.rootElements[0]
+	if (rootElement) {
+		pipelineForm.value = {
+			key: rootElement["id"],
+			name: rootElement["name"]
+		}
+	}
+}
+
+async function save() {
+	// 1. 验证表单
+	await pipelineFormRef.value?.validate()
+		.catch((err: Error) => {
+			ElMessage.error('表单验证失败');
+			throw err;
+		});
+
+	// 2. 找到root节点,给xml配置最新表单的值.
 	const rootElement = bpmnModeler.value?._definitions?.rootElements[0]
 	if (rootElement) {
 		rootElement["id"] = pipelineForm.value.key
 		rootElement["name"] = pipelineForm.value.name
 	}
 
-	// 弹出层,提示输入流程定义名称
-	const result = getXml((err, xml) => {
+	// 3. 把xml转换成json
+	getXml((err: any, xml: any) => {
 		if (!err) {
-			console.log("=================xml========================")
-			console.log(xml)
-			const json = xmlToJson(xml)
-			console.log("*****************json***************************")
-			console.log(json)
-			return json;
+			const bpmnJson = xmlToJson(xml)
+			ElMessage({
+				showClose: true,
+				message: '保存流水线:"' + pipelineForm.value.name + '"成功',
+				type: 'success',
+			})
+
+			const bpmnJsonString = JSON.stringify(bpmnJson)
+			console.log(bpmnJsonString)
+			deploy(bpmnJsonString).then((res) => {
+				console.log("========================================")
+				console.log(res)
+				console.log("========================================")
+			});
+			open.value = false
 		}
 	})
 }
 
 function saveAndRun() {
-	// TODO lixin
+
 }
 </script>
 
