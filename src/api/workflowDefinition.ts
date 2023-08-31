@@ -5,9 +5,24 @@ import request from "@/utils/request"
 import { GATEWAY_BASE_URL } from '@/utils/env';
 
 
+// 部署流程
 export const deploy = (data:string)=>{
     return request({
 		url: GATEWAY_BASE_URL + '/starlink-service/workflow/definition/deploy',
+		method: 'POST',
+		headers: {
+            'content-type': 'application/json'
+        },
+        data: data
+	}).then((res)=>{
+        return res.data;
+    })
+}
+
+// 启动流程
+export const startWorkFlowById = (data)=>{
+    return request({
+		url: GATEWAY_BASE_URL + '/starlink-service/workflow/instance/startById',
 		method: 'POST',
 		headers: {
             'content-type': 'application/json'

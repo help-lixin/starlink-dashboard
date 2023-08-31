@@ -3,7 +3,6 @@
 		<div ref="canvasRef" class="canvas"></div>
 		<CustomPropertiesPanel v-if="bpmnModeler" :modeler="bpmnModeler" />
 		<div class="action">
-			<button @click="showSavePage()">保存</button>
 			<button @click="showSavePage()">保存&运行</button>
 		</div>
 	</div>
@@ -21,8 +20,11 @@
 		<template #footer>
 			<span class="dialog-footer">
 				<el-button @click="open = false">取消</el-button>
-				<el-button type="primary" @click="save()">
+				<el-button type="primary" @click="saveAndRun(false)">
 					保存
+				</el-button>
+				<el-button type="primary" @click="saveAndRun(true)">
+					保存&运行
 				</el-button>
 			</span>
 		</template>
@@ -39,7 +41,7 @@ import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css'
 // 左边工具栏以及编辑节点的样式
 import 'bpmn-js-properties-panel/dist/assets/bpmn-js-properties-panel.css'
 
-import { deploy } from '@/api/workflowDefinition'
+import { deploy, startWorkFlowById } from '@/api/workflowDefinition'
 
 import type { FormInstance, FormRules } from 'element-plus'
 import { ref, onMounted } from 'vue'
@@ -436,7 +438,7 @@ function showSavePage() {
 	}
 }
 
-async function save() {
+async function saveAndRun(isRunning: boolean) {
 	// 1. 验证表单
 	await pipelineFormRef.value?.validate()
 		.catch((err: Error) => {
@@ -455,27 +457,51 @@ async function save() {
 	getXml((err: any, xml: any) => {
 		if (!err) {
 			const bpmnJson = xmlToJson(xml)
-			ElMessage({
-				showClose: true,
-				message: '保存流水线:"' + pipelineForm.value.name + '"成功',
-				type: 'success',
-			})
-
 			const bpmnJsonString = JSON.stringify(bpmnJson)
-			console.log(bpmnJsonString)
 			deploy(bpmnJsonString).then((res) => {
-				console.log("========================================")
-				console.log(res)
-				console.log("========================================")
+				if (res?.code == 200) {
+					const processDefinitionId = res?.data?.id;
+
+					// 启动一个流程
+					if (isRunning) {
+						if (processDefinitionId) {
+							const startWorkFlowData = {
+								processDefinitionId
+							}
+
+							// 启动流水线
+							startWorkFlowById(startWorkFlowData)
+								.then((startWorkflowRes) => {
+									if (startWorkflowRes?.code == 200) {
+										ElMessage({
+											showClose: true,
+											message: '保存并运行流水线:"' + pipelineForm.value.name + '"成功',
+											type: 'success',
+										})
+										// TODO lixin 跳转到流水管理界面
+									}
+								});
+						}
+					} else {
+						ElMessage({
+							showClose: true,
+							message: '保存流水线:"' + pipelineForm.value.name + '"成功',
+							type: 'success',
+						})
+					}
+					open.value = false
+				} else { // 失败提示
+					const msg = res?.msg;
+					ElMessage.error('保存流水线:"' + pipelineForm.value.name + '"失败,' + "失败原因:" + msg)
+				}
 			});
-			open.value = false
 		}
 	})
 }
 
-function saveAndRun() {
 
-}
+
+
 </script>
 
 <style scoped lang="scss">
