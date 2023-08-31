@@ -7,7 +7,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 id="sid-38422fae-e03e-43a3-bef4-bd33b32041b2" 
 targetNamespace="http://bpmn.io/bpmn" 
 exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="5.1.2">
-<process id="Process_1" isExecutable="false">
+<process id="Process_1" isExecutable="true">
     <startEvent id="StartEvent_1y45yut" name="开始">
     </startEvent>
 </process>
