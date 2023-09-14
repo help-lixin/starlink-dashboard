@@ -11,6 +11,7 @@
     "src/**/__tests__/*"
   ],
   "compilerOptions": {
+    "allowJs":true,
     "moduleResolution" : "node",
     "composite": true,
     "baseUrl": ".",

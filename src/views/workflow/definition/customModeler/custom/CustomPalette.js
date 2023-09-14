@@ -1,3 +1,5 @@
+// @ts-nocheck  
+
 /**
  * A palette that allows you to create BPMN _and_ custom elements.
  */

@@ -1,3 +1,5 @@
+// @ts-nocheck  
+
 
 export default function ContextPadProvider(
 	contextPad,

@@ -43,6 +43,8 @@
 
 <script setup>
 
+// @ts-nocheck  
+
 import { useActionMetasStore } from "@/stores/plugin";
 
 const actionMetasStore = useActionMetasStore();

@@ -1,3 +1,5 @@
+// @ts-nocheck  
+
 import translations from './translationsGerman'
 
 export default function customTranslate(template, replacements) {

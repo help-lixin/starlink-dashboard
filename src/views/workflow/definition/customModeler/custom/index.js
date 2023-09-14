@@ -1,3 +1,5 @@
+// @ts-nocheck  
+
 import CustomPalette from './CustomPalette'
 // import CustomRenderer from './CustomRenderer'
 import CustomContextPadProvider from './CustomContextPadProvider'

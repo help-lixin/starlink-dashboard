@@ -1,3 +1,5 @@
+// @ts-nocheck  
+
 export default {
   // Labels
   'Activate the global connect tool': '激活全局连接工具',

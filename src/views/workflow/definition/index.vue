@@ -1,524 +1,651 @@
-<template>
-	<div class="bpmn">
-		<div ref="canvasRef" class="canvas"></div>
-		<CustomPropertiesPanel v-if="bpmnModeler" :modeler="bpmnModeler" />
-		<div class="action">
-			<button @click="showSavePage()">保存&运行</button>
-		</div>
-	</div>
-
-	<!-- 弹出层 -->
-	<el-dialog v-model="open" title="保存流水线">
-		<el-form :model="pipelineForm" :rules="pipelineFormRules" ref="pipelineFormRef">
-			<el-form-item label="流水线Key" :label-width="formLabelWidth" prop="key">
-				<el-input v-model="pipelineForm.key" autocomplete="off" />
-			</el-form-item>
-			<el-form-item label="流水线名称" :label-width="formLabelWidth" prop="name">
-				<el-input v-model="pipelineForm.name" autocomplete="off" />
-			</el-form-item>
-		</el-form>
-		<template #footer>
-			<span class="dialog-footer">
-				<el-button @click="open = false">取消</el-button>
-				<el-button type="primary" @click="saveAndRun(false)">
-					保存
-				</el-button>
-				<el-button type="primary" @click="saveAndRun(true)">
-					保存&运行
-				</el-button>
-			</span>
-		</template>
-	</el-dialog>
-</template>
 
 <script setup lang="ts">
+// @ts-nocheck  
+import { Plus, Delete, Edit, EditPen, Search, RefreshRight, Sort, QuestionFilled } from '@element-plus/icons-vue'
+import { parseTime, status, addDateRange, showStatusFun, showStatusOperateFun } from "@/utils/common"
+import { getPluginMeta } from '@/api/pluginDefinition';
+import { envOptionSelect, groupOptionSelect, pluginOptionSelect } from "@/api/common-api"
+import { list, get, update, add, changeStatus } from "@/api/pluginInstance"
+import { fromPairs } from 'lodash';
 
-// bpmn 相关依赖
-import 'bpmn-js/dist/assets/diagram-js.css'
-import 'bpmn-js/dist/assets/bpmn-font/css/bpmn.css'
-import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-codes.css'
-import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css'
-// 左边工具栏以及编辑节点的样式
-import 'bpmn-js-properties-panel/dist/assets/bpmn-js-properties-panel.css'
+// 加载中
+const loading = ref(false)
+// 显示搜索条件
+const showSearch = ref(true)
+// 日期范围
+const daterangeArray = ref('')
 
-import { deploy, startWorkFlowById } from '@/api/workflowDefinition'
+// 选中数组
+const ids = ref([])
+// 非单个禁用
+const single = ref(true)
+// 非多个禁用
+const multiple = ref(true)
+const total = ref(0)
+const dataList = reactive([])
 
-import type { FormInstance, FormRules } from 'element-plus'
-import { ref, onMounted } from 'vue'
-import CustomModeler from './customModeler'
-import propertiesPanelModule from 'bpmn-js-properties-panel'
-import propertiesProviderModule from 'bpmn-js-properties-panel/lib/provider/camunda'
-import camundaModdleDescriptor from 'camunda-bpmn-moddle/resources/camunda'
-import CustomPropertiesPanel from './CustomPropertiesPanel.vue'
-import workflowXml from './xmlStr'
-import customTranslate from './customTranslate'
 
-const bpmnModeler = ref()
-const canvasRef = ref()
+// env
+const queryEnvs = ref()
+// group
+const queryGroups = ref()
+// 插件列表
+const queryPlugins = ref();
 
+// 查询的表单引用
+const queryFormRef = ref({});
+const queryParams = reactive({
+  pageNum: 1,
+  pageSize: 10,
+  envCode: undefined,   // []
+  groupCode: undefined, // []
+  pluginCode: undefined, // []
+  instanceName: undefined,
+  status: undefined
+})
+
+// 处理环境下拉列表
+const handleEnv = (envCode: string) => {
+  queryGroups.value = [];
+  if (envCode != "") {
+    groupOptionSelect(envCode).then((res) => {
+      if (res?.code == 200) {
+        queryGroups.value = res.data;
+      }
+    });
+  } else {
+    delete queryParams.envCode
+  }
+}
+
+// 处理环境组下拉列表
+const handleGroup = (groupCode: string) => {
+  if (groupCode == "") {
+    delete queryParams.groupCode
+  }
+}
+
+const handlePlugin = (pluginCode: string) => {
+  if (pluginCode == "") {
+    delete queryParams.pluginCode
+  }
+}
+
+// 获取列表
+const getList = () => {
+  loading.value = true;
+
+  list(addDateRange(queryParams, daterangeArray.value)).then(response => {
+    loading.value = false
+    if (response?.data?.records.length > 0) {
+      dataList.splice(0, dataList.length);
+      Object.assign(dataList, response?.data?.records)
+      total.value = response?.data?.total
+    } else {
+      dataList.splice(0, dataList.length);
+      total.value = 0;
+    }
+  }
+  );
+}
+
+// 处理搜索按钮
+const handleQuery = function () {
+  getList()
+}
+
+// 处理查询按钮
+const resetQuery = function () {
+  daterangeArray.value = ""
+  queryFormRef.value.resetFields()
+  handleQuery();
+}
+
+// 多选框选中数据
+const handleSelectionChange = function (selection) {
+  ids.value = selection.map(item => item.instanceId);
+  single.value = selection.length != 1;
+  multiple.value = !selection.length;
+}
+
+// ==================================================================================================================
+// 表单处理
+// ==================================================================================================================
+
+
+// 表单env
+const formEnvs = ref()
+// 表单group
+const formGroups = ref()
+// 表单插件列表
+const formPlugins = ref();
 
 const open = ref(false)
-const pipelineForm = ref({
-	key: undefined,
-	name: undefined
-})
-const formLabelWidth = '140px'
-const pipelineFormRef = ref<FormInstance>()
-// 表单规则
-const pipelineFormRules = reactive<FormRules>({
-	key: [
-		{ required: true, message: "流水线key不能为空", trigger: "blur" },
-		{ pattern: /[0-9a-zA-Z]{1,6}/, message: '只可以输入数字和字母', trigger: 'blur' },
-		{ min: 2, max: 20, message: '流水线key长度必须介于 2 和 20 之间', trigger: 'blur' }
-	],
-	name: [
-		{ required: true, message: "流水线名称不能为空", trigger: "blur" },
-		{ min: 2, max: 20, message: '流水线名称长度必须介于 2 和 20 之间', trigger: 'blur' }
-	]
+const pluginForm = ref()
+const title = ref("")
+const formRef = ref<FormInstance>();
+const form = reactive({
+  instanceId: undefined,
+  envCode: undefined,
+  groupCode: undefined,
+  pluginCode: undefined,
+  instanceCode: undefined,
+  instanceName: undefined,
+  items: [],
+  content: undefined,    // 动态内容
+  remarks: undefined,
+  status: 1,
 })
 
-
-// 获取xml
-function getXml(cb: any) {
-	bpmnModeler.value.saveXML({ format: true }, (err, xml) => cb(err, xml))
-}
-
-// 渲染xml
-function setDiagram(bpmn: any) {
-	// 将字符串转换成图显示出来
-	bpmnModeler.value.importXML(bpmn, err => {
-		if (err) {
-			console.error(err)
-		} else {
-			bpmnModeler.value.on('commandStack.changed', function () {
-				getXml((_err, xml) => console.log(xml))
-			})
-		}
-	})
-}
-
-// 初始化
-function init() {
-	// 将汉化包装成一个模块
-	const customTranslateModule = {
-		translate: ['value', customTranslate],
-	}
-
-	// 建模
-	bpmnModeler.value = new CustomModeler({
-		container: canvasRef.value,
-		additionalModules: [
-			// 属性栏
-			propertiesPanelModule,
-			propertiesProviderModule,
-			// 汉化模块
-			customTranslateModule,
-		],
-		moddleExtensions: {
-			camunda: camundaModdleDescriptor,
-		},
-	})
-
-	setDiagram(workflowXml)
-}
-
-// xml转json
-function xmlToJson(xmlString) {
-	const NAMESPACE_BPMN = 'http://www.omg.org/spec/BPMN/20100524/MODEL'
-	const NAMESPACE_BPMNDI = 'http://www.omg.org/spec/BPMN/20100524/DI'
-	const NAMESPACE_DDDI = 'http://www.omg.org/spec/DD/20100524/DI'
-	const NAMESPACE_DC = 'http://www.omg.org/spec/DD/20100524/DC'
-
-	const parser = new DOMParser()
-	const xmlDoc = parser.parseFromString(xmlString, 'text/xml')
-
-	const definitionsNode = xmlDoc.getElementsByTagNameNS(
-		NAMESPACE_BPMN,
-		'definitions',
-	)[0]
-
-	// 获得节点<process>
-	const processNode = definitionsNode.getElementsByTagNameNS(
-		NAMESPACE_BPMN,
-		'process',
-	)[0]
-
-	const result = {
-		id: processNode.getAttribute('id'),
-		name: processNode.getAttribute('name'),
-		nodes: [],
-		diagram: {
-			id: null,
-			plane: {
-				id: null,
-				ref: processNode.getAttribute('id'),
-				elements: [],
-			},
-		},
-	}
-
-
-	// 处理节点
-	for (let i = 0; i < processNode.children.length; i++) {
-		const el = processNode.children[i]
-		const obj = {
-			id: el.id,
-			nodeType: el.nodeName,
-		}
-
-		const name = el.getAttribute('name')
-		if (name) obj.name = name
-
-		const source = el.getAttribute('sourceRef')
-		if (source) obj.source = source
-
-		const target = el.getAttribute('targetRef')
-		if (target) obj.target = target
-
-		const sources = el.getElementsByTagName('incoming')?.[0]?.textContent
-		if (sources) obj.sources = [sources]
-
-		const targets = el.getElementsByTagName('outgoing')?.[0]?.textContent
-		if (targets) obj.targets = [targets]
-
-
-
-		if (el.nodeName === 'serviceTask') {
-			obj.nodeType = "serviceTask"
-
-			// 只有serviceTask的情况下才会有plugin属性和pluginCode属性
-			const plugin = el.getAttribute('plugin')
-			if (plugin) obj.plugin = plugin;
-
-			const pluginCode = el.getAttribute('pluginCode')
-			if (pluginCode) obj.pluginCode = pluginCode;
-
-			// const properties = el.getElementsByTagName('camunda:property')
-			// let plugin = ''
-			// for (let j = 0; j < properties.length; j++) {
-			// 	const property = properties[j]
-			// 	const propertyName = property.getAttribute('name')
-			// 	const propertyValue = property.getAttribute('value')
-			// 	if (propertyName === 'plugin') {
-			// 		plugin = propertyValue
-			// 	}
-			// }
-			// if (plugin) obj.plugin = plugin
-		}
-
-		// 收集所有的属性和属性值,转换成json字符串.
-		const excludeAttributeNames = Object.keys(obj).concat(["sourceRef", "targetRef", "plugin", "pluginCode", "nodeType", "_name"]);
-		const nodeAttributeNames = el.getAttributeNames();
-		const nodeOtherAllAttributeNames = nodeAttributeNames.filter((item) => {
-			const index = excludeAttributeNames.indexOf(item)
-			return index == -1 ? true : false;
-		});
-
-		if (nodeOtherAllAttributeNames.length > 0) {
-			const params = {}
-			for (const attributeName of nodeOtherAllAttributeNames) {
-				const attributeValue = el.getAttribute(attributeName);
-				params[attributeName] = attributeValue;
-			}
-			obj.params = JSON.stringify(params)
-		}
-
-		// 重点
-		result.nodes.push(obj);
-	}
-
-	const bpmndiDiagramNode = xmlDoc.getElementsByTagNameNS(
-		NAMESPACE_BPMNDI,
-		'BPMNDiagram',
-	)[0]
-	if (bpmndiDiagramNode) {
-		result.diagram.id = bpmndiDiagramNode.getAttribute('id')
-
-		const bpmndiPlaneNode = bpmndiDiagramNode.getElementsByTagNameNS(
-			NAMESPACE_BPMNDI,
-			'BPMNPlane',
-		)[0]
-		if (bpmndiPlaneNode) {
-			result.diagram.plane.id = bpmndiPlaneNode.getAttribute('id')
-
-			const bpmndiShapeNodes = bpmndiPlaneNode.getElementsByTagNameNS(
-				NAMESPACE_BPMNDI,
-				'BPMNShape',
-			)
-			for (let i = 0; i < bpmndiShapeNodes.length; i++) {
-				const bpmndiShapeNode = bpmndiShapeNodes[i]
-				const shapeId = bpmndiShapeNode.getAttribute('id')
-				const bpmnElement = bpmndiShapeNode.getAttribute('bpmnElement')
-
-				const boundsNode = bpmndiShapeNode.getElementsByTagNameNS(
-					NAMESPACE_DC,
-					'Bounds',
-				)[0]
-				if (!boundsNode) continue
-
-				const bounds = {
-					x: parseFloat(boundsNode.getAttribute('x')),
-					y: parseFloat(boundsNode.getAttribute('y')),
-					width: parseFloat(boundsNode.getAttribute('width')),
-					height: parseFloat(boundsNode.getAttribute('height')),
-				}
-
-				result.diagram.plane.elements.push({
-					id: shapeId,
-					ref: bpmnElement,
-					type: 'shape',
-					bounds: bounds,
-				})
-			}
-
-			const bpmndiEdgeNodes = bpmndiPlaneNode.getElementsByTagNameNS(
-				NAMESPACE_BPMNDI,
-				'BPMNEdge',
-			)
-			for (let i = 0; i < bpmndiEdgeNodes.length; i++) {
-				const bpmndiEdgeNode = bpmndiEdgeNodes[i]
-				const edgeId = bpmndiEdgeNode.getAttribute('id')
-				const bpmnElement = bpmndiEdgeNode.getAttribute('bpmnElement')
-
-				const waypointNodes = bpmndiEdgeNode.getElementsByTagNameNS(
-					NAMESPACE_DDDI,
-					'waypoint',
-				)
-				const waypoints = []
-				for (let j = 0; j < waypointNodes.length; j++) {
-					const waypointNode = waypointNodes[j]
-					waypoints.push({
-						x: parseFloat(waypointNode.getAttribute('x')),
-						y: parseFloat(waypointNode.getAttribute('y')),
-					})
-				}
-
-				result.diagram.plane.elements.push({
-					id: edgeId,
-					ref: bpmnElement,
-					type: 'edge',
-					waypoints: waypoints,
-				})
-			}
-		}
-	}
-
-	return result
-}
-
-// json转xml
-function jsonToXml(json) {
-
-	// 处理nodes
-	function convertNodes(nodes) {
-		let xml = ''
-		for (const node of nodes) {
-			xml += `    <${node.nodeType} id="${node.id}"`
-
-			if (node.name) {
-				xml += ` name="${node.name}" `
-				xml += ` _name="${node.name}" `
-			}
-
-			if (node.plugin) xml += ` plugin="${node.plugin}"`
-			if (node.pluginCode) xml += ` pluginCode="${node.pluginCode}"`
-
-			if (node.source) xml += ` sourceRef="${node.source}"`
-			if (node.target) xml += ` targetRef="${node.target}"`
-
-			if (node.nodeType === 'serviceTask' && (node.params)) {
-				if (node.params) {
-					const paramsObject = JSON.parse(node.params)
-					Object.keys(paramsObject).forEach(key => {
-						const propertyName = key
-						const propertyValue = paramsObject[key]
-						if (propertyValue != undefined && propertyName != undefined) {
-							xml += ` ${propertyName}="${propertyValue}" `
-						}
-					})
-				}
-			}
-
-			xml += `>\n`
-
-			if (node.sources && node.sources.length > 0) {
-				xml += `      <incoming>${node.sources[0]}</incoming>\n`
-			}
-
-			if (node.targets && node.targets.length > 0) {
-				xml += `      <outgoing>${node.targets[0]}</outgoing>\n`
-			}
-
-			xml += `    </${node.nodeType}>\n`
-		}
-		return xml
-	}
-
-	// 处理BPMNDiagram
-	function convertElements(elements) {
-		let xml = ''
-		for (const element of elements) {
-			if (element.type === 'edge') {
-				xml += `        <bpmndi:BPMNEdge bpmnElement="${element.ref}" id="${element.id}">
-          <di:waypoint x="${element.waypoints[0].x}" y="${element.waypoints[0].y}"/>
-          <di:waypoint x="${element.waypoints[1].x}" y="${element.waypoints[1].y}"/>
-        </bpmndi:BPMNEdge>\n`
-			} else if (element.type === 'shape') {
-				xml += `        <bpmndi:BPMNShape bpmnElement="${element.ref}" id="${element.id}">
-          <dc:Bounds height="${element.bounds.height}" width="${element.bounds.width}" x="${element.bounds.x}" y="${element.bounds.y}"/>
-        </bpmndi:BPMNShape>\n`
-			}
-		}
-		return xml
-	}
-
-	// 处理转义字符
-	function escapeXml(string) {
-		return string.replace(/[<>&"']/g, match => {
-			switch (match) {
-				case '<':
-					return '&lt;'
-				case '>':
-					return '&gt;'
-				case '&':
-					return '&amp;'
-				case '"':
-					return '&quot;'
-				case "'":
-					return '&apos;'
-				default:
-					return match
-			}
-		})
-	}
-
-	// 最终期望的xml
-	let xml = `<definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="${generateUniqueId()}" targetNamespace="http://camunda.org/schema/1.0/bpmn" xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL">
-  <process id="${json.id}" isExecutable="true" name="${json.name}">
-    ${convertNodes(json.nodes)}
-  </process>
-	<bpmndi:BPMNDiagram id="${json.diagram.id}">
-      <bpmndi:BPMNPlane bpmnElement="${json.id}" id="${json.diagram.plane.id}">
-        ${convertElements(json.diagram.plane.elements)}
-      </bpmndi:BPMNPlane>
-    </bpmndi:BPMNDiagram>
-</definitions>`
-	return xml
-}
-
-function generateUniqueId() {
-	return Math.random().toString(36).substr(2, 9)
-}
-
-onMounted(() => {
-	init()
+// 表单验证规则
+const rules = reactive<FormRules>({
+  envCode: [
+    { required: true, message: "环境是必选项", trigger: "blur" }
+  ],
+  groupCode: [
+    { required: true, message: "环境组是必选项", trigger: "blur" }
+  ],
+  pluginCode: [
+    { required: true, message: "插件是必选项", trigger: "blur" }
+  ],
+  instanceName: [
+    { required: true, message: "实例名称不能为空", trigger: "blur" },
+    { min: 2, max: 20, message: '实例名称长度必须介于 2 和 20 之间', trigger: 'blur' }
+  ]
 })
 
-function getJson() {
-	getXml((err: any, xml: any) => {
-		if (!err) {
-			console.log(xml)
-			const json = xmlToJson(xml)
-			console.log(JSON.stringify(json))
-		}
-	})
+// 重置表单
+const reset = () => {
+  Object.assign(form, {
+    instanceId: undefined,
+    envCode: undefined,
+    groupCode: undefined,
+    pluginCode: undefined,
+    instanceCode: undefined,
+    instanceName: undefined,
+    items: [],
+    content: undefined,    // 动态内容
+    remarks: undefined,
+    status: 1,
+  })
+  pluginForm.value = "";
 }
 
 
-// 显示保存
-function showSavePage() {
-	open.value = true;
-	// 找到root节点
-	const rootElement = bpmnModeler.value?._definitions?.rootElements[0]
-	if (rootElement) {
-		pipelineForm.value = {
-			key: rootElement["id"],
-			name: rootElement["name"]
-		}
-	}
+// 处理新增按钮
+const handleAdd = function () {
+  reset()
+  formInit()
+  open.value = true;
+  title.value = "添加插件实例";
 }
 
-async function saveAndRun(isRunning: boolean) {
-	// 1. 验证表单
-	await pipelineFormRef.value?.validate()
-		.catch((err: Error) => {
-			ElMessage.error('表单验证失败');
-			throw err;
-		});
+// 处理更新按钮(仅仅只是把数据拿出来展示一下)
+const handleUpdate = function (row) {
+  reset();
+  formInit();
+  const id = row.instanceId || ids.value
+  get(id).then(response => {
+    if (response?.code == 200) {
+      Object.assign(form, response?.data?.instance)
 
-	// 2. 找到root节点,给xml配置最新表单的值.
-	const rootElement = bpmnModeler.value?._definitions?.rootElements[0]
-	if (rootElement) {
-		rootElement["id"] = pipelineForm.value.key
-		rootElement["name"] = pipelineForm.value.name
-	}
+      // 插件元数据在页面上展示
+      try {
+        const metaString = response?.data?.pluginMeta
+        const metaArray = JSON.parse(metaString);
+        form.items = []
+        form.items = form.items.concat(metaArray)
+      } catch (error) {
+        console.log("解析元数据出错")
+        throw error;
+      }
 
-	// 3. 把xml转换成json
-	getXml((err: any, xml: any) => {
-		if (!err) {
-			const bpmnJson = xmlToJson(xml)
-			const bpmnJsonString = JSON.stringify(bpmnJson)
-			deploy(bpmnJsonString).then((res) => {
-				if (res?.code == 200) {
-					const processDefinitionId = res?.data?.id;
+      // 根据插件元数据,渲染成表单后,保存的内容
+      try {
+        const contentString = response?.data?.instance?.content;
+        if (contentString != undefined) {
+          const resultForm = JSON.parse(contentString);
 
-					// 启动一个流程
-					if (isRunning) {
-						if (processDefinitionId) {
-							const startWorkFlowData = {
-								processDefinitionId
-							}
+          // 遍历赋值
+          form.items.forEach((item) => {
+            const key = item.key;
+            if (resultForm[key]) {
+              item.name = resultForm[key];
+            }
+          });
+        }
+      } catch (error) {
+        console.log("解析元数据内容出错")
+        throw error;
+      }
 
-							// 启动流水线
-							startWorkFlowById(startWorkFlowData)
-								.then((startWorkflowRes) => {
-									if (startWorkflowRes?.code == 200) {
-										ElMessage({
-											showClose: true,
-											message: '保存并运行流水线:"' + pipelineForm.value.name + '"成功',
-											type: 'success',
-										})
-										// TODO lixin 跳转到流水管理界面
-									}
-								});
-						}
-					} else {
-						ElMessage({
-							showClose: true,
-							message: '保存流水线:"' + pipelineForm.value.name + '"成功',
-							type: 'success',
-						})
-					}
-					open.value = false
-				} else { // 失败提示
-					const msg = res?.msg;
-					ElMessage.error('保存流水线:"' + pipelineForm.value.name + '"失败,' + "失败原因:" + msg)
-				}
-			});
-		}
-	})
+      // 根据pluginCode获取元数据.
+      // 把元数据填充到:form.items
+      // 把form.items数组里的name填上,用户填写的值.
+      open.value = true;
+      title.value = "修改插件实例";
+    }
+  });
+}
+
+const handleDelete = function (row) {
+  const tmpId = row.instanceId || ids.value;
+  const status = row.status
+  let msg = ""
+  if (status == 1) {
+    msg = '是否禁用编号为"' + tmpId + '"的数据项？'
+  } else {
+    msg = '是否启用编号为"' + tmpId + '"的数据项？'
+  }
+
+  ElMessageBox.confirm(
+    msg,
+    'Warning',
+    {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }
+  ).then(() => {
+    let tmpStatus;
+    if (status == 0) {
+      tmpStatus = 1
+    } else {
+      tmpStatus = 0
+    }
+    changeStatus(tmpId, tmpStatus).then((res) => {
+      if (res.code == 200) {
+        // 重置查询表单,并进行查询
+        queryParams.pageNum = 1
+        getList()
+        ElMessage({
+          type: 'success',
+          message: '操作成功',
+        })
+      }
+    })
+  }).catch(() => { })
+}
+
+const handleFormEnv = (envCode: String) => {
+  formGroups.value = []
+  if (envCode != "") {
+    groupOptionSelect(envCode).then((res) => {
+      if (res?.code == 200) {
+        formGroups.value = res.data
+      }
+    });
+  }
+}
+
+const handleFormPlugin = (pluginCode: String) => {
+  if (pluginCode != "") {
+    getPluginMeta(pluginCode).then((res) => {
+      if (res?.code == 200 && res?.data?.pluginMeta) {
+        try {
+          const pluginMetaArray: [] = JSON.parse(res?.data?.pluginMeta);
+          // 先清空
+          form.items = []
+          // 再重新进生赋值
+          form.items = form.items.concat(pluginMetaArray)
+        } catch (error) {
+          console.log("处理异常", error)
+          throw error;
+        }
+      }
+    });
+  } else {
+    form.items = []
+  }
 }
 
 
+// 表单提交处理
+const submitForm = async () => {
+  loading.value = true;
+  await formRef.value?.validate()
+    .catch((err: Error) => {
+      ElMessage.error('表单验证失败');
+      loading.value = false;
+      throw err;
+    });
 
+  // content
+  const dynamicFormBody = {}
+  // 把items打平,然后,配置到
+  form.items.forEach((obj) => {
+    dynamicFormBody[obj.key] = obj.name;
+  })
+  form.content = JSON.stringify(dynamicFormBody)
+  // 可删,可不删来着
+  // delete form.items;
 
+  if (form.instanceId != undefined) {
+    update(form).then(response => {
+      if (response?.code == 200) {
+        ElMessage({
+          showClose: true,
+          message: '修改成功',
+          type: 'success',
+        });
+        open.value = false;
+        getList();
+      } else {
+        ElMessage.error(response?.msg)
+      }
+    });
+  } else {
+    add(form).then(response => {
+      if (response?.code == 200) {
+        ElMessage({
+          showClose: true,
+          message: '新增成功',
+          type: 'success',
+        });
+        open.value = false;
+        getList();
+      } else {
+        ElMessage.error(response?.msg);
+      }
+    });
+  }
+}
+
+// 表单取消处理
+const cancel = () => {
+  open.value = false;
+  reset();
+}
+
+const formInit = () => {
+  // 获取环境列表
+  envOptionSelect().then((res) => {
+    if (res?.code == 200) {
+      formEnvs.value = res?.data;
+    }
+  });
+
+  // 获取插件列表
+  pluginOptionSelect().then((res) => {
+    if (res?.code == 200) {
+      formPlugins.value = res?.data;
+    }
+  })
+}
+
+// ==========================================================================
+// 初始化钩子
+// ==========================================================================
+// 触发查询
+getList()
+// 获取环境列表
+envOptionSelect().then((res) => {
+  if (res?.code == 200) {
+    queryEnvs.value = res?.data;
+  }
+});
+
+// 获取插件列表
+pluginOptionSelect().then((res) => {
+  if (res?.code == 200) {
+    queryPlugins.value = res?.data;
+  }
+})
 </script>
 
-<style scoped lang="scss">
-.bpmn {
-	width: 100%;
-	display: flex;
+<template>
+  <div class="main-wrapp">
+    <!--sousuo  -->
+    <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" size="small" :inline="true" v-show="showSearch"
+      label-width="68px">
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-form-item label="环境" prop="envCode">
+            <el-select class="search-select" v-model="queryParams.envCode" @keyup.enter.native="handleQuery"
+              @change="handleEnv" placeholder="环境编码" clearable style="width: 240px">
+              <el-option v-for="item in queryEnvs" :key="item.value" :label="item.label" :value="item.value" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="环境组" prop="groupCode">
+            <el-select class="search-select" v-model="queryParams.groupCode" @keyup.enter.native="handleQuery"
+              @change="handleGroup" placeholder="环境组" clearable style="width: 240px">
+              <el-option v-for="item in queryGroups" :key="item.value" :label="item.label" :value="item.value" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
 
-	.canvas {
-		height: 100vh;
-		flex: 1;
-	}
 
-	.action {
-		position: absolute;
-		bottom: 20px;
-		left: 20px;
-		display: flex;
-	}
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-form-item label="插件" prop="pluginCode">
+            <el-select class="search-select" v-model="queryParams.pluginCode" @change="handlePlugin"
+              @keyup.enter.native="handleQuery" placeholder="请选择插件" clearable style="width: 240px">
+              <el-option v-for="item in queryPlugins" :key="item.value" :label="item.label" :value="item.value" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="插件名称" prop="instanceName">
+            <el-input v-model="queryParams.instanceName" placeholder="请输入插件实例名称" clearable style="width: 240px"
+              @keyup.enter.native="handleQuery" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-form-item label="状态" prop="status">
+            <el-select class="search-select" v-model="queryParams.status" placeholder="状态" clearable style="width: 240px">
+              <el-option v-for="dict in status" :key="dict.value" :label="dict.label" :value="dict.value" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="创建时间">
+            <el-date-picker v-model="daterangeArray" style="width: 240px" value-format="YYYY-MM-DD" type="daterange"
+              range-separator="-" start-placeholder="开始日期" end-placeholder="结束日期"></el-date-picker>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <div>
+            <el-button type="primary" size="small" @click="handleQuery"><el-icon>
+                <Search />
+              </el-icon>搜索</el-button>
+            <el-button size="small" @click="resetQuery"><el-icon>
+                <RefreshRight />
+              </el-icon>重置</el-button>
+          </div>
+        </el-col>
+      </el-row>
+    </el-form>
+
+    <!--  option-->
+    <div class="option-wrap">
+      <el-button type="primary" plain size="default" @click="handleAdd"
+        v-hasPerms="['/system/plugin/instance/add']"><el-icon>
+          <Plus />
+        </el-icon>新增</el-button>
+
+
+      <el-button type="success" plain size="default" :disabled="single" @click="handleUpdate"
+        v-hasPerms="['/system/plugin/instance/edit']"><el-icon>
+          <EditPen />
+        </el-icon>修改</el-button>
+    </div>
+
+    <!--table  -->
+    <div class="table-wrap">
+      <el-table v-loading="loading" :data="dataList" @selection-change="handleSelectionChange">
+        <el-table-column type="selection" width="30" align="center" />
+        <el-table-column label="插件编码" align="center" key="pluginCode" prop="pluginCode" />
+        <el-table-column label="实例编码" align="center" key="instanceCode" prop="instanceCode" />
+        <el-table-column label="实例名称" align="center" key="instanceName" prop="instanceName" :show-overflow-tooltip="true"
+          width="100" />
+        <el-table-column label="状态" align="center" key="status" width="100">
+          <template v-slot="scope">
+            {{ showStatusFun(scope.row.status) }}
+          </template>
+        </el-table-column>
+        <el-table-column label="创建时间" align="center" prop="createdTime" width="180">
+          <template v-slot="scope">
+            <span>{{ parseTime(scope.row.createdTime) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" align="center" width="220">
+          <template v-slot="scope">
+            <div class="action-btn">
+              <el-button size="default" @click="handleUpdate(scope.row)"
+                v-hasPerms="['/system/plugin/instance/edit']">修改</el-button>
+
+              <el-button size="default" @click="handleDelete(scope.row)"
+                v-hasPerms="['/system/plugin/instance/changeStatus/**']">
+                {{ showStatusOperateFun(scope.row.status) }}
+              </el-button>
+
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
+    <div class="page-wrap">
+      <el-pagination v-show="total > 0" :total="total" background layout="prev, pager, next"
+        v-model:current-page="queryParams.pageNum" v-model:page-size="queryParams.pageSize" @current-change="getList" />
+    </div>
+
+
+    <!-- 添加或修改用户配置对话框 -->
+    <el-dialog :title="title" v-model="open" width="600px" append-to-body>
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="环境" prop="envCode">
+              <el-select class="search-select" v-model="form.envCode" @change="handleFormEnv"
+                @keyup.enter.native="handleQuery" placeholder="环境编码" clearable style="width: 240px">
+                <el-option v-for=" item  in  formEnvs " :key="item.value" :label="item.label" :value="item.value" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="环境组" prop="groupCode">
+              <el-select class="search-select" v-model="form.groupCode" @keyup.enter.native="handleQuery"
+                placeholder="环境组" clearable style="width: 240px">
+                <el-option v-for=" item  in  formGroups " :key="item.value" :label="item.label" :value="item.value" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="插件编码" prop="pluginCode">
+              <el-select class="search-select" v-model="form.pluginCode" @change="handleFormPlugin"
+                @keyup.enter.native="handleQuery" placeholder="插件" clearable style="width: 240px">
+                <el-option v-for=" item  in  formPlugins " :key="item.value" :label="item.label" :value="item.value" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="实例编码" prop="instanceCode">
+              <el-input v-model="form.instanceCode" placeholder="请输入实例编码" maxlength="30" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="实例名称" prop="instanceName">
+              <el-input v-model="form.instanceName" placeholder="请输入实例名称" maxlength="50" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row v-for="( item, index ) in  form.items ">
+          <el-col :span="12">
+            <el-form-item :label="item.label" :prop="`items.${index}.name`" :rules="item.rules">
+              <el-input :type="item.type" v-model="item.name" :key="item.key" :placeholder="item.placeholder" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="备注" prop="remarks">
+              <el-input v-model="form.remarks" type="textarea" placeholder="请输入备注" maxlength="30" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="状态">
+              <el-radio-group v-model="form.status">
+                <el-radio v-for=" dict  in  status " :key="dict.value" :label="dict.value">{{ dict.label }}</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitForm">确 定</el-button>
+        <el-button @click="cancel">取 消</el-button>
+      </div>
+    </el-dialog>
+  </div>
+</template>
+
+<style lang="scss" scoped>
+.main-wrap {
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  background: #fff;
+
+}
+
+.option-wrap {
+  margin-bottom: 8px;
+
+  .el-button {
+    // margin-right: 6px;
+  }
+}
+
+.table-wrap {
+  width: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+
+  .action-btn {
+    display: flex;
+  }
+}
+
+.page-wrap {
+  padding: 20px 0;
+
+  .el-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: end;
+  }
+
 }
 </style>
+<style>
+.el-form-item__label {
+  font-size: 14px;
+}
+
+.search-select .el-input {
+  --el-input-width: 240px;
+}
+</style>
+
+
+
