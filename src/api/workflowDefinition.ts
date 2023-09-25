@@ -5,6 +5,18 @@ import request from "@/utils/request"
 import { GATEWAY_BASE_URL } from '@/utils/env';
 
 
+// 列出所有的流水线
+export const list = (queryParams:any)=>{
+    return request({
+		url: GATEWAY_BASE_URL + '/starlink-service/workflow/definition/list',
+		method: 'GET',
+		params: queryParams
+	}).then((res)=>{
+        return res.data;
+    })
+}
+
+
 // 部署流程
 export const deploy = (data:string)=>{
     return request({
