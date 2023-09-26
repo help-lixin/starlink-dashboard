@@ -55,6 +55,10 @@ import CustomPropertiesPanel from './CustomPropertiesPanel.vue'
 import workflowXml from './xmlStr'
 import customTranslate from './customTranslate'
 
+import { useRouter, useRoute } from "vue-router";
+const router = useRouter();
+
+
 const bpmnModeler = ref()
 const canvasRef = ref()
 
@@ -480,7 +484,8 @@ async function saveAndRun(isRunning: boolean) {
 											message: '保存并运行流水线:"' + pipelineForm.value.name + '"成功',
 											type: 'success',
 										})
-										// TODO lixin 跳转到流水管理界面
+										//跳转到流水管理界面
+										router.push("/workflow/definition/index");
 									}
 								});
 						}

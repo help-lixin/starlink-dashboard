@@ -95,6 +95,14 @@ export const dynamicRoutes = [
         requiresAuth: true
     },
   },
+  {
+    path : '/workflow/definition/add',
+    name : 'workflow-definition-add',
+    component: ()=> import("../views/workflow/definition/add.vue"),
+    meta: {
+        requiresAuth: false
+    },
+  },
 ];
 
 const router = createRouter({

@@ -4,9 +4,9 @@
 // @ts-nocheck  
 import { Plus, Delete, Edit, EditPen, Search, RefreshRight, Sort, QuestionFilled } from '@element-plus/icons-vue'
 import { parseTime, status, addDateRange, showStatusFun, showStatusOperateFun } from "@/utils/common"
-import { getPluginMeta } from '@/api/pluginDefinition';
 import { list } from "@/api/workflowDefinition"
-
+import { useRouter, useRoute } from "vue-router";
+const router = useRouter();
 
 // 加载中
 const loading = ref(false)
@@ -72,6 +72,17 @@ const handleSelectionChange = function (selection) {
   multiple.value = !selection.length;
 }
 
+
+// 处理新增按钮
+const handleAdd = function () {
+  router.push("/workflow/definition/add");
+}
+
+
+const handleUpdate = function (row) {
+  console.log("=========================handleUpdate============================");
+}
+
 // 触发查询
 getList()
 </script>
@@ -127,13 +138,13 @@ getList()
     <!--  option-->
     <div class="option-wrap">
       <el-button type="primary" plain size="default" @click="handleAdd"
-        v-hasPerms="['/system/plugin/instance/add']"><el-icon>
+        v-hasPerms="['/workflow/definition/add']"><el-icon>
           <Plus />
         </el-icon>新增</el-button>
 
 
       <el-button type="success" plain size="default" :disabled="single" @click="handleUpdate"
-        v-hasPerms="['/system/plugin/instance/edit']"><el-icon>
+        v-hasPerms="['/workflow/definition/edit']"><el-icon>
           <EditPen />
         </el-icon>修改</el-button>
     </div>
