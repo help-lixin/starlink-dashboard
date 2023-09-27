@@ -67,7 +67,7 @@ const resetQuery = function () {
 
 // 多选框选中数据
 const handleSelectionChange = function (selection) {
-  ids.value = selection.map(item => item.instanceId);
+  ids.value = selection.map(item => item.id);
   single.value = selection.length != 1;
   multiple.value = !selection.length;
 }
@@ -75,12 +75,28 @@ const handleSelectionChange = function (selection) {
 
 // 处理新增按钮
 const handleAdd = function () {
-  router.push("/workflow/definition/add");
+  const state = { processDefinitionBody: undefined }
+  // 跳转到新增
+  router.push({
+    name: "workflow-definition-info",
+    state
+  });
 }
 
 
 const handleUpdate = function (row) {
-  console.log("=========================handleUpdate============================");
+  const processDefinitionBodyJson = row?.processDefinitionBody
+  if (processDefinitionBodyJson) {
+    const state = { processDefinitionBody: JSON.parse(processDefinitionBodyJson) }
+    // 跳转到修改页面
+    router.push({
+      name: "workflow-definition-info",
+      state
+    });
+  } else {
+    const id = ids.value
+    console.log("=======网络请求,获取流程定义信息=========");
+  }
 }
 
 // 触发查询
@@ -138,7 +154,7 @@ getList()
     <!--  option-->
     <div class="option-wrap">
       <el-button type="primary" plain size="default" @click="handleAdd"
-        v-hasPerms="['/workflow/definition/add']"><el-icon>
+        v-hasPerms="['/workflow/definition/info']"><el-icon>
           <Plus />
         </el-icon>新增</el-button>
 
@@ -171,7 +187,7 @@ getList()
           <template v-slot="scope">
             <div class="action-btn">
               <el-button size="default" @click="handleUpdate(scope.row)"
-                v-hasPerms="['/system/plugin/instance/edit']">修改</el-button>
+                v-hasPerms="['/workflow/definition/info']">修改</el-button>
 
               <el-button size="default" @click="handleDelete(scope.row)"
                 v-hasPerms="['/system/plugin/instance/changeStatus/**']">

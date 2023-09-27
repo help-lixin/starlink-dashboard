@@ -96,9 +96,9 @@ export const dynamicRoutes = [
     },
   },
   {
-    path : '/workflow/definition/add',
-    name : 'workflow-definition-add',
-    component: ()=> import("../views/workflow/definition/add.vue"),
+    path : '/workflow/definition/info',
+    name : 'workflow-definition-info',
+    component: ()=> import("../views/workflow/definition/info.vue"),
     meta: {
         requiresAuth: false
     },
