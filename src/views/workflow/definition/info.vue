@@ -33,6 +33,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck  
+
 // bpmn 相关依赖
 import 'bpmn-js/dist/assets/diagram-js.css'
 import 'bpmn-js/dist/assets/bpmn-font/css/bpmn.css'
@@ -55,9 +56,6 @@ import customTranslate from './customTranslate'
 
 import { useRouter, useRoute } from "vue-router";
 const router = useRouter();
-
-// 流程定义内容
-const processDefinitionJson = history?.state?.processDefinitionBody
 
 const bpmnModeler = ref()
 const canvasRef = ref()
@@ -94,7 +92,17 @@ function setDiagram(bpmn: any) {
 	// 将字符串转换成图显示出来
 	bpmnModeler.value.importXML(bpmn, err => {
 		if (err) {
-			console.error(err)
+			const processDefinitionJson = history?.state?.processDefinitionBody
+			const count = history?.state?.count
+			if (processDefinitionJson && count) {
+				history.state.count = history.state.count + 1;
+				if (history.state.count > 3) {
+					console.error(err)
+				} else {
+					router.go(0)
+				}
+				// window.location.reload();
+			}
 		} else {
 			bpmnModeler.value.on('commandStack.changed', function () {
 				getXml((_err, xml) => console.log(xml))
@@ -128,15 +136,12 @@ function init() {
 	// 先进行一次初始化
 	setDiagram(workflowXml)
 
+	// 流程定义内容
+	const processDefinitionJson = history?.state?.processDefinitionBody
+
 	// 把json转换成xml进行展示
 	if (processDefinitionJson) {
-		console.log("----------------------------json源文件------------------------------------")
-		console.log(processDefinitionJson)
-		console.log("----------------------------json源文件------------------------------------")
 		const processDefinitionXml = jsonToXml(processDefinitionJson)
-		console.log("============================xml文件====================================")
-		console.log(processDefinitionXml)
-		console.log("============================xml文件====================================")
 		setDiagram(processDefinitionXml)
 		return;
 	}
@@ -212,18 +217,6 @@ function xmlToJson(xmlString) {
 
 			const pluginCode = el.getAttribute('pluginCode')
 			if (pluginCode) obj.pluginCode = pluginCode;
-
-			// const properties = el.getElementsByTagName('camunda:property')
-			// let plugin = ''
-			// for (let j = 0; j < properties.length; j++) {
-			// 	const property = properties[j]
-			// 	const propertyName = property.getAttribute('name')
-			// 	const propertyValue = property.getAttribute('value')
-			// 	if (propertyName === 'plugin') {
-			// 		plugin = propertyValue
-			// 	}
-			// }
-			// if (plugin) obj.plugin = plugin
 		}
 
 		// 收集所有的属性和属性值,转换成json字符串.
@@ -519,10 +512,6 @@ async function saveAndRun(isRunning: boolean) {
 		}
 	})
 }
-
-
-
-
 </script>
 
 <style scoped lang="scss">

@@ -1,7 +1,7 @@
 
 <script setup lang="ts">
-// 流水线定义管理
 // @ts-nocheck  
+// 流水线定义管理
 import { Plus, Delete, Edit, EditPen, Search, RefreshRight, Sort, QuestionFilled } from '@element-plus/icons-vue'
 import { parseTime, status, addDateRange, showStatusFun, showStatusOperateFun } from "@/utils/common"
 import { list } from "@/api/workflowDefinition"
@@ -75,24 +75,26 @@ const handleSelectionChange = function (selection) {
 
 // 处理新增按钮
 const handleAdd = function () {
-  const state = { processDefinitionBody: undefined }
+  const state = { processDefinitionBody: undefined, count: 1 }
   // 跳转到新增
   router.push({
     name: "workflow-definition-info",
+    replace: true,
     state
-  });
+  })
 }
 
 
 const handleUpdate = function (row) {
   const processDefinitionBodyJson = row?.processDefinitionBody
   if (processDefinitionBodyJson) {
-    const state = { processDefinitionBody: JSON.parse(processDefinitionBodyJson) }
+    const state = { processDefinitionBody: JSON.parse(processDefinitionBodyJson), count: 1 }
     // 跳转到修改页面
     router.push({
       name: "workflow-definition-info",
+      replace: true,
       state
-    });
+    })
   } else {
     const id = ids.value
     console.log("=======网络请求,获取流程定义信息=========");
