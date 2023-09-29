@@ -92,17 +92,7 @@ function setDiagram(bpmn: any) {
 	// 将字符串转换成图显示出来
 	bpmnModeler.value.importXML(bpmn, err => {
 		if (err) {
-			const processDefinitionJson = history?.state?.processDefinitionBody
-			const count = history?.state?.count
-			if (processDefinitionJson && count) {
-				history.state.count = history.state.count + 1;
-				if (history.state.count > 3) {
-					console.error(err)
-				} else {
-					router.go(0)
-				}
-				// window.location.reload();
-			}
+			console.error(err)
 		} else {
 			bpmnModeler.value.on('commandStack.changed', function () {
 				getXml((_err, xml) => console.log(xml))
@@ -406,7 +396,13 @@ function jsonToXml(json) {
 	}
 
 	// 最终期望的xml
-	let xml = `<definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="${generateUniqueId()}" targetNamespace="http://camunda.org/schema/1.0/bpmn" xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL">
+	let xml = `<definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" 
+	xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" 
+	xmlns:camunda="http://camunda.org/schema/1.0/bpmn" 
+	xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" 
+	xmlns:di="http://www.omg.org/spec/DD/20100524/DI"  
+	targetNamespace="http://camunda.org/schema/1.0/bpmn" 
+	xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL">
   <process id="${json.id}" isExecutable="true" name="${json.name}">
     ${convertNodes(json.nodes)}
   </process>
@@ -502,6 +498,8 @@ async function saveAndRun(isRunning: boolean) {
 							message: '保存流水线:"' + pipelineForm.value.name + '"成功',
 							type: 'success',
 						})
+						//跳转到流水管理界面
+						router.push("/workflow/definition/index");
 					}
 					open.value = false
 				} else { // 失败提示

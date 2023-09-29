@@ -4,7 +4,7 @@
 // 流水线定义管理
 import { Plus, Delete, Edit, EditPen, Search, RefreshRight, Sort, QuestionFilled } from '@element-plus/icons-vue'
 import { parseTime, status, addDateRange, showStatusFun, showStatusOperateFun } from "@/utils/common"
-import { list } from "@/api/workflowDefinition"
+import { list, get } from "@/api/workflowDefinition"
 import { useRouter, useRoute } from "vue-router";
 const router = useRouter();
 
@@ -79,7 +79,6 @@ const handleAdd = function () {
   // 跳转到新增
   router.push({
     name: "workflow-definition-info",
-    replace: true,
     state
   })
 }
@@ -92,12 +91,23 @@ const handleUpdate = function (row) {
     // 跳转到修改页面
     router.push({
       name: "workflow-definition-info",
-      replace: true,
       state
     })
   } else {
-    const id = ids.value
-    console.log("=======网络请求,获取流程定义信息=========");
+    const val = ids.value
+    if (val instanceof Array && val.length > 0) {
+      const value = val[0]
+      get(value).then((res) => {
+        if (res?.code == 200 && res?.data?.processDefinitionBody) {
+          const state = { processDefinitionBody: JSON.parse(res.data.processDefinitionBody), count: 1 }
+          // 跳转到修改页面
+          router.push({
+            name: "workflow-definition-info",
+            state
+          })
+        }
+      });
+    }
   }
 }
 
@@ -160,9 +170,8 @@ getList()
           <Plus />
         </el-icon>新增</el-button>
 
-
       <el-button type="success" plain size="default" :disabled="single" @click="handleUpdate"
-        v-hasPerms="['/workflow/definition/edit']"><el-icon>
+        v-hasPerms="['/workflow/definition/info']"><el-icon>
           <EditPen />
         </el-icon>修改</el-button>
     </div>
@@ -172,7 +181,7 @@ getList()
       <el-table v-loading="loading" :data="dataList" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="30" align="center" />
         <el-table-column label="流水线名称" align="center" key="processDefinitionName" prop="processDefinitionName"
-          :show-overflow-tooltip="true" width="100" />
+          :show-overflow-tooltip="true" />
         <el-table-column label="流水线定义key" align="center" key="processDefinitionKey" prop="processDefinitionKey" />
         <el-table-column label="流水线版本" align="center" key="processDefinitionVersion" prop="processDefinitionVersion" />
         <el-table-column label="状态" align="center" key="status" width="100">

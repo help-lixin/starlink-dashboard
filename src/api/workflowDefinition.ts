@@ -5,7 +5,7 @@ import request from "@/utils/request"
 import { GATEWAY_BASE_URL } from '@/utils/env';
 
 
-// 列出所有的流水线
+// 列出所有的流水线定义
 export const list = (queryParams:any)=>{
     return request({
 		url: GATEWAY_BASE_URL + '/starlink-service/workflow/definition/list',
@@ -16,6 +16,15 @@ export const list = (queryParams:any)=>{
     })
 }
 
+// 根据流水线定义id获得流水线定义信息.
+export const get = (id:any)=>{
+    return request({
+		url: GATEWAY_BASE_URL + '/starlink-service/workflow/definition/info/' + id,
+		method: 'GET'
+	}).then((res)=>{
+        return res.data;
+    })
+}
 
 // 部署流程
 export const deploy = (data:string)=>{
