@@ -4,7 +4,7 @@
 // 流水线定义管理
 import { Plus, Delete, Edit, EditPen, Search, RefreshRight, Sort, QuestionFilled } from '@element-plus/icons-vue'
 import { parseTime, status, addDateRange, showStatusFun, showStatusOperateFun } from "@/utils/common"
-import { list, get } from "@/api/workflowDefinition"
+import { list, get, changeStatus } from "@/api/workflowDefinition"
 import { useRouter, useRoute } from "vue-router";
 const router = useRouter();
 
@@ -78,7 +78,7 @@ const handleAdd = function () {
   const state = { processDefinitionBody: undefined, count: 1 }
   // 跳转到新增
   router.push({
-    name: "workflow-definition-info",
+    name: "workflow-definition-operate",
     state
   })
 }
@@ -90,7 +90,7 @@ const handleUpdate = function (row) {
     const state = { processDefinitionBody: JSON.parse(processDefinitionBodyJson), count: 1 }
     // 跳转到修改页面
     router.push({
-      name: "workflow-definition-info",
+      name: "workflow-definition-operate",
       state
     })
   } else {
@@ -102,7 +102,7 @@ const handleUpdate = function (row) {
           const state = { processDefinitionBody: JSON.parse(res.data.processDefinitionBody), count: 1 }
           // 跳转到修改页面
           router.push({
-            name: "workflow-definition-info",
+            name: "workflow-definition-operate",
             state
           })
         }
@@ -110,6 +110,47 @@ const handleUpdate = function (row) {
     }
   }
 }
+
+const handleDelete = function (row) {
+  const id = row.id || ids.value;
+  const status = row.status
+  let msg = ""
+  if (status == 1) {
+    msg = '是否禁用编号为"' + id + '"的数据项？'
+  } else {
+    msg = '是否启用编号为"' + id + '"的数据项？'
+  }
+
+  ElMessageBox.confirm(
+    msg,
+    'Warning',
+    {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }
+  ).then(() => {
+    let tmpStatus;
+    if (status == 0) {
+      tmpStatus = 1
+    } else {
+      tmpStatus = 0
+    }
+
+    changeStatus(id, tmpStatus).then((res) => {
+      if (res.code == 200) {
+        // 重置查询表单,并进行查询
+        queryParams.pageNum = 1
+        getList()
+        ElMessage({
+          type: 'success',
+          message: '操作成功',
+        })
+      }
+    })
+  }).catch(() => { });
+}
+
 
 // 触发查询
 getList()
@@ -166,12 +207,12 @@ getList()
     <!--  option-->
     <div class="option-wrap">
       <el-button type="primary" plain size="default" @click="handleAdd"
-        v-hasPerms="['/workflow/definition/info']"><el-icon>
+        v-hasPerms="['/workflow/definition/operate']"><el-icon>
           <Plus />
         </el-icon>新增</el-button>
 
       <el-button type="success" plain size="default" :disabled="single" @click="handleUpdate"
-        v-hasPerms="['/workflow/definition/info']"><el-icon>
+        v-hasPerms="['/workflow/definition/operate']"><el-icon>
           <EditPen />
         </el-icon>修改</el-button>
     </div>
@@ -198,10 +239,10 @@ getList()
           <template v-slot="scope">
             <div class="action-btn">
               <el-button size="default" @click="handleUpdate(scope.row)"
-                v-hasPerms="['/workflow/definition/info']">修改</el-button>
+                v-hasPerms="['/workflow/definition/operate']">修改</el-button>
 
               <el-button size="default" @click="handleDelete(scope.row)"
-                v-hasPerms="['/system/plugin/instance/changeStatus/**']">
+                v-hasPerms="['/workflow/definition/changeStatus/**']">
                 {{ showStatusOperateFun(scope.row.status) }}
               </el-button>
 

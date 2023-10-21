@@ -53,3 +53,13 @@ export const startWorkFlowById = (data)=>{
         return res.data;
     })
 }
+
+// 修改状态
+export const changeStatus = (id:any,status:any)=>{
+    return request({
+		url: GATEWAY_BASE_URL + '/starlink-service/workflow/definition/changeStatus/' + id + "/"+status,
+		method: 'PUT'
+	}).then((res)=>{
+        return res.data;
+    })
+}
