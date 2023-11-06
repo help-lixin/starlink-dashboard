@@ -88,6 +88,14 @@ export const dynamicRoutes = [
     },
   },
   {
+    path : '/gitlab/group/index',
+    name : 'gitlab-group',
+    component: ()=> import("../views/gitlab/group/index.vue"),
+    meta: {
+        requiresAuth: true
+    },
+  },
+  {
     path : '/workflow/definition/index',
     name : 'workflow-definition',
     component: ()=> import("../views/workflow/definition/index.vue"),

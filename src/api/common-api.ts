@@ -56,3 +56,12 @@ export const instanceOptionSelect = (groupCode:string)=>{
     })
 }
 
+//根据插件编码查询实例信息
+export const queryInstanceInfoByPluginCode = (pluginCode:string)=>{
+    return request({
+      url: GATEWAY_BASE_URL + '/system-service/system/plugin/instance/optionSelects/' + pluginCode,
+      method: 'get',
+    }).then((res)=>{
+        return res?.data;
+    });
+  }
