@@ -1,0 +1,14 @@
+{
+    "version":"0.2.0",
+    "configurations":[{
+        "type" :"chrome",
+        "request": "launch",
+        "name" : "vuejs: chrome",
+        "url": "http://localhost:7002",
+        "webRoot":"s(workspaceFolder]/src",
+        "breakOnLoad": true,
+        "sourceMapPathoverrides":{
+            "webpack:///src/*": "$(webRoot}/*"
+        }
+    }]
+}
