@@ -473,7 +473,6 @@
                 >{{dict.label}}</el-radio>
               </el-radio-group>
             </el-form-item>
-            {{ form.status   }}
           </el-col>
         </el-row>
         <el-row>
