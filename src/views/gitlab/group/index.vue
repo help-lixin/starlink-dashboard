@@ -1,7 +1,7 @@
 <script setup lang="ts">
   // @ts-nocheck  
   import { Plus ,Delete, Edit, EditPen, Search , RefreshRight , Sort , QuestionFilled} from '@element-plus/icons-vue'
-  import { parseTime , statusDicts , sexDicts , addDateRange , addDateRangeRuoyi } from "@/utils/common"
+  import { parseTime , status , sexDicts , addDateRange , addDateRangeRuoyi } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { pageList , addGroup , updateGroup , delGroup , queryGroupInfoById, changeGroupStatus} from "@/api/gitlabs"
 
@@ -305,7 +305,7 @@
               clearable
               style="width: 240px"
             >
-            <el-option v-for="dict in statusDicts"
+            <el-option v-for="dict in status"
               :key="dict.value"
               :label="dict.label"
               :value="dict.value"/>
@@ -366,8 +366,8 @@
             <template v-slot="scope">
               <el-switch
                 v-model="scope.row.status"
-                active-value="0"
-                inactive-value="1"
+                :active-value="0"
+                :inactive-value="1"
                 @change="handleStatusChange(scope.row)"
               ></el-switch>
             </template>
@@ -467,12 +467,13 @@
             <el-form-item label="状态">
               <el-radio-group v-model="form.status">
                 <el-radio
-                  v-for="dict in statusDicts"
+                  v-for="dict in status"
                   :key="dict.value"
                   :label="dict.value"
                 >{{dict.label}}</el-radio>
               </el-radio-group>
             </el-form-item>
+            {{ form.status   }}
           </el-col>
         </el-row>
         <el-row>
