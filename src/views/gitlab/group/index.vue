@@ -3,8 +3,9 @@
   import { Plus ,Delete, Edit, EditPen, Search , RefreshRight , Sort , QuestionFilled} from '@element-plus/icons-vue'
   import { parseTime , status , sexDicts , addDateRange , addDateRangeRuoyi } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
+  import { dayjs } from "@/utils/common-dayjs"
   import { pageList , addGroup , updateGroup , delGroup , queryGroupInfoById, changeGroupStatus} from "@/api/gitlabs"
-
+ 
   const queryForm = ref(null);
   // 日期范围
   const daterangeArray = ref('')
@@ -374,7 +375,7 @@
           </el-table-column>
           <el-table-column label="创建时间" align="center" prop="createdTime"  width="180">
             <template v-slot="scope">
-              <span>{{ parseTime(scope.row.createTime) }}</span>
+              <span>{{ dayjs(scope.row.createdTime).format("YYYY-MM-DD HH:mm:ss")   }}</span>
             </template>
           </el-table-column>
           <el-table-column
