@@ -132,6 +132,17 @@ export const sexDicts = [
   }
 ]
 
+export const enable = [
+  {
+    value: 1,
+    label: '是',
+  },
+  {
+    value: 0,
+    label: '否',
+  }
+];
+
 export const status = [
   {
     value: 1,

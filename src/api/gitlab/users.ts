@@ -10,12 +10,6 @@ type Response<T = string> = {
     data: T
 }
 
-type Profile = Response<{
-    postGroup: string,
-    userName: string,
-    roleGroup: string,
-    avatar: string
-}>;
 
 type RefreshTokenResult = Response<{
     accessToken: string,
@@ -26,10 +20,6 @@ type RefreshTokenResult = Response<{
 }>
 
 
-type LoginRequest = {
-    username: string
-    password: string
-}
 
 export type ResponseResult = {
     code: number
@@ -100,10 +90,10 @@ export const refreshToken = () => {
 }
 
 // 查询组列表
-export function pageList(query:any) {
+export function userList(query:any) {
     return request({
-      url: GATEWAY_BASE_URL + '/starlink-service/gitlab/group/list',
-      method: 'post',
+      url: GATEWAY_BASE_URL + '/starlink-service/gitlab/user/list',
+      method: 'get',
       data: query
     }).then((res)=>{
         return res?.data;
@@ -144,7 +134,7 @@ return request({
     });
 }
 
-// 根据组名查询组信息
+// 根据id查询组信息
 export function queryGroupInfoById(id:string) {
 return request({
         url: GATEWAY_BASE_URL + '/starlink-service/gitlab/group/info/' + id,

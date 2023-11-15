@@ -1,10 +1,12 @@
 <script setup lang="ts">
   // @ts-nocheck  
   import { Plus ,Delete, Edit, EditPen, Search , RefreshRight , Sort , QuestionFilled} from '@element-plus/icons-vue'
-  import { showStatusOperateFun , status , showStatusFun , addDateRange , addDateRangeRuoyi } from "@/utils/common"
+  import { showStatusOperateFun , status , showStatusFun , addDateRange , addDateRangeRuoyi , enable } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
-  import { groupList as groupPageList , addGroup , updateGroup , queryGroupInfoById, changeGroupStatus, groupList} from "@/api/gitlab/groups"
+  import { pageList , addProject , queryProjectInfoById , delProject, changeProjectStatus} from "@/api/gitlab/project"
+  import { groupList } from "@/api/gitlab/groups"
+  import { userList} from "@/api/gitlab/users"
  
   const queryForm = ref(null);
   // 日期范围
@@ -17,14 +19,28 @@
     beginTime: undefined,
     endTime: undefined,
     status: undefined,
+    instanceCode:'gitlab-instance-1',
+    envCode:'common',
+    groupCode:'common-group',
+    projectName: undefined,
+    path: undefined,
+    visibility: undefined
+  })
+
+    //查询列表信息
+    const groupParams = reactive({
+    pageNum: 1,
+    pageSize: 10,
+    beginTime: undefined,
+    endTime: undefined,
+    status: undefined,
     envRequest:{instanceCode:'gitlab-instance-1',envCode:'common',groupCode:'common-group'},
     groupName: undefined
   })
 
-  // 根据组名查询组信息
-  const queryGroupParams = reactive({
-    instanceCode:'gitlab-instance-1',envCode:'common',groupCode:'common-group',
-    groupName: undefined
+  // 根据项目名查询项目信息
+  const queryProjectParams = reactive({
+    instanceCode:'gitlab-instance-1',envCode:'common',groupCode:'common-group'
   })
 
   // 权限列表
@@ -37,7 +53,7 @@
   // 日期范围
   const dateRange = ref([])
 
-  // 选中数组
+  // 选中数项目
   const ids = ref([])
   // 非单个禁用
   const single = ref(true)
@@ -45,35 +61,31 @@
   const multiple = ref(true)
 
   const total= ref(0)
-  const groupPageList = reactive([])
+  const projectList = reactive([])
+  const groups = reactive([])
 
   // 表单
   const open = ref(false);
   const formRef = ref<FormInstance>();
-  const form = reactive({envRequest:{instanceCode:'gitlab-instance-1',envCode:'common',groupCode:'common-group'}})
+  const form = reactive({envCode:'common',groupCode:'common-group',instanceCode:'gitlab-instance-1'})
   const title = ref("")
   const pluginInstance = reactive([]);
+  const users = reactive([]);
   const pluginCode = "gitlab"
 
   // 表单规则
   const rules = reactive<FormRules>({
         groupName: [
-          { required: true, message: "组名称不能为空", trigger: "blur" },
-          { min: 2, max: 20, message: '组名称长度必须介于 2 和 20 之间', trigger: 'blur' }
-        ],
-        visibility: [
-          { required: true, message: "权限不能为空", trigger: "blur" }
-        ],
-        path: [
-          { required: true, message: "路径不能为空", trigger: "blur" }
+          { required: true, message: "项目名称不能为空", trigger: "blur" },
+          { min: 2, max: 20, message: '项目名称长度必须介于 2 和 20 之间', trigger: 'blur' }
         ]
     })
 
   // 重置表单
   const reset = ()=> {
       Object.assign(form,{
-        groupId: undefined,
-        groupName: undefined,
+        id: undefined,
+        projectName: undefined,
         visibility: undefined,
         path: undefined,
         remark: undefined,
@@ -86,15 +98,15 @@
   const getList = ()=>{
 
     loading.value = true;
-    groupList(addDateRange(queryParams, dateRange.value))
+    pageList(addDateRange(queryParams, dateRange.value))
     .then(response => {
           loading.value = false
           if(response?.data?.records.length > 0){
-            groupPageList.splice(0,groupPageList.length);
-            Object.assign(groupPageList, response?.data?.records)
+            projectList.splice(0,projectList.length);
+            Object.assign(projectList, response?.data?.records)
             total.value = response?.data?.total
           }else{
-            groupPageList.splice(0,groupPageList.length);
+            projectList.splice(0,projectList.length);
             total.value = 0;
           }
         }
@@ -119,8 +131,9 @@
     queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
       if(res.code == 200){
         open.value = true;
-        title.value = "添加组";
+        title.value = "添加项目";
         Object.assign(pluginInstance,res?.data)
+        console.log(pluginInstance)
       }
     });
   }
@@ -128,20 +141,19 @@
   // 处理更新按钮
   const handleUpdate = function(row){
     reset();
-    queryGroupParams.groupName = row.gitlabGroupName
+    queryProjectParams.projectName = row.gitlabProjectName
     queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
       if(res.code == 200){
         Object.assign(pluginInstance,res?.data)
       }
     });
-    queryParams.groupName = row.groupName
-    queryGroupInfoById(row.id).then(response => {
+    queryParams.projectName = row.gitlabProjectName
+    queryProjectInfoById(row.id,queryProjectParams).then(response => {
       if(response?.code == 200){
         Object.assign(form,response?.data)
-        form.groupName = response?.data.gitlabGroupName
-        form.groupId = response?.data.id
+        console.log(form)
         open.value = true;
-        title.value = "修改组";
+        title.value = "修改项目";
       }
     });
   }
@@ -164,8 +176,9 @@
             throw err;
         });
 
-    if (form.groupId != undefined) {
-      updateGroup(form).then(response => {
+    if (form.id != undefined) {
+      addProject(form).then(response => {
+        console.log(response)
           if(response?.code == 200){
             ElMessage({
                   showClose: true,
@@ -174,10 +187,17 @@
             });
             open.value = false;
             getList();
+          }else{
+            ElMessage({
+                  showClose: true,
+                  message: response?.msg,
+                  type: 'warning',
+            });
           }
+          
         });
       } else {
-        addGroup(form).then(response => {
+        addProject(form).then(response => {
           if(response?.code){
             ElMessage({
                   showClose: true,
@@ -192,13 +212,13 @@
   }
 
   const handleStatusChange = (row)=>{
-    const groupId = row.id || ids.value;
+    const projectId = row.id || ids.value;
     const status = row.status
     let msg = ""
     if(status == 1){
-      msg = '是否禁用编号为"' + groupId + '"的数据项？'
+      msg = '是否禁用编号为"' + projectId + '"的数据项？'
     }else{
-      msg = '是否启用编号为"' + groupId + '"的数据项？'
+      msg = '是否启用编号为"' + projectId + '"的数据项？'
     }
 
     ElMessageBox.confirm(
@@ -216,8 +236,7 @@
         }else{
           tmpStatus = 0
         }
-        console.log(row)
-        changeGroupStatus(groupId,tmpStatus).then((res)=>{
+        changeProjectStatus(projectId,tmpStatus).then((res)=>{
             if(res.code == 200){
                 // 重置查询表单,并进行查询
                 queryParams.pageNum=1
@@ -238,6 +257,19 @@
     reset();
   }
 
+  userList(queryParams).then((res)=>{
+      if(res.code == 200){
+        Object.assign(users,res?.data?.records)
+        console.log(users)
+      }
+  });
+
+  groupList(addDateRange(groupParams, dateRange.value)).then((res)=>{
+      if(res.code == 200){
+        Object.assign(groups,res?.data?.records)
+      }
+  });
+  
   // 触发查询
   getList();
   queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
@@ -253,10 +285,10 @@
     <el-form class="form-wrap" :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
       <el-row :gutter="20">
         <el-col :span="8">
-          <el-form-item label="组名称" prop="groupName">
+          <el-form-item label="项目名称" prop="projectName">
             <el-input
-              v-model="queryParams.groupName"
-              placeholder="请输入组名称"
+              v-model="queryParams.projectName"
+              placeholder="请输入项目名称"
               clearable
               style="width: 240px"
               @keyup.enter.native="handleQuery"
@@ -305,7 +337,7 @@
             <el-select
             class="search-select"
               v-model="queryParams.status"
-              placeholder="组状态"
+              placeholder="项目状态"
               clearable
               style="width: 240px"
             >
@@ -346,15 +378,18 @@
         type="primary"
         plain
         size="default"
-        @click="handleAdd" v-hasPerms="['/gitlab/group/add']" ><el-icon><Plus /></el-icon>新增</el-button>
+        @click="handleAdd" v-hasPerms="['/gitlab/project/add']" ><el-icon><Plus /></el-icon>新增</el-button>
     </div>
 
     <!--table  -->
     <div class="table-wrap">
-      <el-table v-loading="loading" :data="groupPageList" @selection-change="handleSelectionChange">
+      <el-table v-loading="loading" :data="projectList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="30" align="center" />
-          <el-table-column label="组编号" align="center" key="id" prop="id"/>
-          <el-table-column label="组名称" align="center" key="gitlabGroupName" prop="gitlabGroupName"  :show-overflow-tooltip="true"  width="100" />
+          <el-table-column label="项目编号" align="center" key="id" prop="id"/>
+          <el-table-column label="项目名称" align="center" key="projectName" prop="projectName"  :show-overflow-tooltip="true"  width="100" />
+          <el-table-column label="路径" align="center" key="path" prop="path" :show-overflow-tooltip="true"  width="100" />
+          <el-table-column label="webUrl" align="center" key="webUrl" prop="webUrl" :show-overflow-tooltip="true"  width="100" />
+          <el-table-column label="sshUrl" align="center" key="sshUrl" prop="sshUrl" :show-overflow-tooltip="true"  width="100" />
           <el-table-column label="备注" align="center" key="remark" prop="remark" :show-overflow-tooltip="true"  width="100" />
           <el-table-column label="状态" align="center" key="status"  width="100">
             <template v-slot="scope">
@@ -376,12 +411,12 @@
               <el-button
                 size="default"
                 @click="handleUpdate(scope.row)"
-                v-hasPerms="['/gitlab/group/add']"
+                v-hasPerms="['/gitlab/project/add']"
               >修改</el-button>
               <el-button
                 size="default"
                 @click="handleStatusChange(scope.row)"
-                v-hasPerms="['/gitlab/group/changeStatus/**']"
+                v-hasPerms="['/gitlab/project/changeStatus/**']"
               >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
              </div>
             </template>
@@ -401,18 +436,18 @@
     </div>
 
 
-    <!-- 添加或修改组配置对话框 -->
+    <!-- 添加或修改项目配置对话框 -->
     <el-dialog :title="title" v-model="open" width="600px" append-to-body>
       <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
         <el-row>
           <el-col :span="12">
-            <el-form-item label="组编号" prop="groupId" :readonly="true">
-              <el-input v-model="form.groupId" placeholder="组编号" maxlength="30" :disabled="true"/>
+            <el-form-item label="项目编号" prop="id" :readonly="true">
+              <el-input v-model="form.id" placeholder="项目编号" maxlength="30" :disabled="true"/>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="组名称" prop="groupName">
-              <el-input v-model="form.groupName" placeholder="请输入组名称" maxlength="30" />
+            <el-form-item label="项目名称" prop="projectName">
+              <el-input v-model="form.projectName" placeholder="请输入项目名称" maxlength="30" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -431,32 +466,39 @@
             </el-select>
             </el-form-item>
           </el-col> 
+        </el-row>
+        <el-row>
           <el-col :span="12">
-            <el-form-item label="路径" prop="path">
-              <el-input v-model="form.path" placeholder="请输路径" maxlength="30" />
+            <el-form-item label="路径名称" prop="path">
+              <el-input v-model="form.path" placeholder="请输入路径名称" maxlength="30" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="备注" prop="remark">
+              <el-input v-model="form.remark" placeholder="请输入备注信息" maxlength="30" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
-          <el-col :span="12">
+          <el-col :span="8">
             <el-form-item label="插件实例" prop="instanceCode">
               <el-select
+              class="search-select"
                 v-model="form.instanceCode"
+                @change="handlePlugin"
                 @keyup.enter.native="handleQuery"
-                placeholder="请选择插件实例"
+                placeholder="请选择实例"
                 clearable
                 style="width: 240px"
               >
               <el-option v-for="item in pluginInstance"
-              :key="item.pluginCode"
-              :label="item.instanceName"
-              :value="item.instanceCode"/>
+                :key="item.pluginCode"
+                :label="item.instanceName"
+                :value="item.instanceCode"/>
               </el-select>
             </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="12">
+          </el-col> 
+          <el-col :span="20">
             <el-form-item label="状态">
               <el-radio-group v-model="form.status">
                 <el-radio
@@ -467,11 +509,47 @@
               </el-radio-group>
             </el-form-item>
           </el-col>
+          <el-col :span="12">
+            <el-form-item label="readme初始化仓库">
+              <el-radio-group v-model="form.initiallizeWithReadme">
+                <el-radio
+                  v-for="dict in enable"
+                  :key="dict.value"
+                  :label="dict.value"
+                >{{dict.label}}</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
         </el-row>
         <el-row>
-          <el-col :span="24">
-            <el-form-item label="备注">
-              <el-input v-model="form.remark" type="textarea" placeholder="请输入内容"></el-input>
+          <el-col :span="12">
+            <el-form-item label="用户" prop="namespaceByUser">
+              <el-select
+              v-model="form.namespaceByUser"
+              placeholder="请选择用户"
+              clearable
+              style="width: 240px"
+            >
+            <el-option v-for="user in users"
+              :key="user.userName"
+              :label="user.userName"
+              :value="user.gitlabUserId"/>
+            </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="组" prop="namespaceByGroup">
+              <el-select
+              v-model="form.namespaceByGroup"
+              placeholder="请选择组"
+              clearable
+              style="width: 240px"
+            >
+            <el-option v-for="group in groups"
+              :key="group.gitlabGroupName"
+              :label="group.gitlabGroupName"
+              :value="group.gitlabGroupId"/>
+            </el-select>
             </el-form-item>
           </el-col>
         </el-row>
