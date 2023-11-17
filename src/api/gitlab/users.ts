@@ -102,9 +102,9 @@ export function userList(query:any) {
 
 
 // 新增组
-export function addGroup(data:any) {
+export function addUser(data:any) {
 return request({
-        url: GATEWAY_BASE_URL + '/starlink-service/gitlab/group/add',
+        url: GATEWAY_BASE_URL + '/starlink-service/gitlab/user/add',
         method: 'post',
         data: data
     }).then((res)=>{
@@ -113,9 +113,9 @@ return request({
 }
   
 // 修改组
-export function updateGroup(data:any) {
+export function updateUser(data:any) {
 return request({
-        url: GATEWAY_BASE_URL + '/starlink-service/gitlab/group/add',
+        url: GATEWAY_BASE_URL + '/starlink-service/gitlab/user/add',
         method: 'post',
         data: data
     }).then((res)=>{
@@ -124,20 +124,20 @@ return request({
 }
   
   // 删除组
-export function delGroup(groupInfo:any) {
+export function delUser(userInfo:any) {
 return request({
-        url: GATEWAY_BASE_URL + '/starlink-service/gitlab/group/del',
+        url: GATEWAY_BASE_URL + '/starlink-service/gitlab/user/del',
         method: 'delete',
-        data: groupInfo
+        data: userInfo
     }).then((res)=>{
         return res?.data;
     });
 }
 
 // 根据id查询组信息
-export function queryGroupInfoById(id:string) {
+export function queryUserInfoById(id:string) {
 return request({
-        url: GATEWAY_BASE_URL + '/starlink-service/gitlab/group/info/' + id,
+        url: GATEWAY_BASE_URL + '/starlink-service/gitlab/user/info/' + id,
         method: 'get'
     }).then((res)=>{
         return res?.data;
@@ -145,9 +145,9 @@ return request({
 }
 
 // 组状态修改
-export function changeGroupStatus(groupId:any, status:any) {
+export function changeUserStatus(userId:any, status:any) {
     return request({
-        url: GATEWAY_BASE_URL + '/starlink-service/gitlab/group/changeStatus/'+groupId+"/"+status,
+        url: GATEWAY_BASE_URL + '/starlink-service/gitlab/user/changeStatus/'+userId+"/"+status,
         method: 'put'
     }).then((res)=>{
         return res?.data;

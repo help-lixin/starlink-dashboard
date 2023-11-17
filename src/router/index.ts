@@ -104,6 +104,14 @@ export const dynamicRoutes = [
     },
   },
   {
+    path : '/gitlab/user/index',
+    name : 'gitlab-user',
+    component: ()=> import("../views/gitlab/user/index.vue"),
+    meta: {
+        requiresAuth: true
+    },
+  },
+  {
     path : '/workflow/definition/index',
     name : 'workflow-definition',
     component: ()=> import("../views/workflow/definition/index.vue"),

@@ -17,13 +17,12 @@
     beginTime: undefined,
     endTime: undefined,
     status: undefined,
-    envRequest:{instanceCode:'gitlab-instance-1',envCode:'common',groupCode:'common-group'},
+    instanceCode:undefined,
     groupName: undefined
   })
 
   // 根据组名查询组信息
   const queryGroupParams = reactive({
-    instanceCode:'gitlab-instance-1',envCode:'common',groupCode:'common-group',
     groupName: undefined
   })
 
@@ -50,7 +49,7 @@
   // 表单
   const open = ref(false);
   const formRef = ref<FormInstance>();
-  const form = reactive({envRequest:{instanceCode:'gitlab-instance-1',envCode:'common',groupCode:'common-group'}})
+  const form = reactive({})
   const title = ref("")
   const pluginInstance = reactive([]);
   const pluginCode = "gitlab"
@@ -172,8 +171,6 @@
                   message: '修改成功',
                   type: 'success',
             });
-            open.value = false;
-            getList();
           }
         });
       } else {
@@ -189,6 +186,9 @@
           }
         });
       }
+
+      open.value = false;
+      getList();
   }
 
   const handleStatusChange = (row)=>{
@@ -237,6 +237,7 @@
     open.value = false;
     reset();
   }
+
 
   // 触发查询
   getList();
@@ -287,7 +288,6 @@
             <el-select
             class="search-select"
               v-model="queryParams.instanceCode"
-              @change="handlePlugin"
               @keyup.enter.native="handleQuery"
               placeholder="请选择实例"
               clearable
@@ -441,6 +441,7 @@
           <el-col :span="12">
             <el-form-item label="插件实例" prop="instanceCode">
               <el-select
+                class="search-select2" 
                 v-model="form.instanceCode"
                 @keyup.enter.native="handleQuery"
                 placeholder="请选择插件实例"
