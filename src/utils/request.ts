@@ -23,7 +23,7 @@ request.interceptors.response.use((respose)=>{
     return respose;
 }, async (err)=>{
     // 针对401进行独立处理
-    if(err.response.status == 401) {
+    if(err?.response?.status == 401) {
         const tokenStore = useTokenStore();
         if(Object.keys(tokenStore?.token).length == 0){
             ElMessage.error("刷新token失败,您将重新登录");

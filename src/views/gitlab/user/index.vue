@@ -4,7 +4,7 @@
   import { showStatusOperateFun , status , showStatusFun , addDateRange , addDateRangeRuoyi , enable } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
-  import { userList , addUser , queryUserInfoById , changeUserStatus} from "@/api/gitlab/users"
+  import { userList , addUser , updateUser , queryUserInfoById , changeUserStatus} from "@/api/gitlab/users"
   import { groupList } from "@/api/gitlab/groups"
  
   const queryForm = ref(null);
@@ -130,17 +130,14 @@
   // 处理更新按钮
   const handleUpdate = function(row){
     reset();
-    queryUserParams.userName = row.gitlabUserName
     queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
       if(res.code == 200){
         Object.assign(pluginInstance,res?.data)
       }
     });
-    queryParams.userName = row.gitlabUserName
     queryUserInfoById(row.id,queryUserParams).then(response => {
       if(response?.code == 200){
         Object.assign(form,response?.data)
-        form.namespaceByGroup = form.gitlabGroupId
         open.value = true;
         title.value = "修改用户";
       }
@@ -166,7 +163,7 @@
         });
 
     if (form.id != undefined) {
-      addUser(form).then(response => {
+        updateUser(form).then(response => {
         console.log(response)
           if(response?.code == 200){
             ElMessage({
@@ -360,7 +357,7 @@
               <el-button
                 size="default"
                 @click="handleUpdate(scope.row)"
-                v-hasPerms="['/gitlab/user/add']"
+                v-hasPerms="['/gitlab/user/edit']"
               >修改</el-button>
               <el-button
                 size="default"
@@ -400,6 +397,11 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
+            <el-form-item label="用户昵称" prop="nickName">
+              <el-input v-model="form.nickName" placeholder="请输入用户昵称" maxlength="30" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
             <el-form-item label="邮件" prop="email">
               <el-input v-model="form.email" placeholder="请输入邮件名称" maxlength="30" />
             </el-form-item>
@@ -425,12 +427,7 @@
         <el-row>
           <el-col :span="12">
             <el-form-item label="密码" prop="pwd">
-              <el-input v-model="form.pwd" placeholder="请输入密码" maxlength="30" type="password" show-password/>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="校验密码" prop="repeatPwd">
-              <el-input v-model="form.repeatPwd" placeholder="请重复输入密码" maxlength="30" type="password" show-password />
+              <el-input v-model="form.pwd" placeholder="请输入密码" maxlength="30" minlength="6" type="password" show-password/>
             </el-form-item>
           </el-col>
         </el-row>

@@ -91,10 +91,11 @@ export const refreshToken = () => {
 
 // 查询组列表
 export function userList(query:any) {
+    console.log(query)
     return request({
       url: GATEWAY_BASE_URL + '/starlink-service/gitlab/user/list',
       method: 'get',
-      data: query
+      params: query
     }).then((res)=>{
         return res?.data;
     });
@@ -115,8 +116,8 @@ return request({
 // 修改组
 export function updateUser(data:any) {
 return request({
-        url: GATEWAY_BASE_URL + '/starlink-service/gitlab/user/add',
-        method: 'post',
+        url: GATEWAY_BASE_URL + '/starlink-service/gitlab/user/edit',
+        method: 'put',
         data: data
     }).then((res)=>{
         return res?.data;
