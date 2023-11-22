@@ -4,7 +4,7 @@
   import { showStatusOperateFun , status , showStatusFun , addDateRange , addDateRangeRuoyi , enable } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
-  import { userList , addUser , updateUser , queryUserInfoById , changeUserStatus} from "@/api/gitlab/users"
+  import { userList , addUser , updateUser , queryUserInfoById , changeUserStatus} from "@/api/gitlab/members"
   import { groupList } from "@/api/gitlab/groups"
  
   const queryForm = ref(null);

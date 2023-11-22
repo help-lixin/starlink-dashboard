@@ -1,10 +1,10 @@
 <script setup lang="ts">
   // @ts-nocheck  
   import { Plus ,Delete, Edit, EditPen, Search , RefreshRight , Sort , QuestionFilled} from '@element-plus/icons-vue'
-  import { showStatusOperateFun , status , showStatusFun , addDateRange , addDateRangeRuoyi , enable } from "@/utils/common"
+  import { showStatusOperateFun , status , showStatusFun , addDateRange , enable } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
-  import { pageList , addProject , queryProjectInfoById , delProject, changeProjectStatus} from "@/api/gitlab/projects"
+  import { pageList , addProject , queryProjectInfoById , changeProjectStatus} from "@/api/gitlab/projects"
   import { groupList } from "@/api/gitlab/groups"
   import { userList} from "@/api/gitlab/users"
  
