@@ -23,6 +23,9 @@ import { fromPairs } from 'lodash';
   const total= ref(0)
   const dataList = reactive([])
 
+  // TODO lixin
+  const test =  ref("<el-input v-model='queryParams.instanceName' placeholder='请输入插件实例名称' clearable style='width: 240px' @keyup.enter.native='handleQuery' /> ");
+
 
   // env
   const queryEnvs = ref()
@@ -390,6 +393,8 @@ const getList = ()=>{
       queryPlugins.value = res?.data;
     }
   })
+
+
 </script>
 
 <template>
@@ -457,13 +462,7 @@ const getList = ()=>{
         </el-col> 
         <el-col :span="8">
           <el-form-item label="插件名称" prop="instanceName">
-            <el-input
-              v-model="queryParams.instanceName"
-              placeholder="请输入插件实例名称"
-              clearable
-              style="width: 240px"
-              @keyup.enter.native="handleQuery"
-            />
+            <div v-html="test"></div>
           </el-form-item>
         </el-col> 
       </el-row>

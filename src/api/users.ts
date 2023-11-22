@@ -1,6 +1,6 @@
 import {useTokenStore} from "@/stores/token";
 import request from "@/utils/request";
-import {GATEWAY_BASE_URL} from "@/utils/env"
+import {GATEWAY_BASE_URL,SYSTEM_SERVICE} from "@/utils/env"
 import { parseStrEmpty } from "@/utils/common";
 
 
@@ -103,7 +103,7 @@ export const authorize = function (url: string) {
 // 获取个人信息
 export const getProfile = () => {
     return request<Profile>({
-        url: GATEWAY_BASE_URL + '/system-service/system/user/getProfile'
+        url: SYSTEM_SERVICE + '/system/user/getProfile'
     }).then((res) => {
         return res.data;
     });
