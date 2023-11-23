@@ -1,11 +1,13 @@
 <script setup lang="ts">
   // @ts-nocheck  
-  import { Plus ,Delete, Edit, EditPen, Search , RefreshRight , Sort , QuestionFilled} from '@element-plus/icons-vue'
-  import { showStatusOperateFun , status , showStatusFun , addDateRange , addDateRangeRuoyi , enable } from "@/utils/common"
+  import { Plus ,Delete, Edit, Search , RefreshRight , Sort , QuestionFilled} from '@element-plus/icons-vue'
+  import { showStatusOperateFun , status , showStatusFun , addDateRange } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
-  import { userList , addUser , updateUser , queryUserInfoById , changeUserStatus} from "@/api/gitlab/members"
+  import { memberList , addGroupMember , updateGroupMember , queryGroupMemberInfoById , changeGroupStatus} from "@/api/gitlab/members"
+  import { userList} from "@/api/gitlab/users"
   import { groupList } from "@/api/gitlab/groups"
+  
  
   const queryForm = ref(null);
   // 日期范围
@@ -18,21 +20,26 @@
     beginTime: undefined,
     endTime: undefined,
     status: undefined,
-    userName: undefined
+    userName: undefined,
+    groupId: undefined
   })
 
     //查询列表信息
-    const groupParams = reactive({
+  const groupParams = reactive({
     pageNum: 1,
     pageSize: 10,
     beginTime: undefined,
     endTime: undefined,
     status: undefined,
-    groupName: undefined
+    groupName: undefined,
+    instanceCode: undefined
   })
 
-  // 根据用户名查询用户信息
+  // 根据成员名查询成员信息
   const queryUserParams = reactive({
+    pageNum: 1,
+    pageSize: 10,
+    instanceCode: undefined
   })
 
   const loading = ref(false)
@@ -41,8 +48,10 @@
   const showSearch = ref(true)
   // 日期范围
   const dateRange = ref([])
+  // 成员列表
+  const users = ref([]);
 
-  // 选中数用户
+  // 选中数成员
   const ids = ref([])
   // 非单个禁用
   const single = ref(true)
@@ -50,8 +59,8 @@
   const multiple = ref(true)
 
   const total= ref(0)
-  const userRow = reactive([])
-  const groups = reactive([])
+  // 列表信息
+  const memberRow = reactive([])
 
   // 表单
   const open = ref(false);
@@ -59,16 +68,16 @@
   const form = reactive({})
   const title = ref("")
   const pluginInstance = reactive([]);
-  const users = reactive([]);
+  const groups = reactive([]);
   const pluginCode = "gitlab"
 
   // 表单规则
   const rules = reactive<FormRules>({
         groupName: [
-          { required: true, message: "用户名称不能为空", trigger: "blur" },
-          { min: 2, max: 20, message: '用户名称长度必须介于 2 和 20 之间', trigger: 'blur' }
+          { required: true, message: "成员名称不能为空", trigger: "blur" },
+          { min: 2, max: 20, message: '成员名称长度必须介于 2 和 20 之间', trigger: 'blur' }
         ]
-    })
+  })
 
   // 重置表单
   const reset = ()=> {
@@ -87,20 +96,22 @@
   const getList = ()=>{
 
     loading.value = true;
-    userList(addDateRange(queryParams, dateRange.value))
+    memberList(addDateRange(queryParams, dateRange.value))
     .then(response => {
           loading.value = false
           if(response?.data?.records.length > 0){
-            userRow.splice(0,userRow.length);
-            Object.assign(userRow, response?.data?.records)
+            memberRow.splice(0,memberRow.length);
+            Object.assign(memberRow, response?.data?.records)
             total.value = response?.data?.total
+            console.log(memberRow)
           }else{
-            userRow.splice(0,userRow.length);
+            memberRow.splice(0,memberRow.length);
             total.value = 0;
           }
         }
     );
   }
+  
 
   // 处理搜索按钮
   const handleQuery = function(){
@@ -119,29 +130,41 @@
     reset();
     queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
       if(res.code == 200){
-        open.value = true;
-        title.value = "添加用户";
         Object.assign(pluginInstance,res?.data)
-        console.log(pluginInstance)
+        open.value = true;
+        title.value = "新增组成员";
       }
+
+      
     });
   }
 
   // 处理更新按钮
   const handleUpdate = function(row){
     reset();
+
     queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
       if(res.code == 200){
         Object.assign(pluginInstance,res?.data)
-      }
-    });
-    queryUserInfoById(row.id,queryUserParams).then(response => {
-      if(response?.code == 200){
-        Object.assign(form,response?.data)
+
+        queryGroupMemberInfoById(row.id).then(response => {
+          if(response?.code == 200){
+            Object.assign(form,response?.data)
+            
+          }
+        });
+      
+        userList(queryUserParams).then(response =>{
+          Object.assign(users,response?.data)
+          form.userId = users[0].id
+        })
         open.value = true;
-        title.value = "修改用户";
+        title.value = "修改组成员";
       }
+
+      
     });
+    
   }
   
 
@@ -163,8 +186,7 @@
         });
 
     if (form.id != undefined) {
-        updateUser(form).then(response => {
-        console.log(response)
+        updateGroupMember(form).then(response => {
           if(response?.code == 200){
             ElMessage({
                   showClose: true,
@@ -183,7 +205,7 @@
           getList();
         });
       } else {
-        addUser(form).then(response => {
+        addGroupMember(form).then(response => {
           if(response?.code){
             ElMessage({
                   showClose: true,
@@ -198,15 +220,15 @@
   }
 
   
-
+  // 修改状态弹出框处理
   const handleStatusChange = (row)=>{
-    const userId = row.id || ids.value;
+    const memberId = row.id || ids.value;
     const curStatus = row.status
     let msg = ""
     if(curStatus == 1){
-      msg = '是否禁用编号为"' + userId + '"的数据项？'
+      msg = '是否禁用编号为"' + memberId + '"的数据项？'
     }else{
-      msg = '是否启用编号为"' + userId + '"的数据项？'
+      msg = '是否启用编号为"' + memberId + '"的数据项？'
     }
 
     ElMessageBox.confirm(
@@ -224,7 +246,7 @@
         }else{
           tmpStatus = 0
         }
-        changeUserStatus(userId,tmpStatus).then((res)=>{
+        changeUserStatus(memberId,tmpStatus).then((res)=>{
             if(res.code == 200){
                 // 重置查询表单,并进行查询
                 queryParams.pageNum=1
@@ -245,23 +267,24 @@
     reset();
   }
 
-  userList(queryParams).then((res)=>{
-      if(res.code == 200){
-        Object.assign(users,res?.data?.records)
-      }
-  });
-
-  groupList(addDateRange(groupParams, dateRange.value)).then((res)=>{
-      if(res.code == 200){
-        Object.assign(groups,res?.data?.records)
-      }
-  });
-  
-  // 触发查询
-  getList();
+  // 查询实例列表
   queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
       if(res.code == 200){
         Object.assign(pluginInstance,res?.data)
+        queryUserParams.instanceCode =  queryParams.instanceCode = groupParams.instanceCode = res?.data[0].instanceCode
+        
+        groupList(addDateRange(groupParams, dateRange.value))
+          .then(response => {
+            Object.assign(groups,response?.data?.records)
+            queryParams.groupId = response?.data?.records[0]?.id
+            // 触发查询
+            getList();
+
+            userList(queryUserParams).then(response =>{
+                Object.assign(users,response?.data?.records)
+                console.log(users)
+            })
+        })
       }
     });
 </script>
@@ -272,10 +295,10 @@
     <el-form class="form-wrap" :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
       <el-row :gutter="20">
         <el-col :span="8">
-          <el-form-item label="用户名称" prop="userName">
+          <el-form-item label="成员名称" prop="userName">
             <el-input
               v-model="queryParams.userName"
-              placeholder="请输入用户名称"
+              placeholder="请输入成员名称"
               clearable
               style="width: 240px"
               @keyup.enter.native="handleQuery"
@@ -287,7 +310,7 @@
             <el-select
             class="search-select"
               v-model="queryParams.status"
-              placeholder="用户状态"
+              placeholder="成员状态"
               clearable
               style="width: 240px"
             >
@@ -295,6 +318,41 @@
               :key="dict.value"
               :label="dict.label"
               :value="dict.value"/>
+            </el-select>
+          </el-form-item>
+        </el-col> 
+      </el-row>
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-form-item label="成员组" prop="groupId">
+            <el-select
+            class="search-select"
+              v-model="queryParams.groupId"
+              placeholder="成员组"
+              clearable
+              style="width: 240px"
+            >
+            <el-option v-for="dict in groups"
+              :key="dict.gitlabGroupName"
+              :label="dict.gitlabGroupName"
+              :value="dict.id"/>
+            </el-select>
+          </el-form-item>
+        </el-col> 
+        <el-col :span="8">
+          <el-form-item label="插件实例" prop="instanceCode">
+            <el-select
+            class="search-select"
+              v-model="queryParams.instanceCode"
+              @keyup.enter.native="handleQuery"
+              placeholder="请选择实例"
+              clearable
+              style="width: 240px"
+            >
+            <el-option v-for="item in pluginInstance"
+              :key="item.pluginCode"
+              :label="item.instanceName"
+              :value="item.instanceCode"/>
             </el-select>
           </el-form-item>
         </el-col> 
@@ -328,17 +386,17 @@
         type="primary"
         plain
         size="default"
-        @click="handleAdd" v-hasPerms="['/gitlab/user/add']" ><el-icon><Plus /></el-icon>新增</el-button>
+        @click="handleAdd" v-hasPerms="['/gitlab/group/member/add']" ><el-icon><Plus /></el-icon>新增</el-button>
     </div>
 
     <!--table  -->
     <div class="table-wrap">
-      <el-table v-loading="loading" :data="userRow" @selection-change="handleSelectionChange">
+      <el-table v-loading="loading" :data="memberRow" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="30" align="center" />
-          <el-table-column label="用户编号" align="center" key="id" prop="id"/>
-          <el-table-column label="用户昵称" align="center" key="nickName" prop="nickName"  :show-overflow-tooltip="true"  width="100" />
+          <el-table-column label="成员编号" align="center" key="id" prop="id"/>
+          <el-table-column label="成员昵称" align="center" key="nickName" prop="nickName"  :show-overflow-tooltip="true"  width="100" />
           <el-table-column label="邮箱" align="center" key="email" prop="email"  :show-overflow-tooltip="true"  width="100" />
-          <el-table-column label="用户名称" align="center" key="userName" prop="userName"  :show-overflow-tooltip="true"  width="100" />
+          <el-table-column label="成员名称" align="center" key="userName" prop="userName"  :show-overflow-tooltip="true"  width="100" />
           <el-table-column label="状态" align="center" key="status"  width="100">
             <template v-slot="scope">
               {{  showStatusFun(scope.row.status) }}
@@ -359,12 +417,12 @@
               <el-button
                 size="default"
                 @click="handleUpdate(scope.row)"
-                v-hasPerms="['/gitlab/user/edit']"
+                v-hasPerms="['/gitlab/group/member/edit']"
               >修改</el-button>
               <el-button
                 size="default"
                 @click="handleStatusChange(scope.row)"
-                v-hasPerms="['/gitlab/user/changeStatus/**']"
+                v-hasPerms="['/gitlab/group/member/changeStatus/**']"
               >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
              </div>
             </template>
@@ -384,30 +442,10 @@
     </div>
 
 
-    <!-- 添加或修改用户配置对话框 -->
+    <!-- 添加或修改成员配置对话框 -->
     <el-dialog :title="title" v-model="open" width="600px" append-to-body>
       <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
         <el-row>
-          <el-col :span="12">
-            <el-form-item label="用户编号" prop="id" :readonly="true">
-              <el-input v-model="form.id" placeholder="用户编号" maxlength="30" :disabled="true"/>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="用户名称" prop="userName">
-              <el-input v-model="form.userName" placeholder="请输入用户名称" maxlength="30" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="用户昵称" prop="nickName">
-              <el-input v-model="form.nickName" placeholder="请输入用户昵称" maxlength="30" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="邮件" prop="email">
-              <el-input v-model="form.email" placeholder="请输入邮件名称" maxlength="30" />
-            </el-form-item>
-          </el-col>
           <el-col :span="8">
             <el-form-item label="插件实例" prop="instanceCode">
               <el-select
@@ -425,26 +463,40 @@
               </el-select>
             </el-form-item>
           </el-col> 
+          <el-col :span="8">
+            <el-form-item label="成员组" prop="groupId">
+              <el-select
+                class="search-select"
+                v-model="form.groupId"
+                placeholder="成员组"
+                clearable
+                style="width: 240px"
+              >
+              <el-option v-for="dict in groups"
+                :key="dict.gitlabGroupName"
+                :label="dict.gitlabGroupName"
+                :value="dict.id"/>
+              </el-select>
+            </el-form-item>
+          </el-col> 
         </el-row>
         <el-row>
-          <el-col :span="12">
-            <el-form-item label="密码" prop="pwd">
-              <el-input v-model="form.pwd" placeholder="请输入密码" maxlength="30" minlength="6" type="password" show-password/>
+          <el-col :span="8">
+            <el-form-item label="成员" prop="userId">
+              <el-select
+                class="search-select"
+                v-model="form.userId"
+                placeholder="成员"
+                clearable
+                style="width: 240px"
+              >
+              <el-option v-for="user in users"
+                :key="user.userName"
+                :label="user.userName"
+                :value="user.id"/>
+              </el-select>
             </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="20">
-            <el-form-item label="状态">
-              <el-radio-group v-model="form.status">
-                <el-radio
-                  v-for="dict in status"
-                  :key="dict.value"
-                  :label="dict.value"
-                >{{dict.label}}</el-radio>
-              </el-radio-group>
-            </el-form-item>
-          </el-col>
+          </el-col>           
         </el-row>
       </el-form>
       <div slot="footer" class="dialog-footer">

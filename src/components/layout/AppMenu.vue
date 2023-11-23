@@ -36,7 +36,6 @@
 
     // 处理url
     const processUrl =  (component:string) => {
-        console.log(component)
         if(!component?.startsWith("/")){
             return "/" + component;
         }

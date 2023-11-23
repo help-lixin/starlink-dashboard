@@ -1,6 +1,5 @@
 <script setup lang="ts">
   // @ts-nocheck  
-  import { Plus ,Delete, Edit, EditPen, Search , RefreshRight , Sort , QuestionFilled} from '@element-plus/icons-vue'
   import { showStatusOperateFun , status , showStatusFun , addDateRange , enable } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
@@ -263,13 +262,16 @@
       }
   });
 
-  // 触发查询
-  getList();
   queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
       if(res.code == 200){
         Object.assign(pluginInstance,res?.data)
+        queryParams.instanceCode = res?.data[0].instanceCode
       }
-    });
+      // 触发查询
+      getList();
+  });
+
+  
 </script>
 
 <template>
@@ -277,6 +279,22 @@
     <!--sousuo  -->
     <el-form class="form-wrap" :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
       <el-row :gutter="20">
+        <el-col :span="8">
+          <el-form-item label="插件实例" prop="instanceCode">
+            <el-select
+            class="search-select"
+              v-model="queryParams.instanceCode"
+              @keyup.enter.native="handleQuery"
+              placeholder="请选择实例"
+              clearable
+            >
+            <el-option v-for="item in pluginInstance"
+              :key="item.pluginCode"
+              :label="item.instanceName"
+              :value="item.instanceCode"/>
+            </el-select>
+          </el-form-item>
+        </el-col> 
         <el-col :span="8">
           <el-form-item label="项目名称" prop="projectName">
             <el-input
@@ -288,6 +306,8 @@
             />
           </el-form-item>
         </el-col> 
+      </el-row>
+      <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="权限" prop="visibility">
             <el-select
@@ -305,25 +325,21 @@
             </el-select>
           </el-form-item>
         </el-col> 
-      </el-row>
-      <el-row :gutter="20">
         <el-col :span="8">
-          <el-form-item label="插件实例" prop="instanceCode">
-            <el-select
-            class="search-select"
-              v-model="queryParams.instanceCode"
-              @keyup.enter.native="handleQuery"
-              placeholder="请选择实例"
-              clearable
+          <el-form-item label="创建时间">
+            <el-date-picker
+              v-model="dateRange"
               style="width: 240px"
-            >
-            <el-option v-for="item in pluginInstance"
-              :key="item.pluginCode"
-              :label="item.instanceName"
-              :value="item.instanceCode"/>
-            </el-select>
+              value-format="YYYY-MM-DD"
+              type="daterange"
+              range-separator="-"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+            ></el-date-picker>
           </el-form-item>
         </el-col> 
+      </el-row>
+      <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="状态" prop="status">
             <el-select
@@ -338,21 +354,6 @@
               :label="dict.label"
               :value="dict.value"/>
             </el-select>
-          </el-form-item>
-        </el-col> 
-      </el-row>
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="创建时间">
-            <el-date-picker
-              v-model="dateRange"
-              style="width: 240px"
-              value-format="YYYY-MM-DD"
-              type="daterange"
-              range-separator="-"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-            ></el-date-picker>
           </el-form-item>
         </el-col> 
         <el-col :span="8">

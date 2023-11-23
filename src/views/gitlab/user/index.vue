@@ -1,6 +1,5 @@
 <script setup lang="ts">
   // @ts-nocheck  
-  import { Plus ,Delete, Edit, EditPen, Search , RefreshRight , Sort , QuestionFilled} from '@element-plus/icons-vue'
   import { showStatusOperateFun , status , showStatusFun , addDateRange , addDateRangeRuoyi , enable } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
@@ -18,7 +17,8 @@
     beginTime: undefined,
     endTime: undefined,
     status: undefined,
-    userName: undefined
+    userName: undefined,
+    instanceCode: undefined
   })
 
     //查询列表信息
@@ -245,12 +245,6 @@
     reset();
   }
 
-  userList(queryParams).then((res)=>{
-      if(res.code == 200){
-        Object.assign(users,res?.data?.records)
-      }
-  });
-
   groupList(addDateRange(groupParams, dateRange.value)).then((res)=>{
       if(res.code == 200){
         Object.assign(groups,res?.data?.records)
@@ -262,6 +256,7 @@
   queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
       if(res.code == 200){
         Object.assign(pluginInstance,res?.data)
+        groupParams.instanceCode = res?.data[0].instanceCode
       }
     });
 </script>
