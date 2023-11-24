@@ -131,11 +131,14 @@
     queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
       if(res.code == 200){
         Object.assign(pluginInstance,res?.data)
+        queryUserParams.instanceCode = res?.data[0].instanceCode
+        userList(queryUserParams).then(response =>{
+            Object.assign(users,response?.data?.records)
+        })
         open.value = true;
         title.value = "新增组成员";
       }
 
-      
     });
   }
 
@@ -279,11 +282,6 @@
             queryParams.groupId = response?.data?.records[0]?.id
             // 触发查询
             getList();
-
-            userList(queryUserParams).then(response =>{
-                Object.assign(users,response?.data?.records)
-                console.log(users)
-            })
         })
       }
     });
