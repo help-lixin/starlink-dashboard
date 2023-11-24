@@ -132,8 +132,9 @@
       if(res.code == 200){
         Object.assign(pluginInstance,res?.data)
         queryUserParams.instanceCode = res?.data[0].instanceCode
+
         userList(queryUserParams).then(response =>{
-            Object.assign(users,response?.data?.records)
+          users.value = response?.data?.records;
         })
         open.value = true;
         title.value = "新增组成员";
@@ -488,7 +489,7 @@
                 clearable
                 style="width: 240px"
               >
-              //todo lixin
+              
               <el-option v-for="user in users"
                 :key="user.userName"
                 :label="user.userName"
