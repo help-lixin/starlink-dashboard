@@ -135,6 +135,22 @@ export const dynamicRoutes = [
         requiresAuth: false
     },
   },
+  {
+    path : '/nexus/respository/index',
+    name : 'nexus-browes',
+    component: ()=> import("../views/nexus/respository/index.vue"),
+    meta: {
+        requiresAuth: true
+    }
+  },
+  {
+    path : '/nexus/blobStores/index',
+    name : 'nexus-blobStores-index',
+    component: ()=> import("../views/nexus/blobStores/index.vue"),
+    meta: {
+        requiresAuth: false
+    }
+  },
 ];
 
 const router = createRouter({

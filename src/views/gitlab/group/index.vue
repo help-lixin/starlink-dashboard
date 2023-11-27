@@ -84,7 +84,7 @@
   const getList = ()=>{
 
     loading.value = true;
-    groupList(addDateRange(queryParams, dateRange.value))
+        groupList(addDateRange(queryParams, dateRange.value))
     .then(response => {
           loading.value = false
           if(response?.data?.records.length > 0){
