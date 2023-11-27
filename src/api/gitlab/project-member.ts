@@ -4,7 +4,7 @@ import {STARLINK_SERVICE} from "@/utils/env"
 // 查询组成员列表
 export function memberList(query:any) {
     return request({
-      url: STARLINK_SERVICE + '/gitlab/group/member/list',
+      url: STARLINK_SERVICE + '/gitlab/project/member/list',
       method: 'get',
       params: query
     }).then((res)=>{
@@ -14,9 +14,9 @@ export function memberList(query:any) {
 
 
 // 新增组成员
-export function addGroupMember(data:any) {
+export function addProjectMember(data:any) {
 return request({
-        url: STARLINK_SERVICE + '/gitlab/group/member/add',
+        url: STARLINK_SERVICE + '/gitlab/project/member/add',
         method: 'post',
         data: data
     }).then((res)=>{
@@ -25,9 +25,9 @@ return request({
 }
   
 // 修改组成员
-export function updateGroupMember(data:any) {
+export function updateProjectMember(data:any) {
 return request({
-        url: STARLINK_SERVICE + '/gitlab/group/member/edit',
+        url: STARLINK_SERVICE + '/gitlab/project/member/edit',
         method: 'put',
         data: data
     }).then((res)=>{
@@ -37,9 +37,9 @@ return request({
   
 
 // 根据id查询组成员信息
-export function queryGroupMemberInfoById(id:string) {
+export function queryProjectMemberInfoById(id:string) {
 return request({
-        url: STARLINK_SERVICE + '/gitlab/group/member/info/' + id,
+        url: STARLINK_SERVICE + '/gitlab/project/member/info/' + id,
         method: 'get'
     }).then((res)=>{
         return res?.data;
@@ -49,7 +49,7 @@ return request({
 // 删除组成员
 export function removeMember(data:any) {
     return request({
-        url: STARLINK_SERVICE + '/gitlab/group/member/del',
+        url: STARLINK_SERVICE + '/gitlab/project/member/del',
         method: 'delete',
         data: data
     }).then((res)=>{
@@ -57,10 +57,10 @@ export function removeMember(data:any) {
     });
 }
 
-export  function showMemberGroup(groupId:number,groups:any) {
-    for (const group of groups) {
-        if (group.id === groupId) {
-            return group.gitlabGroupName
+export  function showMemberProject(projectId:number,projects:any) {
+    for (const project of projects) {
+        if (project.id === projectId) {
+            return project.gitlabProjectName
         }
     }
   }
