@@ -5,7 +5,7 @@
   import { getPluginMeta } from '@/api/pluginDefinition';
   import {envOptionSelect, groupOptionSelect , pluginOptionSelect } from "@/api/common-api"
   import { list , get , update , add , changeStatus } from "@/api/pluginInstance"
-import { fromPairs } from 'lodash';
+  
   
   // 加载中
   const loading = ref(false)
@@ -22,10 +22,6 @@ import { fromPairs } from 'lodash';
   const multiple = ref(true)
   const total= ref(0)
   const dataList = reactive([])
-
-  // TODO lixin
-  const test =  ref("<el-input v-model='queryParams.instanceName' placeholder='请输入插件实例名称' clearable style='width: 240px' @keyup.enter.native='handleQuery' /> ");
-
 
   // env
   const queryEnvs = ref()
@@ -462,7 +458,7 @@ const getList = ()=>{
         </el-col> 
         <el-col :span="8">
           <el-form-item label="插件名称" prop="instanceName">
-            <div v-html="test"></div>
+            <el-input v-model='queryParams.instanceName' placeholder='请输入插件实例名称' clearable style='width: 240px' @keyup.enter.native='handleQuery' />
           </el-form-item>
         </el-col> 
       </el-row>

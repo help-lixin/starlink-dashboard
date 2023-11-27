@@ -4,7 +4,7 @@
   import { showStatusOperateFun , status , showStatusFun , addDateRange } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
-  import { memberList , addGroupMember , updateGroupMember , queryGroupMemberInfoById , removeMember, showMemberGroup} from "@/api/gitlab/members"
+  import { memberList , addGroupMember , updateGroupMember , queryGroupMemberInfoById , changeGroupStatus} from "@/api/gitlab/members"
   import { userList} from "@/api/gitlab/users"
   import { groupList } from "@/api/gitlab/groups"
   
@@ -35,13 +35,6 @@
     instanceCode: undefined
   })
 
-  //删除成员参数
-  const deleteParams = reactive({
-    userId: undefined,
-    groupId: undefined,
-    instanceCode: undefined
-  })
-
   // 根据成员名查询成员信息
   const queryUserParams = reactive({
     pageNum: 1,
@@ -57,29 +50,6 @@
   const dateRange = ref([])
   // 成员列表
   const users = ref([]);
-  // 权限列表
-  const accessLevels = [
-  {
-    value: 10,
-    label: 'GUEST',
-  },
-  {
-    value: 20,
-    label: 'REPORTER',
-  },
-  {
-    value: 30,
-    label: 'DEVELOPER',
-  },
-  {
-    value: 40,
-    label: 'MAINTAINER',
-  },
-  {
-    value: 50,
-    label: 'OWNER',
-  }
-];
 
   // 选中数成员
   const ids = ref([])
@@ -163,7 +133,7 @@
         Object.assign(pluginInstance,res?.data)
         queryUserParams.instanceCode = res?.data[0].instanceCode
         userList(queryUserParams).then(response =>{
-          users.value = response?.data.records
+            Object.assign(users,response?.data?.records)
         })
         open.value = true;
         title.value = "新增组成员";
@@ -172,30 +142,33 @@
     });
   }
 
-  // // 处理更新按钮
-  // const handleUpdate = function(row){
-  //   reset();
+  // 处理更新按钮
+  const handleUpdate = function(row){
+    reset();
 
-  //   queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
-  //     if(res.code == 200){
-  //       Object.assign(pluginInstance,res?.data)
+    queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
+      if(res.code == 200){
+        Object.assign(pluginInstance,res?.data)
 
-  //       queryGroupMemberInfoById(row.id).then(response => {
-  //         if(response?.code == 200){
-  //           Object.assign(form,response?.data)
+        queryGroupMemberInfoById(row.id).then(response => {
+          if(response?.code == 200){
+            Object.assign(form,response?.data)
             
-  //         }
-  //       });
+          }
+        });
       
-  //       userList(queryUserParams).then(response =>{
-  //         users.value = response?.data.records
-  //         form.userId = users[0].id
-  //       })
-  //       open.value = true;
-  //       title.value = "修改组成员";
-  //     }
-  //   });
-  // }
+        userList(queryUserParams).then(response =>{
+          Object.assign(users,response?.data)
+          form.userId = users[0].id
+        })
+        open.value = true;
+        title.value = "修改组成员";
+      }
+
+      
+    });
+    
+  }
   
 
   // 多选框选中数据
@@ -251,11 +224,15 @@
 
   
   // 修改状态弹出框处理
-  const handleDelete = (row)=>{
-    const memberName = row.userName
+  const handleStatusChange = (row)=>{
+    const memberId = row.id || ids.value;
     const curStatus = row.status
     let msg = ""
-    msg = '是否删除组成员【"' + memberName + '"】的数据项？'
+    if(curStatus == 1){
+      msg = '是否禁用编号为"' + memberId + '"的数据项？'
+    }else{
+      msg = '是否启用编号为"' + memberId + '"的数据项？'
+    }
 
     ElMessageBox.confirm(
       msg,
@@ -266,10 +243,13 @@
         type: 'warning',
       }
     ).then(() => {
-      deleteParams.userId = row.userId
-      deleteParams.groupId = row.groupId
-      deleteParams.instanceCode = row.instanceCode
-      removeMember(deleteParams).then((res)=>{
+        let tmpStatus;
+        if(curStatus == 0){
+          tmpStatus = 1
+        }else{
+          tmpStatus = 0
+        }
+        changeUserStatus(memberId,tmpStatus).then((res)=>{
             if(res.code == 200){
                 // 重置查询表单,并进行查询
                 queryParams.pageNum=1
@@ -280,13 +260,7 @@
                 })
             }
         })    
-    }).catch(() => { 
-      getList()
-      ElMessage({
-                  type: 'warning',
-                  message: '删除失败',
-        })
-    })
+    }).catch(() => { })
   }
 
 
@@ -304,11 +278,8 @@
         
         groupList(addDateRange(groupParams, dateRange.value))
           .then(response => {
-            console.log("=============")
-            console.log(response?.data?.records)
-            console.log("=============")
             Object.assign(groups,response?.data?.records)
-            // queryParams.groupId = response?.data?.records[0]?.id
+            queryParams.groupId = response?.data?.records[0]?.id
             // 触发查询
             getList();
         })
@@ -420,16 +391,10 @@
     <div class="table-wrap">
       <el-table v-loading="loading" :data="memberRow" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="30" align="center" />
-          <el-table-column label="用户编号" align="center" key="userId" prop="userId" v-if="false"/>
           <el-table-column label="成员编号" align="center" key="id" prop="id"/>
           <el-table-column label="成员昵称" align="center" key="nickName" prop="nickName"  :show-overflow-tooltip="true"  width="100" />
           <el-table-column label="邮箱" align="center" key="email" prop="email"  :show-overflow-tooltip="true"  width="100" />
           <el-table-column label="成员名称" align="center" key="userName" prop="userName"  :show-overflow-tooltip="true"  width="100" />
-          <el-table-column label="组" align="center" key="groupId"  width="100">
-            <template v-slot="scope">
-              {{  showMemberGroup(scope.row.groupId,groups) }}
-            </template>
-          </el-table-column>
           <el-table-column label="状态" align="center" key="status"  width="100">
             <template v-slot="scope">
               {{  showStatusFun(scope.row.status) }}
@@ -447,16 +412,16 @@
           >
             <template v-slot="scope">
              <div class="action-btn">
-              <!-- <el-button
+              <el-button
                 size="default"
                 @click="handleUpdate(scope.row)"
                 v-hasPerms="['/gitlab/group/member/edit']"
-              >修改</el-button> -->
+              >修改</el-button>
               <el-button
                 size="default"
-                @click="handleDelete(scope.row)"
-                v-hasPerms="['/gitlab/group/member/del']"
-              >删除</el-button>
+                @click="handleStatusChange(scope.row)"
+                v-hasPerms="['/gitlab/group/member/changeStatus/**']"
+              >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
              </div>
             </template>
           </el-table-column>
@@ -521,29 +486,16 @@
                 v-model="form.userId"
                 placeholder="成员"
                 clearable
+                style="width: 240px"
               >
+              //todo lixin
               <el-option v-for="user in users"
                 :key="user.userName"
                 :label="user.userName"
                 :value="user.id"/>
               </el-select>
             </el-form-item>
-          </el-col>   
-          <el-col :span="8">
-            <el-form-item label="权限" prop="accessLevel">
-              <el-select
-                class="search-select"
-                v-model="form.accessLevel"
-                placeholder="成员"
-                clearable
-              >
-              <el-option v-for="accessLevel in accessLevels"
-                :key="accessLevel.label"
-                :label="accessLevel.label"
-                :value="accessLevel.value"/>
-              </el-select>
-            </el-form-item>
-          </el-col>
+          </el-col>           
         </el-row>
       </el-form>
       <div slot="footer" class="dialog-footer">
