@@ -4,7 +4,7 @@
   import { showStatusOperateFun , status , showStatusFun , addDateRange } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
-  import { memberList , addGroupMember , updateGroupMember , queryGroupMemberInfoById , changeGroupStatus} from "@/api/gitlab/members"
+  import { memberList , addGroupMember , updateGroupMember , queryGroupMemberInfoById} from "@/api/gitlab/members"
   import { userList} from "@/api/gitlab/users"
   import { groupList } from "@/api/gitlab/groups"
   
