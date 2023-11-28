@@ -31,7 +31,9 @@ export default defineConfig({
     AutoImport({
       imports: ['vue','vue-router'],
       resolvers: [
-        ElementPlusResolver(),
+        ElementPlusResolver({
+          importStyle : "sass"
+        }),
         // Auto import icon components
         IconsResolver(),
       ],

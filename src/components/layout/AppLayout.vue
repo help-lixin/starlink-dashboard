@@ -1,9 +1,7 @@
 <script setup lang="ts">
     import  AppMenu from "./AppMenu.vue"
     import  AppHeader from "./AppHeader.vue"
-    import { ElConfigProvider } from 'element-plus';
     import locale from 'element-plus/lib/locale/lang/zh-cn';
-
 </script>
 
 <template>

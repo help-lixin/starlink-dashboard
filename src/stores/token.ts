@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia'
-import { ElMessage } from 'element-plus'
 
 // token类型定义
 interface Token {
