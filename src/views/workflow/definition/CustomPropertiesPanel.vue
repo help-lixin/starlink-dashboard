@@ -41,263 +41,263 @@
 	</div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 
 // @ts-nocheck  
 
-import { useActionMetasStore } from "@/stores/plugin";
+// import { useActionMetasStore } from "@/stores/plugin";
 
-const actionMetasStore = useActionMetasStore();
-
-
-import { ref, toRaw } from 'vue'
-import { pluginInstanceOptionSelect } from '@/api/common-api'
-import request from "@/utils/request"
-import mitt from "@/mitt/bus"
+// const actionMetasStore = useActionMetasStore();
 
 
-const props = defineProps({
-	modeler: Object,
-})
-
-const selectedElements = ref([])
-const element = ref(null)
-const form = ref({
-	name: undefined,
-	envCode: undefined,
-	groupCode: undefined,
-	pluginCode: undefined,
-	instanceCode: undefined,
-	instances: [],
-	itemsMap: {}
-})
+// import { ref, toRaw } from 'vue'
+// import { pluginInstanceOptionSelect } from '@/api/common-api'
+// import request from "@/utils/request"
+// import mitt from "@/mitt/bus"
 
 
-// 事件网桥
-function eventBridgeFun(ctx) {
-	const items = ctx.items;
-	const eventName = ctx.eventName;
+// const props = defineProps({
+// 	modeler: Object,
+// })
 
-	Object.values(items).forEach(item => {
-		if (item?.events && item.events instanceof Array && item.events.includes(eventName)) {
-			if (item?.eventHandler) {
-				if (typeof item.eventHandler === "object") {
-					if (item.eventHandler instanceof Array) {
-						item?.eventHandler.forEach(bridgeJs => {
-							const bridgeFun = eval(bridgeJs);
-							bridgeFun(ctx);
-						});
-					}
-				} else if (typeof item.eventHandler === "string") {
-					const bridgeFun = eval(item.eventHandler);
-					bridgeFun(ctx);
-				}
-			}
-		}
-	});
-}
+// const selectedElements = ref([])
+// const element = ref(null)
+// const form = ref({
+// 	name: undefined,
+// 	envCode: undefined,
+// 	groupCode: undefined,
+// 	pluginCode: undefined,
+// 	instanceCode: undefined,
+// 	instances: [],
+// 	itemsMap: {}
+// })
 
 
-function init() {
-	props.modeler.on('selection.changed', async e => {
-		// 所有的节点
-		selectedElements.value = e.newSelection
-		// 被选中的节点
-		element.value = e.newSelection[0]
+// // 事件网桥
+// function eventBridgeFun(ctx) {
+// 	const items = ctx.items;
+// 	const eventName = ctx.eventName;
 
-		// 先清空数据
-		form.value = {
-			name: undefined,
-			envCode: undefined,
-			groupCode: undefined,
-			pluginCode: undefined,
-			instanceCode: undefined,
-			instances: [],
-			itemsMap: {}
-		}
-
-		// 元数据对象(右侧表单动态展示)
-		if (element.value?.businessObject?.$attrs?.plugin) {
-			// 从store里拿数据
-			const plugins = actionMetasStore.getActions
-			const pluginInfoStr = plugins.get(element.value.businessObject.$attrs.plugin)
-			if (pluginInfoStr) {
-				const pluginItem = JSON.parse(pluginInfoStr)
-				form.value.items = pluginItem?._meta
-				// 转换成map,方便业务对象使用.
-				form.value.items.forEach(item => {
-					const propertyName = item.key
-					form.value.itemsMap[propertyName] = item
-
-					// 订阅事件
-					if (item?.events) {
-						for (const eventName of item.events) {
-							mitt.off(eventName)
-							mitt.on(eventName, eventBridgeFun)
-						}
-					}
-				});
-			}
-		}
-
-		// 节点名称
-		if (element.value?.businessObject?.$attrs?._name) {
-			form.value.name = element.value?.businessObject?.$attrs?._name
-			element.value['name'] = element.value?.businessObject?.$attrs?._name
-			// 注意哈,要调用更新,才能真正的render
-			updateProperties({ "name": form.value.name })
-		} else {
-			if (element.value?.businessObject?.name) {
-				form.value.name = element.value?.businessObject?.name
-			}
-		}
-
-		// 环境编码
-		if (element.value?.businessObject?.$attrs?.envCode) {
-			form.value.envCode = element.value?.businessObject?.$attrs?.envCode;
-		}
-		// 环境组编码
-		if (element.value?.businessObject?.$attrs?.groupCode) {
-			form.value.groupCode = element.value?.businessObject?.$attrs?.groupCode;
-		}
-		//插件编码
-		if (element.value?.businessObject?.$attrs?.pluginCode) {
-			form.value.pluginCode = element.value?.businessObject?.$attrs?.pluginCode;
-		}
-		//实例编码
-		if (element.value?.businessObject?.$attrs?.instanceCode) {
-			form.value.instanceCode = element.value?.businessObject?.$attrs?.instanceCode;
-		}
-
-		if (form.value.pluginCode) {
-			// 初始化插件对应的实例列表
-			pluginInstanceOptionSelect(form.value.pluginCode).then((res) => {
-				if (res?.code == 200) {
-					form.value.instances = res?.data
-					// 触发下拉列表被动改变
-					if (form.value.instanceCode) {
-						selectInstance(form.value.instanceCode);
-					}
-				}
-			})
-		}
-
-		// 如果: $attrs有用户填充的数据, 且, 表单的动态元数据大于零的情况下, 遍历动态表单的每一项, 进行赋值操作.
-		if (element.value?.businessObject?.$attrs && form?.value?.items?.length > 0) {
-			form.value.items.forEach((item) => {
-				const propertyName = item.key
-				const propertyValue = element.value.businessObject.$attrs[propertyName]
-				if (propertyValue) {
-					item.name = propertyValue
-				}
-			});
-		}
-
-		//  为节点配置默认属性
-		setDefaultProperties()
-	})
-
-	props.modeler.on('element.changed', e => {
-		const { element } = e
-		if (!element.value) {
-			return
-		}
-		if (e.element.id === element.value.id) {
-			element.value = e.element
-		}
-	})
-}
-
-init()
-
-function setDefaultProperties() {
-	if (element.value) {
-		element.value['name'] = element.value.businessObject.name
-	}
-}
-
-// 选择实例
-async function selectInstance(value) {
-	if (value == "") {
-		return;
-	}
-
-	const instance = form.value.instances.filter(item => item.instanceCode === value).shift()
-	const properties = {
-		"envCode": instance.envCode,
-		"groupCode": instance.groupCode,
-		"pluginCode": instance.pluginCode,
-		"instanceCode": instance.instanceCode,
-	}
-
-	element.value["envCode"] = instance.envCode;
-	element.value["groupCode"] = instance.groupCode;
-	element.value["pluginCode"] = instance.pluginCode;
-	element.value["instanceCode"] = instance.instanceCode;
-
-	updateProperties(properties)
+// 	Object.values(items).forEach(item => {
+// 		if (item?.events && item.events instanceof Array && item.events.includes(eventName)) {
+// 			if (item?.eventHandler) {
+// 				if (typeof item.eventHandler === "object") {
+// 					if (item.eventHandler instanceof Array) {
+// 						item?.eventHandler.forEach(bridgeJs => {
+// 							const bridgeFun = eval(bridgeJs);
+// 							bridgeFun(ctx);
+// 						});
+// 					}
+// 				} else if (typeof item.eventHandler === "string") {
+// 					const bridgeFun = eval(item.eventHandler);
+// 					bridgeFun(ctx);
+// 				}
+// 			}
+// 		}
+// 	});
+// }
 
 
-	// 把相关对象塞到上下文里
-	const eventName = instance.pluginCode + "." + "instance" + "." + "change"
-	const ctx = {
-		"request": request,
-		"bus": mitt,
-		"items": form.value.itemsMap,
-		"env": properties,
-		"eventName": eventName,
-		"value": value
-	}
+// function init() {
+// 	props.modeler.on('selection.changed', async e => {
+// 		// 所有的节点
+// 		selectedElements.value = e.newSelection
+// 		// 被选中的节点
+// 		element.value = e.newSelection[0]
 
-	mitt.emit(eventName, ctx);
-}
+// 		// 先清空数据
+// 		form.value = {
+// 			name: undefined,
+// 			envCode: undefined,
+// 			groupCode: undefined,
+// 			pluginCode: undefined,
+// 			instanceCode: undefined,
+// 			instances: [],
+// 			itemsMap: {}
+// 		}
 
-/**
- * 改变控件触发的事件
- * @param { Object } input的Event
- * @param { String } 要修改的属性的名称
- */
-function changeField(value, propertyName) {
-	const item = form.value.itemsMap[propertyName];
-	if (item) {
-		item.name = value
+// 		// 元数据对象(右侧表单动态展示)
+// 		if (element.value?.businessObject?.$attrs?.plugin) {
+// 			// 从store里拿数据
+// 			const plugins = actionMetasStore.getActions
+// 			const pluginInfoStr = plugins.get(element.value.businessObject.$attrs.plugin)
+// 			if (pluginInfoStr) {
+// 				const pluginItem = JSON.parse(pluginInfoStr)
+// 				form.value.items = pluginItem?._meta
+// 				// 转换成map,方便业务对象使用.
+// 				form.value.items.forEach(item => {
+// 					const propertyName = item.key
+// 					form.value.itemsMap[propertyName] = item
 
-		// 环境信息
-		const envProperties = {
-			"envCode": element.value["envCode"],
-			"groupCode": element.value["groupCode"],
-			"pluginCode": element.value["pluginCode"],
-			"instanceCode": element.value["instanceCode"],
-		}
+// 					// 订阅事件
+// 					if (item?.events) {
+// 						for (const eventName of item.events) {
+// 							mitt.off(eventName)
+// 							mitt.on(eventName, eventBridgeFun)
+// 						}
+// 					}
+// 				});
+// 			}
+// 		}
 
-		// 
-		const eventName = envProperties.pluginCode + "." + propertyName + "." + "change"
-		const ctx = {
-			"request": request,
-			"bus": mitt,
-			"items": form.value.itemsMap,
-			"env": envProperties,
-			"eventName": eventName,
-			"value": value
-		}
-		mitt.emit(eventName, ctx)
-	}
+// 		// 节点名称
+// 		if (element.value?.businessObject?.$attrs?._name) {
+// 			form.value.name = element.value?.businessObject?.$attrs?._name
+// 			element.value['name'] = element.value?.businessObject?.$attrs?._name
+// 			// 注意哈,要调用更新,才能真正的render
+// 			updateProperties({ "name": form.value.name })
+// 		} else {
+// 			if (element.value?.businessObject?.name) {
+// 				form.value.name = element.value?.businessObject?.name
+// 			}
+// 		}
 
-	element.value[propertyName] = value
-	const properties = {}
-	properties[propertyName] = value
-	updateProperties(properties)
-}
+// 		// 环境编码
+// 		if (element.value?.businessObject?.$attrs?.envCode) {
+// 			form.value.envCode = element.value?.businessObject?.$attrs?.envCode;
+// 		}
+// 		// 环境组编码
+// 		if (element.value?.businessObject?.$attrs?.groupCode) {
+// 			form.value.groupCode = element.value?.businessObject?.$attrs?.groupCode;
+// 		}
+// 		//插件编码
+// 		if (element.value?.businessObject?.$attrs?.pluginCode) {
+// 			form.value.pluginCode = element.value?.businessObject?.$attrs?.pluginCode;
+// 		}
+// 		//实例编码
+// 		if (element.value?.businessObject?.$attrs?.instanceCode) {
+// 			form.value.instanceCode = element.value?.businessObject?.$attrs?.instanceCode;
+// 		}
+
+// 		if (form.value.pluginCode) {
+// 			// 初始化插件对应的实例列表
+// 			pluginInstanceOptionSelect(form.value.pluginCode).then((res) => {
+// 				if (res?.code == 200) {
+// 					form.value.instances = res?.data
+// 					// 触发下拉列表被动改变
+// 					if (form.value.instanceCode) {
+// 						selectInstance(form.value.instanceCode);
+// 					}
+// 				}
+// 			})
+// 		}
+
+// 		// 如果: $attrs有用户填充的数据, 且, 表单的动态元数据大于零的情况下, 遍历动态表单的每一项, 进行赋值操作.
+// 		if (element.value?.businessObject?.$attrs && form?.value?.items?.length > 0) {
+// 			form.value.items.forEach((item) => {
+// 				const propertyName = item.key
+// 				const propertyValue = element.value.businessObject.$attrs[propertyName]
+// 				if (propertyValue) {
+// 					item.name = propertyValue
+// 				}
+// 			});
+// 		}
+
+// 		//  为节点配置默认属性
+// 		setDefaultProperties()
+// 	})
+
+// 	props.modeler.on('element.changed', e => {
+// 		const { element } = e
+// 		if (!element.value) {
+// 			return
+// 		}
+// 		if (e.element.id === element.value.id) {
+// 			element.value = e.element
+// 		}
+// 	})
+// }
+
+// init()
+
+// function setDefaultProperties() {
+// 	if (element.value) {
+// 		element.value['name'] = element.value.businessObject.name
+// 	}
+// }
+
+// // 选择实例
+// async function selectInstance(value) {
+// 	if (value == "") {
+// 		return;
+// 	}
+
+// 	const instance = form.value.instances.filter(item => item.instanceCode === value).shift()
+// 	const properties = {
+// 		"envCode": instance.envCode,
+// 		"groupCode": instance.groupCode,
+// 		"pluginCode": instance.pluginCode,
+// 		"instanceCode": instance.instanceCode,
+// 	}
+
+// 	element.value["envCode"] = instance.envCode;
+// 	element.value["groupCode"] = instance.groupCode;
+// 	element.value["pluginCode"] = instance.pluginCode;
+// 	element.value["instanceCode"] = instance.instanceCode;
+
+// 	updateProperties(properties)
 
 
-/**
- * 更新元素属性
- * @param { Object } 要更新的属性, 例如 { name: '' }
- */
-function updateProperties(properties) {
-	const modeling = props.modeler.get('modeling')
-	modeling.updateProperties(toRaw(element.value), properties)
-}
+// 	// 把相关对象塞到上下文里
+// 	const eventName = instance.pluginCode + "." + "instance" + "." + "change"
+// 	const ctx = {
+// 		"request": request,
+// 		"bus": mitt,
+// 		"items": form.value.itemsMap,
+// 		"env": properties,
+// 		"eventName": eventName,
+// 		"value": value
+// 	}
+
+// 	mitt.emit(eventName, ctx);
+// }
+
+// /**
+//  * 改变控件触发的事件
+//  * @param { Object } input的Event
+//  * @param { String } 要修改的属性的名称
+//  */
+// function changeField(value, propertyName) {
+// 	const item = form.value.itemsMap[propertyName];
+// 	if (item) {
+// 		item.name = value
+
+// 		// 环境信息
+// 		const envProperties = {
+// 			"envCode": element.value["envCode"],
+// 			"groupCode": element.value["groupCode"],
+// 			"pluginCode": element.value["pluginCode"],
+// 			"instanceCode": element.value["instanceCode"],
+// 		}
+
+// 		// 
+// 		const eventName = envProperties.pluginCode + "." + propertyName + "." + "change"
+// 		const ctx = {
+// 			"request": request,
+// 			"bus": mitt,
+// 			"items": form.value.itemsMap,
+// 			"env": envProperties,
+// 			"eventName": eventName,
+// 			"value": value
+// 		}
+// 		mitt.emit(eventName, ctx)
+// 	}
+
+// 	element.value[propertyName] = value
+// 	const properties = {}
+// 	properties[propertyName] = value
+// 	updateProperties(properties)
+// }
+
+
+// /**
+//  * 更新元素属性
+//  * @param { Object } 要更新的属性, 例如 { name: '' }
+//  */
+// function updateProperties(properties) {
+// 	const modeling = props.modeler.get('modeling')
+// 	modeling.updateProperties(toRaw(element.value), properties)
+// }
 </script>
 
 <style scoped lang="scss">
