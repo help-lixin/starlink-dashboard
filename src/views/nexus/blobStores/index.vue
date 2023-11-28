@@ -2,7 +2,7 @@
 // @ts-nocheck  
 import { Plus } from '@element-plus/icons-vue'
 import { queryInstanceInfoByPluginCode } from "@/api/common-api"
-import { getBlobStoreList, createFileBlobStore, getFileBlobStoreInfoByName, deleteBlobStoreByName } from "@/api/nexus/blobStore"
+import { getBlobStoresList, createFileBlobStores, getFileBlobStoresInfoByName, deleteBlobStoresByName, updateFileBlobStoresInfoByName } from "@/api/nexus/blobStores"
 import { showBlobStoresState } from "@/utils/common"
 
 const pluginCode = "nexus";
@@ -16,7 +16,7 @@ const queryParams = reactive({
 const open = ref(false);
 const loading = ref(false);
 const title = ref("");
-const blobStoreList = reactive([]);
+const blobStoresList = reactive([]);
 
 // 表单规则
 const rules = reactive<FormRules>({
@@ -32,7 +32,7 @@ const rules = reactive<FormRules>({
 });
 
 //存储库类型
-const blobStoreTypes = ref(["File", "S3"]);
+const blobStoresTypes = ref(["File", "S3"]);
 //File类型存储库的限制类型
 const constraintType = ref([
   { value: "spaceRemainingQuota", label: "Space Remaining" },
@@ -81,8 +81,19 @@ const reset = () => {
   })
 };
 
+const resetQueryParams = () => {
+  Object.assign(queryParams, {
+    instanceCode: undefined,
+    name: undefined
+  })
+};
+
+
+const resetBlobStoresList = ()=>{
+  Object.assign(blobStoresList, []);
+};
 //处理两种不同类型的存储仓库的表单显示与隐藏
-const handleBlobStoreTypeShow = (type: string) => {
+const handleBlobStoresTypeShow = (type: string) => {
   if (type == "File") {
     s3IsShow.value = false;
     fileIsShow.value = true;
@@ -115,7 +126,7 @@ const submitForm = async () => {
     });
   form.instanceCode = toRefs(pluginInstance).instanceCode;
 
-  createFileBlobStore(form).then(response => {
+  createFileBlobStores(form).then(response => {
     if (response?.code == 200) {
       ElMessage({
         showClose: true,
@@ -134,6 +145,38 @@ const submitForm = async () => {
   });
 };
 
+//更新操作
+const updateInfo = async () => {
+  loading.value = true;
+  console.log("form:", form);
+  await formRef.value?.validate()
+    .catch((err: Error) => {
+      ElMessage.error('表单验证失败');
+      loading.value = false;
+      throw err;
+    });
+  form.instanceCode = toRefs(pluginInstance).instanceCode;
+
+  updateFileBlobStoresInfoByName(form).then(response => {
+    if (response?.code == 200) {
+      ElMessage({
+        showClose: true,
+        message: '修改成功',
+        type: 'success',
+      });
+      open.value = false;
+      reset();
+      resetQueryParams();
+      getList();
+    } else {
+      ElMessage({
+        showClose: true,
+        message: '修改失败',
+        type: 'fail',
+      });
+    }
+  });
+};
 
 // 表单取消处理
 const cancel = () => {
@@ -163,13 +206,13 @@ const clickRow = (row) => {
   queryParams.instanceCode = pluginInstance.instanceCode;
   queryParams.name = row.name;
 
-  getFileBlobStoreInfoByName(queryParams).then(response => {
+  getFileBlobStoresInfoByName(queryParams).then(response => {
     Object.assign(form, response?.data);
     open.value = true;
     delButtonShow.value = true;
     newButtonShow.value = false;
     updateButtonShow.value = true;
-
+    resetQueryParams();
     if (form.type == "File") {
       fileIsShow.value = true
     }
@@ -203,8 +246,8 @@ const unitConversion = (param: string) => {
 const deleteInfo = (name: string) => {
   queryParams.instanceCode = pluginInstance.instanceCode;
   queryParams.name = name;
-  console.log("queryParams:",queryParams);
-  deleteBlobStoreByName(queryParams).then(response => {
+  console.log("queryParams:", queryParams);
+  deleteBlobStoresByName(queryParams).then(response => {
     if (response?.code == 200) {
       ElMessage({
         showClose: true,
@@ -212,6 +255,8 @@ const deleteInfo = (name: string) => {
         type: 'success',
       });
       open.value = false;
+      reset();
+      resetQueryParams();
       getList();
     } else {
       ElMessage({
@@ -228,11 +273,14 @@ const getList = () => {
   loading.value = true;
   reset();
   queryParams.instanceCode = pluginInstance.instanceCode;
-  console.log("queryParams:",queryParams);
-  getBlobStoreList(queryParams)
+  console.log("queryParams:", queryParams);
+  console.log("qblobStoresList:", blobStoresList);
+  resetBlobStoresList();
+  console.log("hblobStoresList:", blobStoresList);
+  getBlobStoresList(queryParams)
     .then(response => {
       loading.value = false
-      Object.assign(blobStoreList, response?.data)
+      Object.assign(blobStoresList, response?.data)
     });
 };
 
@@ -240,10 +288,10 @@ const getList = () => {
 queryInstanceInfoByPluginCode(pluginCode).then((res) => {
   if (res.code == 200) {
     Object.assign(pluginInstance, res?.data[0]);
+    //获取列表
+    getList();
   }
 });
-
-getList();
 </script>
 
 <template>
@@ -256,7 +304,7 @@ getList();
     </div>
     <!--table  -->
     <div class="table-wrap">
-      <el-table v-loading="loading" :data="blobStoreList" @row-click="clickRow">
+      <el-table v-loading="loading" :data="blobStoresList" @row-click="clickRow">
         <el-table-column label="名称" align="center" key="name" prop="name" />
         <el-table-column label="类型" align="center" key="type" prop="type" />
         <el-table-column label="状态" align="center" key="state" prop="state">
@@ -285,8 +333,8 @@ getList();
       <el-form ref="formRef" :model="form" :rules="rules" label-width="200px">
         <el-form-item label="存储库类型：" prop="type" label-width="150px">
           <el-select v-model="form.type" style="width: 240px">
-            <el-option v-for="item in blobStoreTypes" :key="item" :label="item" :value="item"
-              @click="handleBlobStoreTypeShow(item)" />
+            <el-option v-for="item in blobStoresTypes" :key="item" :label="item" :value="item"
+              @click="handleBlobStoresTypeShow(item)" />
           </el-select>
         </el-form-item>
         <div v-show="fileIsShow">
@@ -326,7 +374,7 @@ getList();
       </el-form>
       <div slot="footer" class="dialog-footer" style="text-align:right;">
         <el-button type="primary" v-show="delButtonShow" @click="deleteInfo(form.name)">删 除</el-button>
-        <el-button type="primary" v-show="updateButtonShow">更 新</el-button>
+        <el-button type="primary" v-show="updateButtonShow" @click="updateInfo">更 新</el-button>
         <el-button type="primary" v-show="newButtonShow" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">返 回</el-button>
       </div>

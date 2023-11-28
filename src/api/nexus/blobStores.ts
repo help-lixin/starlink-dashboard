@@ -3,7 +3,7 @@ import {STARLINK_SERVICE} from "@/utils/env"
 
                                         
 // 获取存储库列表信息
-export const getBlobStoreList = (param:any) =>{
+export const getBlobStoresList = (param:any) =>{
     return request({
       url: STARLINK_SERVICE + '/nexus/blobstores/list',
       method: 'post',
@@ -14,7 +14,7 @@ export const getBlobStoreList = (param:any) =>{
 }
 
 // 创建存储库
-export const createFileBlobStore = (param:any) =>{
+export const createFileBlobStores = (param:any) =>{
   return request({
     url: STARLINK_SERVICE + '/nexus/blobstores/file',
     method: 'post',
@@ -26,9 +26,9 @@ export const createFileBlobStore = (param:any) =>{
 
 
 // 根据仓库名称获取存储库信息
-export const getFileBlobStoreInfoByName = (param:any)=> {
+export const getFileBlobStoresInfoByName = (param:any)=> {
   return request({
-    url: STARLINK_SERVICE + '/nexus/blobstores/file/list',
+    url: STARLINK_SERVICE + '/nexus/blobstores/file/details',
     method: 'post',
     data:param
   }).then((res)=>{
@@ -37,7 +37,7 @@ export const getFileBlobStoreInfoByName = (param:any)=> {
 }
 
 // 根据仓库名称删除存储库信息
-export const deleteBlobStoreByName = (param:any)=> {
+export const deleteBlobStoresByName = (param:any)=> {
   return request({
     url: STARLINK_SERVICE + '/nexus/blobstores/file',
     method: 'delete',
@@ -48,7 +48,7 @@ export const deleteBlobStoreByName = (param:any)=> {
 }
 
 // 更新存储库信息
-export const updateFileBlobStoreInfoByName = (updateInfo:any)=> {
+export const updateFileBlobStoresInfoByName = (updateInfo:any)=> {
   return request({
     url: STARLINK_SERVICE + '/nexus/blobstores/file',
     method: 'put',
