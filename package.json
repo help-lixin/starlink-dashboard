@@ -23,7 +23,7 @@
     "camunda-bpmn-moddle": "^4.3.0",
     "crypto-js": "^4.1.1",
     "dayjs": "^1.11.10",
-    "element-plus": "2.0.0",
+    "element-plus": "2.2.0",
     "mitt": "^3.0.1",
     "moment": "^2.29.4",
     "pinia": "^2.1.3",
