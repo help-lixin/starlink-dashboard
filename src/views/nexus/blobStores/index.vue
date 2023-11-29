@@ -8,28 +8,16 @@ import { showBlobStoresState ,addDateRange} from "@/utils/common"
 
 //插件Code
 const pluginCode = "nexus";
-//插件信息
-const pluginInstance = reactive([]);
+//实例信息列表
+const pluginInstance = ref([]);
+
 //查询列表信息
-const queryParams = reactive({
+const queryParams = ref({
   pageNum: 1,
   pageSize: 10,
   instanceCode: undefined,
   name: undefined,
   type: undefined
-});
-
-//搜索功能查询条件
-const searchParams = reactive({
-  instanceCode: undefined,
-  name: undefined,
-  type: undefined
-});
-
-//详情查询
-const detailsParams = reactive({
-  instanceCode: undefined,
-  name: undefined
 });
 
 //弹窗开关
@@ -39,10 +27,13 @@ const loading = ref(false);
 //页面标题
 const title = ref("");
 //存储仓库集合
-const blobStoresList = reactive([]);
+const blobStoresList = ref([]);
 
 // 表单信息校验
 const rules = reactive<FormRules>({
+  instanceCode: [
+    { required: true, message: "插件实例是必填项", trigger: "blur" }
+  ],
   type: [
     { required: true, message: "存储类型不能为空", trigger: "blur" }
   ],
@@ -56,6 +47,9 @@ const rules = reactive<FormRules>({
 
 //预警信息校验
 const quotaRules= reactive<FormRules>({
+  instanceCode: [
+    { required: true, message: "插件实例是必填项", trigger: "blur" }
+  ],
   type: [
     { required: true, message: "存储类型不能为空", trigger: "blur" }
   ],
@@ -73,7 +67,7 @@ const quotaRules= reactive<FormRules>({
   ]
 });
 
-const queryForm = ref(null);
+const queryFormRef = ref(null);
 //存储库类型
 const blobStoresTypes = ref(["File"]);
 //File类型存储库的限制类型
@@ -83,7 +77,7 @@ const constraintType = ref([
 ]);
 
 const formRef = ref<FormInstance>();
-const form = reactive({
+const form = ref({
   nexusId:undefined,
   instanceCode: undefined,
   type: undefined,
@@ -118,7 +112,7 @@ const dateRange = ref([]);
 
 // 重置表单
 const reset = () => {
-  Object.assign(form, {
+  form.value={
     type: undefined,
     name: undefined,
     path: undefined,
@@ -127,17 +121,17 @@ const reset = () => {
       type: undefined,
       enabled: false
     }
-  })
+  }
 };
 
 const resetQueryParams = () => {
-  Object.assign(queryParams, {
+  queryParams.value={
     pageNum: 1,
     pageSize: 10,
     instanceCode: undefined,
     name: undefined,
     type: undefined
-  })
+  }
 };
 
 //处理两种不同类型的存储仓库的表单显示与隐藏
@@ -153,11 +147,11 @@ const handleBlobStoresTypeShow = (type) => {
 //处理警戒类型的显示与隐藏
 const handleSoftQuotaShow = (val) => {
   if (val) {
-    form.softQuota.enabled = true;
+    form.value.softQuota.enabled = true;
     quotaShow.value = true;
  
   } else {
-    form.softQuota.enabled = false;
+    form.value.softQuota.enabled = false;
     quotaShow.value = false;
   }
 };
@@ -171,7 +165,7 @@ const submitForm = async () => {
       loading.value = false;
       throw err;
     });
-  createFileBlobStores(form).then(response => {
+  createFileBlobStores(form.value).then(response => {
     if (response?.code == 200) {
       ElMessage({
         showClose: true,
@@ -200,7 +194,7 @@ const updateInfo = async () => {
       throw err;
     });
   
-    createFileBlobStores(form).then(response => {
+    createFileBlobStores(form.value).then(response => {
     if (response?.code == 200) {
       ElMessage({
         showClose: true,
@@ -209,8 +203,7 @@ const updateInfo = async () => {
       });
       open.value = false;
       reset();
-      resetQueryParams();
-      getList();
+      init();
     } else {
       ElMessage({
         showClose: true,
@@ -229,16 +222,14 @@ const cancel = () => {
 
 // 处理搜索按钮
 const handleQuery = function(){
-  queryParams.instanceCode = searchParams.instanceCode;
-  queryParams.name = searchParams.name;
   getList();
 };
 
 // 处理查询按钮
 const resetQuery = function(){
-  dateRange.value = [];
-  queryForm.value.resetFields();
-  handleQuery();
+  dateRange.value = []
+  queryFormRef.value.resetFields()
+  init()
 };
 
 //处理新增按钮
@@ -248,7 +239,7 @@ const handleAdd = () => {
     if(res.code == 200){
       open.value = true;
       title.value = "新增存储库";
-      Object.assign(pluginInstance,res?.data)
+      pluginInstance.value = res?.data
       quotaShow.value = false;
       fileIsShow.value = false;
       delButtonShow.value = false;
@@ -262,21 +253,27 @@ const handleAdd = () => {
 //处理修改按钮
 const handleUpdate = (row)=>{
   reset();
-  dateRange.value={};
-  detailsParams.instanceCode = row.instanceCode;
-  detailsParams.name = row.name;
-  getFileBlobStoresInfoByName(detailsParams).then(response => {
+
+  const updateQuery = {
+    instanceCode: row.instanceCode,
+    name : row.name
+  }
+  console.log("===================================================");
+  console.log(updateQuery);
+  console.log("===================================================");
+
+  getFileBlobStoresInfoByName(updateQuery).then(response => {
     if(response.code == 200){
-      Object.assign(form, response?.data);
       open.value = true;
+      form.value = response?.data
+      
       delButtonShow.value = true;
       newButtonShow.value = false;
       updateButtonShow.value = true;
-      resetQueryParams();
-      if (form.type == "File") {
+      if (form.value.type == "File") {
         fileIsShow.value = true
       }
-      if (form.softQuota.enabled) {
+      if (form.value.softQuota.enabled) {
         quotaShow.value = true;
       }
     }else{
@@ -310,11 +307,12 @@ const unitConversion = (param) => {
     return parseInt(value * 1024).toFixed(2) + ' KB';
   }
 };
+
 //删除操作
 const handleStatusChange = (row) => {
-  queryParams.name = row.name;
-  queryParams.instanceCode = row.instanceCode;
-  deleteBlobStoresByName(queryParams).then(response => {
+  queryParams.value.name = row.name;
+  queryParams.value.instanceCode = row.instanceCode;
+  deleteBlobStoresByName(queryParams.value).then(response => {
     if (response?.code == 200) {
       ElMessage({
         showClose: true,
@@ -338,41 +336,47 @@ const handleStatusChange = (row) => {
 // 获取列表
 const getList = () => {
   loading.value = true;
-  reset();
-  getBlobStoresList(addDateRange(queryParams,dateRange.value))
+  getBlobStoresList(addDateRange(queryParams.value,dateRange.value))
     .then(response => {
       loading.value = false
       if (response?.data?.records.length > 0) {
-        blobStoresList.splice(0, blobStoresList.length);
-        Object.assign(blobStoresList, response?.data.records)
+        blobStoresList.value = response?.data.records
         total.value = response?.data?.total
       } else {
-        blobStoresList.splice(0, blobStoresList.length);
+        blobStoresList.value = []
         total.value = 0;
       }
     });
 };
 
 
-//获取插件信息
-queryInstanceInfoByPluginCode(pluginCode).then((res) => {
-  if (res.code == 200) {
-    Object.assign(pluginInstance, res?.data);
-  }
-});
+const init = ()=>{
+  // 挑选一个插件实例,进行查询
+  queryInstanceInfoByPluginCode(pluginCode).then((res) => {
+    if (res.code == 200) {
+      pluginInstance.value = res?.data
+      if(pluginInstance.value.length> 0){
+        // 挑出一个实例进行查询
+        const firstInstance = pluginInstance.value[0]
+        queryParams.value.instanceCode = firstInstance.instanceCode;
+      }
+      getList();
+    }
+  });
+}
 
-// 触发查询
-getList();
+
+init();
 </script>
 
 <template>
   <div class="main-wrapp">
-    <el-form class="form-wrap" :model="searchParams" ref="queryForm" size="small" :inline="true" v-show="showSearch"
+    <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" size="small" :inline="true" v-show="showSearch"
       label-width="68px">
       <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="插件实例" prop="instanceCode">
-            <el-select class="search-select" v-model="searchParams.instanceCode" @keyup.enter.native="handleQuery"
+            <el-select class="search-select" v-model="queryParams.instanceCode" @keyup.enter.native="handleQuery"
               placeholder="请选择实例" clearable style="width: 240px">
               <el-option v-for="item in pluginInstance" :key="item.pluginCode" :label="item.instanceName"
                 :value="item.instanceCode" />
@@ -382,7 +386,7 @@ getList();
         <el-col :span="8">
           <el-form-item label="名称" prop="name">
             <el-input
-              v-model="searchParams.name"
+              v-model="queryParams.name"
               placeholder="请输入名称"
               clearable
               style="width: 240px"
@@ -395,7 +399,7 @@ getList();
         <el-col :span="8">
           <el-form-item label="类型" prop="type">
             <el-input
-              v-model="searchParams.type"
+              v-model="queryParams.type"
               placeholder="请输入类型"
               clearable
               style="width: 240px"
