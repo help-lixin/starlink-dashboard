@@ -16,7 +16,7 @@ export const getBlobStoresList = (param:any) =>{
 // 创建存储库
 export const createFileBlobStores = (param:any) =>{
   return request({
-    url: STARLINK_SERVICE + '/nexus/blobstores/file',
+    url: STARLINK_SERVICE + '/nexus/blobstores/file/add',
     method: 'post',
     data: param
   }).then((res)=>{
@@ -47,15 +47,5 @@ export const deleteBlobStoresByName = (param:any)=> {
   });
 }
 
-// 更新存储库信息
-export const updateFileBlobStoresInfoByName = (updateInfo:any)=> {
-  return request({
-    url: STARLINK_SERVICE + '/nexus/blobstores/file',
-    method: 'put',
-    data: updateInfo
-  }).then((res)=>{
-      return res?.data;
-  });
-}
 
 

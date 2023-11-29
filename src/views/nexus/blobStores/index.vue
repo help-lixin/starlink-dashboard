@@ -1,38 +1,74 @@
 <script setup lang="ts">
 // @ts-nocheck  
-import { Plus } from '@element-plus/icons-vue'
+import { Plus,Search,RefreshRight } from '@element-plus/icons-vue'
 import { queryInstanceInfoByPluginCode } from "@/api/common-api"
+import { dayjs } from "@/utils/common-dayjs"
 import { getBlobStoresList, createFileBlobStores, getFileBlobStoresInfoByName, deleteBlobStoresByName, updateFileBlobStoresInfoByName } from "@/api/nexus/blobStores"
-import { showBlobStoresState } from "@/utils/common"
+import { showBlobStoresState ,addDateRange} from "@/utils/common"
 
+//插件Code
 const pluginCode = "nexus";
-
-const pluginInstance = reactive({});
+//插件信息
+const pluginInstance = reactive([]);
 //查询列表信息
 const queryParams = reactive({
+  pageNum: 1,
+  pageSize: 10,
   instanceCode: undefined,
-  name: undefined
+  name: undefined,
+  type: undefined
 });
+
+//搜索功能查询条件
+const searchParams = reactive({
+  instanceCode: undefined,
+  name: undefined,
+  type: undefined
+});
+//弹窗开关
 const open = ref(false);
+//页面遮罩开关
 const loading = ref(false);
+//页面标题
 const title = ref("");
+//存储仓库集合
 const blobStoresList = reactive([]);
 
-// 表单规则
+// 表单信息校验
 const rules = reactive<FormRules>({
   type: [
     { required: true, message: "存储类型不能为空", trigger: "blur" }
   ],
   name: [
-    { required: true, message: "存储仓库不能为空", trigger: "blur" }
+    { required: true, message: "存储仓库名称不能为空", trigger: "blur" }
   ],
   path: [
     { required: true, message: "路径不能为空", trigger: "blur" }
   ]
 });
 
+//预警信息校验
+const quotaRules= reactive<FormRules>({
+  type: [
+    { required: true, message: "存储类型不能为空", trigger: "blur" }
+  ],
+  name: [
+    { required: true, message: "存储仓库名称不能为空", trigger: "blur" }
+  ],
+  path: [
+    { required: true, message: "路径不能为空", trigger: "blur" }
+  ],
+  softQuotaLimit: [
+    { required: true, message: "警戒值不能为空", trigger: "blur" }
+  ],
+  softQuotaType: [
+    { required: true, message: "限制类型不能为空", trigger: "blur" }
+  ]
+});
+
+const queryForm = ref(null);
 //存储库类型
-const blobStoresTypes = ref(["File", "S3"]);
+const blobStoresTypes = ref(["File"]);
 //File类型存储库的限制类型
 const constraintType = ref([
   { value: "spaceRemainingQuota", label: "Space Remaining" },
@@ -41,6 +77,7 @@ const constraintType = ref([
 
 const formRef = ref<FormInstance>();
 const form = reactive({
+  nexusId:undefined,
   instanceCode: undefined,
   type: undefined,
   name: undefined,
@@ -48,10 +85,11 @@ const form = reactive({
   softQuota: {
     limit: undefined,
     type: undefined,
-    enabled: false
+    enabled: undefined
   }
 });
-
+//分页信息
+const total = ref(0);
 //是否显示file类型的表单
 const fileIsShow = ref(false);
 //是否显示s3类型的表单
@@ -66,6 +104,10 @@ const newButtonShow = ref(true);
 const updateButtonShow = ref(false);
 //表单中name输入框是否可用
 const nameDisabled = ref(true);
+// 显示搜索条件
+const showSearch = ref(true);
+  // 日期范围
+const dateRange = ref([]);
 
 // 重置表单
 const reset = () => {
@@ -83,31 +125,30 @@ const reset = () => {
 
 const resetQueryParams = () => {
   Object.assign(queryParams, {
+    pageNum: 1,
+    pageSize: 10,
     instanceCode: undefined,
-    name: undefined
+    name: undefined,
+    type: undefined
   })
 };
 
-
-const resetBlobStoresList = ()=>{
-  Object.assign(blobStoresList, []);
-};
 //处理两种不同类型的存储仓库的表单显示与隐藏
-const handleBlobStoresTypeShow = (type: string) => {
+const handleBlobStoresTypeShow = (type) => {
   if (type == "File") {
-    s3IsShow.value = false;
     fileIsShow.value = true;
   } else {
     fileIsShow.value = false;
-    s3IsShow.value = true;
+
   }
 };
 
-//处理两种不同类型的存储仓库的表单显示与隐藏
-const handleSoftQuotaShow = (val: any) => {
+//处理警戒类型的显示与隐藏
+const handleSoftQuotaShow = (val) => {
   if (val) {
     form.softQuota.enabled = true;
     quotaShow.value = true;
+ 
   } else {
     form.softQuota.enabled = false;
     quotaShow.value = false;
@@ -117,15 +158,12 @@ const handleSoftQuotaShow = (val: any) => {
 // 表单提交处理
 const submitForm = async () => {
   loading.value = true;
-  console.log("form:", form);
   await formRef.value?.validate()
     .catch((err: Error) => {
       ElMessage.error('表单验证失败');
       loading.value = false;
       throw err;
     });
-  form.instanceCode = toRefs(pluginInstance).instanceCode;
-
   createFileBlobStores(form).then(response => {
     if (response?.code == 200) {
       ElMessage({
@@ -148,16 +186,14 @@ const submitForm = async () => {
 //更新操作
 const updateInfo = async () => {
   loading.value = true;
-  console.log("form:", form);
   await formRef.value?.validate()
     .catch((err: Error) => {
       ElMessage.error('表单验证失败');
       loading.value = false;
       throw err;
     });
-  form.instanceCode = toRefs(pluginInstance).instanceCode;
-
-  updateFileBlobStoresInfoByName(form).then(response => {
+  
+    createFileBlobStores(form).then(response => {
     if (response?.code == 200) {
       ElMessage({
         showClose: true,
@@ -184,55 +220,80 @@ const cancel = () => {
   reset();
 };
 
+// 处理搜索按钮
+const handleQuery = function(){
+  queryParams.instanceCode = searchParams.instanceCode;
+  queryParams.name = searchParams.name;
+  getList();
+};
+
+// 处理查询按钮
+const resetQuery = function(){
+  queryForm.value.resetFields();
+  handleQuery();
+};
 
 //处理新增按钮
 const handleAdd = () => {
   reset();
-  quotaShow.value = false;
-  fileIsShow.value = false;
-  delButtonShow.value = false;
-  updateButtonShow.value = false;
-  newButtonShow.value = true;
-  open.value = true;
-  nameDisabled.value = false;
-  title.value = "新增存储库";
-};
-
-//表单行的点击事件：获取详情
-const clickRow = (row) => {
-  nameDisabled.value = true;
-  quotaShow.value = false;
-  reset();
-  queryParams.instanceCode = pluginInstance.instanceCode;
-  queryParams.name = row.name;
-
-  getFileBlobStoresInfoByName(queryParams).then(response => {
-    Object.assign(form, response?.data);
-    open.value = true;
-    delButtonShow.value = true;
-    newButtonShow.value = false;
-    updateButtonShow.value = true;
-    resetQueryParams();
-    if (form.type == "File") {
-      fileIsShow.value = true
-    }
-    if (response?.data.softQuota.enabled) {
-      quotaShow.value = true;
+  queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
+    if(res.code == 200){
+      open.value = true;
+      title.value = "新增存储库";
+      Object.assign(pluginInstance,res?.data)
+      quotaShow.value = false;
+      fileIsShow.value = false;
+      delButtonShow.value = false;
+      updateButtonShow.value = false;
+      newButtonShow.value = true;
+      nameDisabled.value = false;
     }
   });
 };
 
+//处理修改按钮
+const handleUpdate = (row)=>{
+  reset();
+  console.log("queryParams:",queryParams);
+  queryParams.instanceCode = row.instanceCode;
+  queryParams.name = row.name;
+  getFileBlobStoresInfoByName(queryParams).then(response => {
+    if(response.code == 200){
+      Object.assign(form, response?.data);
+      form.instanceCode = row.instanceCode;
+      open.value = true;
+      delButtonShow.value = true;
+      newButtonShow.value = false;
+      updateButtonShow.value = true;
+      resetQueryParams();
+      if (form.type == "File") {
+        fileIsShow.value = true
+      }
+      if (form.softQuota.enabled) {
+        quotaShow.value = true;
+      }
+    }else{
+      ElMessage({
+        showClose: true,
+        message: '查询详情失败',
+        type: 'fail',
+      });
+    }
+    
+  });
+}
+
 //B转MB
-const byteToMB = (param: string) => {
+const byteToMB = (param) => {
   return parseInt(param) / (1024 * 1024);
 };
-
+//MB转GB
 const mBToGB = (param) => {
   return parseInt(param) / 1024;
 };
 
 //显示单位，param=Byte，大于1024转为GB，保留2位小数
-const unitConversion = (param: string) => {
+const unitConversion = (param) => {
   let value = byteToMB(param);
   if (mBToGB(value) > 1) {
     return mBToGB(value).toFixed(2) + " GB";
@@ -242,11 +303,10 @@ const unitConversion = (param: string) => {
     return parseInt(value * 1024).toFixed(2) + ' KB';
   }
 };
-
-const deleteInfo = (name: string) => {
-  queryParams.instanceCode = pluginInstance.instanceCode;
-  queryParams.name = name;
-  console.log("queryParams:", queryParams);
+//删除操作
+const handleStatusChange = (row) => {
+  queryParams.name = row.name;
+  queryParams.instanceCode = row.instanceCode;
   deleteBlobStoresByName(queryParams).then(response => {
     if (response?.code == 200) {
       ElMessage({
@@ -272,58 +332,148 @@ const deleteInfo = (name: string) => {
 const getList = () => {
   loading.value = true;
   reset();
-  queryParams.instanceCode = pluginInstance.instanceCode;
-  console.log("queryParams:", queryParams);
-  console.log("qblobStoresList:", blobStoresList);
-  resetBlobStoresList();
-  console.log("hblobStoresList:", blobStoresList);
-  getBlobStoresList(queryParams)
+  getBlobStoresList(addDateRange(queryParams,dateRange.value))
     .then(response => {
       loading.value = false
-      Object.assign(blobStoresList, response?.data)
+      if (response?.data?.records.length > 0) {
+        blobStoresList.splice(0, blobStoresList.length);
+        Object.assign(blobStoresList, response?.data.records)
+        total.value = response?.data?.total
+      } else {
+        blobStoresList.splice(0, blobStoresList.length);
+        total.value = 0;
+      }
     });
 };
+
 
 //获取插件信息
 queryInstanceInfoByPluginCode(pluginCode).then((res) => {
   if (res.code == 200) {
-    Object.assign(pluginInstance, res?.data[0]);
-    //获取列表
-    getList();
+    Object.assign(pluginInstance, res?.data);
   }
 });
+
+// 触发查询
+getList();
 </script>
 
 <template>
   <div class="main-wrapp">
+    <el-form class="form-wrap" :model="searchParams" ref="queryForm" size="small" :inline="true" v-show="showSearch"
+      label-width="68px">
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-form-item label="插件实例" prop="instanceCode">
+            <el-select class="search-select" v-model="searchParams.instanceCode" @keyup.enter.native="handleQuery"
+              placeholder="请选择实例" clearable style="width: 240px">
+              <el-option v-for="item in pluginInstance" :key="item.pluginCode" :label="item.instanceName"
+                :value="item.instanceCode" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="名称" prop="name">
+            <el-input
+              v-model="searchParams.name"
+              placeholder="请输入名称"
+              clearable
+              style="width: 240px"
+              @keyup.enter.native="handleQuery"
+            />
+          </el-form-item>
+        </el-col> 
+      </el-row>
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-form-item label="类型" prop="type">
+            <el-input
+              v-model="searchParams.type"
+              placeholder="请输入类型"
+              clearable
+              style="width: 240px"
+              @keyup.enter.native="handleQuery"
+            />
+          </el-form-item>
+        </el-col> 
+        <el-col :span="8">
+          <el-form-item label="创建时间">
+            <el-date-picker
+              v-model="dateRange"
+              style="width: 240px"
+              value-format="YYYY-MM-DD"
+              type="daterange"
+              range-separator="-"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+            ></el-date-picker>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <div>
+            <el-button type="primary" size="small" @click="handleQuery"><el-icon>
+                <Search />
+              </el-icon>搜索</el-button>
+            <el-button size="small" @click="resetQuery"><el-icon>
+                <RefreshRight />
+              </el-icon>重置</el-button>
+          </div>
+        </el-col>
+      </el-row>
+    </el-form>
     <!-- add BlobStore -->
     <div class="option-wrap">
-      <el-button type="primary" plain size="default" @click="handleAdd"><el-icon>
-          <Plus />
+      <el-button type="primary" plain size="default" @click="handleAdd"
+      v-hasPerms="['/nexus/blobstores/file/add']"><el-icon>
+          <Plus/>
         </el-icon>新增</el-button>
     </div>
     <!--table  -->
     <div class="table-wrap">
-      <el-table v-loading="loading" :data="blobStoresList" @row-click="clickRow">
+      <el-table v-loading="loading" :data="blobStoresList">
         <el-table-column label="名称" align="center" key="name" prop="name" />
         <el-table-column label="类型" align="center" key="type" prop="type" />
         <el-table-column label="状态" align="center" key="state" prop="state">
-          <template v-slot="scope">
+          <template #default="scope">
             {{ showBlobStoresState(scope.row.state) }}
           </template>
         </el-table-column>
         <el-table-column label="BLOB数量" align="center" key="blobCount" prop="blobCount" />
         <el-table-column label="使用空间" align="center" key="totalSize" prop="totalSize">
-          <template v-slot="scope">
+          <template #default="scope">
             {{ unitConversion(scope.row.totalSize) }}
           </template>
         </el-table-column>
         <el-table-column label="空间总大小" align="center" key="availableSpace" prop="availableSpace">
-          <template v-slot="scope">
+          <template #default="scope">
             {{ unitConversion(scope.row.availableSpace) }}
           </template>
         </el-table-column>
+        <el-table-column label="创建时间" align="center" prop="createTime"  width="180">
+            <template #default="scope">
+              {{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss") }}
+            </template>
+          </el-table-column>
+        <el-table-column label="操作" align="center" width="220" >
+            <template #default="scope">
+             <div class="action-btn">
+              <el-button size="default" @click="handleUpdate(scope.row)" v-hasPerms="['/nexus/blobstores/file/add']">修改</el-button>
+              <el-button size="default" @click="handleStatusChange(scope.row)">删除</el-button>
+             </div>
+            </template>
+          </el-table-column>
       </el-table>
+    </div>
+    <div class="page-wrap">
+      <el-pagination
+      v-show="total>0"
+      :total="total"
+      :page-sizes=[10,20]
+      background layout="prev, pager, next" 
+      v-model:current-page="queryParams.pageNum"
+      v-model:page-size="queryParams.pageSize"
+      @current-change="getList"
+    />
     </div>
   </div>
 
@@ -331,6 +481,21 @@ queryInstanceInfoByPluginCode(pluginCode).then((res) => {
   <el-dialog :title="title" v-model="open" width="800px" append-to-body>
     <div class="main-wrapp">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="200px">
+        <el-form-item label="插件实例" prop="instanceCode" label-width="150px">
+            <el-select
+              class="search-select2" 
+              v-model="form.instanceCode"
+              @keyup.enter.native="handleQuery"
+              placeholder="请选择插件实例"
+              clearable
+              style="width: 240px"
+            >
+            <el-option v-for="item in pluginInstance"
+              :key="item.pluginCode"
+              :label="item.instanceName"
+              :value="item.instanceCode"/>
+            </el-select>
+          </el-form-item>
         <el-form-item label="存储库类型：" prop="type" label-width="150px">
           <el-select v-model="form.type" style="width: 240px">
             <el-option v-for="item in blobStoresTypes" :key="item" :label="item" :value="item"
@@ -339,7 +504,7 @@ queryInstanceInfoByPluginCode(pluginCode).then((res) => {
         </el-form-item>
         <div v-show="fileIsShow">
           <el-row>
-            <el-form-item label="存储库名称" prop="name" :required="true" label-width="150px">
+            <el-form-item label="存储库名称" prop="name"  label-width="150px">
               <el-input v-model="form.name" placeholder="请输入库名称" maxlength="30" style="width:240px"
                 :disabled="nameDisabled" />
             </el-form-item>
@@ -373,7 +538,6 @@ queryInstanceInfoByPluginCode(pluginCode).then((res) => {
         </div>
       </el-form>
       <div slot="footer" class="dialog-footer" style="text-align:right;">
-        <el-button type="primary" v-show="delButtonShow" @click="deleteInfo(form.name)">删 除</el-button>
         <el-button type="primary" v-show="updateButtonShow" @click="updateInfo">更 新</el-button>
         <el-button type="primary" v-show="newButtonShow" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">返 回</el-button>
