@@ -396,13 +396,13 @@
           <el-table-column label="邮箱" align="center" key="email" prop="email"  :show-overflow-tooltip="true"  width="100" />
           <el-table-column label="成员名称" align="center" key="userName" prop="userName"  :show-overflow-tooltip="true"  width="100" />
           <el-table-column label="状态" align="center" key="status"  width="100">
-            <template v-slot="scope">
+            <template #default="scope">
               {{  showStatusFun(scope.row.status) }}
             </template>
           </el-table-column>
-          <el-table-column label="创建时间" align="center" prop="createdTime"  width="180">
-            <template v-slot="scope">
-              <span>{{ dayjs(scope.row.createdTime).format("YYYY-MM-DD HH:mm:ss")   }}</span>
+          <el-table-column label="创建时间" align="center" prop="createTime"  width="180">
+            <template #default="scope">
+              <span>{{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}</span>
             </template>
           </el-table-column>
           <el-table-column
@@ -410,7 +410,7 @@
             align="center"
             width="220"
           >
-            <template v-slot="scope">
+            <template #default="scope">
              <div class="action-btn">
               <el-button
                 size="default"
