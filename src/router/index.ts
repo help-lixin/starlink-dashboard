@@ -56,22 +56,6 @@ export const dynamicRoutes = [
     },
   },
   {
-    path : '/system/env/index',
-    name : 'env',
-    component: ()=> import("../views/system/env/index.vue"),
-    meta: {
-        requiresAuth: true
-    },
-  },
-  {
-    path : '/system/group/index',
-    name : 'group',
-    component: ()=> import("../views/system/group/index.vue"),
-    meta: {
-        requiresAuth: true
-    },
-  },
-  {
     path : '/system/plugin/definition/index',
     name : 'plugin-definition',
     component: ()=> import("../views/system/plugin/definition/index.vue"),
