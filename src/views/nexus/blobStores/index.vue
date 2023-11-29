@@ -25,6 +25,13 @@ const searchParams = reactive({
   name: undefined,
   type: undefined
 });
+
+//详情查询
+const detailsParams = reactive({
+  instanceCode: undefined,
+  name: undefined
+});
+
 //弹窗开关
 const open = ref(false);
 //页面遮罩开关
@@ -229,6 +236,7 @@ const handleQuery = function(){
 
 // 处理查询按钮
 const resetQuery = function(){
+  dateRange.value = [];
   queryForm.value.resetFields();
   handleQuery();
 };
@@ -254,13 +262,12 @@ const handleAdd = () => {
 //处理修改按钮
 const handleUpdate = (row)=>{
   reset();
-  console.log("queryParams:",queryParams);
-  queryParams.instanceCode = row.instanceCode;
-  queryParams.name = row.name;
-  getFileBlobStoresInfoByName(queryParams).then(response => {
+  dateRange.value={};
+  detailsParams.instanceCode = row.instanceCode;
+  detailsParams.name = row.name;
+  getFileBlobStoresInfoByName(detailsParams).then(response => {
     if(response.code == 200){
       Object.assign(form, response?.data);
-      form.instanceCode = row.instanceCode;
       open.value = true;
       delButtonShow.value = true;
       newButtonShow.value = false;
