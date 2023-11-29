@@ -134,27 +134,7 @@ const resetQueryParams = () => {
   }
 };
 
-//处理两种不同类型的存储仓库的表单显示与隐藏
-const handleBlobStoresTypeShow = (type) => {
-  if (type == "File") {
-    fileIsShow.value = true;
-  } else {
-    fileIsShow.value = false;
 
-  }
-};
-
-//处理警戒类型的显示与隐藏
-const handleSoftQuotaShow = (val) => {
-  if (val) {
-    form.value.softQuota.enabled = true;
-    quotaShow.value = true;
- 
-  } else {
-    form.value.softQuota.enabled = false;
-    quotaShow.value = false;
-  }
-};
 
 // 表单提交处理
 const submitForm = async () => {
@@ -173,13 +153,10 @@ const submitForm = async () => {
         type: 'success',
       });
       open.value = false;
-      getList();
+      
+      queryAll();
     } else {
-      ElMessage({
-        showClose: true,
-        message: '创建失败',
-        type: 'fail',
-      });
+      ElMessage.error('创建失败');
     }
   });
 };
@@ -194,7 +171,8 @@ const updateInfo = async () => {
       throw err;
     });
   
-    createFileBlobStores(form.value).then(response => {
+    createFileBlobStores(form.value) //
+    .then(response => {
     if (response?.code == 200) {
       ElMessage({
         showClose: true,
@@ -202,14 +180,11 @@ const updateInfo = async () => {
         type: 'success',
       });
       open.value = false;
-      reset();
-      init();
+
+      // 重新进行查询
+      queryAll();
     } else {
-      ElMessage({
-        showClose: true,
-        message: '修改失败',
-        type: 'fail',
-      });
+      ElMessage.error('修改失败');
     }
   });
 };
@@ -229,28 +204,24 @@ const handleQuery = function(){
 const resetQuery = function(){
   dateRange.value = []
   queryFormRef.value.resetFields()
-  init()
+  queryAll()
 };
 
 //处理新增按钮
 const handleAdd = () => {
   reset();
-  queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
-    if(res.code == 200){
-      open.value = true;
-      title.value = "新增存储库";
-      pluginInstance.value = res?.data
-      quotaShow.value = false;
-      fileIsShow.value = false;
-      delButtonShow.value = false;
-      updateButtonShow.value = false;
-      newButtonShow.value = true;
-      nameDisabled.value = false;
-    }
-  });
+  open.value = true;
+  title.value = "新增存储库";
+  pluginInstance.value = res?.data
+  quotaShow.value = false;
+  fileIsShow.value = false;
+  delButtonShow.value = false;
+  updateButtonShow.value = false;
+  newButtonShow.value = true;
+  nameDisabled.value = false;
 };
 
-//处理修改按钮
+//修改时,弹出修改界面
 const handleUpdate = (row)=>{
   reset();
 
@@ -258,14 +229,13 @@ const handleUpdate = (row)=>{
     instanceCode: row.instanceCode,
     name : row.name
   }
-  console.log("===================================================");
-  console.log(updateQuery);
-  console.log("===================================================");
 
   getFileBlobStoresInfoByName(updateQuery).then(response => {
     if(response.code == 200){
       open.value = true;
+
       form.value = response?.data
+      form.value.instanceCode = updateQuery.instanceCode;
       
       delButtonShow.value = true;
       newButtonShow.value = false;
@@ -287,26 +257,7 @@ const handleUpdate = (row)=>{
   });
 }
 
-//B转MB
-const byteToMB = (param) => {
-  return parseInt(param) / (1024 * 1024);
-};
-//MB转GB
-const mBToGB = (param) => {
-  return parseInt(param) / 1024;
-};
 
-//显示单位，param=Byte，大于1024转为GB，保留2位小数
-const unitConversion = (param) => {
-  let value = byteToMB(param);
-  if (mBToGB(value) > 1) {
-    return mBToGB(value).toFixed(2) + " GB";
-  } else if (value > 1) {
-    return parseInt(value).toFixed(2) + ' MB';
-  } else {
-    return parseInt(value * 1024).toFixed(2) + ' KB';
-  }
-};
 
 //删除操作
 const handleStatusChange = (row) => {
@@ -350,23 +301,74 @@ const getList = () => {
 };
 
 
-const init = ()=>{
-  // 挑选一个插件实例,进行查询
-  queryInstanceInfoByPluginCode(pluginCode).then((res) => {
-    if (res.code == 200) {
-      pluginInstance.value = res?.data
-      if(pluginInstance.value.length> 0){
-        // 挑出一个实例进行查询
-        const firstInstance = pluginInstance.value[0]
-        queryParams.value.instanceCode = firstInstance.instanceCode;
-      }
-      getList();
-    }
+const queryAll = ()=>{
+  queryInstances()
+  .then(()=>{
+    getList();
   });
 }
 
+//处理两种不同类型的存储仓库的表单显示与隐藏
+const handleBlobStoresTypeShow = (type) => {
+  if (type == "File") {
+    fileIsShow.value = true;
+  } else {
+    fileIsShow.value = false;
 
-init();
+  }
+};
+
+//处理警戒类型的显示与隐藏
+const handleSoftQuotaShow = (val) => {
+  if (val) {
+    form.value.softQuota.enabled = true;
+    quotaShow.value = true;
+ 
+  } else {
+    form.value.softQuota.enabled = false;
+    quotaShow.value = false;
+  }
+};
+
+const queryInstances = ()=>{
+  // 挑选一个插件实例,进行查询
+  return queryInstanceInfoByPluginCode(pluginCode).then((res) => {
+      if (res.code == 200) {
+        pluginInstance.value = res?.data
+        if(pluginInstance.value.length> 0){
+          // 挑出一个实例进行查询
+          const firstInstance = pluginInstance.value[0]
+          queryParams.value.instanceCode = firstInstance.instanceCode;
+        }
+      }
+    });
+}
+
+//B转MB
+const byteToMB = (param) => {
+  return parseInt(param) / (1024 * 1024);
+};
+
+
+//MB转GB
+const mBToGB = (param) => {
+  return parseInt(param) / 1024;
+};
+
+//显示单位，param=Byte，大于1024转为GB，保留2位小数
+const unitConversion = (param) => {
+  let value = byteToMB(param);
+  if (mBToGB(value) > 1) {
+    return mBToGB(value).toFixed(2) + " GB";
+  } else if (value > 1) {
+    return parseInt(value).toFixed(2) + ' MB';
+  } else {
+    return parseInt(value * 1024).toFixed(2) + ' KB';
+  }
+};
+
+
+queryAll();
 </script>
 
 <template>
@@ -496,7 +498,7 @@ init();
             <el-select
               class="search-select2" 
               v-model="form.instanceCode"
-              @keyup.enter.native="handleQuery"
+              @keyup.enter.native="queryInstances"
               placeholder="请选择插件实例"
               clearable
               style="width: 240px"
