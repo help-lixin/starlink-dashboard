@@ -56,7 +56,7 @@
       Object.assign(form,{
         id: undefined,
         projectName: undefined,
-        visibility: undefined,
+        visibility: "PRIVATE",
         namespaceByGroup : undefined,
         path: undefined,
         remark: undefined,
