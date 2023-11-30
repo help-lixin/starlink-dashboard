@@ -48,21 +48,21 @@ return request({
 }
 
 // 根据id查询项目信息
-export function queryProjectInfoById(id:string,env:any) {
+export function queryProjectInfoById(id:string,instanceCode:any) {
 return request({
-        url: STARLINK_SERVICE + '/gitlab/project/info/'+id,
-        method: 'get',
-        params: env
+        url: STARLINK_SERVICE + '/gitlab/project/info/'+id+"/"+instanceCode,
+        method: 'get'
     }).then((res)=>{
         return res?.data;
     });
 }
 
 // 项目状态修改
-export function changeProjectStatus(projectId:number, status:number) {
+export function changeProjectStatus(changeStatusParams:any) {
     return request({
-        url: STARLINK_SERVICE + '/gitlab/project/changeStatus/'+projectId+"/"+status,
-        method: 'put'
+        url: STARLINK_SERVICE + '/gitlab/project/changeStatus',
+        method: 'put',
+        data: changeStatusParams
     }).then((res)=>{
         return res?.data;
     });

@@ -136,14 +136,13 @@
   // 处理更新按钮
   const handleUpdate = function(row){
     reset();
-    queryProjectParams.projectName = row.gitlabProjectName
     queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
       if(res.code == 200){
         pluginInstance.value = res?.data
       }
     });
     queryParams.projectName = row.gitlabProjectName
-    queryProjectInfoById(row.id,queryProjectParams).then(response => {
+    queryProjectInfoById(row.id,queryParams.instanceCode).then(response => {
       if(response?.code == 200){
         Object.assign(form,response?.data)
         open.value = true;
@@ -204,13 +203,19 @@
   }
 
   const handleStatusChange = (row)=>{
-    const projectId = row.id || ids.value;
+    console.log(row)
+
+    const changeStatusParams = reactive({
+      id: row.id,
+      status: undefined,
+      instanceCode: queryParams.instanceCode
+    })
     const curStatus = row.status
     let msg = ""
     if(curStatus == 1){
-      msg = '是否禁用编号为"' + projectId + '"的数据项？'
+      msg = '是否禁用编号为"' + changeStatusParams.id + '"的数据项？'
     }else{
-      msg = '是否启用编号为"' + projectId + '"的数据项？'
+      msg = '是否启用编号为"' + changeStatusParams.id + '"的数据项？'
     }
 
     ElMessageBox.confirm(
@@ -222,13 +227,12 @@
         type: 'warning',
       }
     ).then(() => {
-        let tmpStatus;
         if(curStatus == 0){
-          tmpStatus = 1
+          changeStatusParams.status = 1
         }else{
-          tmpStatus = 0
+          changeStatusParams.status = 0
         }
-        changeProjectStatus(projectId,tmpStatus).then((res)=>{
+        changeProjectStatus(changeStatusParams).then((res)=>{
             if(res.code == 200){
                 // 重置查询表单,并进行查询
                 queryParams.pageNum=1
@@ -398,7 +402,7 @@
               <el-button
                 size="default"
                 @click="handleStatusChange(scope.row)"
-                v-hasPerms="['/gitlab/project/changeStatus/**']"
+                v-hasPerms="['/gitlab/project/changeStatus']"
               >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
              </div>
             </template>
