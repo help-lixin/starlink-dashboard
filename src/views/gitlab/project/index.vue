@@ -5,11 +5,8 @@
   import { dayjs } from "@/utils/common-dayjs"
   import { pageList , addProject , queryProjectInfoById , changeProjectStatus} from "@/api/gitlab/projects"
   import { groupList } from "@/api/gitlab/groups"
-  import { userList} from "@/api/gitlab/users"
  
   const queryForm = ref(null);
-  // 日期范围
-  const daterangeArray = ref('')
 
   //查询列表信息
   const queryParams = reactive({
@@ -24,21 +21,6 @@
     visibility: undefined
   })
 
-    //查询列表信息
-    const groupParams = reactive({
-    pageNum: 1,
-    pageSize: 10,
-    beginTime: undefined,
-    endTime: undefined,
-    status: undefined,
-    instanceCode: undefined,
-    groupName: undefined
-  })
-
-  // 根据项目名查询项目信息
-  const queryProjectParams = reactive({
-  })
-
   // 权限列表
   const visibilityArr = ref(["PUBLIC", "PRIVATE", "INTERNAL"])
 
@@ -48,13 +30,6 @@
   const showSearch = ref(true)
   // 日期范围
   const dateRange = ref([])
-
-  // 选中数项目
-  const ids = ref([])
-  // 非单个禁用
-  const single = ref(true)
-  // 非多个禁用
-  const multiple = ref(true)
 
   const total= ref(0)
   const projectList = reactive([])
@@ -66,7 +41,6 @@
   const form = reactive({})
   const title = ref("")
   const pluginInstance = reactive([]);
-  const users = reactive([]);
   const pluginCode = "gitlab"
 
   // 表单规则
@@ -83,6 +57,7 @@
         id: undefined,
         projectName: undefined,
         visibility: undefined,
+        namespaceByGroup : undefined,
         path: undefined,
         remark: undefined,
         status: undefined,
@@ -92,7 +67,6 @@
 
   // 获取列表
   const getList = ()=>{
-
     loading.value = true;
     pageList(addDateRange(queryParams, dateRange.value))
     .then(response => {
@@ -116,33 +90,25 @@
 
   // 处理查询按钮
   const resetQuery = function(){
-    dateRange.value = [];
-    queryForm.value.resetFields();
-    handleQuery();
+    dateRange.value = []
+    queryForm.value.resetFields()
+    handleQuery()
   }
 
   // 处理新增按钮
   const handleAdd = function(){
-    reset();
-    queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
-      if(res.code == 200){
-        open.value = true;
-        title.value = "添加项目";
-        pluginInstance.value = res?.data
-      }
-    });
+    reset()
+    formInitFunc()
+    open.value = true
+    title.value = "添加项目"
   }
 
   // 处理更新按钮
   const handleUpdate = function(row){
-    reset();
-    queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
-      if(res.code == 200){
-        pluginInstance.value = res?.data
-      }
-    });
-    queryParams.projectName = row.gitlabProjectName
-    queryProjectInfoById(row.id,queryParams.instanceCode).then(response => {
+    reset()
+    formInitFunc()
+    queryProjectInfoById(row.id,queryParams.instanceCode)
+    .then(response => {
       if(response?.code == 200){
         Object.assign(form,response?.data)
         open.value = true;
@@ -154,9 +120,9 @@
 
   // 多选框选中数据
   const handleSelectionChange = function(selection){
-    ids.value = selection.map(item => item.id);
-    single.value = selection.length != 1;
-    multiple.value = !selection.length;
+    // ids.value = selection.map(item => item.id);
+    // single.value = selection.length != 1;
+    // multiple.value = !selection.length;
   }
 
   // 表单提交处理
@@ -203,13 +169,11 @@
   }
 
   const handleStatusChange = (row)=>{
-    console.log(row)
-
-    const changeStatusParams = reactive({
+    const changeStatusParams = {
       id: row.id,
       status: undefined,
       instanceCode: queryParams.instanceCode
-    })
+    };
     const curStatus = row.status
     let msg = ""
     if(curStatus == 1){
@@ -234,8 +198,6 @@
         }
         changeProjectStatus(changeStatusParams).then((res)=>{
             if(res.code == 200){
-                // 重置查询表单,并进行查询
-                queryParams.pageNum=1
                 getList()
                 ElMessage({
                   type: 'success',
@@ -253,18 +215,18 @@
     reset();
   }
 
-  userList(queryParams).then((res)=>{
-      if(res.code == 200){
-        users.value = res?.data?.records
-      }
-  });
+  // form表单初始化,尽量在表单使用时初始化,会影响列表页面的渲染时间.
+  const formInitFunc = ()=>{
+    // TODO 伍岳林,不允许:共用分页接口,后端独立开接口来承载数据,将来权限可以更加细粒度.
+    groupList(addDateRange(queryParams, dateRange.value))
+    .then((res)=>{
+        if(res.code == 200){
+          Object.assign(groups,res?.data?.records)
+        }
+    });
+  }
 
-  groupList(addDateRange(groupParams, dateRange.value)).then((res)=>{
-      if(res.code == 200){
-        Object.assign(groups,res?.data?.records)
-      }
-  });
-
+  // 进入页面,选择一个实例进行查询
   queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
       if(res.code == 200){
         Object.assign(pluginInstance,res?.data)
@@ -273,8 +235,6 @@
       // 触发查询
       getList();
   });
-
-  
 </script>
 
 <template>
@@ -427,13 +387,43 @@
       <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
         <el-row>
           <el-col :span="12">
-            <el-form-item label="项目编号" prop="id" :readonly="true">
-              <el-input v-model="form.id" placeholder="项目编号" maxlength="30" :disabled="true"/>
+            <el-form-item label="插件实例" prop="instanceCode">
+              <el-select
+              class="search-select2"
+                v-model="form.instanceCode"
+                @keyup.enter.native="handleQuery"
+                placeholder="请选择实例"
+                clearable
+                style="width: 240px"
+              >
+              <el-option v-for="item in pluginInstance"
+                :key="item.pluginCode"
+                :label="item.instanceName"
+                :value="item.instanceCode"/>
+              </el-select>
             </el-form-item>
-          </el-col>
+          </el-col> 
           <el-col :span="12">
             <el-form-item label="项目名称" prop="projectName">
               <el-input v-model="form.projectName" placeholder="请输入项目名称" maxlength="30" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+          
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="组" prop="namespaceByGroup">
+              <el-select
+              v-model="form.namespaceByGroup"
+              placeholder="请选择组"
+              clearable
+              style="width: 240px"
+            >
+            <el-option v-for="group in groups"
+              :key="group.gitlabGroupId"
+              :label="group.gitlabGroupName"
+              :value="group.gitlabGroupId"/>
+            </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -453,6 +443,7 @@
             </el-form-item>
           </el-col> 
         </el-row>
+
         <el-row>
           <el-col :span="12">
             <el-form-item label="路径名称" prop="path">
@@ -466,24 +457,7 @@
           </el-col>
         </el-row>
         <el-row>
-          <el-col :span="8">
-            <el-form-item label="插件实例" prop="instanceCode">
-              <el-select
-              class="search-select2"
-                v-model="form.instanceCode"
-                @keyup.enter.native="handleQuery"
-                placeholder="请选择实例"
-                clearable
-                style="width: 240px"
-              >
-              <el-option v-for="item in pluginInstance"
-                :key="item.pluginCode"
-                :label="item.instanceName"
-                :value="item.instanceCode"/>
-              </el-select>
-            </el-form-item>
-          </el-col> 
-          <el-col :span="20">
+          <el-col :span="24">
             <el-form-item label="状态">
               <el-radio-group v-model="form.status">
                 <el-radio
@@ -494,8 +468,11 @@
               </el-radio-group>
             </el-form-item>
           </el-col>
-          <el-col :span="12">
-            <el-form-item label="readme初始化仓库">
+        </el-row>
+
+        <el-row>
+          <el-col :span="24">
+            <el-form-item label="readme初始化" label-width="180px">
               <el-radio-group v-model="form.initiallizeWithReadme">
                 <el-radio
                   v-for="dict in enable"
@@ -506,24 +483,8 @@
             </el-form-item>
           </el-col>
         </el-row>
-        <el-row>
-          <el-col :span="12">
-            <el-form-item label="组" prop="namespaceByGroup">
-              <el-select
-              v-model="form.namespaceByGroup"
-              placeholder="请选择组"
-              clearable
-              style="width: 240px"
-            >
-            <el-option v-for="group in groups"
-              :key="group.gitlabGroupId"
-              :label="group.gitlabGroupName"
-              :value="group.gitlabGroupId"/>
-            </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
       </el-form>
+
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
