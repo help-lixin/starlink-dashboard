@@ -14,6 +14,7 @@
   // 日期范围
   const daterangeArray = ref('')
 
+
   // 选中数组
   const ids = ref([])
   // 非单个禁用
@@ -85,6 +86,7 @@ const getList = ()=>{
   // 表单插件列表
   const formPlugins = ref();
 
+  const isReadyOnly = ref(false);
   const open = ref(false)
   const pluginForm = ref()
   const title = ref("")
@@ -104,6 +106,9 @@ const getList = ()=>{
   const rules = reactive<FormRules>({
         pluginCode: [
           { required: true, message: "插件是必选项", trigger: "blur" }
+        ],
+        instanceCode :[
+          { required: true, message: "实例编码不能为空", trigger: "blur" },
         ],
         instanceName: [
           { required: true, message: "实例名称不能为空", trigger: "blur" },
@@ -131,6 +136,7 @@ const getList = ()=>{
   const handleAdd = function(){
     reset()
     formInit()
+    isReadyOnly.value=false;
     open.value = true;
     title.value = "添加插件实例";
   }
@@ -139,6 +145,7 @@ const getList = ()=>{
   const handleUpdate = function(row){
     reset();
     formInit();
+    isReadyOnly.value=true;
     const id = row.instanceId || ids.value
     get(id).then(response => {
       if(response?.code == 200){
@@ -467,9 +474,9 @@ const getList = ()=>{
 
     <!-- 添加或修改用户配置对话框 -->
     <el-dialog :title="title" v-model="open" width="600px" append-to-body>
-      <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
         <el-row>
-          <el-col :span="12">
+          <el-col :span="24">
             <el-form-item label="插件" prop="pluginCode">
               <el-select
                 class="search-select"
@@ -477,10 +484,10 @@ const getList = ()=>{
                     @change="handleFormPlugin"
                     @keyup.enter.native="handleQuery"
                     placeholder="插件"
-                    clearable
                     style="width: 240px"
                 >
                 <el-option v-for="item in formPlugins"
+                    :disabled="isReadyOnly"
                     :key="item.value"
                     :label="item.label"
                     :value="item.value"/>
@@ -489,15 +496,15 @@ const getList = ()=>{
           </el-col>
         </el-row>
         <el-row>
-          <el-col :span="12">
+          <el-col :span="24">
             <el-form-item label="实例编码" prop="instanceCode">
-              <el-input v-model="form.instanceCode" placeholder="请输入实例编码" maxlength="30" />
+              <el-input v-model="form.instanceCode" placeholder="请输入实例编码" maxlength="30" :disabled="isReadyOnly"/>
             </el-form-item>
           </el-col>
         </el-row>
 
         <el-row>
-          <el-col :span="12">
+          <el-col :span="24">
             <el-form-item label="实例名称" prop="instanceName">
               <el-input v-model="form.instanceName" placeholder="请输入实例名称" maxlength="50" />
             </el-form-item>
@@ -505,8 +512,9 @@ const getList = ()=>{
         </el-row>
       
         <el-row v-for="(item,index) in form.items"> 
-          <el-col :span="12">
+          <el-col :span="24">
             <el-form-item 
+               label-width="150px"
                :label="item.label" 
                :prop="`items.${index}.name`" 
                :rules="item.rules">
@@ -516,14 +524,14 @@ const getList = ()=>{
         </el-row> 
 
         <el-row>
-          <el-col :span="12">
+          <el-col :span="24">
             <el-form-item label="备注" prop="remarks">
               <el-input v-model="form.remarks" type="textarea" placeholder="请输入备注" maxlength="30" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
-          <el-col :span="12">
+          <el-col :span="24">
             <el-form-item label="状态">
               <el-radio-group v-model="form.status">
                 <el-radio

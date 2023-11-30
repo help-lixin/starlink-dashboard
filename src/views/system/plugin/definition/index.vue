@@ -32,6 +32,7 @@
   const dataList = reactive([])
 
   // 表单
+  const isReadyOnly = ref(false);
   const open = ref(false);
   const formRef = ref<FormInstance>();
   const form = reactive({
@@ -100,6 +101,7 @@
   // 处理新增按钮
   const handleAdd = function(){
     reset();
+    isReadyOnly.value = false;
     open.value = true;
     title.value = "添加插件";
   }
@@ -107,6 +109,7 @@
   // 处理更新按钮(仅仅只是把数据拿出来展示一下)
   const handleUpdate = function(row){
     reset();
+    isReadyOnly.value = true;
     const id = row.id || ids.value
     get(id).then(response => {
       if(response?.code == 200){
@@ -357,28 +360,28 @@
     <el-dialog :title="title" v-model="open" width="600px" append-to-body>
       <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
         <el-row>
-          <el-col :span="12">
+          <el-col :span="24">
             <el-form-item label="插件编码" prop="pluginCode">
-              <el-input v-model="form.pluginCode" placeholder="请输入插件编码" maxlength="30" />
+              <el-input v-model="form.pluginCode" placeholder="请输入插件编码" maxlength="30" :disabled="isReadyOnly"/>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
-          <el-col :span="12">
+          <el-col :span="24">
             <el-form-item label="插件名称" prop="pluginName">
               <el-input v-model="form.pluginName" placeholder="请输入插件名称" maxlength="30" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
-          <el-col :span="12">
-            <el-form-item label="插件元数据" prop="pluginMeta">
-              <el-input v-model="form.pluginMeta" placeholder="请输入插件元数据" type="textarea" maxlength="5000" />
+          <el-col :span="24">
+            <el-form-item label="插件元数据" prop="pluginMeta" label-width="100px">
+              <el-input v-model="form.pluginMeta" placeholder="请输入插件元数据" type="textarea" maxlength="5000" autosize/>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
-          <el-col :span="12">
+          <el-col :span="24">
             <el-form-item label="状态">
               <el-radio-group v-model="form.status">
                 <el-radio
