@@ -1,10 +1,10 @@
 <script setup lang="ts">
   // @ts-nocheck  
-  import { Plus ,Delete, Edit, Search , RefreshRight , Sort , QuestionFilled} from '@element-plus/icons-vue'
-  import { showStatusOperateFun , status , showStatusFun , addDateRange } from "@/utils/common"
+  import { Plus , Search , RefreshRight , Sort } from '@element-plus/icons-vue'
+  import {  status , showStatusFun , addDateRange } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
-  import { memberList , addGroupMember , updateGroupMember , queryGroupMemberInfoById , removeMember, showMemberGroup} from "@/api/gitlab/members"
+  import { memberList , addGroupMember , updateGroupMember  , removeMember} from "@/api/gitlab/members"
   import { userList} from "@/api/gitlab/users"
   import { groupList } from "@/api/gitlab/groups"
   
@@ -63,7 +63,6 @@
   const form = reactive({})
   const title = ref("")
   const pluginInstance = reactive([]);
-  // const groups = reactive([]);
   const pluginCode = "gitlab"
 
   // 表单规则
@@ -92,7 +91,7 @@
   // 获取列表
   const getList = ()=>{
     loading.value = true;
-    // 临时拷贝一份
+    // 临时拷贝一份,清除:groups属性和数据
     const requesParams = {};
     Object.assign(requesParams,queryParams);
     delete requesParams.groups
@@ -161,6 +160,7 @@
             throw err;
         });
 
+    // 临时拷贝一份,清除:groups/users属性和数据
     const requestForm = {};
     Object.assign(requestForm,form)
     delete requestForm.groups
