@@ -224,6 +224,23 @@
     <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" size="small" :inline="true" v-show="showSearch" label-width="68px">
       <el-row :gutter="20">
         <el-col :span="8">
+          <el-form-item label="插件实例" prop="instanceCode">
+            <el-select
+            class="search-select"
+              v-model="queryParams.instanceCode"
+              @keyup.enter.native="handleQuery"
+              placeholder="请选择实例"
+              clearable
+              style="width: 240px"
+            >
+            <el-option v-for="item in pluginInstance"
+              :key="item.pluginCode"
+              :label="item.instanceName"
+              :value="item.instanceCode"/>
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
           <el-form-item label="组名称" prop="groupName">
             <el-input
               v-model="queryParams.groupName"
@@ -234,6 +251,8 @@
             />
           </el-form-item>
         </el-col> 
+      </el-row>
+      <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="权限" prop="visibility">
             <el-select
@@ -248,25 +267,6 @@
               :key="item"
               :label="item"
               :value="item"/>
-            </el-select>
-          </el-form-item>
-        </el-col> 
-      </el-row>
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="插件实例" prop="instanceCode">
-            <el-select
-            class="search-select"
-              v-model="queryParams.instanceCode"
-              @keyup.enter.native="handleQuery"
-              placeholder="请选择实例"
-              clearable
-              style="width: 240px"
-            >
-            <el-option v-for="item in pluginInstance"
-              :key="item.pluginCode"
-              :label="item.instanceName"
-              :value="item.instanceCode"/>
             </el-select>
           </el-form-item>
         </el-col> 
@@ -376,8 +376,20 @@
       <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
         <el-row>
           <el-col :span="12">
-            <el-form-item label="组编号" prop="groupId" :readonly="true">
-              <el-input v-model="form.groupId" placeholder="组编号" maxlength="30" :disabled="true"/>
+            <el-form-item label="插件实例" prop="instanceCode">
+              <el-select
+                class="search-select2" 
+                v-model="form.instanceCode"
+                @keyup.enter.native="handleQuery"
+                placeholder="请选择插件实例"
+                clearable
+                style="width: 240px"
+              >
+              <el-option v-for="item in pluginInstance"
+              :key="item.pluginCode"
+              :label="item.instanceName"
+              :value="item.instanceCode"/>
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -407,25 +419,7 @@
             </el-form-item>
           </el-col>
         </el-row>
-        <el-row>
-          <el-col :span="12">
-            <el-form-item label="插件实例" prop="instanceCode">
-              <el-select
-                class="search-select2" 
-                v-model="form.instanceCode"
-                @keyup.enter.native="handleQuery"
-                placeholder="请选择插件实例"
-                clearable
-                style="width: 240px"
-              >
-              <el-option v-for="item in pluginInstance"
-              :key="item.pluginCode"
-              :label="item.instanceName"
-              :value="item.instanceCode"/>
-              </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
+        
         <el-row>
           <el-col :span="12">
             <el-form-item label="状态">
