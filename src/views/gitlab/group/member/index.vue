@@ -74,7 +74,7 @@
   })
 
   // 重置表单
-  const reset = ()=> {
+  const resetForm = ()=> {
       Object.assign(form,{
         id: undefined,
         userName: undefined,
@@ -128,7 +128,7 @@
 
   // 处理新增按钮
   const handleAdd = ()=>{
-    reset();
+    resetForm();
     open.value = true;
     title.value = "新增组成员";
 
@@ -260,7 +260,7 @@
   // 表单取消处理
   const cancel = ()=>{
     open.value = false;
-    reset();
+    resetForm();
   }
 
   // form表单切换实例
