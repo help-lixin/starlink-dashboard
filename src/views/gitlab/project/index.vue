@@ -128,8 +128,7 @@
       if(res.code == 200){
         open.value = true;
         title.value = "添加项目";
-        Object.assign(pluginInstance,res?.data)
-        console.log(pluginInstance)
+        pluginInstance.value = res?.data
       }
     });
   }
@@ -140,7 +139,7 @@
     queryProjectParams.projectName = row.gitlabProjectName
     queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
       if(res.code == 200){
-        Object.assign(pluginInstance,res?.data)
+        pluginInstance.value = res?.data
       }
     });
     queryParams.projectName = row.gitlabProjectName
@@ -252,13 +251,13 @@
 
   userList(queryParams).then((res)=>{
       if(res.code == 200){
-        Object.assign(users,res?.data?.records)
+        users.value = res?.data?.records
       }
   });
 
   groupList(addDateRange(groupParams, dateRange.value)).then((res)=>{
       if(res.code == 200){
-        Object.assign(groups,res?.data?.records)
+        groups.value = res?.data?.records
       }
   });
 
@@ -295,15 +294,21 @@
             </el-select>
           </el-form-item>
         </el-col> 
+
         <el-col :span="8">
-          <el-form-item label="项目名称" prop="projectName">
-            <el-input
-              v-model="queryParams.projectName"
-              placeholder="请输入项目名称"
+          <el-form-item label="状态" prop="status">
+            <el-select
+            class="search-select"
+              v-model="queryParams.status"
+              placeholder="项目状态"
               clearable
               style="width: 240px"
-              @keyup.enter.native="handleQuery"
-            />
+            >
+            <el-option v-for="dict in status"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"/>
+            </el-select>
           </el-form-item>
         </el-col> 
       </el-row>
@@ -340,22 +345,6 @@
         </el-col> 
       </el-row>
       <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="状态" prop="status">
-            <el-select
-            class="search-select"
-              v-model="queryParams.status"
-              placeholder="项目状态"
-              clearable
-              style="width: 240px"
-            >
-            <el-option v-for="dict in status"
-              :key="dict.value"
-              :label="dict.label"
-              :value="dict.value"/>
-            </el-select>
-          </el-form-item>
-        </el-col> 
         <el-col :span="8">
           <div>
             <el-button type="primary" size="small" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>

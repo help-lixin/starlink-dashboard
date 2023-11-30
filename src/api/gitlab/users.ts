@@ -57,10 +57,11 @@ return request({
 }
 
 // 组状态修改
-export function changeUserStatus(userId:any, status:any) {
+export function changeUserStatus(data:any) {
     return request({
-        url: STARLINK_SERVICE + '/gitlab/user/changeStatus/'+userId+"/"+status,
-        method: 'put'
+        url: STARLINK_SERVICE + '/gitlab/user/changeStatus/',
+        method: 'put',
+        data: data
     }).then((res)=>{
         return res?.data;
     });

@@ -31,6 +31,12 @@
     groupName: undefined
   })
 
+  const changeStatusParams = reactive({
+    status: undefined,
+    userId: undefined,
+    instanceCode: undefined
+  })
+
   // 根据用户名查询用户信息
   const queryUserParams = reactive({
   })
@@ -218,13 +224,15 @@
         type: 'warning',
       }
     ).then(() => {
-        let tmpStatus;
         if(curStatus == 0){
-          tmpStatus = 1
+          changeStatusParams.status = 1
         }else{
-          tmpStatus = 0
+          changeStatusParams.status = 0
         }
-        changeUserStatus(userId,tmpStatus).then((res)=>{
+
+        changeStatusParams.userId = userId
+        changeStatusParams.instanceCode = groupParams.instanceCode
+        changeUserStatus(changeStatusParams).then((res)=>{
             if(res.code == 200){
                 // 重置查询表单,并进行查询
                 queryParams.pageNum=1

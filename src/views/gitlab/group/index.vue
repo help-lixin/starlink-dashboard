@@ -360,9 +360,9 @@
               {{  showStatusFun(scope.row.status) }}
             </template>
           </el-table-column>
-          <el-table-column label="创建时间" align="center" prop="createdTime"  width="180">
-            <template v-slot="scope">
-              <span>{{ dayjs(scope.row.createdTime).format("YYYY-MM-DD HH:mm:ss")   }}</span>
+          <el-table-column label="创建时间" align="center" prop="createTime"  width="180">
+            <template #default="scope">
+              <span>{{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}</span>
             </template>
           </el-table-column>
           <el-table-column

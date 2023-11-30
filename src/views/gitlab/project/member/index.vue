@@ -4,13 +4,11 @@
   import { showStatusOperateFun , status , showStatusFun , addDateRange } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
-  import { memberList , addProjectMember , updateProjectMember , queryProjectMemberInfoById , removeMember, showMemberProject} from "@/api/gitlab/project-member"
+  import { memberList , addProjectMember , updateProjectMember , queryProjectMemberInfoById , projectList , removeMember, showMemberProject} from "@/api/gitlab/project-member"
   import { userList} from "@/api/gitlab/users"
-  
+  import { groupList } from "@/api/gitlab/groups"
  
   const queryForm = ref(null);
-  // 日期范围
-  const daterangeArray = ref('')
 
   //查询列表信息
   const queryParams = reactive({
@@ -20,16 +18,17 @@
     endTime: undefined,
     status: undefined,
     userName: undefined,
+    groupId: undefined,
     projectId: undefined
   })
 
-    //查询列表信息
+  // 查询项目列表信息
   const projectParams = reactive({
     pageNum: 1,
     pageSize: 10,
     beginTime: undefined,
     endTime: undefined,
-    status: undefined,
+    status: 1,
     projectName: undefined,
     instanceCode: undefined
   })
@@ -38,6 +37,17 @@
   const deleteParams = reactive({
     userId: undefined,
     projectId: undefined,
+    instanceCode: undefined
+  })
+
+  // 查询组列表信息
+  const groupParams = reactive({
+    pageNum: 1,
+    pageSize: 10,
+    beginTime: undefined,
+    endTime: undefined,
+    status: 1,
+    groupName: undefined,
     instanceCode: undefined
   })
 
@@ -97,6 +107,7 @@
   const form = reactive({})
   const title = ref("")
   const pluginInstance = reactive([]);
+  const groups = reactive([]);
   const projects = reactive([]);
   const pluginCode = "gitlab"
 
@@ -170,32 +181,6 @@
 
     });
   }
-
-  // // 处理更新按钮
-  // const handleUpdate = function(row){
-  //   reset();
-
-  //   queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
-  //     if(res.code == 200){
-  //       Object.assign(pluginInstance,res?.data)
-
-  //       queryProjectMemberInfoById(row.id).then(response => {
-  //         if(response?.code == 200){
-  //           Object.assign(form,response?.data)
-            
-  //         }
-  //       });
-      
-  //       userList(queryUserParams).then(response =>{
-  //         users.value = response?.data.records
-  //         form.userId = users[0].id
-  //       })
-  //       open.value = true;
-  //       title.value = "修改项目成员";
-  //     }
-  //   });
-  // }
-  
 
   // 多选框选中数据
   const handleSelectionChange = function(selection){
@@ -294,13 +279,21 @@
     open.value = false;
     reset();
   }
+  
 
   // 查询实例列表
   queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
       if(res.code == 200){
         Object.assign(pluginInstance,res?.data)
-        queryUserParams.instanceCode =  queryParams.instanceCode = projectParams.instanceCode = res?.data[0].instanceCode
-        getList();
+        groupParams.instanceCode = queryUserParams.instanceCode =  queryParams.instanceCode = projectParams.instanceCode = res?.data[0].instanceCode
+        groupList(groupParams).then((response) =>{
+          Object.assign(groups,response?.data?.records)
+        })
+        projectList(projectParams).then((response)=>{
+          Object.assign(projects,response?.data?.records)
+          queryParams.projectId = projects[0]?.id
+          getList();
+        })
 
       }
     });
@@ -312,14 +305,20 @@
     <el-form class="form-wrap" :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
       <el-row :gutter="20">
         <el-col :span="8">
-          <el-form-item label="成员名称" prop="userName">
-            <el-input
-              v-model="queryParams.userName"
-              placeholder="请输入成员名称"
+          <el-form-item label="插件实例" prop="instanceCode">
+            <el-select
+            class="search-select"
+              v-model="queryParams.instanceCode"
+              @keyup.enter.native="handleQuery"
+              placeholder="请选择实例"
               clearable
               style="width: 240px"
-              @keyup.enter.native="handleQuery"
-            />
+            >
+            <el-option v-for="item in pluginInstance"
+              :key="item.pluginCode"
+              :label="item.instanceName"
+              :value="item.instanceCode"/>
+            </el-select>
           </el-form-item>
         </el-col> 
         <el-col :span="8">
@@ -341,40 +340,50 @@
       </el-row>
       <el-row :gutter="20">
         <el-col :span="8">
-          <el-form-item label="成员项目" prop="projectId">
+          <el-form-item label="项目组" prop="groupId">
             <el-select
             class="search-select"
-              v-model="queryParams.projectId"
-              placeholder="成员项目"
+              v-model="queryParams.groupId"
+              placeholder="请选择项目组"
               clearable
               style="width: 240px"
             >
-            <el-option v-for="dict in projects"
-              :key="dict.gitlabProjectName"
-              :label="dict.gitlabProjectName"
+            <el-option v-for="dict in groups"
+              :key="dict.gitlabGroupName"
+              :label="dict.gitlabGroupName"
               :value="dict.id"/>
             </el-select>
           </el-form-item>
         </el-col> 
         <el-col :span="8">
-          <el-form-item label="插件实例" prop="instanceCode">
-            <el-select
-            class="search-select"
-              v-model="queryParams.instanceCode"
-              @keyup.enter.native="handleQuery"
-              placeholder="请选择实例"
+          <el-form-item label="成员名称" prop="userName">
+            <el-input
+              v-model="queryParams.userName"
+              placeholder="请输入成员名称"
               clearable
               style="width: 240px"
-            >
-            <el-option v-for="item in pluginInstance"
-              :key="item.pluginCode"
-              :label="item.instanceName"
-              :value="item.instanceCode"/>
-            </el-select>
+              @keyup.enter.native="handleQuery"
+            />
           </el-form-item>
         </el-col> 
       </el-row>
       <el-row :gutter="20">
+        <el-col :span="8">
+          <el-form-item label="项目" prop="projectId">
+            <el-select
+            class="search-select"
+              v-model="queryParams.projectId"
+              placeholder="请选择项目"
+              clearable
+              style="width: 240px"
+            >
+            <el-option v-for="dict in projects"
+              :key="dict.projectName"
+              :label="dict.projectName"
+              :value="dict.id"/>
+            </el-select>
+          </el-form-item>
+        </el-col> 
         <el-col :span="8">
           <el-form-item label="创建时间">
             <el-date-picker
@@ -437,11 +446,6 @@
           >
             <template v-slot="scope">
              <div class="action-btn">
-              <!-- <el-button
-                size="default"
-                @click="handleUpdate(scope.row)"
-                v-hasPerms="['/gitlab/project/member/edit']"
-              >修改</el-button> -->
               <el-button
                 size="default"
                 @click="handleDelete(scope.row)"
