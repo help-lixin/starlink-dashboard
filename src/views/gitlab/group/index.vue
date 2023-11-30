@@ -5,10 +5,7 @@
   import { dayjs } from "@/utils/common-dayjs"
   import {addGroup , updateGroup , queryGroupInfoById, changeGroupStatus, groupList} from "@/api/gitlab/groups"
  
-  const queryForm = ref(null);
-  // 日期范围
-  const daterangeArray = ref('')
-
+  const queryFormRef = ref(null);
   //查询列表信息
   const queryParams = reactive({
     pageNum: 1,
@@ -20,10 +17,6 @@
     groupName: undefined
   })
 
-  // 根据组名查询组信息
-  const queryGroupParams = reactive({
-    groupName: undefined
-  })
 
   // 权限列表
   const visibilityArr = ref(["PUBLIC", "PRIVATE", "INTERNAL"])
@@ -35,12 +28,6 @@
   // 日期范围
   const dateRange = ref([])
 
-  // 选中数组
-  const ids = ref([])
-  // 非单个禁用
-  const single = ref(true)
-  // 非多个禁用
-  const multiple = ref(true)
 
   const total= ref(0)
   const groupPageList = reactive([])
@@ -82,9 +69,8 @@
 
   // 获取列表
   const getList = ()=>{
-
     loading.value = true;
-        groupList(addDateRange(queryParams, dateRange.value))
+    groupList(addDateRange(queryParams, dateRange.value))
     .then(response => {
           loading.value = false
           if(response?.data?.records.length > 0){
@@ -107,32 +93,20 @@
   // 处理查询按钮
   const resetQuery = function(){
     dateRange.value = [];
-    queryForm.value.resetFields();
+    queryFormRef.value.resetFields();
     handleQuery();
   }
 
   // 处理新增按钮
   const handleAdd = function(){
-    reset();
-    queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
-      if(res.code == 200){
-        open.value = true;
-        title.value = "添加组";
-        Object.assign(pluginInstance,res?.data)
-      }
-    });
+    reset()
+    open.value = true
+    title.value = "添加组"
   }
 
   // 处理更新按钮
   const handleUpdate = function(row){
     reset();
-    queryGroupParams.groupName = row.gitlabGroupName
-    queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
-      if(res.code == 200){
-        Object.assign(pluginInstance,res?.data)
-      }
-    });
-    queryParams.groupName = row.groupName
     queryGroupInfoById(row.id).then(response => {
       if(response?.code == 200){
         Object.assign(form,response?.data)
@@ -147,9 +121,7 @@
 
   // 多选框选中数据
   const handleSelectionChange = function(selection){
-    ids.value = selection.map(item => item.id);
-    single.value = selection.length != 1;
-    multiple.value = !selection.length;
+ 
   }
 
   // 表单提交处理
@@ -191,7 +163,7 @@
   }
 
   const handleStatusChange = (row)=>{
-    const groupId = row.id || ids.value;
+    const groupId = row.id
     const status = row.status
     let msg = ""
     if(status == 1){
@@ -215,11 +187,8 @@
         }else{
           tmpStatus = 0
         }
-        console.log(row)
         changeGroupStatus(groupId,tmpStatus).then((res)=>{
             if(res.code == 200){
-                // 重置查询表单,并进行查询
-                queryParams.pageNum=1
                 getList()
                 ElMessage({
                   type: 'success',
@@ -227,7 +196,8 @@
                 })
             }
         })    
-    }).catch(() => { })
+    })
+    .catch(() => { })
   }
 
 
@@ -240,17 +210,18 @@
 
   // 触发查询
   getList();
+  // 进入页面时,就初始化实例列表
   queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
-      if(res.code == 200){
-        Object.assign(pluginInstance,res?.data)
-      }
-    });
+    if(res.code == 200){
+      Object.assign(pluginInstance,res?.data)
+    }
+  });
 </script>
 
 <template>
   <div class="main-wrapp">
     <!--sousuo  -->
-    <el-form class="form-wrap" :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
+    <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" size="small" :inline="true" v-show="showSearch" label-width="68px">
       <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="组名称" prop="groupName">
