@@ -3,7 +3,7 @@
 import { Plus,Search,RefreshRight } from '@element-plus/icons-vue'
 import { queryInstanceInfoByPluginCode } from "@/api/common-api"
 import { dayjs } from "@/utils/common-dayjs"
-import { getBlobStoresList, createFileBlobStores, getFileBlobStoresInfoByName, deleteBlobStoresByName, updateFileBlobStoresInfoByName } from "@/api/nexus/blobStores"
+import { getBlobStoresList, createFileBlobStores, getFileBlobStoresInfoByName, deleteBlobStoresByName,  unitConversion ,mBToGB , byteToMB } from "@/api/nexus/blobStores"
 import { showBlobStoresState ,addDateRange} from "@/utils/common"
 
 //插件Code
@@ -145,7 +145,8 @@ const submitForm = async () => {
       loading.value = false;
       throw err;
     });
-  createFileBlobStores(form.value).then(response => {
+  createFileBlobStores(form.value)
+  .then(response => {
     if (response?.code == 200) {
       ElMessage({
         showClose: true,
@@ -154,7 +155,7 @@ const submitForm = async () => {
       });
       open.value = false;
       
-      queryAll();
+      getList();
     } else {
       ElMessage.error('创建失败');
     }
@@ -182,7 +183,7 @@ const updateInfo = async () => {
       open.value = false;
 
       // 重新进行查询
-      queryAll();
+      getList();
     } else {
       ElMessage.error('修改失败');
     }
@@ -204,7 +205,7 @@ const handleQuery = function(){
 const resetQuery = function(){
   dateRange.value = []
   queryFormRef.value.resetFields()
-  queryAll()
+  getList()
 };
 
 //处理新增按钮
@@ -212,6 +213,7 @@ const handleAdd = () => {
   reset();
   open.value = true;
   title.value = "新增存储库";
+
   pluginInstance.value = res?.data
   quotaShow.value = false;
   fileIsShow.value = false;
@@ -271,8 +273,6 @@ const handleStatusChange = (row) => {
         type: 'success',
       });
       open.value = false;
-      reset();
-      resetQueryParams();
       getList();
     } else {
       ElMessage({
@@ -301,8 +301,8 @@ const getList = () => {
 };
 
 
-const queryAll = ()=>{
-  queryInstances()
+const selectFirstInstanceQuery = ()=>{
+  queryFirstInstance()
   .then(()=>{
     getList();
   });
@@ -330,7 +330,7 @@ const handleSoftQuotaShow = (val) => {
   }
 };
 
-const queryInstances = ()=>{
+const queryFirstInstance = ()=>{
   // 挑选一个插件实例,进行查询
   return queryInstanceInfoByPluginCode(pluginCode).then((res) => {
       if (res.code == 200) {
@@ -344,31 +344,8 @@ const queryInstances = ()=>{
     });
 }
 
-//B转MB
-const byteToMB = (param) => {
-  return parseInt(param) / (1024 * 1024);
-};
-
-
-//MB转GB
-const mBToGB = (param) => {
-  return parseInt(param) / 1024;
-};
-
-//显示单位，param=Byte，大于1024转为GB，保留2位小数
-const unitConversion = (param) => {
-  let value = byteToMB(param);
-  if (mBToGB(value) > 1) {
-    return mBToGB(value).toFixed(2) + " GB";
-  } else if (value > 1) {
-    return parseInt(value).toFixed(2) + ' MB';
-  } else {
-    return parseInt(value * 1024).toFixed(2) + ' KB';
-  }
-};
-
-
-queryAll();
+// 选择一个实例进行查询
+selectFirstInstanceQuery();
 </script>
 
 <template>
