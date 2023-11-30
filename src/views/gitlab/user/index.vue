@@ -209,7 +209,7 @@
     // 如果需要用于交互,才把变量扔到最外层,否则,变量应该就近原则
     const changeStatusParams = {
           status: undefined,
-          userId: id,
+          id: id,
           instanceCode: instanceCode
     };
 
