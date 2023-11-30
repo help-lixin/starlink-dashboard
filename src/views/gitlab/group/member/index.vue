@@ -10,7 +10,6 @@
   
  
   const queryFormRef = ref(null);
-
   //查询列表信息
   const queryParams = reactive({
     pageNum: 1,
@@ -20,34 +19,9 @@
     status: undefined,
     userName: undefined,
     groupId: undefined,
-    instanceCode: undefined
+    instanceCode: undefined,
+    groups:[]
   })
-
-    //查询列表信息
-  // const groupParams = reactive({
-  //   pageNum: 1,
-  //   pageSize: 10,
-  //   beginTime: undefined,
-  //   endTime: undefined,
-  //   status: undefined,
-  //   groupName: undefined,
-  //   instanceCode: undefined
-  // })
-
-  //删除成员参数
-  // const deleteParams = reactive({
-  //   userId: undefined,
-  //   groupId: undefined,
-  //   instanceCode: undefined
-  // })
-
-  // 根据成员名查询成员信息
-  // const queryUserParams = reactive({
-  //   pageNum: 1,
-  //   pageSize: 10,
-  //   status: 1,
-  //   instanceCode: undefined
-  // })
 
   const loading = ref(false)
 
@@ -55,8 +29,6 @@
   const showSearch = ref(true)
   // 日期范围
   const dateRange = ref([])
-  // 成员列表
-  // const users = ref([]);
   // 权限列表
   const accessLevels = [
   {
@@ -81,16 +53,9 @@
   }
 ];
 
-  // 选中数成员
-  // const ids = ref([])
-  // 非单个禁用
-  // const single = ref(true)
-  // 非多个禁用
-  // const multiple = ref(true)
-
   const total= ref(0)
   // 列表信息
-  const memberRow = reactive([])
+  const dataList = reactive([])
 
   // 表单
   const open = ref(false);
@@ -98,7 +63,7 @@
   const form = reactive({})
   const title = ref("")
   const pluginInstance = reactive([]);
-  const groups = reactive([]);
+  // const groups = reactive([]);
   const pluginCode = "gitlab"
 
   // 表单规则
@@ -127,16 +92,20 @@
   // 获取列表
   const getList = ()=>{
     loading.value = true;
-    memberList(addDateRange(queryParams, dateRange.value))
+    // 临时拷贝一份
+    const requesParams = {};
+    Object.assign(requesParams,queryParams);
+    delete requesParams.groups
+
+    memberList(addDateRange(requesParams, dateRange.value))
     .then(response => {
           loading.value = false 
           if(response?.data?.records.length > 0){
-            memberRow.splice(0,memberRow.length);
-            Object.assign(memberRow, response?.data?.records)
+            dataList.splice(0,dataList.length);
+            Object.assign(dataList, response?.data?.records)
             total.value = response?.data?.total
-            console.log(memberRow)
           }else{
-            memberRow.splice(0,memberRow.length);
+            dataList.splice(0,dataList.length);
             total.value = 0;
           }
         }
@@ -156,15 +125,23 @@
     handleQuery();
   }
 
-  // 处理新增按钮
-  const handleAdd = function(){
-    reset();
 
+
+  // 处理新增按钮
+  const handleAdd = ()=>{
+    reset();
     open.value = true;
     title.value = "新增组成员";
 
-    userListFunc(queryUserParams.instanceCode);
-    groupListFunc(queryUserParams.instanceCode)
+
+    groupListFunc(queryParams.instanceCode,(response)=>{
+      form.groups = response?.data?.records
+    })
+
+    userListFunc(queryParams.instanceCode,(response)=>{
+      form.users = response?.data.records
+    })
+    form.instanceCode = queryParams.instanceCode;
   }
 
   // 多选框选中数据
@@ -227,20 +204,16 @@
       groupId: row.groupId,
       instanceCode: row.instanceCode
     };
+
     ElMessageBox.confirm(
-      msg,
-      'Warning',
-      {
-        confirmButtonText: '确认',
-        cancelButtonText: '取消',
-        type: 'warning',
-      }
+      msg, 'Warning', { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning', }
     ).then(() => {
-      removeMember(deleteParams).then((res)=>{
-            if(res.code == 200){
-                getList()
-                ElMessage({ type: 'success', message: '操作成功', })
-            }
+      removeMember(deleteParams)
+      .then((res)=>{
+          if(res.code == 200){
+              getList()
+              ElMessage({ type: 'success', message: '操作成功', })
+          }
         })    
     }).catch(() => {
       getList()
@@ -249,7 +222,7 @@
   }
 
   // 加载"项目组下拉表框"
-  const groupListFunc = (instanceCode:any) =>{
+  const groupListFunc = (instanceCode:any,callback:any) =>{
     const groupParams = { 
         instanceCode : instanceCode
     }
@@ -257,12 +230,14 @@
     // TODO 伍岳林,后端开独立的接口,为下拉列表进行赋值.
     groupList(addDateRange(groupParams, dateRange.value))
       .then(response => {
-        form.groups = response?.data?.records;
+        if(callback){
+          callback(response);
+        }
     })
   }
 
   // 加载"用户下拉表框"
-  const userListFunc = (instanceCode:any)=>{
+  const userListFunc = (instanceCode:any,callback:any)=>{
     const uesrListqueryParams = {
       instanceCode : instanceCode
     };
@@ -270,7 +245,9 @@
     //  TODO 伍岳林,后端抽出独立接口来渲染成下拉列表框,不要共用一个接口.
     userList(uesrListqueryParams)
     .then(response =>{
-      form.users = response?.data.records
+      if(callback){
+        callback(response);
+      }
     })
   }
 
@@ -281,6 +258,30 @@
     reset();
   }
 
+  // form表单切换实例
+  const formSwitchInstance = ()=>{
+    if(form?.instanceCode && form?.instanceCode.length > 0 ){
+      // 根据instanceCode重新加载用户组
+      groupListFunc(form.instanceCode,(response)=>{
+        form.groups = response?.data?.records
+      })
+    }else{
+      form.groups = []
+    }
+  }
+
+  // 列表页面,切换实例操作.
+  const listSwitchInstance = ()=>{
+    if(queryParams?.instanceCode && queryParams?.instanceCode.length > 0 ){
+       // 根据instanceCode重新加载用户组
+       groupListFunc(queryParams.instanceCode,(response)=>{
+        queryParams.groups = response?.data?.records;
+      })
+    }else{
+      queryParams.groups=[];
+    }
+  }
+
   // 默认情况下:选择一个"实例"下的一个"组",进行查询
   queryInstanceInfoByPluginCode(pluginCode)
   .then((res)=>{
@@ -288,24 +289,15 @@
       Object.assign(pluginInstance,res?.data)
       queryParams.instanceCode = res?.data[0].instanceCode
 
-      const groupParams = { 
-        instanceCode : queryParams.instanceCode
-      }
-
       // TODO 伍岳林,后端开独立的接口,为下拉列表进行赋值.
-      groupList(addDateRange(groupParams, dateRange.value))
-        .then(response => {
-          Object.assign(groups,response?.data?.records)
-          queryParams.groupId = response?.data?.records[0]?.id
-          // 触发查询
-          getList();
+      groupListFunc(queryParams.instanceCode,(response)=>{
+        queryParams.groups = response?.data?.records
+        queryParams.groupId = response?.data?.records[0]?.id
+        // 触发查询
+        getList();
       })
     }
   });
-
-// TODO 伍岳林
-// 表单页面的和项目组和人员列表,无非gloabl级别共用.
-// 因为:选择实例时,项目组里的下拉是要跟着一起变动的.
 </script>
 
 <template>
@@ -319,7 +311,7 @@
             <el-select
             class="search-select"
               v-model="queryParams.instanceCode"
-              @keyup.enter.native="handleQuery"
+              :change="listSwitchInstance()"
               placeholder="请选择实例"
               clearable
               style="width: 240px"
@@ -340,7 +332,7 @@
               clearable
               style="width: 240px"
             >
-            <el-option v-for="dict in groups"
+            <el-option v-for="dict in queryParams.groups"
               :key="dict.gitlabGroupName"
               :label="dict.gitlabGroupName"
               :value="dict.id"/>
@@ -413,7 +405,7 @@
 
     <!--table  -->
     <div class="table-wrap">
-      <el-table v-loading="loading" :data="memberRow" @selection-change="handleSelectionChange">
+      <el-table v-loading="loading" :data="dataList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="30" align="center" />
           <el-table-column label="用户编号" align="center" key="userId" prop="userId" v-if="false"/>
           <el-table-column label="成员编号" align="center" key="id" prop="id"/>
@@ -421,9 +413,7 @@
           <el-table-column label="邮箱" align="center" key="email" prop="email"  :show-overflow-tooltip="true"  width="100" />
           <el-table-column label="成员名称" align="center" key="userName" prop="userName"  :show-overflow-tooltip="true"  width="100" />
           <el-table-column label="组" align="center" key="groupId"  width="100">
-            <template v-slot="scope">
-              {{  showMemberGroup(scope.row.groupId,groups) }}
-            </template>
+            #### 待处理
           </el-table-column>
           <el-table-column label="状态" align="center" key="status"  width="100">
             <template #default="scope">
@@ -469,15 +459,15 @@
     <el-dialog :title="title" v-model="open" width="600px" append-to-body>
       <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
         <el-row>
-          <el-col :span="8">
-            <el-form-item label="插件实例" prop="instanceCode">
+          <el-col :span="24">
+            <el-form-item label="实例" prop="instanceCode">
               <el-select
               class="search-select2" 
                 v-model="form.instanceCode"
-                @keyup.enter.native="handleQuery"
+                :change="formSwitchInstance()"
                 placeholder="请选择实例"
                 clearable
-                style="width: 200px;"
+                style="width: 240px"
               >
               <el-option v-for="item in pluginInstance"
                 :key="item.pluginCode"
@@ -486,7 +476,10 @@
               </el-select>
             </el-form-item>
           </el-col> 
-          <el-col :span="8">
+        </el-row>
+
+        <el-row>
+          <el-col :span="24">
             <el-form-item label="成员组" prop="groupId">
               <el-select
                 class="search-select"
@@ -503,13 +496,15 @@
             </el-form-item>
           </el-col> 
         </el-row>
+
         <el-row>
-          <el-col :span="8">
+          <el-col :span="24">
             <el-form-item label="成员" prop="userId">
               <el-select
                 class="search-select"
                 v-model="form.userId"
                 placeholder="成员"
+                style="width: 240px"
                 clearable
               >
               <el-option v-for="user in form.users"
@@ -519,12 +514,16 @@
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+        </el-row>
+
+        <el-row>
+          <el-col :span="24">
             <el-form-item label="权限" prop="accessLevel">
               <el-select
                 class="search-select"
                 v-model="form.accessLevel"
                 placeholder="权限"
+                style="width: 240px"
                 clearable
               >
               <el-option v-for="accessLevel in accessLevels"
@@ -535,6 +534,7 @@
             </el-form-item>
           </el-col>
         </el-row>
+
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
