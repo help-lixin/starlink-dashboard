@@ -31,10 +31,11 @@
   //   groupName: undefined
   // })
 
-
+  // TODO 伍岳林
+  // 定义这样的变量有什么作用?
   // 根据用户名查询用户信息
-  const queryUserParams = reactive({
-  })
+  // const queryUserParams = reactive({
+  // })
 
   const loading = ref(false)
 
@@ -73,9 +74,13 @@
 
   // 重置表单
   const reset = ()=> {
+      // TODO 伍岳林
+      // 重置表单时,表单里所有数据都要清空,否则,会保留有原来的数据.
       Object.assign(form,{
         id: undefined,
         userName: undefined,
+        nickName : undefined,
+        email : undefined,
         visibility: undefined,
         path: undefined,
         remark: undefined,
@@ -117,25 +122,32 @@
   // 处理新增按钮
   const handleAdd = function(){
     reset();
-    queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
-      if(res.code == 200){
-        open.value = true;
-        title.value = "添加用户";
-        Object.assign(pluginInstance,res?.data)
-        console.log(pluginInstance)
-      }
-    });
+    // TODO 伍岳林
+    // queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
+    //   if(res.code == 200){
+    //     open.value = true;
+    //     title.value = "添加用户";
+    //     Object.assign(pluginInstance,res?.data)
+    //     console.log(pluginInstance)
+    //   }
+    // });
+
+    open.value = true;
+    title.value = "添加用户";
   }
 
   // 处理更新按钮
   const handleUpdate = function(row){
     reset();
-    queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
-      if(res.code == 200){
-        Object.assign(pluginInstance,res?.data)
-      }
-    });
-    queryUserInfoById(row.id,queryUserParams).then(response => {
+    // TODO 伍岳林
+    // 在列表页面,已经查询拿出了实例列表,所以,不需要再进行查询了. 
+    // queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
+    //   if(res.code == 200){
+    //     Object.assign(pluginInstance,res?.data)
+    //   }
+    // });
+    queryUserInfoById(row.id)
+    .then(response => {
       if(response?.code == 200){
         Object.assign(form,response?.data)
         open.value = true;
@@ -146,11 +158,11 @@
   
 
   // 多选框选中数据
-  const handleSelectionChange = function(selection){
+  // const handleSelectionChange = function(selection){
     // ids.value = selection.map(item => item.id);
     // single.value = selection.length != 1;
     // multiple.value = !selection.length;
-  }
+  // }
 
   // 表单提交处理
   const submitForm = async ()=>{
@@ -160,11 +172,11 @@
             ElMessage.error('表单验证失败');
             loading.value = false;
             throw err;
-        });
+        });        
 
     if (form.id != undefined) {
-        updateUser(form).then(response => {
-        console.log(response)
+        updateUser(form)
+        .then(response => {
           if(response?.code == 200){
             ElMessage({
                   showClose: true,
@@ -183,7 +195,8 @@
           getList();
         });
       } else {
-        addUser(form).then(response => {
+        addUser(form)
+        .then(response => {
           if(response?.code){
             ElMessage({
                   showClose: true,
