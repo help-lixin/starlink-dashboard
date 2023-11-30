@@ -412,26 +412,6 @@
       <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
         <el-row>
           <el-col :span="12">
-            <el-form-item label="用户编号" prop="id" :readonly="true">
-              <el-input v-model="form.id" placeholder="用户编号" maxlength="30" :disabled="true"/>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="用户名称" prop="userName">
-              <el-input v-model="form.userName" placeholder="请输入用户名称" maxlength="30" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="用户昵称" prop="nickName">
-              <el-input v-model="form.nickName" placeholder="请输入用户昵称" maxlength="30" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="邮件" prop="email">
-              <el-input v-model="form.email" placeholder="请输入邮件名称" maxlength="30" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="插件实例" prop="instanceCode">
               <el-select
               class="search-select2" 
@@ -448,6 +428,21 @@
               </el-select>
             </el-form-item>
           </el-col> 
+          <el-col :span="12">
+            <el-form-item label="用户名称" prop="userName">
+              <el-input v-model="form.userName" placeholder="请输入用户名称" maxlength="30" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="用户昵称" prop="nickName">
+              <el-input v-model="form.nickName" placeholder="请输入用户昵称" maxlength="30" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="邮件" prop="email">
+              <el-input v-model="form.email" placeholder="请输入邮件名称" maxlength="30" />
+            </el-form-item>
+          </el-col>
         </el-row>
         <el-row>
           <el-col :span="12">
