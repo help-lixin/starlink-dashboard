@@ -291,10 +291,12 @@
   queryInstanceInfoByPluginCode(pluginCode)
   .then((res)=>{
     if(res.code == 200){
-      Object.assign(pluginInstance,res?.data)
-      queryParams.instanceCode = res?.data[0].instanceCode
-
-      // TODO 伍岳林,后端开独立的接口,为下拉列表进行赋值.
+      // 检查一下数组情况
+      if(res?.data && res?.data.length > 0){
+        Object.assign(pluginInstance,res?.data)
+        queryParams.instanceCode = res?.data[0].instanceCode
+      }
+      
       groupListFunc(queryParams.instanceCode,(response)=>{
         queryParams.groups = response?.data?.records
         queryParams.groupId = response?.data?.records[0]?.id
