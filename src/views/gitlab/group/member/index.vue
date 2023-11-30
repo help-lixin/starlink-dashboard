@@ -320,6 +320,7 @@
               v-model="queryParams.instanceCode"
               :change="listSwitchInstance()"
               placeholder="请选择实例"
+              clearable
               style="width: 240px"
             >
             <el-option v-for="item in pluginInstance"
@@ -335,6 +336,7 @@
             class="search-select"
               v-model="queryParams.groupId"
               placeholder="成员组"
+              clearable
               style="width: 240px"
             >
             <el-option v-for="dict in queryParams.groups"
@@ -364,6 +366,7 @@
             class="search-select"
               v-model="queryParams.status"
               placeholder="成员状态"
+              clearable
               style="width: 240px"
             >
             <el-option v-for="dict in status"
@@ -470,6 +473,7 @@
                 v-model="form.instanceCode"
                 :change="formSwitchInstance()"
                 placeholder="请选择实例"
+                clearable
                 style="width: 240px"
               >
               <el-option v-for="item in pluginInstance"
@@ -488,6 +492,7 @@
                 class="search-select"
                 v-model="form.groupId"
                 placeholder="成员组"
+                clearable
                 style="width: 240px"
               >
               <el-option v-for="dict in form.groups"
@@ -526,6 +531,7 @@
                 v-model="form.accessLevel"
                 placeholder="权限"
                 style="width: 240px"
+                clearable
               >
               <el-option v-for="accessLevel in accessLevels"
                 :key="accessLevel.label"
