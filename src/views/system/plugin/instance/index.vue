@@ -23,10 +23,6 @@
   const total= ref(0)
   const dataList = reactive([])
 
-  // env
-  const queryEnvs = ref()
-  // group
-  const queryGroups = ref()
   // 插件列表
   const queryPlugins = ref();
 
@@ -35,33 +31,10 @@
   const queryParams = reactive({
     pageNum: 1,
     pageSize: 10,
-    envCode : undefined,   // []
-    groupCode : undefined, // []
     pluginCode : undefined, // []
     instanceName : undefined,
     status : undefined
   })
-
-// 处理环境下拉列表
-const handleEnv = (envCode:string)=>{
-    queryGroups.value = [];
-    if(envCode != "") {
-      groupOptionSelect(envCode).then((res)=>{
-        if(res?.code == 200){
-          queryGroups.value = res.data;
-        }
-      });
-    }else{
-      delete queryParams.envCode
-    }
-  }
-
-  // 处理环境组下拉列表
-  const handleGroup = (groupCode:string)=>{
-    if(groupCode == ""){
-      delete queryParams.groupCode
-    }
-  }
 
   const handlePlugin = (pluginCode:string)=>{
     if(pluginCode == ""){
@@ -109,12 +82,6 @@ const getList = ()=>{
   // ==================================================================================================================
   // 表单处理
   // ==================================================================================================================
-  
-  
-  // 表单env
-  const formEnvs = ref()
-  // 表单group
-  const formGroups = ref()
   // 表单插件列表
   const formPlugins = ref();
 
@@ -243,8 +210,6 @@ const getList = ()=>{
         }
         changeStatus(tmpId,tmpStatus).then((res)=>{
             if(res.code == 200){
-                // 重置查询表单,并进行查询
-                queryParams.pageNum=1
                 getList()
                 ElMessage({
                   type: 'success',

@@ -238,8 +238,6 @@
 
   // 命令处理
   const handleCommand = (command, row)=>{
-    console.log("command: ",command)
-
     switch (command) {
         case "handleResetPwd":
           handleResetPwd(row);

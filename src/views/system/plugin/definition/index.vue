@@ -144,8 +144,6 @@
         }
         changeStatus(tmpId,tmpStatus).then((res)=>{
             if(res.code == 200){
-                // 重置查询表单,并进行查询
-                queryParams.pageNum=1
                 getList()
                 ElMessage({
                   type: 'success',

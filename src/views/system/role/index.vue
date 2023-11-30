@@ -183,9 +183,6 @@
     ).then(() => {
         delRole(roleId).then((response)=>{
           if(response?.code == 200){
-              // 重置查询表单,并进行查询
-              queryParams.pageNum=1
-
               getList()
               ElMessage({ type: 'success', message: '删除成功', })
           }
