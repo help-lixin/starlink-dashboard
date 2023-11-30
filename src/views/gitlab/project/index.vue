@@ -257,7 +257,7 @@
 
   groupList(addDateRange(groupParams, dateRange.value)).then((res)=>{
       if(res.code == 200){
-        groups.value = res?.data?.records
+        Object.assign(groups,res?.data?.records)
       }
   });
 
@@ -503,21 +503,6 @@
           </el-col>
         </el-row>
         <el-row>
-          <el-col :span="12">
-            <el-form-item label="用户" prop="namespaceByUser">
-              <el-select
-              v-model="form.namespaceByUser"
-              placeholder="请选择用户"
-              clearable
-              style="width: 240px"
-            >
-            <el-option v-for="user in users"
-              :key="user.gitlabUserId"
-              :label="user.userName"
-              :value="user.gitlabUserId"/>
-            </el-select>
-            </el-form-item>
-          </el-col>
           <el-col :span="12">
             <el-form-item label="组" prop="namespaceByGroup">
               <el-select
