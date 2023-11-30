@@ -3,7 +3,7 @@
   import { Plus ,Delete, Edit, EditPen, Search , RefreshRight , Sort , QuestionFilled} from '@element-plus/icons-vue'
   import { parseTime , status ,addDateRange , showStatusFun , showStatusOperateFun  } from "@/utils/common"
   import { getPluginMeta } from '@/api/pluginDefinition';
-  import {envOptionSelect, groupOptionSelect , pluginOptionSelect } from "@/api/common-api"
+  import { pluginOptionSelect } from "@/api/common-api"
   import { list , get , update , add , changeStatus } from "@/api/pluginInstance"
   
   
@@ -124,8 +124,6 @@ const getList = ()=>{
   const formRef = ref<FormInstance>();
   const form = reactive({
         instanceId: undefined,
-        envCode : undefined,
-        groupCode: undefined,
         pluginCode: undefined,
         instanceCode: undefined,
         instanceName: undefined,
@@ -137,12 +135,6 @@ const getList = ()=>{
   
   // 表单验证规则
   const rules = reactive<FormRules>({
-        envCode :[
-          { required: true, message: "环境是必选项", trigger: "blur" }
-        ],
-        groupCode :[
-          { required: true, message: "环境组是必选项", trigger: "blur" }
-        ],
         pluginCode: [
           { required: true, message: "插件是必选项", trigger: "blur" }
         ],
@@ -156,8 +148,6 @@ const getList = ()=>{
   const reset = ()=> {
       Object.assign(form,{
         instanceId: undefined,
-        envCode : undefined,
-        groupCode: undefined,
         pluginCode: undefined,
         instanceCode: undefined,
         instanceName: undefined,
@@ -265,17 +255,6 @@ const getList = ()=>{
     }).catch(() => { })
   }
 
-  const handleFormEnv = (envCode:String)=>{
-    formGroups.value = []
-    if( envCode != "") {
-      groupOptionSelect(envCode).then((res)=>{
-        if(res?.code == 200){
-          formGroups.value =  res.data
-        }
-      });
-    }
-  }
-
   const handleFormPlugin = (pluginCode:String)=>{
     if(pluginCode != ""){
       getPluginMeta(pluginCode).then((res)=>{
@@ -356,13 +335,6 @@ const getList = ()=>{
   }
 
   const formInit = ()=>{
-      // 获取环境列表
-      envOptionSelect().then((res)=>{
-        if(res?.code == 200){
-          formEnvs.value = res?.data;
-        }
-      });
-
       // 获取插件列表
       pluginOptionSelect().then((res)=>{
         if(res?.code == 200){
@@ -376,21 +348,13 @@ const getList = ()=>{
   // ==========================================================================
   // 触发查询
   getList()
-  // 获取环境列表
-  envOptionSelect().then((res)=>{
-    if(res?.code == 200){
-      queryEnvs.value = res?.data;
-    }
-  });
-
+  
   // 获取插件列表
   pluginOptionSelect().then((res)=>{
     if(res?.code == 200){
       queryPlugins.value = res?.data;
     }
   })
-
-
 </script>
 
 <template>
@@ -399,47 +363,7 @@ const getList = ()=>{
     <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" size="small" :inline="true" v-show="showSearch" label-width="68px">
       <el-row :gutter="20">
         <el-col :span="8">
-          <el-form-item label="环境" prop="envCode">
-            <el-select
-            class="search-select"
-              v-model="queryParams.envCode"
-              @keyup.enter.native="handleQuery"
-              @change="handleEnv"
-              placeholder="环境编码"
-              clearable
-              style="width: 240px"
-            >
-            <el-option v-for="item in queryEnvs"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"/>
-            </el-select>
-          </el-form-item>
-        </el-col> 
-        <el-col :span="8">
-          <el-form-item label="环境组" prop="groupCode">
-            <el-select
-            class="search-select"
-              v-model="queryParams.groupCode"
-              @keyup.enter.native="handleQuery" 
-              @change="handleGroup"
-              placeholder="环境组"
-              clearable
-              style="width: 240px"
-            >
-            <el-option v-for="item in queryGroups"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"/>
-            </el-select>
-          </el-form-item>
-        </el-col> 
-      </el-row>
-
-
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="插件" prop="pluginCode">
+          <el-form-item label="请选择插件" prop="pluginCode">
             <el-select
             class="search-select"
               v-model="queryParams.pluginCode"
@@ -581,46 +505,7 @@ const getList = ()=>{
       <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
         <el-row>
           <el-col :span="12">
-            <el-form-item label="环境" prop="envCode">
-              <el-select
-                class="search-select"
-                    v-model="form.envCode"
-                    @change="handleFormEnv"
-                    @keyup.enter.native="handleQuery"
-                    placeholder="环境编码"
-                    clearable
-                    style="width: 240px"
-                >
-                <el-option v-for="item in formEnvs"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"/>
-                </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="12">
-            <el-form-item label="环境组" prop="groupCode">
-              <el-select
-                class="search-select"
-                    v-model="form.groupCode"
-                    @keyup.enter.native="handleQuery" 
-                    placeholder="环境组"
-                    clearable
-                    style="width: 240px"
-                >
-                <el-option v-for="item in formGroups"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"/>
-                </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="12">
-            <el-form-item label="插件编码" prop="pluginCode">
+            <el-form-item label="插件" prop="pluginCode">
               <el-select
                 class="search-select"
                     v-model="form.pluginCode"

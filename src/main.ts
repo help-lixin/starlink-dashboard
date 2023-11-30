@@ -12,8 +12,11 @@ import '@/styles/index.scss'
 
 import "virtual:svg-icons-register";
 
-const app = createApp(App)
 
+import 'element-plus/dist/index.css'
+import 'element-plus/theme-chalk/src/base.scss'
+
+const app = createApp(App)
 
 app.use(createPinia())
 app.use(router)

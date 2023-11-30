@@ -13,6 +13,10 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import _ from 'lodash';
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 
+import vitePluginImp from 'vite-plugin-imp'
+import vueJsx from '@vitejs/plugin-vue-jsx'
+
+
 const pathSrc = path.resolve(__dirname, 'src')
 
 const mode =  _.last(process.argv) as string;
@@ -23,10 +27,13 @@ export default defineConfig({
   base: './',
   plugins: [
     vue(),
+    vueJsx(),
     AutoImport({
       imports: ['vue','vue-router'],
       resolvers: [
-        ElementPlusResolver(),
+        ElementPlusResolver({
+          importStyle : "sass"
+        }),
         // Auto import icon components
         IconsResolver(),
       ],
@@ -60,6 +67,18 @@ export default defineConfig({
     }),
     Icons({
       autoInstall: true,
+    }),
+    vitePluginImp({
+      libList: [
+        {
+          libName: '@formily/element-plus',
+          libDirectory: 'esm',
+          replaceOldImport : false,
+          style(name) {
+            return `@formily/element-plus/esm/${name}/style.js`
+          },
+        },
+      ],
     }),
   ],
   // define :{
