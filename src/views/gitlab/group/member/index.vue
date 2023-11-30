@@ -161,8 +161,13 @@
             throw err;
         });
 
-    if (form.id != undefined) {
-        updateGroupMember(form)
+    const requestForm = {};
+    Object.assign(requestForm,form)
+    delete requestForm.groups
+    delete requestForm.users
+
+    if (requestForm.id != undefined) {
+        updateGroupMember(requestForm)
         .then(response => {
           if(response?.code == 200){
             ElMessage({ showClose: true, message: '修改成功', type: 'success', });
@@ -176,7 +181,7 @@
 
         });
       } else {
-        addGroupMember(form)
+        addGroupMember(requestForm)
         .then(response => {
           if(response?.code == 200){
             ElMessage({ showClose: true, message: '新增成功', type: 'success', });
