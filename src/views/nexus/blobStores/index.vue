@@ -107,14 +107,14 @@ const submitForm = async () => {
     if (response?.code == 200) {
       ElMessage({
         showClose: true,
-        message: '创建成功',
+        message: '操作成功',
         type: 'success',
       });
       open.value = false;
       
       getList();
     } else {
-      ElMessage.error('创建失败');
+      ElMessage.error('操作失败');
     }
   });
 
@@ -182,7 +182,7 @@ const handleUpdate = (row)=>{
 
 
 //删除操作
-const handleStatusChange1 = (row) => {
+const handledelete = (row) => {
   const params = {
     name: row.name,
     instanceCode : row.instanceCode
@@ -420,7 +420,7 @@ selectFirstInstanceQuery();
                 size="default"
                 @click="handleStatusChange(scope.row)"
               >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-              <el-button size="default" @click="handleStatusChange(scope.row)">删除</el-button>
+              <el-button size="default" @click="handledelete(scope.row)">删除</el-button>
              </div>
             </template>
           </el-table-column>
