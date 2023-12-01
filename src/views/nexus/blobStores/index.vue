@@ -214,7 +214,6 @@ const handleAdd = () => {
   open.value = true;
   title.value = "新增存储库";
 
-  pluginInstance.value = res?.data
   quotaShow.value = false;
   fileIsShow.value = false;
   delButtonShow.value = false;
@@ -263,9 +262,11 @@ const handleUpdate = (row)=>{
 
 //删除操作
 const handleStatusChange = (row) => {
-  queryParams.value.name = row.name;
-  queryParams.value.instanceCode = row.instanceCode;
-  deleteBlobStoresByName(queryParams.value).then(response => {
+  const params = {
+    name: row.name,
+    instanceCode : row.instanceCode
+  }
+  deleteBlobStoresByName(params).then(response => {
     if (response?.code == 200) {
       ElMessage({
         showClose: true,
@@ -475,7 +476,6 @@ selectFirstInstanceQuery();
             <el-select
               class="search-select2" 
               v-model="form.instanceCode"
-              @keyup.enter.native="queryInstances"
               placeholder="请选择插件实例"
               clearable
               style="width: 240px"
