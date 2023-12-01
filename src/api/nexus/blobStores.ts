@@ -12,8 +12,8 @@ export const getBlobStoresList = (param:any) =>{
     });
 }
 
-// 创建存储库
-export const createFileBlobStores = (param:any) =>{
+// 创建、更新存储库
+export const addOrUpdateFileBlobStores = (param:any) =>{
   return request({
     url: STARLINK_SERVICE + '/nexus/blobstores/file/add',
     method: 'post',
@@ -45,7 +45,15 @@ export const deleteBlobStoresByName = (param:any)=> {
       return res?.data;
   });
 }
-
+// 修改数据状态
+export const changeNexusStatus = (id:any, status:any)=> {
+  return request({
+    url: STARLINK_SERVICE + '/nexus/blobstores/file/changeStatus/'+ id +'/'+ status,
+    method: 'put'
+  }).then((res)=>{
+      return res?.data;
+  });
+}
 
 //B转MB
 export  const byteToMB = (param:any) => {

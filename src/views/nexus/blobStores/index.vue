@@ -3,8 +3,8 @@
 import { Plus,Search,RefreshRight } from '@element-plus/icons-vue'
 import { queryInstanceInfoByPluginCode } from "@/api/common-api"
 import { dayjs } from "@/utils/common-dayjs"
-import { getBlobStoresList, createFileBlobStores, getFileBlobStoresInfoByName, deleteBlobStoresByName,  unitConversion ,mBToGB , byteToMB } from "@/api/nexus/blobStores"
-import { showBlobStoresState ,addDateRange} from "@/utils/common"
+import { getBlobStoresList,addOrUpdateFileBlobStores, getFileBlobStoresInfoByName, deleteBlobStoresByName,changeNexusStatus,  unitConversion } from "@/api/nexus/blobStores"
+import { addDateRange,showStatusFun,showStatusOperateFun} from "@/utils/common"
 
 //插件Code
 const pluginCode = "nexus";
@@ -103,23 +103,21 @@ const submitForm = async () => {
       throw err;
     });
 
-    // 新增和修改共用一个function
-  
-  // createFileBlobStores(form.value)
-  // .then(response => {
-  //   if (response?.code == 200) {
-  //     ElMessage({
-  //       showClose: true,
-  //       message: '创建成功',
-  //       type: 'success',
-  //     });
-  //     open.value = false;
+  addOrUpdateFileBlobStores(form.value)
+  .then(response => {
+    if (response?.code == 200) {
+      ElMessage({
+        showClose: true,
+        message: '创建成功',
+        type: 'success',
+      });
+      open.value = false;
       
-  //     getList();
-  //   } else {
-  //     ElMessage.error('创建失败');
-  //   }
-  // });
+      getList();
+    } else {
+      ElMessage.error('创建失败');
+    }
+  });
 
 
 
@@ -231,7 +229,44 @@ const getList = () => {
       }
     });
 };
+//修改状态
+const handleStatusChange = (row)=>{
+    const id = row.id
+    const status = row.status
+    let msg = ""
+    if(status == 1){
+      msg = '是否禁用编号为"' + id + '"的数据项？'
+    }else{
+      msg = '是否启用编号为"' + id + '"的数据项？'
+    }
 
+    ElMessageBox.confirm(
+      msg,
+      'Warning',
+      {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    ).then(() => {
+        let tmpStatus;
+        if(status == 0){
+          tmpStatus = 1
+        }else{
+          tmpStatus = 0
+        }
+        changeNexusStatus(groupId,tmpStatus).then((res)=>{
+            if(res.code == 200){
+                getList()
+                ElMessage({
+                  type: 'success',
+                  message: '操作成功',
+                })
+            }
+        })    
+    })
+    .catch(() => { })
+  }
 
 const selectFirstInstanceQuery = ()=>{
   queryFirstInstance()
@@ -360,13 +395,9 @@ selectFirstInstanceQuery();
     <!--table  -->
     <div class="table-wrap">
       <el-table v-loading="loading" :data="blobStoresList">
+        <el-table-column label="ID" align="center" key="id" prop="id"/>
         <el-table-column label="名称" align="center" key="name" prop="name" />
         <el-table-column label="类型" align="center" key="type" prop="type" />
-        <el-table-column label="状态" align="center" key="state" prop="state">
-          <template #default="scope">
-            {{ showBlobStoresState(scope.row.state) }}
-          </template>
-        </el-table-column>
         <el-table-column label="BLOB数量" align="center" key="blobCount" prop="blobCount" />
         <el-table-column label="使用空间" align="center" key="totalSize" prop="totalSize">
           <template #default="scope">
@@ -378,15 +409,24 @@ selectFirstInstanceQuery();
             {{ unitConversion(scope.row.availableSpace) }}
           </template>
         </el-table-column>
+        <el-table-column label="状态" align="center" key="status" prop="status">
+          <template #default="scope">
+            {{ showStatusFun(scope.row.status) }}
+          </template>
+        </el-table-column>
         <el-table-column label="创建时间" align="center" prop="createTime"  width="180">
             <template #default="scope">
               {{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss") }}
             </template>
-          </el-table-column>
+        </el-table-column>
         <el-table-column label="操作" align="center" width="220" >
             <template #default="scope">
              <div class="action-btn">
               <el-button size="default" @click="handleUpdate(scope.row)" v-hasPerms="['/nexus/blobstores/file/add']">修改</el-button>
+              <el-button
+                size="default"
+                @click="handleStatusChange(scope.row)"
+              >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
               <el-button size="default" @click="handleStatusChange(scope.row)">删除</el-button>
              </div>
             </template>
