@@ -3,7 +3,7 @@
 import { Plus,Search,RefreshRight } from '@element-plus/icons-vue'
 import { queryInstanceInfoByPluginCode } from "@/api/common-api"
 import { dayjs } from "@/utils/common-dayjs"
-import { getBlobStoresList,addOrUpdateFileBlobStores, getFileBlobStoresInfoByName, deleteBlobStoresByName,changeNexusStatus,  unitConversion } from "@/api/nexus/blobStores"
+import { getBlobStoresList,addOrUpdateFileBlobStores, getFileBlobStoresDetails, deleteBlobStoresByName,changeNexusStatus,  unitConversion } from "@/api/nexus/blobStores"
 import { addDateRange,showStatusFun,showStatusOperateFun} from "@/utils/common"
 
 //插件Code
@@ -30,7 +30,6 @@ const title = ref("");
 const blobStoresList = ref([]);
 
 // 表单信息校验
-//如果 quotaShow = true 需要对softQuotaLimit、softQuotaType进行非空校验，否则不做校验
 const rules = reactive<FormRules>({
   instanceCode: [
     { required: true, message: "插件实例是必填项", trigger: "blur" }
@@ -156,23 +155,16 @@ const handleAdd = () => {
 const handleUpdate = (row)=>{
   reset();
 
-  const updateQuery = {
-    instanceCode: row.instanceCode,
-    name : row.name
-  }
-
-  getFileBlobStoresInfoByName(updateQuery).then(response => {
+  getFileBlobStoresDetails(row.id).then(response => {
     if(response.code == 200){
       open.value = true;
       title.value = "修改存储库";
       nameDisabled.value = true;      
 
-
       form.value = response?.data
-      form.value.instanceCode = updateQuery.instanceCode;
-
+    
       handleSoftQuotaShow(form.value.softQuota.enabled);
-
+     
       if (form.value.type == "File") {
         fileIsShow.value = true
       }
@@ -190,7 +182,7 @@ const handleUpdate = (row)=>{
 
 
 //删除操作
-const handleStatusChange = (row) => {
+const handleStatusChange1 = (row) => {
   const params = {
     name: row.name,
     instanceCode : row.instanceCode
@@ -229,6 +221,7 @@ const getList = () => {
       }
     });
 };
+
 //修改状态
 const handleStatusChange = (row)=>{
     const id = row.id
@@ -255,7 +248,7 @@ const handleStatusChange = (row)=>{
         }else{
           tmpStatus = 0
         }
-        changeNexusStatus(groupId,tmpStatus).then((res)=>{
+        changeNexusStatus(id,tmpStatus).then((res)=>{
             if(res.code == 200){
                 getList()
                 ElMessage({

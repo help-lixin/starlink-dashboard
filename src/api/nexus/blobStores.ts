@@ -25,11 +25,10 @@ export const addOrUpdateFileBlobStores = (param:any) =>{
 
 
 // 根据仓库名称获取存储库信息
-export const getFileBlobStoresInfoByName = (param:any)=> {
+export const getFileBlobStoresDetails = (id:any)=> {
   return request({
-    url: STARLINK_SERVICE + '/nexus/blobstores/file/details',
-    method: 'post',
-    data:param
+    url: STARLINK_SERVICE + '/nexus/blobstores/file/'+id,
+    method: 'get',
   }).then((res)=>{
       return res?.data;
   });
