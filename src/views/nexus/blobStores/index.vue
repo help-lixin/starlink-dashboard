@@ -72,16 +72,6 @@ const form = ref({
 const total = ref(0);
 //是否显示file类型的表单
 const fileIsShow = ref(false);
-//是否显示s3类型的表单
-const s3IsShow = ref(false);
-//是否显示限制表单
-// const quotaShow = ref(false);
-//删除按钮显示开关
-const delButtonShow = ref(false);
-//新增按钮显示开关
-const newButtonShow = ref(true);
-//更新按钮显示开关
-const updateButtonShow = ref(false);
 //表单中name输入框是否可用
 const nameDisabled = ref(true);
 // 显示搜索条件
@@ -103,23 +93,8 @@ const reset = () => {
   }
 };
 
-const resetQueryParams = () => {
-  queryParams.value={
-    pageNum: 1,
-    pageSize: 10,
-    instanceCode: undefined,
-    name: undefined,
-    type: undefined
-  }
-};
-
 // 表单提交处理
 const submitForm = async () => {
-
-  console.log("==================================================");
-  console.log(form.value);
-  console.log("==================================================");
-  
   loading.value = true;
   await formRef.value?.validate()
     .catch((err: Error) => {
@@ -127,10 +102,9 @@ const submitForm = async () => {
       loading.value = false;
       throw err;
     });
+
+    // 新增和修改共用一个function
   
-  console.log("****************************************************************");
-
-
   // createFileBlobStores(form.value)
   // .then(response => {
   //   if (response?.code == 200) {
@@ -146,34 +120,9 @@ const submitForm = async () => {
   //     ElMessage.error('创建失败');
   //   }
   // });
-};
 
-//更新操作
-const updateInfo = async () => {
-  loading.value = true;
-  await formRef.value?.validate()
-    .catch((err: Error) => {
-      ElMessage.error('表单验证失败');
-      loading.value = false;
-      throw err;
-    });
-  
-    createFileBlobStores(form.value) //
-    .then(response => {
-    if (response?.code == 200) {
-      ElMessage({
-        showClose: true,
-        message: '修改成功',
-        type: 'success',
-      });
-      open.value = false;
 
-      // 重新进行查询
-      getList();
-    } else {
-      ElMessage.error('修改失败');
-    }
-  });
+
 };
 
 // 表单取消处理
@@ -187,11 +136,11 @@ const handleQuery = function(){
   getList();
 };
 
-// 处理查询按钮
+// 处理查询重置按钮
 const resetQuery = function(){
   dateRange.value = []
   queryFormRef.value.resetFields()
-  getList()
+  selectFirstInstanceQuery();
 };
 
 //处理新增按钮
@@ -199,15 +148,10 @@ const handleAdd = () => {
   reset();
   open.value = true;
   title.value = "新增存储库";
+  fileIsShow.value = false;
+  nameDisabled.value = false;
 
   handleSoftQuotaShow(form.value.softQuota.enabled);
-
-  
-  fileIsShow.value = false;
-  delButtonShow.value = false;
-  updateButtonShow.value = false;
-  newButtonShow.value = true;
-  nameDisabled.value = false;
 };
 
 //修改时,弹出修改界面
@@ -222,15 +166,15 @@ const handleUpdate = (row)=>{
   getFileBlobStoresInfoByName(updateQuery).then(response => {
     if(response.code == 200){
       open.value = true;
+      title.value = "修改存储库";
+      nameDisabled.value = true;      
+
 
       form.value = response?.data
       form.value.instanceCode = updateQuery.instanceCode;
-      
+
       handleSoftQuotaShow(form.value.softQuota.enabled);
 
-      delButtonShow.value = true;
-      newButtonShow.value = false;
-      updateButtonShow.value = true;
       if (form.value.type == "File") {
         fileIsShow.value = true
       }
@@ -522,8 +466,7 @@ selectFirstInstanceQuery();
         </div>
       </el-form>
       <div slot="footer" class="dialog-footer" style="text-align:right;">
-        <el-button type="primary" v-show="updateButtonShow" @click="updateInfo">更 新</el-button>
-        <el-button type="primary" v-show="newButtonShow" @click="submitForm">确 定</el-button>
+        <el-button type="primary"  @click="submitForm">确认</el-button>
         <el-button @click="cancel">返 回</el-button>
       </div>
     </div>
