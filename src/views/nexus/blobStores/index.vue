@@ -30,23 +30,8 @@ const title = ref("");
 const blobStoresList = ref([]);
 
 // 表单信息校验
+//如果 quotaShow = true 需要对softQuotaLimit、softQuotaType进行非空校验，否则不做校验
 const rules = reactive<FormRules>({
-  instanceCode: [
-    { required: true, message: "插件实例是必填项", trigger: "blur" }
-  ],
-  type: [
-    { required: true, message: "存储类型不能为空", trigger: "blur" }
-  ],
-  name: [
-    { required: true, message: "存储仓库名称不能为空", trigger: "blur" }
-  ],
-  path: [
-    { required: true, message: "路径不能为空", trigger: "blur" }
-  ]
-});
-
-//预警信息校验
-const quotaRules= reactive<FormRules>({
   instanceCode: [
     { required: true, message: "插件实例是必填项", trigger: "blur" }
   ],
@@ -63,7 +48,7 @@ const quotaRules= reactive<FormRules>({
     { required: true, message: "警戒值不能为空", trigger: "blur" }
   ],
   softQuotaType: [
-    { required: true, message: "限制类型不能为空", trigger: "blur" }
+    { required: true, message: "预警类型不能为空", trigger: "blur" }
   ]
 });
 
