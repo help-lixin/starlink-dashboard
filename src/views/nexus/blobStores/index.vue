@@ -43,12 +43,6 @@ const rules = reactive<FormRules>({
   ],
   path: [
     { required: true, message: "路径不能为空", trigger: "blur" }
-  ],
-  softQuotaLimit: [
-    { required: true, message: "警戒值不能为空", trigger: "blur" }
-  ],
-  softQuotaType: [
-    { required: true, message: "预警类型不能为空", trigger: "blur" }
   ]
 });
 
@@ -71,7 +65,7 @@ const form = ref({
   softQuota: {
     limit: undefined,
     type: undefined,
-    enabled: undefined
+    enabled: false
   }
 });
 //分页信息
@@ -81,7 +75,7 @@ const fileIsShow = ref(false);
 //是否显示s3类型的表单
 const s3IsShow = ref(false);
 //是否显示限制表单
-const quotaShow = ref(false);
+// const quotaShow = ref(false);
 //删除按钮显示开关
 const delButtonShow = ref(false);
 //新增按钮显示开关
@@ -119,10 +113,13 @@ const resetQueryParams = () => {
   }
 };
 
-
-
 // 表单提交处理
 const submitForm = async () => {
+
+  console.log("==================================================");
+  console.log(form.value);
+  console.log("==================================================");
+  
   loading.value = true;
   await formRef.value?.validate()
     .catch((err: Error) => {
@@ -130,21 +127,25 @@ const submitForm = async () => {
       loading.value = false;
       throw err;
     });
-  createFileBlobStores(form.value)
-  .then(response => {
-    if (response?.code == 200) {
-      ElMessage({
-        showClose: true,
-        message: '创建成功',
-        type: 'success',
-      });
-      open.value = false;
+  
+  console.log("****************************************************************");
+
+
+  // createFileBlobStores(form.value)
+  // .then(response => {
+  //   if (response?.code == 200) {
+  //     ElMessage({
+  //       showClose: true,
+  //       message: '创建成功',
+  //       type: 'success',
+  //     });
+  //     open.value = false;
       
-      getList();
-    } else {
-      ElMessage.error('创建失败');
-    }
-  });
+  //     getList();
+  //   } else {
+  //     ElMessage.error('创建失败');
+  //   }
+  // });
 };
 
 //更新操作
@@ -199,7 +200,9 @@ const handleAdd = () => {
   open.value = true;
   title.value = "新增存储库";
 
-  quotaShow.value = false;
+  handleSoftQuotaShow(form.value.softQuota.enabled);
+
+  
   fileIsShow.value = false;
   delButtonShow.value = false;
   updateButtonShow.value = false;
@@ -223,14 +226,13 @@ const handleUpdate = (row)=>{
       form.value = response?.data
       form.value.instanceCode = updateQuery.instanceCode;
       
+      handleSoftQuotaShow(form.value.softQuota.enabled);
+
       delButtonShow.value = true;
       newButtonShow.value = false;
       updateButtonShow.value = true;
       if (form.value.type == "File") {
         fileIsShow.value = true
-      }
-      if (form.value.softQuota.enabled) {
-        quotaShow.value = true;
       }
     }else{
       ElMessage({
@@ -308,11 +310,18 @@ const handleBlobStoresTypeShow = (type) => {
 const handleSoftQuotaShow = (val) => {
   if (val) {
     form.value.softQuota.enabled = true;
-    quotaShow.value = true;
- 
+
+    // 动态添加验证规则
+    const softQuotaRules = {
+      type : [ { required: true, message: "警戒值不能为空", trigger: "blur" } ],
+      limit : [ { required: true, message: "预警类型不能为空", trigger: "blur" } ]
+    }
+    rules["softQuota"] = softQuotaRules
   } else {
     form.value.softQuota.enabled = false;
-    quotaShow.value = false;
+    
+    // 清除验证规则上的两个验证信息
+    delete rules.softQuotaRules
   }
 };
 
@@ -490,15 +499,15 @@ selectFirstInstanceQuery();
             </el-form-item>
           </el-row>
           <el-row>
-            <el-form-item label="是否开启预警" prop="softQuotaEnabled" label-width="150px">
+            <el-form-item label="是否开启预警" prop="softQuotaEnabled"  label-width="150px">
               <el-checkbox v-model="form.softQuota.enabled"
                 @change="checked => handleSoftQuotaShow(checked)">开启</el-checkbox>
             </el-form-item>
           </el-row>
         </div>
-        <div v-show="quotaShow">
+        <div v-show="form.softQuota.enabled">
           <el-row>
-            <el-form-item label="预警类型" prop="softQuotaType" label-width="150px">
+            <el-form-item label="预警类型" prop="softQuota.type" label-width="150px">
               <el-select v-model="form.softQuota.type" clearable style="width: 240px">
                 <el-option v-for="item in constraintType" :key="item.value" :label="item.label" :value="item.value" />
               </el-select>
@@ -506,7 +515,7 @@ selectFirstInstanceQuery();
           </el-row>
 
           <el-row>
-            <el-form-item label="警戒值(单位:MB)" prop="softQuotaLimit" label-width="150px">
+            <el-form-item label="警戒值(单位:MB)" prop="softQuota.limit" label-width="150px">
               <el-input v-model="form.softQuota.limit" maxlength="100" style="width:240px" />
             </el-form-item>
           </el-row>
