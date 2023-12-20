@@ -48,7 +48,7 @@ export const useActionMetasStore = defineStore('action', {
                     }
                 }
             }catch(err){
-                ElMessage.error("数据格式不对,转换成Map对象失败");
+                ElMessage.error("Action数据格式不对,转换成Map对象失败");
                 window.localStorage.setItem(localStorageActionsKey,"");
                 throw err;
             }

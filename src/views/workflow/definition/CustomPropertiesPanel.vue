@@ -1,38 +1,21 @@
-<template>
-	<div v-if="selectedElements.length === 1" class="custom-properties-panel">
-
-		<el-form :inline="true" :model="form" class="demo-form-inline">
-			<el-form-item label="任务名称">
-				<el-input v-model="form.name" placeholder="请输入任务名称" clearable
-					@change="event => changeField(event, 'name')" />
-			</el-form-item>
-			
-			<template v-if="element.type === 'bpmn:ServiceTask'">
-				<el-form-item label="实例">
-					<el-select v-model="form.instanceCode" placeholder="请选择实例" @change="event => selectInstance(event)"
-						clearable>
-						<el-option v-for="(option, index) in   form.instances  " :label="option.instanceName"
-							:value="option.instanceCode" />
-					</el-select>
-				</el-form-item>
-			</template>
-			
-		</el-form>
-	</div>
-</template>
-
 <script setup lang="ts">
 // @ts-nocheck  
 
-import { useActionMetasStore } from "@/stores/plugin";
-
-const actionMetasStore = useActionMetasStore();
-
-
 import { ref, toRaw } from 'vue'
 import { pluginInstanceOptionSelect } from '@/api/common-api'
-import request from "@/utils/request"
-import mitt from "@/mitt/bus"
+import { encode, decode } from 'js-base64';
+
+import { createForm } from '@formily/core'
+import { createSchemaField, FormProvider } from '@formily/vue'
+import {
+  FormItem,
+  FormLayout,
+  Input,
+  Select,
+} from '@formily/element-plus'
+
+import { useActionMetasStore } from "@/stores/plugin";
+const actionMetasStore = useActionMetasStore();
 
 
 const props = defineProps({
@@ -41,11 +24,45 @@ const props = defineProps({
 
 const selectedElements = ref([])
 const element = ref(null)
-const form = ref({
+const nodeForm = ref({
 	name: undefined,
 	pluginCode: undefined,
 	instanceCode: undefined
 })
+
+// 表单schema
+const formSchema = {
+	type: 'object',
+	properties: {
+		layout: {
+		type: 'void',
+		'x-component': 'FormLayout',
+		'x-component-props': {
+			labelAlign: "left",
+			wrapperAlign: "left",
+			labelWrap: true,
+			labelCol: 8,
+			wrapperCol: 14,
+			layout: 'horizontal',
+		},
+		properties: {
+
+		},
+		},
+	},
+};
+
+const schema = ref({});
+const form = createForm()
+const { SchemaField } = createSchemaField({
+	components: {
+		FormLayout,
+		FormItem,
+		Input,
+		Select,
+	},
+});
+
 
 
 function init() {
@@ -56,7 +73,7 @@ function init() {
 		element.value = e.newSelection[0]
 		
 		// 先清空数据
-		form.value = {
+		nodeForm.value = {
 			name: undefined,
 			pluginCode: undefined,
 			instanceCode: undefined
@@ -67,43 +84,47 @@ function init() {
 			// 从store里拿数据
 			const plugins = actionMetasStore.getActions
 			const pluginInfoStr = plugins.get(element.value.businessObject.$attrs.plugin)
+			const pluginInfo = JSON.parse(pluginInfoStr)
+
+			//拷贝出一份新的schema
+			const tempScehma = {};
+			Object.assign(tempScehma,formSchema);
+
+			// TODO lixin 先处理公共的.
+			
+
+			// 存在元数据的情况下做处理.
+			if(pluginInfo?._meta){
+				Object.assign(tempScehma.properties.layout.properties,pluginInfo._meta)
+			}
+			schema.value = tempScehma;
 		}
+	
 
 		// 节点名称
 		if (element.value?.businessObject?.$attrs?._name) {
-			form.value.name = element.value?.businessObject?.$attrs?._name
+			nodeForm.value.name = element.value?.businessObject?.$attrs?._name
 			element.value['name'] = element.value?.businessObject?.$attrs?._name
 			// 注意哈,要调用更新,才能真正的render
-			updateProperties({ "name": form.value.name })
+			updateProperties({ "name": nodeForm.value.name })
 		} else {
 			if (element.value?.businessObject?.name) {
-				form.value.name = element.value?.businessObject?.name
+				nodeForm.value.name = element.value?.businessObject?.name
 			}
 		}
 
 		//插件编码
 		if (element.value?.businessObject?.$attrs?.pluginCode) {
-			form.value.pluginCode = element.value?.businessObject?.$attrs?.pluginCode;
+			nodeForm.value.pluginCode = element.value?.businessObject?.$attrs?.pluginCode;
 		}
 		//实例编码
 		if (element.value?.businessObject?.$attrs?.instanceCode) {
-			form.value.instanceCode = element.value?.businessObject?.$attrs?.instanceCode;
-		}
-
-		// 如果: $attrs有用户填充的数据, 且, 表单的动态元数据大于零的情况下, 遍历动态表单的每一项, 进行赋值操作.
-		if (element.value?.businessObject?.$attrs && form?.value?.items?.length > 0) {
-			form.value.items.forEach((item) => {
-				const propertyName = item.key
-				const propertyValue = element.value.businessObject.$attrs[propertyName]
-				if (propertyValue) {
-					item.name = propertyValue
-				}
-			});
+			nodeForm.value.instanceCode = element.value?.businessObject?.$attrs?.instanceCode;
 		}
 
 		//  为节点配置默认属性
 		setDefaultProperties()
-	})
+	}) // end  selection.changed
 
 	props.modeler.on('element.changed', e => {
 		const { element } = e
@@ -113,10 +134,9 @@ function init() {
 		if (e.element.id === element.value.id) {
 			element.value = e.element
 		}
-	})
+	}) // end element.changed
 }
 
-init()
 
 function setDefaultProperties() {
 	if (element.value) {
@@ -146,7 +166,40 @@ function updateProperties(properties) {
 	const modeling = props.modeler.get('modeling')
 	modeling.updateProperties(toRaw(element.value), properties)
 }
+
+
+// 初始化
+init()
 </script>
+
+
+<template>
+	<div v-if="selectedElements.length === 1" class="custom-properties-panel">
+
+		<FormProvider :form="form">
+			<SchemaField :schema="schema" />
+		</FormProvider>
+
+		<!--
+		<el-form :inline="true" :model="form" class="demo-form-inline">
+			<el-form-item label="任务名称">
+				<el-input v-model="form.name" placeholder="请输入任务名称" clearable
+					@change="event => changeField(event, 'name')" />
+			</el-form-item>
+			
+			<template v-if="element.type === 'bpmn:ServiceTask'">
+				<el-form-item label="实例">
+					<el-select v-model="form.instanceCode" placeholder="请选择实例" @change="event => selectInstance(event)"
+						clearable>
+						<el-option v-for="(option, index) in   form.instances  " :label="option.instanceName"
+							:value="option.instanceCode" />
+					</el-select>
+				</el-form-item>
+			</template>
+		</el-form>
+		-->
+	</div>
+</template>
 
 <style scoped lang="scss">
 .custom-properties-panel {

@@ -54,6 +54,8 @@ import CustomPropertiesPanel from './CustomPropertiesPanel.vue'
 import workflowXml from './xmlStr'
 import customTranslate from './customTranslate'
 
+import { encode, decode } from 'js-base64';
+
 import { useRouter, useRoute } from "vue-router";
 const router = useRouter();
 
@@ -131,7 +133,13 @@ function init() {
 
 	// 把json转换成xml进行展示
 	if (processDefinitionJson) {
+		console.log("======================processDefinitionJson===================================")
+		console.log(processDefinitionJson)
+		console.log("======================processDefinitionJson===================================")
 		const processDefinitionXml = jsonToXml(processDefinitionJson)
+		console.log("======================processDefinitionXml===================================")
+		console.log(processDefinitionXml)
+		console.log("======================processDefinitionXml===================================")
 		setDiagram(processDefinitionXml)
 		return;
 	}
@@ -329,16 +337,12 @@ function jsonToXml(json) {
 			if (node.source) xml += ` sourceRef="${node.source}"`
 			if (node.target) xml += ` targetRef="${node.target}"`
 
+			// 针对JSON参数进行编码,因为,json中有一些数据会影响xml
+			// "{\"envCode\":\"common\",\"groupCode\":\"common-group\",\"instanceCode\":\"gitlab-instance-1\",\"projectId\":\"1\",\"branch\":\"v1.0\"}"
 			if (node.nodeType === 'serviceTask' && (node.params)) {
 				if (node.params) {
-					const paramsObject = JSON.parse(node.params)
-					Object.keys(paramsObject).forEach(key => {
-						const propertyName = key
-						const propertyValue = paramsObject[key]
-						if (propertyValue != undefined && propertyName != undefined) {
-							xml += ` ${propertyName}="${propertyValue}" `
-						}
-					})
+					const base64Params = encode(node.params);
+					xml += ` _params="${base64Params}"`
 				}
 			}
 

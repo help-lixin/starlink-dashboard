@@ -111,11 +111,11 @@ PaletteProvider.prototype.getPaletteEntries = function (element) {
 	actions.forEach((value, key) => {
 		const pluginItem = JSON.parse(value)
 		const pluginMeta = { "plugin": key, "_name": pluginItem?.title, "pluginCode": pluginItem?.pluginCode };
-
+		
 		paletteObj[key] = {
-			group: pluginItem.group,
-			className: pluginItem.className,
-			title: pluginItem.title,
+			group: pluginItem?.group,
+			className: pluginItem?.className,
+			title: pluginItem?.title,
 			action: {
 				dragstart: createTask(pluginMeta),
 				click: createTask(pluginMeta),

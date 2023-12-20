@@ -33,3 +33,30 @@ a,
     /* padding: 0 2rem; */
   }
 }
+
+.custom-task-common {
+  border-radius: 50%;
+	background-size: 65%;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+.custom-task-common.gitlab-clone-service-task {
+	background-image: url(../assets/gitlab.png);
+}
+
+.custom-task-common.github-clone-service-task {
+	background-image: url(../assets/github.png);
+}
+
+.custom-task-common.svn-clone-service-task {
+	background-image: url(../assets/svn.jpg);
+}
+
+.custom-task-common.jenkins-service-task {
+	background-image: url(../assets/jenkins.png);
+}
+
+
+
+
