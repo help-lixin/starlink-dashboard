@@ -4,7 +4,7 @@
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
   import { pageList , addProject , queryProjectInfoById , changeProjectStatus} from "@/api/gitlab/projects"
-  import { groupList } from "@/api/gitlab/groups"
+  import { groupSelectOption } from "@/api/gitlab/groups"
  
   const queryForm = ref(null);
 
@@ -217,8 +217,7 @@
 
   // form表单初始化,尽量在表单使用时初始化,会影响列表页面的渲染时间.
   const formInitFunc = ()=>{
-    // TODO 伍岳林,不允许:共用分页接口,后端独立开接口来承载数据,将来权限可以更加细粒度.
-    groupList(addDateRange(queryParams, dateRange.value))
+    groupSelectOption()
     .then((res)=>{
         if(res.code == 200){
           Object.assign(groups,res?.data?.records)
@@ -249,7 +248,7 @@
               v-model="queryParams.instanceCode"
               @keyup.enter.native="handleQuery"
               placeholder="请选择实例"
-              clearable
+              style="width: 240px"
             >
             <el-option v-for="item in pluginInstance"
               :key="item.pluginCode"
@@ -295,6 +294,19 @@
           </el-form-item>
         </el-col> 
         <el-col :span="8">
+          <el-form-item label="成员名称" prop="userName">
+            <el-input
+              v-model="queryParams.userName"
+              placeholder="请输入成员名称"
+              clearable
+              style="width: 240px"
+              @keyup.enter.native="handleQuery"
+            />
+          </el-form-item>
+        </el-col> 
+      </el-row>
+      <el-row :gutter="20">
+        <el-col :span="8">
           <el-form-item label="创建时间">
             <el-date-picker
               v-model="dateRange"
@@ -307,15 +319,13 @@
             ></el-date-picker>
           </el-form-item>
         </el-col> 
-      </el-row>
-      <el-row :gutter="20">
         <el-col :span="8">
           <div>
             <el-button type="primary" size="small" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
             <el-button  size="small" @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
           </div>
         </el-col>
-      </el-row>  
+      </el-row>
     </el-form>
 
     <!--  option-->
@@ -342,9 +352,9 @@
               {{  showStatusFun(scope.row.status) }}
             </template>
           </el-table-column>
-          <el-table-column label="创建时间" align="center" prop="createdTime"  width="180">
+          <el-table-column label="创建时间" align="center" prop="createTime"  width="180">
             <template #default="scope">
-              <span>{{ dayjs(scope.row.createdTime).format("YYYY-MM-DD HH:mm:ss")   }}</span>
+              <span>{{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}</span>
             </template>
           </el-table-column>
           <el-table-column

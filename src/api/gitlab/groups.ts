@@ -67,3 +67,14 @@ export function changeGroupStatus(groupId:any, status:any) {
     });
 }
 
+
+// 查询组下拉列表
+export function groupSelectOption(query:any) {
+    return request({
+      url: STARLINK_SERVICE + '/gitlab/group/selectOption',
+      method: 'get',
+      params: query
+    }).then((res)=>{
+        return res?.data;
+    });
+}

@@ -4,7 +4,7 @@ import {STARLINK_SERVICE} from "@/utils/env"
 // 查询组成员列表
 export function memberList(query:any) {
     return request({
-      url: STARLINK_SERVICE + '/gitlab/project/member/user/list',
+      url: STARLINK_SERVICE + '/gitlab/project/member/list',
       method: 'get',
       params: query
     }).then((res)=>{
@@ -48,10 +48,11 @@ return request({
   
 
 // 根据id查询组成员信息
-export function queryProjectMemberInfoById(id:string) {
+export function queryProjectMemberInfoById(memberData:any) {
 return request({
-        url: STARLINK_SERVICE + '/gitlab/project/member/info/' + id,
-        method: 'get'
+        url: STARLINK_SERVICE + '/gitlab/project/member/info',
+        method: 'get',
+        params: memberData
     }).then((res)=>{
         return res?.data;
     });

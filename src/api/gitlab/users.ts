@@ -67,3 +67,14 @@ export function changeUserStatus(data:any) {
     });
 }
 
+// 查询组列表
+export function userSelectOption(query:any) {
+    return request({
+      url: STARLINK_SERVICE + '/gitlab/user/selectOption',
+      method: 'get',
+      params: query
+    }).then((res)=>{
+        return res?.data;
+    });
+}
+

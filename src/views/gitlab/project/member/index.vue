@@ -4,7 +4,7 @@
   import { showStatusOperateFun , status , showStatusFun , addDateRange } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
-  import { memberList , addProjectMember , updateProjectMember , queryProjectMemberInfoById , projectList , removeMember, showMemberProject} from "@/api/gitlab/project-member"
+  import { memberList , addProjectMember , updateProjectMember , projectList , removeMember, showMemberProject} from "@/api/gitlab/project-member"
   import { userList} from "@/api/gitlab/users"
   import { groupList } from "@/api/gitlab/groups"
  
@@ -237,7 +237,6 @@
   // 修改状态弹出框处理
   const handleDelete = (row)=>{
     const memberName = row.userName
-    const curStatus = row.status
     let msg = ""
     msg = '是否删除项目成员【"' + memberName + '"】的数据项？'
 
@@ -250,8 +249,7 @@
         type: 'warning',
       }
     ).then(() => {
-      deleteParams.userId = row.userId
-      deleteParams.projectId = row.projectId
+      deleteParams.projectId = row.id
       deleteParams.instanceCode = row.instanceCode
       removeMember(deleteParams).then((res)=>{
             if(res.code == 200){
@@ -340,22 +338,6 @@
       </el-row>
       <el-row :gutter="20">
         <el-col :span="8">
-          <el-form-item label="项目组" prop="groupId">
-            <el-select
-            class="search-select"
-              v-model="queryParams.groupId"
-              placeholder="请选择项目组"
-              clearable
-              style="width: 240px"
-            >
-            <el-option v-for="dict in groups"
-              :key="dict.gitlabGroupName"
-              :label="dict.gitlabGroupName"
-              :value="dict.id"/>
-            </el-select>
-          </el-form-item>
-        </el-col> 
-        <el-col :span="8">
           <el-form-item label="成员名称" prop="userName">
             <el-input
               v-model="queryParams.userName"
@@ -366,8 +348,6 @@
             />
           </el-form-item>
         </el-col> 
-      </el-row>
-      <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="项目" prop="projectId">
             <el-select
@@ -384,6 +364,8 @@
             </el-select>
           </el-form-item>
         </el-col> 
+      </el-row>
+      <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="创建时间">
             <el-date-picker
@@ -424,11 +406,7 @@
           <el-table-column label="成员昵称" align="center" key="nickName" prop="nickName"  :show-overflow-tooltip="true"  width="100" />
           <el-table-column label="邮箱" align="center" key="email" prop="email"  :show-overflow-tooltip="true"  width="100" />
           <el-table-column label="成员名称" align="center" key="userName" prop="userName"  :show-overflow-tooltip="true"  width="100" />
-          <el-table-column label="项目" align="center" key="projectId"  width="100">
-            <template v-slot="scope">
-              {{  showMemberProject(scope.row.projectId,projects) }}
-            </template>
-          </el-table-column>
+          <el-table-column label="项目" align="center" key="projectName" prop="projectName"  width="100" />
           <el-table-column label="状态" align="center" key="status"  width="100">
             <template #default="scope">
               {{  showStatusFun(scope.row.status) }}
@@ -491,17 +469,16 @@
             </el-form-item>
           </el-col> 
           <el-col :span="8">
-            <el-form-item label="成员项目" prop="projectId">
+            <el-form-item label="项目" prop="projectId">
               <el-select
                 class="search-select"
                 v-model="form.projectId"
-                placeholder="成员项目"
+                placeholder="项目"
                 clearable
-                style="width: 240px"
               >
               <el-option v-for="dict in projects"
-                :key="dict.gitlabProjectName"
-                :label="dict.gitlabProjectName"
+                :key="dict.projectName"
+                :label="dict.projectName"
                 :value="dict.id"/>
               </el-select>
             </el-form-item>

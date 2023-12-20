@@ -4,11 +4,8 @@
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
   import { userList , addUser , updateUser , queryUserInfoById , changeUserStatus} from "@/api/gitlab/users"
-  import { groupList } from "@/api/gitlab/groups"
  
   const queryForm = ref(null);
-  // 日期范围
-  // const daterangeArray = ref('')
 
   //查询列表信息
   const queryParams = reactive({
@@ -21,39 +18,14 @@
     instanceCode: undefined
   })
 
-    //查询列表信息
-  //   const groupParams = reactive({
-  //   pageNum: 1,
-  //   pageSize: 10,
-  //   beginTime: undefined,
-  //   endTime: undefined,
-  //   status: undefined,
-  //   groupName: undefined
-  // })
-
-  // TODO 伍岳林
-  // 定义这样的变量有什么作用?
-  // 根据用户名查询用户信息
-  // const queryUserParams = reactive({
-  // })
-
   const loading = ref(false)
 
   // 显示搜索条件
   const showSearch = ref(true)
   // 日期范围
   const dateRange = ref([])
-
-  // 选中数用户
-  // const ids = ref([])
-  // 非单个禁用
-  // const single = ref(true)
-  // 非多个禁用
-  // const multiple = ref(true)
-
   const total= ref(0)
   const userRow = reactive([])
-  // const groups = reactive([])
 
   // 表单
   const open = ref(false);
@@ -61,7 +33,6 @@
   const form = reactive({})
   const title = ref("")
   const pluginInstance = reactive([]);
-  // const users = reactive([]);
   const pluginCode = "gitlab"
 
   // 表单规则
@@ -74,8 +45,6 @@
 
   // 重置表单
   const reset = ()=> {
-      // TODO 伍岳林
-      // 重置表单时,表单里所有数据都要清空,否则,会保留有原来的数据.
       Object.assign(form,{
         id: undefined,
         userName: undefined,
@@ -122,16 +91,6 @@
   // 处理新增按钮
   const handleAdd = function(){
     reset();
-    // TODO 伍岳林
-    // queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
-    //   if(res.code == 200){
-    //     open.value = true;
-    //     title.value = "添加用户";
-    //     Object.assign(pluginInstance,res?.data)
-    //     console.log(pluginInstance)
-    //   }
-    // });
-
     open.value = true;
     title.value = "添加用户";
   }
@@ -139,13 +98,6 @@
   // 处理更新按钮
   const handleUpdate = function(row){
     reset();
-    // TODO 伍岳林
-    // 在列表页面,已经查询拿出了实例列表,所以,不需要再进行查询了. 
-    // queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
-    //   if(res.code == 200){
-    //     Object.assign(pluginInstance,res?.data)
-    //   }
-    // });
     queryUserInfoById(row.id)
     .then(response => {
       if(response?.code == 200){
@@ -156,14 +108,6 @@
     });
   }
   
-
-  // 多选框选中数据
-  // const handleSelectionChange = function(selection){
-    // ids.value = selection.map(item => item.id);
-    // single.value = selection.length != 1;
-    // multiple.value = !selection.length;
-  // }
-
   // 表单提交处理
   const submitForm = async ()=>{
     loading.value = true;
@@ -212,14 +156,10 @@
 
   
   const handleStatusChange = (row)=>{
-    // 复选框都被干掉了,ids就没有意义了.
-    // const id = row.id || ids.value;
     const id = row.id
     const curStatus = row.status
     const instanceCode = row.instanceCode;
 
-    // TODO 伍岳林
-    // 如果需要用于交互,才把变量扔到最外层,否则,变量应该就近原则
     const changeStatusParams = {
           status: undefined,
           id: id,
@@ -247,10 +187,6 @@
         changeUserStatus(changeStatusParams)
         .then((res)=>{
             if(res.code == 200){
-                //  TODO 伍岳林
-                // 为什么进行状态修改后,数据要跳到第一页去?为什么不是保持用户的操作?
-                // 重置查询表单,并进行查询
-                // queryParams.pageNum=1
                 getList()
                 ElMessage({
                   type: 'success',
@@ -269,14 +205,6 @@
     reset();
   }
 
-  // TODO 伍岳林
-  // 在页面上,根本就没有看到需要用这些信息
-  // groupList(addDateRange(queryParams, dateRange.value)).then((res)=>{
-  //     if(res.code == 200){
-  //       Object.assign(groups,res?.data?.records)
-  //     }
-  // });
-  
   // 触发查询
   getList();
 
@@ -387,7 +315,7 @@
               <el-button
                 size="default"
                 @click="handleStatusChange(scope.row)"
-                v-hasPerms="['/gitlab/user/changeStatus/**']"
+                v-hasPerms="['/gitlab/user/changeStatus']"
               >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
              </div>
             </template>

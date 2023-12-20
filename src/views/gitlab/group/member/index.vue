@@ -5,8 +5,8 @@
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
   import { memberList , addGroupMember , updateGroupMember  , removeMember} from "@/api/gitlab/members"
-  import { userList} from "@/api/gitlab/users"
-  import { groupList } from "@/api/gitlab/groups"
+  import { userSelectOption} from "@/api/gitlab/users"
+  import { groupSelectOption } from "@/api/gitlab/groups"
   
  
   const queryFormRef = ref(null);
@@ -134,11 +134,11 @@
 
 
     groupListFunc(queryParams.instanceCode,(response)=>{
-      form.groups = response?.data?.records
+      form.groups = response?.data
     })
 
     userListFunc(queryParams.instanceCode,(response)=>{
-      form.users = response?.data.records
+      form.users = response?.data
     })
     form.instanceCode = queryParams.instanceCode;
   }
@@ -233,7 +233,7 @@
     }
 
     // TODO 伍岳林,后端开独立的接口,为下拉列表进行赋值.
-    groupList(addDateRange(groupParams, dateRange.value))
+    groupSelectOption(addDateRange(groupParams, dateRange.value))
       .then(response => {
         if(callback){
           callback(response);
@@ -247,8 +247,7 @@
       instanceCode : instanceCode
     };
 
-    //  TODO 伍岳林,后端抽出独立接口来渲染成下拉列表框,不要共用一个接口.
-    userList(uesrListqueryParams)
+    userSelectOption(uesrListqueryParams)
     .then(response =>{
       if(callback){
         callback(response);
@@ -268,7 +267,7 @@
     if(form?.instanceCode && form?.instanceCode.length > 0 ){
       // 根据instanceCode重新加载用户组
       groupListFunc(form.instanceCode,(response)=>{
-        form.groups = response?.data?.records
+        form.groups = response?.data
       })
     }else{
       form.groups = []
@@ -280,7 +279,7 @@
     if(queryParams?.instanceCode && queryParams?.instanceCode.length > 0 ){
        // 根据instanceCode重新加载用户组
        groupListFunc(queryParams.instanceCode,(response)=>{
-        queryParams.groups = response?.data?.records;
+        queryParams.groups = response?.data;
       })
     }else{
       queryParams.groups=[];
@@ -298,8 +297,8 @@
       }
       
       groupListFunc(queryParams.instanceCode,(response)=>{
-        queryParams.groups = response?.data?.records
-        queryParams.groupId = response?.data?.records[0]?.id
+        queryParams.groups = response?.data
+        queryParams.groupId = response?.data[0]?.id
         // 触发查询
         getList();
       })
@@ -342,7 +341,7 @@
             <el-option v-for="dict in queryParams.groups"
               :key="dict.gitlabGroupName"
               :label="dict.gitlabGroupName"
-              :value="dict.id"/>
+              :value="dict.gitlabGroupId"/>
             </el-select>
           </el-form-item>
         </el-col> 
@@ -419,9 +418,7 @@
           <el-table-column label="成员昵称" align="center" key="nickName" prop="nickName"  :show-overflow-tooltip="true"  width="100" />
           <el-table-column label="邮箱" align="center" key="email" prop="email"  :show-overflow-tooltip="true"  width="100" />
           <el-table-column label="成员名称" align="center" key="userName" prop="userName"  :show-overflow-tooltip="true"  width="100" />
-          <el-table-column label="组" align="center" key="groupId"  width="100">
-            #### 待处理
-          </el-table-column>
+          <el-table-column label="组" align="center" key="gitlabGroupName" prop="gitlabGroupName"  width="100" />
           <el-table-column label="状态" align="center" key="status"  width="100">
             <template #default="scope">
               {{  showStatusFun(scope.row.status) }}
@@ -473,7 +470,6 @@
                 v-model="form.instanceCode"
                 :change="formSwitchInstance()"
                 placeholder="请选择实例"
-                clearable
                 style="width: 240px"
               >
               <el-option v-for="item in pluginInstance"
@@ -498,7 +494,7 @@
               <el-option v-for="dict in form.groups"
                 :key="dict.gitlabGroupName"
                 :label="dict.gitlabGroupName"
-                :value="dict.id"/>
+                :value="dict.gitlabGroupId"/>
               </el-select>
             </el-form-item>
           </el-col> 

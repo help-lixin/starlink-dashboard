@@ -7,4 +7,12 @@ export const navigation = new Map<string,string[]>([
     [ "/system/plugin/definition/index" ,  ["系统管理","插件管理"] ],
     [ "/system/plugin/instance/index" ,  ["系统管理","插件实例管理"] ],
     [ "/workflow/definition/index" ,  ["流水线管理","流水线定义管理"] ],
+
+    [ "/gitlab/group/index" ,  ["gitlab管理","gitlab组管理"] ],
+    [ "/gitlab/project/index" ,  ["gitlab管理","gitlab项目管理"] ],
+    [ "/gitlab/group/member/index" ,  ["gitlab管理","gitlab组成员管理"] ],
+    [ "/gitlab/project/member/index" ,  ["gitlab管理","gitlab项目成员管理"] ],
+    [ "/gitlab/user/index" ,  ["gitlab管理","gitlab用户管理"] ],
+
 ]);
+
