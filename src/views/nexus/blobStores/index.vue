@@ -3,8 +3,8 @@
 import { Plus,Search,RefreshRight } from '@element-plus/icons-vue'
 import { queryInstanceInfoByPluginCode } from "@/api/common-api"
 import { dayjs } from "@/utils/common-dayjs"
-import { getBlobStoresList, createFileBlobStores, getFileBlobStoresInfoByName, deleteBlobStoresByName, updateFileBlobStoresInfoByName } from "@/api/nexus/blobStores"
-import { showBlobStoresState ,addDateRange} from "@/utils/common"
+import { getBlobStoresList,addOrUpdateFileBlobStores, getFileBlobStoresDetails, deleteBlobStoresByName,changeNexusStatus,  unitConversion } from "@/api/nexus/blobStores"
+import { addDateRange,showStatusFun,showStatusOperateFun} from "@/utils/common"
 
 //插件Code
 const pluginCode = "nexus";
@@ -45,28 +45,6 @@ const rules = reactive<FormRules>({
   ]
 });
 
-//预警信息校验
-const quotaRules= reactive<FormRules>({
-  instanceCode: [
-    { required: true, message: "插件实例是必填项", trigger: "blur" }
-  ],
-  type: [
-    { required: true, message: "存储类型不能为空", trigger: "blur" }
-  ],
-  name: [
-    { required: true, message: "存储仓库名称不能为空", trigger: "blur" }
-  ],
-  path: [
-    { required: true, message: "路径不能为空", trigger: "blur" }
-  ],
-  softQuotaLimit: [
-    { required: true, message: "警戒值不能为空", trigger: "blur" }
-  ],
-  softQuotaType: [
-    { required: true, message: "限制类型不能为空", trigger: "blur" }
-  ]
-});
-
 const queryFormRef = ref(null);
 //存储库类型
 const blobStoresTypes = ref(["File"]);
@@ -86,23 +64,13 @@ const form = ref({
   softQuota: {
     limit: undefined,
     type: undefined,
-    enabled: undefined
+    enabled: false
   }
 });
 //分页信息
 const total = ref(0);
 //是否显示file类型的表单
 const fileIsShow = ref(false);
-//是否显示s3类型的表单
-const s3IsShow = ref(false);
-//是否显示限制表单
-const quotaShow = ref(false);
-//删除按钮显示开关
-const delButtonShow = ref(false);
-//新增按钮显示开关
-const newButtonShow = ref(true);
-//更新按钮显示开关
-const updateButtonShow = ref(false);
 //表单中name输入框是否可用
 const nameDisabled = ref(true);
 // 显示搜索条件
@@ -124,18 +92,6 @@ const reset = () => {
   }
 };
 
-const resetQueryParams = () => {
-  queryParams.value={
-    pageNum: 1,
-    pageSize: 10,
-    instanceCode: undefined,
-    name: undefined,
-    type: undefined
-  }
-};
-
-
-
 // 表单提交处理
 const submitForm = async () => {
   loading.value = true;
@@ -145,48 +101,25 @@ const submitForm = async () => {
       loading.value = false;
       throw err;
     });
-  createFileBlobStores(form.value).then(response => {
+
+  addOrUpdateFileBlobStores(form.value)
+  .then(response => {
     if (response?.code == 200) {
       ElMessage({
         showClose: true,
-        message: '创建成功',
+        message: '操作成功',
         type: 'success',
       });
       open.value = false;
       
-      queryAll();
+      getList();
     } else {
-      ElMessage.error('创建失败');
+      ElMessage.error('操作失败');
     }
   });
-};
 
-//更新操作
-const updateInfo = async () => {
-  loading.value = true;
-  await formRef.value?.validate()
-    .catch((err: Error) => {
-      ElMessage.error('表单验证失败');
-      loading.value = false;
-      throw err;
-    });
-  
-    createFileBlobStores(form.value) //
-    .then(response => {
-    if (response?.code == 200) {
-      ElMessage({
-        showClose: true,
-        message: '修改成功',
-        type: 'success',
-      });
-      open.value = false;
 
-      // 重新进行查询
-      queryAll();
-    } else {
-      ElMessage.error('修改失败');
-    }
-  });
+
 };
 
 // 表单取消处理
@@ -200,11 +133,11 @@ const handleQuery = function(){
   getList();
 };
 
-// 处理查询按钮
+// 处理查询重置按钮
 const resetQuery = function(){
   dateRange.value = []
   queryFormRef.value.resetFields()
-  queryAll()
+  selectFirstInstanceQuery();
 };
 
 //处理新增按钮
@@ -212,39 +145,28 @@ const handleAdd = () => {
   reset();
   open.value = true;
   title.value = "新增存储库";
-  pluginInstance.value = res?.data
-  quotaShow.value = false;
   fileIsShow.value = false;
-  delButtonShow.value = false;
-  updateButtonShow.value = false;
-  newButtonShow.value = true;
   nameDisabled.value = false;
+
+  handleSoftQuotaShow(form.value.softQuota.enabled);
 };
 
 //修改时,弹出修改界面
 const handleUpdate = (row)=>{
   reset();
 
-  const updateQuery = {
-    instanceCode: row.instanceCode,
-    name : row.name
-  }
-
-  getFileBlobStoresInfoByName(updateQuery).then(response => {
+  getFileBlobStoresDetails(row.id).then(response => {
     if(response.code == 200){
       open.value = true;
+      title.value = "修改存储库";
+      nameDisabled.value = true;      
 
       form.value = response?.data
-      form.value.instanceCode = updateQuery.instanceCode;
-      
-      delButtonShow.value = true;
-      newButtonShow.value = false;
-      updateButtonShow.value = true;
+    
+      handleSoftQuotaShow(form.value.softQuota.enabled);
+     
       if (form.value.type == "File") {
         fileIsShow.value = true
-      }
-      if (form.value.softQuota.enabled) {
-        quotaShow.value = true;
       }
     }else{
       ElMessage({
@@ -260,10 +182,12 @@ const handleUpdate = (row)=>{
 
 
 //删除操作
-const handleStatusChange = (row) => {
-  queryParams.value.name = row.name;
-  queryParams.value.instanceCode = row.instanceCode;
-  deleteBlobStoresByName(queryParams.value).then(response => {
+const handledelete = (row) => {
+  const params = {
+    name: row.name,
+    instanceCode : row.instanceCode
+  }
+  deleteBlobStoresByName(params).then(response => {
     if (response?.code == 200) {
       ElMessage({
         showClose: true,
@@ -271,8 +195,6 @@ const handleStatusChange = (row) => {
         type: 'success',
       });
       open.value = false;
-      reset();
-      resetQueryParams();
       getList();
     } else {
       ElMessage({
@@ -300,9 +222,47 @@ const getList = () => {
     });
 };
 
+//修改状态
+const handleStatusChange = (row)=>{
+    const id = row.id
+    const status = row.status
+    let msg = ""
+    if(status == 1){
+      msg = '是否禁用编号为"' + id + '"的数据项？'
+    }else{
+      msg = '是否启用编号为"' + id + '"的数据项？'
+    }
 
-const queryAll = ()=>{
-  queryInstances()
+    ElMessageBox.confirm(
+      msg,
+      'Warning',
+      {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    ).then(() => {
+        let tmpStatus;
+        if(status == 0){
+          tmpStatus = 1
+        }else{
+          tmpStatus = 0
+        }
+        changeNexusStatus(id,tmpStatus).then((res)=>{
+            if(res.code == 200){
+                getList()
+                ElMessage({
+                  type: 'success',
+                  message: '操作成功',
+                })
+            }
+        })    
+    })
+    .catch(() => { })
+  }
+
+const selectFirstInstanceQuery = ()=>{
+  queryFirstInstance()
   .then(()=>{
     getList();
   });
@@ -322,15 +282,22 @@ const handleBlobStoresTypeShow = (type) => {
 const handleSoftQuotaShow = (val) => {
   if (val) {
     form.value.softQuota.enabled = true;
-    quotaShow.value = true;
- 
+
+    // 动态添加验证规则
+    const softQuotaRules = {
+      type : [ { required: true, message: "警戒值不能为空", trigger: "blur" } ],
+      limit : [ { required: true, message: "预警类型不能为空", trigger: "blur" } ]
+    }
+    rules["softQuota"] = softQuotaRules
   } else {
     form.value.softQuota.enabled = false;
-    quotaShow.value = false;
+    
+    // 清除验证规则上的两个验证信息
+    delete rules.softQuotaRules
   }
 };
 
-const queryInstances = ()=>{
+const queryFirstInstance = ()=>{
   // 挑选一个插件实例,进行查询
   return queryInstanceInfoByPluginCode(pluginCode).then((res) => {
       if (res.code == 200) {
@@ -344,31 +311,8 @@ const queryInstances = ()=>{
     });
 }
 
-//B转MB
-const byteToMB = (param) => {
-  return parseInt(param) / (1024 * 1024);
-};
-
-
-//MB转GB
-const mBToGB = (param) => {
-  return parseInt(param) / 1024;
-};
-
-//显示单位，param=Byte，大于1024转为GB，保留2位小数
-const unitConversion = (param) => {
-  let value = byteToMB(param);
-  if (mBToGB(value) > 1) {
-    return mBToGB(value).toFixed(2) + " GB";
-  } else if (value > 1) {
-    return parseInt(value).toFixed(2) + ' MB';
-  } else {
-    return parseInt(value * 1024).toFixed(2) + ' KB';
-  }
-};
-
-
-queryAll();
+// 选择一个实例进行查询
+selectFirstInstanceQuery();
 </script>
 
 <template>
@@ -444,13 +388,9 @@ queryAll();
     <!--table  -->
     <div class="table-wrap">
       <el-table v-loading="loading" :data="blobStoresList">
+        <el-table-column label="ID" align="center" key="id" prop="id"/>
         <el-table-column label="名称" align="center" key="name" prop="name" />
         <el-table-column label="类型" align="center" key="type" prop="type" />
-        <el-table-column label="状态" align="center" key="state" prop="state">
-          <template #default="scope">
-            {{ showBlobStoresState(scope.row.state) }}
-          </template>
-        </el-table-column>
         <el-table-column label="BLOB数量" align="center" key="blobCount" prop="blobCount" />
         <el-table-column label="使用空间" align="center" key="totalSize" prop="totalSize">
           <template #default="scope">
@@ -462,16 +402,25 @@ queryAll();
             {{ unitConversion(scope.row.availableSpace) }}
           </template>
         </el-table-column>
+        <el-table-column label="状态" align="center" key="status" prop="status">
+          <template #default="scope">
+            {{ showStatusFun(scope.row.status) }}
+          </template>
+        </el-table-column>
         <el-table-column label="创建时间" align="center" prop="createTime"  width="180">
             <template #default="scope">
               {{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss") }}
             </template>
-          </el-table-column>
+        </el-table-column>
         <el-table-column label="操作" align="center" width="220" >
             <template #default="scope">
              <div class="action-btn">
               <el-button size="default" @click="handleUpdate(scope.row)" v-hasPerms="['/nexus/blobstores/file/add']">修改</el-button>
-              <el-button size="default" @click="handleStatusChange(scope.row)">删除</el-button>
+              <el-button
+                size="default"
+                @click="handleStatusChange(scope.row)"
+              >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
+              <el-button size="default" @click="handledelete(scope.row)">删除</el-button>
              </div>
             </template>
           </el-table-column>
@@ -498,7 +447,6 @@ queryAll();
             <el-select
               class="search-select2" 
               v-model="form.instanceCode"
-              @keyup.enter.native="queryInstances"
               placeholder="请选择插件实例"
               clearable
               style="width: 240px"
@@ -528,15 +476,15 @@ queryAll();
             </el-form-item>
           </el-row>
           <el-row>
-            <el-form-item label="是否开启预警" prop="softQuotaEnabled" label-width="150px">
+            <el-form-item label="是否开启预警" prop="softQuotaEnabled"  label-width="150px">
               <el-checkbox v-model="form.softQuota.enabled"
                 @change="checked => handleSoftQuotaShow(checked)">开启</el-checkbox>
             </el-form-item>
           </el-row>
         </div>
-        <div v-show="quotaShow">
+        <div v-show="form.softQuota.enabled">
           <el-row>
-            <el-form-item label="预警类型" prop="softQuotaType" label-width="150px">
+            <el-form-item label="预警类型" prop="softQuota.type" label-width="150px">
               <el-select v-model="form.softQuota.type" clearable style="width: 240px">
                 <el-option v-for="item in constraintType" :key="item.value" :label="item.label" :value="item.value" />
               </el-select>
@@ -544,15 +492,14 @@ queryAll();
           </el-row>
 
           <el-row>
-            <el-form-item label="警戒值(单位:MB)" prop="softQuotaLimit" label-width="150px">
+            <el-form-item label="警戒值(单位:MB)" prop="softQuota.limit" label-width="150px">
               <el-input v-model="form.softQuota.limit" maxlength="100" style="width:240px" />
             </el-form-item>
           </el-row>
         </div>
       </el-form>
       <div slot="footer" class="dialog-footer" style="text-align:right;">
-        <el-button type="primary" v-show="updateButtonShow" @click="updateInfo">更 新</el-button>
-        <el-button type="primary" v-show="newButtonShow" @click="submitForm">确 定</el-button>
+        <el-button type="primary"  @click="submitForm">确认</el-button>
         <el-button @click="cancel">返 回</el-button>
       </div>
     </div>
