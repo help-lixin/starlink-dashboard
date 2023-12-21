@@ -1,12 +1,12 @@
 // @ts-nocheck  
 
 import CustomPalette from './CustomPalette'
-// import CustomRenderer from './CustomRenderer'
+import CustomRenderer from './CustomRenderer'
 import CustomContextPadProvider from './CustomContextPadProvider'
+
 export default {
-	// __init__: ['paletteProvider', 'customRenderer', 'contextPadProvider'],
-	__init__: ['paletteProvider', 'contextPadProvider'],
+	__init__: ['paletteProvider', 'customRenderer', 'contextPadProvider'],
 	paletteProvider: ['type', CustomPalette],
-	// customRenderer: ['type', CustomRenderer],
+	customRenderer: ['type', CustomRenderer],
 	contextPadProvider: ['type', CustomContextPadProvider]
 }

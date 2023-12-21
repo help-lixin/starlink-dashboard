@@ -1,10 +1,11 @@
 // @ts-nocheck  
 
 /**
- * A palette that allows you to create BPMN _and_ custom elements.
+ * 定义BPMNJB中左侧的工具栏
  */
 
 import { useActionMetasStore } from "@/stores/plugin";
+import {STARLINK_SERVICE} from "@/utils/env"
 
 const actionMetasStore = useActionMetasStore();
 
@@ -110,18 +111,40 @@ PaletteProvider.prototype.getPaletteEntries = function (element) {
 	const actions = actionMetasStore.getActions
 	actions.forEach((value, key) => {
 		const pluginItem = JSON.parse(value)
-		const pluginMeta = { "plugin": key, "_name": pluginItem?.title, "pluginCode": pluginItem?.pluginCode };
-		
+		const pluginMeta = { 
+			"plugin": key 
+		};
+
+		if(pluginItem?.title){
+			pluginMeta["_name"] = pluginItem?.title;
+		}
+
+		if(pluginItem?.icon){
+			pluginMeta["icon"] = STARLINK_SERVICE + "/icons/" + pluginItem?.icon;
+		}
+
+		if(pluginItem?.pluginCode){
+			pluginMeta["pluginCode"] = pluginItem?.pluginCode;
+		}
+
 		paletteObj[key] = {
 			group: pluginItem?.group,
-			className: pluginItem?.className,
 			title: pluginItem?.title,
 			action: {
 				dragstart: createTask(pluginMeta),
 				click: createTask(pluginMeta),
 			},
 		}
-	});
 
+		if(pluginMeta?.icon){
+			paletteObj[key]["imageUrl"] = pluginMeta?.icon
+		}
+		
+		if(pluginItem?.className){
+			paletteObj[key]["className"] = "custom-task-common " + pluginItem?.className;
+		}else{
+			paletteObj[key]["className"] = "custom-task-common";
+		}
+	});
 	return paletteObj;
 }
