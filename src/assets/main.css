@@ -34,29 +34,16 @@ a,
   }
 }
 
+
+/* 以下部份是bpmn部份的css */
+.djs-direct-editing-parent {
+  top: 130px!important;
+  width: 60px!important;
+}
+
 .custom-task-common {
   border-radius: 50%;
 	background-size: 65%;
 	background-repeat: no-repeat;
 	background-position: center;
 }
-
-.custom-task-common.gitlab-clone-service-task {
-	background-image: url(../assets/gitlab.png);
-}
-
-.custom-task-common.github-clone-service-task {
-	background-image: url(../assets/github.png);
-}
-
-.custom-task-common.svn-clone-service-task {
-	background-image: url(../assets/svn.jpg);
-}
-
-.custom-task-common.jenkins-service-task {
-	background-image: url(../assets/jenkins.png);
-}
-
-
-
-
