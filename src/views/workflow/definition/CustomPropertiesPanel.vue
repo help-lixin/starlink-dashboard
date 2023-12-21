@@ -5,13 +5,43 @@ import { ref, toRaw } from 'vue'
 import { pluginInstanceOptionSelect } from '@/api/common-api'
 import { encode, decode } from 'js-base64';
 
-import { createForm } from '@formily/core'
+import { 
+	createForm ,
+	onFormValuesChange
+} from '@formily/core'
 import { createSchemaField, FormProvider } from '@formily/vue'
 import {
   FormItem,
   FormLayout,
+  FormButtonGroup,
+  Space,
+  Submit,
+  Reset,
+
   Input,
+  Password,
   Select,
+  DatePicker,
+  TimePicker,
+  InputNumber,
+  Transfer,
+  Cascader,
+  Radio,
+  Checkbox,
+  Upload,
+  Switch,
+  PreviewText,
+
+  ArrayCards,
+  ArrayItems,
+  ArrayTable,
+  ArrayTabs,
+  FormCollapse,
+  FormStep,
+  FormTab,
+  FormDialog,
+  FormDrawer,
+  Editable,
 } from '@formily/element-plus'
 
 import { useActionMetasStore } from "@/stores/plugin";
@@ -24,11 +54,6 @@ const props = defineProps({
 
 const selectedElements = ref([])
 const element = ref(null)
-const nodeForm = ref({
-	name: undefined,
-	pluginCode: undefined,
-	instanceCode: undefined
-})
 
 // 表单schema
 const formSchema = {
@@ -52,14 +77,63 @@ const formSchema = {
 	},
 };
 
+const commonSchmea = {
+	name: {
+	   type: "string",
+       title: "任务名称",
+       required: true,
+       'x-decorator': "FormItem",
+       'x-component': "PreviewText.Input",
+	   default: ""
+	}
+}
+
 const schema = ref({});
-const form = createForm()
+
+const form = createForm({
+  effects(){
+    onFormValuesChange((form)=>{
+		if(element.value){
+			const formJsonString = JSON.stringify(form.values)
+			const encodeFormValues = encode(formJsonString)
+			changeForm(encodeFormValues)
+		}
+	})
+  }
+})
+
 const { SchemaField } = createSchemaField({
 	components: {
 		FormLayout,
 		FormItem,
+		FormButtonGroup,
+		Space,
+		Submit,
+		Reset,
 		Input,
+		Password,
 		Select,
+		DatePicker,
+		TimePicker,
+		InputNumber,
+		Transfer,
+		Cascader,
+		Radio,
+		Checkbox,
+		Upload,
+		Switch,
+		PreviewText,
+
+		ArrayCards,
+		ArrayItems,
+		ArrayTable,
+		ArrayTabs,
+		FormCollapse,
+		FormStep,
+		FormTab,
+		FormDialog,
+		FormDrawer,
+		Editable,
 	},
 });
 
@@ -71,13 +145,7 @@ function init() {
 		selectedElements.value = e.newSelection
 		// 被选中的节点
 		element.value = e.newSelection[0]
-		
-		// 先清空数据
-		nodeForm.value = {
-			name: undefined,
-			pluginCode: undefined,
-			instanceCode: undefined
-		}
+
 
 		// 元数据对象(右侧表单动态展示)
 		if (element.value?.businessObject?.$attrs?.plugin) {
@@ -91,39 +159,55 @@ function init() {
 			Object.assign(tempScehma,formSchema);
 
 			// TODO lixin 先处理公共的.
-			
+			Object.assign(tempScehma.properties.layout.properties,commonSchmea);
 
 			// 存在元数据的情况下做处理.
 			if(pluginInfo?._meta){
 				Object.assign(tempScehma.properties.layout.properties,pluginInfo._meta)
 			}
+			// 重点,要重新为schema赋值
 			schema.value = tempScehma;
 		}
-	
 
+
+		const params = {};
+		if(element.value?.businessObject?.$attrs?._params){
+			const decodeParamsString = decode(element.value?.businessObject?.$attrs?._params)
+			const decodeParams = JSON.parse(decodeParamsString);
+			Object.assign(params,decodeParams)
+		}
+	
 		// 节点名称
 		if (element.value?.businessObject?.$attrs?._name) {
-			nodeForm.value.name = element.value?.businessObject?.$attrs?._name
 			element.value['name'] = element.value?.businessObject?.$attrs?._name
+			params["name"] = element.value?.businessObject?.$attrs?._name
 			// 注意哈,要调用更新,才能真正的render
-			updateProperties({ "name": nodeForm.value.name })
+			updateProperties({ "name": params["name"] })
 		} else {
 			if (element.value?.businessObject?.name) {
-				nodeForm.value.name = element.value?.businessObject?.name
+				params["name"] = element.value?.businessObject?.name
 			}
 		}
 
 		//插件编码
 		if (element.value?.businessObject?.$attrs?.pluginCode) {
-			nodeForm.value.pluginCode = element.value?.businessObject?.$attrs?.pluginCode;
+			params["pluginCode"] = element.value?.businessObject?.$attrs?.pluginCode;
 		}
+
+		//插件
+		if (element.value?.businessObject?.$attrs?.plugin) {
+			params["plugin"] = element.value?.businessObject?.$attrs?.plugin;
+		}
+
 		//实例编码
 		if (element.value?.businessObject?.$attrs?.instanceCode) {
-			nodeForm.value.instanceCode = element.value?.businessObject?.$attrs?.instanceCode;
+			params["instanceCode"] = element.value?.businessObject?.$attrs?.instanceCode;
 		}
 
 		//  为节点配置默认属性
 		setDefaultProperties()
+		// 为表单赋值
+		form.setValues(params);
 	}) // end  selection.changed
 
 	props.modeler.on('element.changed', e => {
@@ -147,11 +231,11 @@ function setDefaultProperties() {
 
 /**
  * 改变控件触发的事件
- * @param { Object } input的Event
- * @param { String } 要修改的属性的名称
  */
-function changeField(value, propertyName) {
+function changeForm(value) {
+	const propertyName = "_params"
 	element.value[propertyName] = value
+
 	const properties = {}
 	properties[propertyName] = value
 	updateProperties(properties)
