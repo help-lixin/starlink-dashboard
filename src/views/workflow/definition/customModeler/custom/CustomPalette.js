@@ -6,6 +6,7 @@
 
 import { useActionMetasStore } from "@/stores/plugin";
 import {STARLINK_SERVICE} from "@/utils/env"
+import serialize from  'serialize-javascript'
 
 const actionMetasStore = useActionMetasStore();
 
@@ -106,17 +107,21 @@ PaletteProvider.prototype.getPaletteEntries = function (element) {
 		}
 	}
 
+	function deserialize(serializedJavascript){
+		return eval('(' + serializedJavascript + ')');
+	}
+
 	// 获取所有的actions
 	actionMetasStore.initActions()
 	const actions = actionMetasStore.getActions
 	actions.forEach((value, key) => {
-		const pluginItem = JSON.parse(value)
+		const pluginItem = deserialize(value)
 		const pluginMeta = { 
 			"plugin": key 
 		};
 
-		if(pluginItem?.title){
-			pluginMeta["_name"] = pluginItem?.title;
+		if(pluginItem?.name){
+			pluginMeta["_name"] = pluginItem?.name;
 		}
 
 		if(pluginItem?.icon){
@@ -129,7 +134,7 @@ PaletteProvider.prototype.getPaletteEntries = function (element) {
 
 		paletteObj[key] = {
 			group: pluginItem?.group,
-			title: pluginItem?.title,
+			title: pluginItem?.name,
 			action: {
 				dragstart: createTask(pluginMeta),
 				click: createTask(pluginMeta),
@@ -148,3 +153,4 @@ PaletteProvider.prototype.getPaletteEntries = function (element) {
 	});
 	return paletteObj;
 }
+

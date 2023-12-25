@@ -133,9 +133,6 @@ function init() {
 
 	// 把json转换成xml进行展示
 	if (processDefinitionJson) {
-		console.log("======================processDefinitionJson===================================")
-		console.log(processDefinitionJson)
-		console.log("======================processDefinitionJson===================================")
 		const processDefinitionXml = jsonToXml(processDefinitionJson)
 		console.log("======================processDefinitionXml===================================")
 		console.log(processDefinitionXml)

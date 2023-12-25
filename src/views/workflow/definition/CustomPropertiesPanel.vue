@@ -2,12 +2,15 @@
 // @ts-nocheck  
 
 import { ref, toRaw } from 'vue'
+import {STARLINK_SERVICE} from "@/utils/env"
 import { pluginInstanceOptionSelect } from '@/api/common-api'
 import { encode, decode } from 'js-base64';
 
 import { 
 	createForm ,
-	onFormValuesChange
+	onFormValuesChange,
+	onFieldInit,
+	onFieldValueChange
 } from '@formily/core'
 import { createSchemaField, FormProvider } from '@formily/vue'
 import {
@@ -43,6 +46,9 @@ import {
   FormDrawer,
   Editable,
 } from '@formily/element-plus'
+
+
+import request from '@/utils/request';
 
 import { useActionMetasStore } from "@/stores/plugin";
 const actionMetasStore = useActionMetasStore();
@@ -88,10 +94,46 @@ const commonSchmea = {
 	}
 }
 
+// 公共业务Schema
+const commonBussnessSchema = {
+	instanceCode: {
+		"type": "string",
+       "title": "实例",
+       "required": true,
+       "x-decorator": "FormItem",
+       "x-decorator-props": {
+         "tooltip": "请选择实例"
+       },
+       "x-component": "Select",
+	   "x-data": {
+		"onInitCallback": [
+			(ctx:any)=>{
+				if(element.value?.businessObject?.$attrs?.pluginCode){
+					pluginInstanceOptionSelect(element.value?.businessObject?.$attrs?.pluginCode).then((res)=>{
+						if(res?.code == 200){
+							const datasources = [];
+							res.data.forEach((item)=>{
+								datasources.push({
+									label: item?.instanceName,
+									value: item?.instanceCode
+								});
+							})
+							ctx.field.dataSource = datasources;
+						}
+					});
+				}
+			}
+		]
+	   }
+	}
+}
+
+
 const schema = ref({});
 
-const form = createForm({
+const formProperties = {
   effects(){
+	// 当表单被更改时,序列化表单的内容为json,并base64给bpmnjs进行保存好
     onFormValuesChange((form)=>{
 		if(element.value){
 			const formJsonString = JSON.stringify(form.values)
@@ -99,10 +141,46 @@ const form = createForm({
 			changeForm(encodeFormValues)
 		}
 	})
-  }
-})
 
-const { SchemaField } = createSchemaField({
+	// * : 监听所有的属性
+	onFieldInit('*',(field,form)=>{
+		if(field.data?.onInitCallback){
+			const ctx = {
+				field,
+				form,
+				request,
+				formValues:form.values,
+				urlPrefix:STARLINK_SERVICE
+			}
+			const callbackArray = field.data?.onInitCallback
+			callbackArray.forEach(callback => {
+              callback(ctx)
+            });
+		}
+	})
+
+	// * : 监听所有的属性
+	onFieldValueChange('*',(field,form)=>{
+		if(field.data?.onChangeCallback){
+			const ctx = {
+				field,
+				form,
+				request,
+				formValues:form.values,
+				urlPrefix:STARLINK_SERVICE
+			}
+			const callbackArray = field.data?.onChangeCallback
+			callbackArray.forEach(callback => {
+              callback(ctx)
+            });
+		}
+	})
+  }
+}
+
+var form = createForm(formProperties)
+
+var { SchemaField } = createSchemaField({
 	components: {
 		FormLayout,
 		FormItem,
@@ -146,27 +224,29 @@ function init() {
 		// 被选中的节点
 		element.value = e.newSelection[0]
 
-
 		// 元数据对象(右侧表单动态展示)
 		if (element.value?.businessObject?.$attrs?.plugin) {
 			// 从store里拿数据
 			const plugins = actionMetasStore.getActions
 			const pluginInfoStr = plugins.get(element.value.businessObject.$attrs.plugin)
-			const pluginInfo = JSON.parse(pluginInfoStr)
+			const pluginInfo = deserialize(pluginInfoStr)
 
 			//拷贝出一份新的schema
 			const tempScehma = {};
 			Object.assign(tempScehma,formSchema);
-
-			// TODO lixin 先处理公共的.
+			
 			Object.assign(tempScehma.properties.layout.properties,commonSchmea);
+			Object.assign(tempScehma.properties.layout.properties,commonBussnessSchema);
 
 			// 存在元数据的情况下做处理.
 			if(pluginInfo?._meta){
 				Object.assign(tempScehma.properties.layout.properties,pluginInfo._meta)
 			}
+
 			// 重点,要重新为schema赋值
 			schema.value = tempScehma;
+			// 重点,重新生成表单.
+			form = createForm(formProperties)
 		}
 
 
@@ -252,6 +332,10 @@ function updateProperties(properties) {
 }
 
 
+function deserialize(serializedJavascript){
+  return eval('(' + serializedJavascript + ')');
+}
+
 // 初始化
 init()
 </script>
@@ -259,29 +343,9 @@ init()
 
 <template>
 	<div v-if="selectedElements.length === 1" class="custom-properties-panel">
-
 		<FormProvider :form="form">
 			<SchemaField :schema="schema" />
 		</FormProvider>
-
-		<!--
-		<el-form :inline="true" :model="form" class="demo-form-inline">
-			<el-form-item label="任务名称">
-				<el-input v-model="form.name" placeholder="请输入任务名称" clearable
-					@change="event => changeField(event, 'name')" />
-			</el-form-item>
-			
-			<template v-if="element.type === 'bpmn:ServiceTask'">
-				<el-form-item label="实例">
-					<el-select v-model="form.instanceCode" placeholder="请选择实例" @change="event => selectInstance(event)"
-						clearable>
-						<el-option v-for="(option, index) in   form.instances  " :label="option.instanceName"
-							:value="option.instanceCode" />
-					</el-select>
-				</el-form-item>
-			</template>
-		</el-form>
-		-->
 	</div>
 </template>
 
