@@ -10,8 +10,13 @@ import {
 	createForm ,
 	onFormValuesChange,
 	onFieldInit,
-	onFieldValueChange
+	onFieldChange,
+	onFieldMount,
+	onFieldValueChange,
+
+	FormPath
 } from '@formily/core'
+
 import { createSchemaField, FormProvider } from '@formily/vue'
 import {
   FormItem,
@@ -97,7 +102,7 @@ const commonSchmea = {
 // 公共业务Schema
 const commonBussnessSchema = {
 	instanceCode: {
-		"type": "string",
+	   "type": "string",
        "title": "实例",
        "required": true,
        "x-decorator": "FormItem",
@@ -129,6 +134,10 @@ const commonBussnessSchema = {
 }
 
 
+const exclusionField = new Set()
+exclusionField.add("name")
+
+
 const schema = ref({});
 
 const formProperties = {
@@ -143,7 +152,7 @@ const formProperties = {
 	})
 
 	// * : 监听所有的属性
-	onFieldInit('*',(field,form)=>{
+	onFieldMount('*',(field,form)=>{
 		if(field.data?.onInitCallback){
 			const ctx = {
 				field,
@@ -156,6 +165,63 @@ const formProperties = {
 			callbackArray.forEach(callback => {
               callback(ctx)
             });
+		}
+	})
+
+	// 监听组件变化
+	onFieldChange('*',['value'],(field,form)=>{
+		const dependenciesArray = [];
+		// 排除掉哪些不需要进行监听
+		if(!exclusionField.has(field?.props?.name)){
+			// 属性的value有值的情况下.
+			if(field?.value && field?.value?.length > 0) {
+				const properties = schema.value?.properties?.layout?.properties
+				if(!properties){
+					return;
+				}
+				// 对所有的属性(all)进行遍历,如果,发现属性(x-reactions)上配置的dependencies正好依赖于当前属性(field)的话
+				// 则,记住所有属性中,是哪一个属性依赖当前(field)
+				// x-reactions: {  "dependencies": ["instanceCode"] }
+				// 
+				for(let key in properties){
+					const dependencies = properties[key]?.["x-reactions"]?.dependencies
+					if(dependencies){
+						dependencies.forEach(el => {
+							if(el == field?.props?.name){
+								dependenciesArray.push(key)
+							}
+						});
+					}
+				}
+			}
+		}
+
+		if(dependenciesArray.length > 0) {
+			for(let i=0;i<dependenciesArray.length;i++){
+				const dependenciesItem = dependenciesArray[i]
+				// 当前属性(field)发生变改时,找出那些依赖于我的属性.调用:onChangeCallback方法
+				const address = form.query(dependenciesItem)?.addresses
+				for(let i=0;i<address.length;i++){
+					const addr = address[i]
+					const targetField = form.fields[addr]
+					if(targetField){
+						const ctx = {
+							field:targetField,
+							form,
+							request,
+							formValues:form.values,
+							urlPrefix:STARLINK_SERVICE
+						}
+
+						const callbacks = targetField?.data?.onChangeCallback;
+						if(callbacks){
+							callbacks.forEach(callback => {
+								callback(ctx)
+							});
+						} // end if
+					}
+				}
+			}
 		}
 	})
 
@@ -176,6 +242,17 @@ const formProperties = {
 		}
 	})
   }
+}
+
+
+// 触发被动依赖
+// eventField 当前被动触发的Field
+// 整个表单
+function triggerDependencies(eventField,form){
+	console.log("=====================triggerDependencies=============================")
+	console.log(eventField);
+	console.log(form);
+	console.log("=====================triggerDependencies=============================")
 }
 
 var form = createForm(formProperties)
