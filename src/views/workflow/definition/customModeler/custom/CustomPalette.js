@@ -124,7 +124,7 @@ PaletteProvider.prototype.getPaletteEntries = function (element) {
 		}
 
 		if(pluginItem?.icon){
-			pluginMeta["icon"] = STARLINK_SERVICE + "/icons/" + pluginItem?.icon;
+			pluginMeta["pluginIcon"] = STARLINK_SERVICE + "/icons/" + pluginItem?.icon;
 		}
 
 		if(pluginItem?.pluginCode){
@@ -140,8 +140,8 @@ PaletteProvider.prototype.getPaletteEntries = function (element) {
 			},
 		}
 
-		if(pluginMeta?.icon){
-			paletteObj[key]["imageUrl"] = pluginMeta?.icon
+		if(pluginMeta?.pluginIcon){
+			paletteObj[key]["imageUrl"] = pluginMeta?.pluginIcon
 		}
 		
 		if(pluginItem?.className){

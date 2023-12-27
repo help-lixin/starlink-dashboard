@@ -134,6 +134,9 @@ function init() {
 	// 把json转换成xml进行展示
 	if (processDefinitionJson) {
 		const processDefinitionXml = jsonToXml(processDefinitionJson)
+		console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+		console.log(processDefinitionXml)
+		console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
 		setDiagram(processDefinitionXml)
 		return;
 	}
@@ -200,17 +203,20 @@ function xmlToJson(xmlString) {
 
 		if (el.nodeName === 'serviceTask') {
 			obj.nodeType = "serviceTask"
-
-			// 只有serviceTask的情况下才会有plugin属性和pluginCode属性
-			const plugin = el.getAttribute('plugin')
-			if (plugin) obj.plugin = plugin;
-
-			const pluginCode = el.getAttribute('pluginCode')
-			if (pluginCode) obj.pluginCode = pluginCode;
-
-			const params = el.getAttribute('_params')
-			if(params) obj.params = decode(params)
 		}
+
+		// 只有serviceTask的情况下才会有plugin属性和pluginCode属性
+		const plugin = el.getAttribute('plugin')
+		if (plugin) obj.plugin = plugin;
+
+		const pluginCode = el.getAttribute('pluginCode')
+		if (pluginCode) obj.pluginCode = pluginCode;
+
+		const params = el.getAttribute('_params')
+		if(params) obj.params = decode(params)
+
+		const pluginIcon = el.getAttribute('pluginIcon')
+		if(pluginIcon) obj.pluginIcon = pluginIcon
 
 		// 重点
 		result.nodes.push(obj);
@@ -314,6 +320,7 @@ function jsonToXml(json) {
 
 			if (node.source) xml += ` sourceRef="${node.source}"`
 			if (node.target) xml += ` targetRef="${node.target}"`
+			if (node.pluginIcon) xml += ` pluginIcon="${node.pluginIcon}" `
 
 			// 针对JSON参数进行编码,因为,json中有一些数据会影响xml
 			// "{\"envCode\":\"common\",\"groupCode\":\"common-group\",\"instanceCode\":\"gitlab-instance-1\",\"projectId\":\"1\",\"branch\":\"v1.0\"}"
@@ -449,46 +456,49 @@ async function saveAndRun(isRunning: boolean) {
 		if (!err) {
 			const bpmnJson = xmlToJson(xml)
 			const bpmnJsonString = JSON.stringify(bpmnJson)
-			deploy(bpmnJsonString).then((res) => {
-				if (res?.code == 200) {
-					const processDefinitionId = res?.data?.id;
+			console.log("**********************************************")
+			console.log(bpmnJson)
+			console.log("**********************************************")
+			// deploy(bpmnJsonString).then((res) => {
+			// 	if (res?.code == 200) {
+			// 		const processDefinitionId = res?.data?.id;
 
-					// 启动一个流程
-					if (isRunning) {
-						if (processDefinitionId) {
-							const startWorkFlowData = {
-								processDefinitionId
-							}
+			// 		// 启动一个流程
+			// 		if (isRunning) {
+			// 			if (processDefinitionId) {
+			// 				const startWorkFlowData = {
+			// 					processDefinitionId
+			// 				}
 
-							// 启动流水线
-							startWorkFlowById(startWorkFlowData)
-								.then((startWorkflowRes) => {
-									if (startWorkflowRes?.code == 200) {
-										ElMessage({
-											showClose: true,
-											message: '保存并运行流水线:"' + pipelineForm.value.name + '"成功',
-											type: 'success',
-										})
-										//跳转到流水管理界面
-										router.push("/workflow/definition/index");
-									}
-								});
-						}
-					} else {
-						ElMessage({
-							showClose: true,
-							message: '保存流水线:"' + pipelineForm.value.name + '"成功',
-							type: 'success',
-						})
-						//跳转到流水管理界面
-						router.push("/workflow/definition/index");
-					}
-					open.value = false
-				} else { // 失败提示
-					const msg = res?.msg;
-					ElMessage.error('保存流水线:"' + pipelineForm.value.name + '"失败,' + "失败原因:" + msg)
-				}
-			});
+			// 				// 启动流水线
+			// 				startWorkFlowById(startWorkFlowData)
+			// 					.then((startWorkflowRes) => {
+			// 						if (startWorkflowRes?.code == 200) {
+			// 							ElMessage({
+			// 								showClose: true,
+			// 								message: '保存并运行流水线:"' + pipelineForm.value.name + '"成功',
+			// 								type: 'success',
+			// 							})
+			// 							//跳转到流水管理界面
+			// 							router.push("/workflow/definition/index");
+			// 						}
+			// 					});
+			// 			}
+			// 		} else {
+			// 			ElMessage({
+			// 				showClose: true,
+			// 				message: '保存流水线:"' + pipelineForm.value.name + '"成功',
+			// 				type: 'success',
+			// 			})
+			// 			//跳转到流水管理界面
+			// 			router.push("/workflow/definition/index");
+			// 		}
+			// 		open.value = false
+			// 	} else { // 失败提示
+			// 		const msg = res?.msg;
+			// 		ElMessage.error('保存流水线:"' + pipelineForm.value.name + '"失败,' + "失败原因:" + msg)
+			// 	}
+			// });
 		}
 	})
 }
