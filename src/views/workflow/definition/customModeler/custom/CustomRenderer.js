@@ -49,6 +49,10 @@ export default function CustomRenderer(eventBus, styles, textRenderer) {
                     href: url
                 }
 
+                console.log("=====================================================")
+                console.log(customIconAttr)
+                console.log(element.businessObject.$attrs?.icon)
+                console.log("=====================================================")
                 if(element.businessObject.$attrs?.icon){
                     // customIconAttr.href = element.businessObject.$attrs?.icon
                     customIconAttr.href = new URL(element.businessObject.$attrs?.icon, import.meta.url).href
@@ -94,5 +98,5 @@ CustomRenderer.prototype.drawShape = function(p, element) {
 }
 
 CustomRenderer.prototype.getShapePath = function(shape) {
-    console.log(shape)
 }
+

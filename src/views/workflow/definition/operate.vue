@@ -134,9 +134,6 @@ function init() {
 	// 把json转换成xml进行展示
 	if (processDefinitionJson) {
 		const processDefinitionXml = jsonToXml(processDefinitionJson)
-		console.log("======================processDefinitionXml===================================")
-		console.log(processDefinitionXml)
-		console.log("======================processDefinitionXml===================================")
 		setDiagram(processDefinitionXml)
 		return;
 	}
@@ -201,8 +198,6 @@ function xmlToJson(xmlString) {
 		const targets = el.getElementsByTagName('outgoing')?.[0]?.textContent
 		if (targets) obj.targets = [targets]
 
-
-
 		if (el.nodeName === 'serviceTask') {
 			obj.nodeType = "serviceTask"
 
@@ -212,23 +207,9 @@ function xmlToJson(xmlString) {
 
 			const pluginCode = el.getAttribute('pluginCode')
 			if (pluginCode) obj.pluginCode = pluginCode;
-		}
 
-		// 收集所有的属性和属性值,转换成json字符串.
-		const excludeAttributeNames = Object.keys(obj).concat(["sourceRef", "targetRef", "plugin", "pluginCode", "nodeType", "_name"]);
-		const nodeAttributeNames = el.getAttributeNames();
-		const nodeOtherAllAttributeNames = nodeAttributeNames.filter((item) => {
-			const index = excludeAttributeNames.indexOf(item)
-			return index == -1 ? true : false;
-		});
-
-		if (nodeOtherAllAttributeNames.length > 0) {
-			const params = {}
-			for (const attributeName of nodeOtherAllAttributeNames) {
-				const attributeValue = el.getAttribute(attributeName);
-				params[attributeName] = attributeValue;
-			}
-			obj.params = JSON.stringify(params)
+			const params = el.getAttribute('_params')
+			if(params) obj.params = decode(params)
 		}
 
 		// 重点

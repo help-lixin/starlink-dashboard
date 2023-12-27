@@ -6,7 +6,6 @@
 
 import { useActionMetasStore } from "@/stores/plugin";
 import {STARLINK_SERVICE} from "@/utils/env"
-import serialize from  'serialize-javascript'
 
 const actionMetasStore = useActionMetasStore();
 
