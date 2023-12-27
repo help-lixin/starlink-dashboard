@@ -245,16 +245,6 @@ const formProperties = {
 }
 
 
-// 触发被动依赖
-// eventField 当前被动触发的Field
-// 整个表单
-function triggerDependencies(eventField,form){
-	console.log("=====================triggerDependencies=============================")
-	console.log(eventField);
-	console.log(form);
-	console.log("=====================triggerDependencies=============================")
-}
-
 var form = createForm(formProperties)
 
 var { SchemaField } = createSchemaField({
@@ -313,7 +303,10 @@ function init() {
 			Object.assign(tempScehma,formSchema);
 			
 			Object.assign(tempScehma.properties.layout.properties,commonSchmea);
-			Object.assign(tempScehma.properties.layout.properties,commonBussnessSchema);
+			// 启用实例选择
+			if(pluginInfo?.enableInstanceSelect){
+				Object.assign(tempScehma.properties.layout.properties,commonBussnessSchema);
+			}
 
 			// 存在元数据的情况下做处理.
 			if(pluginInfo?._meta){
