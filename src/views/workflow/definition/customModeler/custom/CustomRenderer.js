@@ -49,14 +49,11 @@ export default function CustomRenderer(eventBus, styles, textRenderer) {
                     href: url
                 }
 
-                console.log("=====================================================")
-                console.log(customIconAttr)
-                console.log(element.businessObject.$attrs)
-                console.log(element.businessObject.$attrs?.pluginIcon)
-                console.log("=====================================================")
                 if(element.businessObject.$attrs?.pluginIcon){
-                    customIconAttr.href = new URL(element.businessObject.$attrs?.pluginIcon, import.meta.url).href
+                    // customIconAttr.href = new URL(element.businessObject.$attrs?.pluginIcon, import.meta.url).href
+                    customIconAttr.href = element.businessObject.$attrs?.pluginIcon
                 }
+                
                 const customIcon = svgCreate('image', customIconAttr)
                 element['width'] = attr.width // 这里我是取了巧, 直接修改了元素的宽高
                 element['height'] = attr.height

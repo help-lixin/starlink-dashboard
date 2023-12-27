@@ -124,7 +124,8 @@ PaletteProvider.prototype.getPaletteEntries = function (element) {
 		}
 
 		if(pluginItem?.icon){
-			pluginMeta["pluginIcon"] = STARLINK_SERVICE + "/icons/" + pluginItem?.icon;
+			// pluginMeta["pluginIcon"] = STARLINK_SERVICE + "/icons/" + pluginItem?.icon;
+			pluginMeta["pluginIcon"] = pluginItem?.icon;
 		}
 
 		if(pluginItem?.pluginCode){

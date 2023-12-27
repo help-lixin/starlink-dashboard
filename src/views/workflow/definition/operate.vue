@@ -134,9 +134,7 @@ function init() {
 	// 把json转换成xml进行展示
 	if (processDefinitionJson) {
 		const processDefinitionXml = jsonToXml(processDefinitionJson)
-		console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
 		console.log(processDefinitionXml)
-		console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
 		setDiagram(processDefinitionXml)
 		return;
 	}
@@ -415,9 +413,7 @@ onMounted(() => {
 function getJson() {
 	getXml((err: any, xml: any) => {
 		if (!err) {
-			console.log(xml)
-			const json = xmlToJson(xml)
-			console.log(JSON.stringify(json))
+			xmlToJson(xml)
 		}
 	})
 }
@@ -456,49 +452,46 @@ async function saveAndRun(isRunning: boolean) {
 		if (!err) {
 			const bpmnJson = xmlToJson(xml)
 			const bpmnJsonString = JSON.stringify(bpmnJson)
-			console.log("**********************************************")
-			console.log(bpmnJson)
-			console.log("**********************************************")
-			// deploy(bpmnJsonString).then((res) => {
-			// 	if (res?.code == 200) {
-			// 		const processDefinitionId = res?.data?.id;
+			deploy(bpmnJsonString).then((res) => {
+				if (res?.code == 200) {
+					const processDefinitionId = res?.data?.id;
 
-			// 		// 启动一个流程
-			// 		if (isRunning) {
-			// 			if (processDefinitionId) {
-			// 				const startWorkFlowData = {
-			// 					processDefinitionId
-			// 				}
+					// 启动一个流程
+					if (isRunning) {
+						if (processDefinitionId) {
+							const startWorkFlowData = {
+								processDefinitionId
+							}
 
-			// 				// 启动流水线
-			// 				startWorkFlowById(startWorkFlowData)
-			// 					.then((startWorkflowRes) => {
-			// 						if (startWorkflowRes?.code == 200) {
-			// 							ElMessage({
-			// 								showClose: true,
-			// 								message: '保存并运行流水线:"' + pipelineForm.value.name + '"成功',
-			// 								type: 'success',
-			// 							})
-			// 							//跳转到流水管理界面
-			// 							router.push("/workflow/definition/index");
-			// 						}
-			// 					});
-			// 			}
-			// 		} else {
-			// 			ElMessage({
-			// 				showClose: true,
-			// 				message: '保存流水线:"' + pipelineForm.value.name + '"成功',
-			// 				type: 'success',
-			// 			})
-			// 			//跳转到流水管理界面
-			// 			router.push("/workflow/definition/index");
-			// 		}
-			// 		open.value = false
-			// 	} else { // 失败提示
-			// 		const msg = res?.msg;
-			// 		ElMessage.error('保存流水线:"' + pipelineForm.value.name + '"失败,' + "失败原因:" + msg)
-			// 	}
-			// });
+							// 启动流水线
+							startWorkFlowById(startWorkFlowData)
+								.then((startWorkflowRes) => {
+									if (startWorkflowRes?.code == 200) {
+										ElMessage({
+											showClose: true,
+											message: '保存并运行流水线:"' + pipelineForm.value.name + '"成功',
+											type: 'success',
+										})
+										//跳转到流水管理界面
+										router.push("/workflow/definition/index");
+									}
+								});
+						}
+					} else {
+						ElMessage({
+							showClose: true,
+							message: '保存流水线:"' + pipelineForm.value.name + '"成功',
+							type: 'success',
+						})
+						//跳转到流水管理界面
+						router.push("/workflow/definition/index");
+					}
+					open.value = false
+				} else { // 失败提示
+					const msg = res?.msg;
+					ElMessage.error('保存流水线:"' + pipelineForm.value.name + '"失败,' + "失败原因:" + msg)
+				}
+			});
 		}
 	})
 }
