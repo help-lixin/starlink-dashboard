@@ -91,6 +91,11 @@ CustomRenderer.prototype.canRender = function(element) {
 CustomRenderer.prototype.drawShape = function(p, element) {
     if (customElements.includes(element.type)) {
         return this.drawCustomElements(p, element)
+    }else if(element?.type == "bpmn:EndEvent") {
+        // 针对开始和结束节点添加标签下标
+        element.name = element.businessObject.name = "结束";
+    } else if(element?.type == "bpmn:StartEvent") {
+        element.name = element.businessObject.name = "开始";
     }
 }
 
