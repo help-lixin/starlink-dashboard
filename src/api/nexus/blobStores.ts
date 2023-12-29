@@ -70,11 +70,13 @@ export  const unitConversion = (param:string) => {
   const value = byteToMB(param);
   if (mBToGB(value) > 1) {
     return mBToGB(value).toFixed(2) + " GB";
-  } else if (value > 1) {
-    return parseInt(value).toFixed(2) + ' MB';
-  } else {
-    return parseInt(value * 1024).toFixed(2) + ' KB';
-  }
+  } 
+  // TODO lixin
+  // else if (value > 1) {
+  //   return parseInt(value).toFixed(2) + ' MB';
+  // } else {
+  //   return parseInt(value * 1024).toFixed(2) + ' KB';
+  // }
 };
 
 
