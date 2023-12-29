@@ -290,7 +290,15 @@ function init() {
 		selectedElements.value = e.newSelection
 		// 被选中的节点
 		element.value = e.newSelection[0]
+		// 先置空
+		delete schema.value?.properties?.layout?.properties
 
+		//拷贝出一份新的schema
+		const tempScehma = {};
+		Object.assign(tempScehma,formSchema);
+		tempScehma.properties.layout.properties = {}
+		Object.assign(tempScehma.properties.layout.properties,commonSchmea);
+		
 		// 元数据对象(右侧表单动态展示)
 		if (element.value?.businessObject?.$attrs?.plugin) {
 			// 从store里拿数据
@@ -298,11 +306,7 @@ function init() {
 			const pluginInfoStr = plugins.get(element.value.businessObject.$attrs.plugin)
 			const pluginInfo = deserialize(pluginInfoStr)
 
-			//拷贝出一份新的schema
-			const tempScehma = {};
-			Object.assign(tempScehma,formSchema);
 			
-			Object.assign(tempScehma.properties.layout.properties,commonSchmea);
 			// 启用实例选择
 			if(pluginInfo?.enableInstanceSelect){
 				Object.assign(tempScehma.properties.layout.properties,commonBussnessSchema);
@@ -312,12 +316,12 @@ function init() {
 			if(pluginInfo?._meta){
 				Object.assign(tempScehma.properties.layout.properties,pluginInfo._meta)
 			}
-
-			// 重点,要重新为schema赋值
-			schema.value = tempScehma;
-			// 重点,重新生成表单.
-			form = createForm(formProperties)
 		}
+
+		// 重点,要重新为schema赋值
+		schema.value = tempScehma;
+		// 重点,重新生成表单.
+		form = createForm(formProperties)
 
 
 		const params = {};
