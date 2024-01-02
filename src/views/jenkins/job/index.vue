@@ -66,7 +66,7 @@
 
   const formDefault = {
       id: undefined,
-      scmType: undefined,
+      scmType: "GIT",
       toolsType: undefined,
       jdkId: undefined,
       scm:{
@@ -609,7 +609,7 @@
           </el-col>
         </el-row>
         <el-row>
-          <el-col :span="12">
+          <el-col :span="12" v-if="form.scmType == 'GIT'">
             <el-form-item label="分支" prop="scm.branch">
               <el-input v-model="form.scm.branch" placeholder="请输入分支:*/main" maxlength="100" />
             </el-form-item>
@@ -634,11 +634,11 @@
 
         <el-row>
           <el-col :span="12">
-            <el-form-item label="工具类型" prop="toolsType">
+            <el-form-item label="语言选择" prop="toolsType">
               <el-select
                   class="search-select2" 
                   v-model="form.toolsType"
-                  placeholder="请选择工具类型"
+                  placeholder="请选择语言"
                   clearable
                   style="width: 240px"
                   @change="queryToolVersion"
@@ -648,6 +648,25 @@
                 :label="item.label"
                 :value="item.value"/>
                 </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row v-if="form.toolsType != undefined &&  ( form.toolsType == 'MAVEN' || form.toolsType == 'ANT' || form.toolsType == 'GRADLE' ) " >
+          <el-col :span="12">
+            <el-form-item label="jdk" prop="form.jdkId">
+              <el-select
+                class="search-select2" 
+                v-model="form.jdkId"
+                placeholder="请选择插件实例"
+                clearable
+                style="width: 240px"
+              >
+              <el-option v-for="item in jdkList"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"/>
+              </el-select>
             </el-form-item>
           </el-col>
         </el-row>
@@ -832,7 +851,7 @@
 
         <el-row>
             <el-col :span="12" >
-              <el-form-item label="构建顺序" >
+              <el-form-item label="构建依赖" >
                 <el-select
                   class="search-select2" 
                   placeholder="请选择项目"
