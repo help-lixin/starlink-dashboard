@@ -112,6 +112,22 @@ export const dynamicRoutes = [
     },
   },
   {
+    path : '/jenkins/job/index',
+    name : 'jenkins-job',
+    component: ()=> import("../views/jenkins/job/index.vue"),
+    meta: {
+        requiresAuth: true
+    },
+  },
+  {
+    path : '/jenkins/sys_config/index',
+    name : 'jenkins-sysConfig',
+    component: ()=> import("../views/jenkins/sys_config/index.vue"),
+    meta: {
+        requiresAuth: true
+    },
+  },
+  {
     path : '/workflow/definition/index',
     name : 'workflow-definition',
     component: ()=> import("../views/workflow/definition/index.vue"),

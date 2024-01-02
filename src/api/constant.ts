@@ -14,5 +14,7 @@ export const navigation = new Map<string,string[]>([
     [ "/gitlab/project/member/index" ,  ["gitlab管理","gitlab项目成员管理"] ],
     [ "/gitlab/user/index" ,  ["gitlab管理","gitlab用户管理"] ],
 
+    [ "/jenkins/job/index" ,  ["jenkins管理","jenkins任务管理"] ],
+    [ "/jenkins/sys_config/index" ,  ["jenkins管理","jenkins工具管理"] ],
 ]);
 
