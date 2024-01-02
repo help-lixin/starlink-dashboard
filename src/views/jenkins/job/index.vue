@@ -499,16 +499,16 @@
           <el-table-column label="仓库类型" align="center" key="scm" prop="scm" :show-overflow-tooltip="true"  width="100" />
           <el-table-column label="工具类型" align="center" key="tools" prop="tools" :show-overflow-tooltip="true"  width="100" />
           <el-table-column label="状态" align="center" key="status"  width="100">
+            <template #default="scope">
+              {{  showStatusFun(scope.row.status) }}
+            </template>
+          </el-table-column>
           <el-table-column label="最后成功时间" align="center" key="lastSuccess" prop="lastSuccess" :show-overflow-tooltip="true"  width="120" />
           <el-table-column label="最后失败时间" align="center" key="lastFailure" prop="lastFailure" :show-overflow-tooltip="true"  width="120" />
           <el-table-column label="最后构建所需时间" align="center" key="lastDuration" prop="lastDuration" :show-overflow-tooltip="true"  width="150" />
           <el-table-column label="聚合状态" align="center" key="aggregatedStatus" prop="aggregatedStatus" :show-overflow-tooltip="true"  width="100" />
           <el-table-column label="构建状态" align="center" key="buildStatus" prop="buildStatus" :show-overflow-tooltip="true"  width="100" />
           <el-table-column label="备注" align="center" key="remark" prop="remark" :show-overflow-tooltip="true"  width="100" />
-            <template #default="scope">
-              {{  showStatusFun(scope.row.status) }}
-            </template>
-          </el-table-column>
           <el-table-column label="创建时间" align="center" prop="createTime"  width="180">
             <template #default="scope">
               {{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}
