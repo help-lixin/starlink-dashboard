@@ -6,6 +6,7 @@
   import { credentialList } from "@/api/sys_credential/credential"
   import {toolsSelectOption , jdkSelectOption} from "@/api/jenkins/sys_config"
   import {addJob, changeStatus, pageList, tools ,scmType, jobSelectOption, queryJobDetail, paramTypes, buildJob} from "@/api/jenkins/job"
+import type { pushScopeId } from "vue"
 
   const queryFormRef = ref(null);
 
@@ -34,6 +35,13 @@
         { required: true, message: "仓库类型不能为空", trigger: "change" },
         { min: 2, max: 20, message: '任务名称长度必须介于 2 和 20 之间', trigger: 'change' }
       ],
+      'toolsType': [
+        { required: true, message: "语言不能为空", trigger: "change" },
+      ],
+      'jdkId' :[
+        { required: true, message: "jdk不能为空", trigger: "change" },
+      ],
+
       'scm':{
         'url': [
           { required: true, message: "url不能为空", trigger: "blur" },
@@ -74,14 +82,6 @@
         credentialsId:undefined,
         branch:undefined
       },
-      params: [{
-        id:undefined,
-        jobId:undefined,
-        paramName:undefined,
-        paramValue:undefined,
-        defaultValue:undefined,
-        description:undefined
-      }],
       buildDependencys: [],
       setups: [{
         id:undefined,
@@ -148,9 +148,9 @@
   }
 
   //处理工具变更时的type
-  const handleToolChange = (item)=>{
-    item.type = form.toolsType
-    item.setupType = form.toolsType
+  const handleToolChange = (item,type)=>{
+    item.type = type
+    item.setupType = type
   }
 
   // 下拉选择添加标签
@@ -251,7 +251,7 @@
           if(jobRes?.code == 200){
             toolsSelectOption(jobRes?.data.toolsType,form.instanceCode).then(response => {
               if(response?.code == 200){
-                Object.assign(versions,response?.data)
+                Object.assign(languages,response?.data)
                 Object.assign(form,jobRes?.data)
 
                 form.setups.forEach((setup)=>{
@@ -265,13 +265,15 @@
   }
   
   // 工具版本对象
-  const versions = reactive([]);
+  const languages = reactive([]);
   // 工具版本名称选择
-  const queryToolVersion = (row)=>{
-    toolsSelectOption(row,form.instanceCode).then(response => {
-      versions.splice(0, versions.length);
+  const switchLanguage = ()=>{
+    // 根据工具类型,查询出所有的工具信息
+    // 例如: MAVEN --> { label: "maven-3.6.3" , "value" : "/home/app/maven-3.6.3" }
+    toolsSelectOption(form.toolsType,form.instanceCode).then(response => {
+      languages.splice(0, languages.length);
       if(response?.code == 200){
-        Object.assign(versions,response?.data)
+        Object.assign(languages,response?.data)
       }
     })
   }
@@ -291,6 +293,10 @@
             loading.value = false;
             throw err;
         });
+
+    console.log("========================================================");
+    console.log(form);    
+    console.log("========================================================");
 
     // if (form.id != undefined) {
     //   addJob(form).then(response => {
@@ -641,7 +647,7 @@
                   placeholder="请选择语言"
                   clearable
                   style="width: 240px"
-                  @change="queryToolVersion"
+                  @change="switchLanguage"
                 >
                 <el-option v-for="item in tools"
                 :key="item.value"
@@ -654,7 +660,7 @@
 
         <el-row v-if="form.toolsType != undefined &&  ( form.toolsType == 'MAVEN' || form.toolsType == 'ANT' || form.toolsType == 'GRADLE' ) " >
           <el-col :span="12">
-            <el-form-item label="jdk" prop="form.jdkId">
+            <el-form-item label="jdk" prop="jdkId">
               <el-select
                 class="search-select2" 
                 v-model="form.jdkId"
@@ -675,16 +681,16 @@
           <template 
             v-for="(item, index) in form.setups">
             <el-col :span="12">
-              <el-form-item label="maven" :prop="`setups.${index}.mavenName`">
+              <el-form-item label="maven" :prop="`setups.${index}.mavenName`" :rules="[  { required: true, message: 'maven版本是必选项', trigger: 'change' } ]" >
                 <el-select
                   class="search-select2" 
                   v-model="item.mavenName"
                   placeholder="请选择maven"
                   clearable
-                  @change="handleToolChange(item)"
+                  @change="handleToolChange(item,'MAVEN')"
                   style="width: 240px"
                 >
-                <el-option v-for="version in versions"
+                <el-option v-for="version in languages"
                 :key="version.label"
                 :label="version.label"
                 :value="version.label"/>
@@ -692,7 +698,9 @@
               </el-form-item>
             </el-col>
             <el-col :span="24">
-                <el-form-item  label="脚本" :prop="`setups.${index}.goals`">
+                <el-form-item  label="脚本" :prop="`setups.${index}.goals`" :rules="[       
+                  { required: true, message: '脚本内容不能为空', trigger: 'blur' },
+                  { min: 2, max: 200, message: '分支长度必须介于 2 和 200 之间', trigger: 'blur' } ]" >
                   <el-input v-model="item.goals" type="textarea" placeholder="请输入脚本内容"/>
                 </el-form-item>
             </el-col>
@@ -710,9 +718,10 @@
                   v-model="item.goName"
                   placeholder="请选择go"
                   clearable
+                  @change="handleToolChange(item,'GO')"
                   style="width: 240px"
                 >
-                <el-option v-for="version in versions"
+                <el-option v-for="version in languages"
                 :key="version.label"
                 :label="version.label"
                 :value="version.label"/>
@@ -759,9 +768,10 @@
                   v-model="item.gradleName"
                   placeholder="请选择gradle"
                   clearable
+                  @change="handleToolChange(item,'GRADLE')"
                   style="width: 240px"
                 >
-                <el-option v-for="version in versions"
+                <el-option v-for="version in languages"
                 :key="version.label"
                 :label="version.label"
                 :value="version.label"/>
@@ -786,9 +796,10 @@
                   v-model="item.nodejsName"
                   placeholder="请选择nodejs"
                   clearable
+                  @change="handleToolChange(item,'NODEJS')"
                   style="width: 240px"
                 >
-                <el-option v-for="version in versions"
+                <el-option v-for="version in languages"
                 :key="version.label"
                 :label="version.label"
                 :value="version.label"/>
@@ -813,9 +824,10 @@
                   v-model="item.pythonName"
                   placeholder="请选择python"
                   clearable
+                  @change="handleToolChange(item,'PYTHON')"
                   style="width: 240px"
                 >
-                <el-option v-for="version in versions"
+                <el-option v-for="version in languages"
                 :key="version.label"
                 :label="version.label"
                 :value="version.label"/>
@@ -828,25 +840,6 @@
                 </el-form-item>
             </el-col>
           </template>
-        </el-row>
-
-        <el-row v-if="form.toolsType != undefined" >
-          <el-col :span="12">
-            <el-form-item label="jdk" prop="form.jdkId">
-              <el-select
-                class="search-select2" 
-                v-model="form.jdkId"
-                placeholder="请选择jdk版本"
-                clearable
-                style="width: 240px"
-              >
-              <el-option v-for="item in jdkList"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"/>
-              </el-select>
-            </el-form-item>
-          </el-col>
         </el-row>
 
         <el-row>
@@ -901,7 +894,6 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm(false)">确 定</el-button>
-        <el-button type="primary" @click="submitForm(true)">确定并构建</el-button>
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
