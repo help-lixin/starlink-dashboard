@@ -23,28 +23,30 @@
 
   // 表单验证规则
   const rules = reactive<FormRules>({
-        'form.instanceCode' :[
-          { required: true, message: "实例编码不能为空", trigger: "change" },
-        ],
-        'form.jobName': [
-          { required: true, message: "任务名称不能为空", trigger: "blur" },
-          { min: 2, max: 20, message: '任务名称长度必须介于 2 和 20 之间', trigger: 'blur' }
-        ],
-        'form.scmType': [
-          { required: true, message: "仓库类型不能为空", trigger: "change" },
-          { min: 2, max: 20, message: '任务名称长度必须介于 2 和 20 之间', trigger: 'change' }
-        ],
-        'form.scm.url': [
+      'instanceCode' : [
+        { required: true, message: "实例编码不能为空", trigger: "change" },
+      ],
+      'jobName': [
+        { required: true, message: "任务名称不能为空", trigger: "blur" },
+        { min: 2, max: 20, message: '任务名称长度必须介于 2 和 20 之间', trigger: 'blur' }
+      ],
+      'scmType': [
+        { required: true, message: "仓库类型不能为空", trigger: "change" },
+        { min: 2, max: 20, message: '任务名称长度必须介于 2 和 20 之间', trigger: 'change' }
+      ],
+      'scm':{
+        'url': [
           { required: true, message: "url不能为空", trigger: "blur" },
           { min: 2, max: 200, message: 'url长度必须介于 2 和 200 之间', trigger: 'blur' }
         ],
-        'form.scm.branch': [
+        'branch': [
           { required: true, message: "分支不能为空", trigger: "blur" },
           { min: 2, max: 200, message: '分支长度必须介于 2 和 200 之间', trigger: 'blur' }
         ],
-        'form.scm.credentialsId': [
+        'credentialsId': [
           { required: true, message: "凭证不能为空", trigger: "change" }
         ]
+      }
   })
 
   const loading = ref(false)
@@ -61,91 +63,58 @@
   // 表单
   const open = ref(false);
   const formRef = ref<FormInstance>();
-  const form = reactive({
-        id: undefined,
-        scmType: undefined,
-        toolsType: undefined,
-        jdkId: undefined,
-        scm:{
-          url:undefined,
-          credentialsId:undefined,
-          branch:undefined
-        },
-        params: [{
-          id:undefined,
-          jobId:undefined,
-          paramName:undefined,
-          paramValue:undefined,
-          defaultValue:undefined,
-          description:undefined
-        }],
-        buildDependencys: [],
-        setups: [{
-          id:undefined,
-          setupType:undefined,
-          sequence:undefined,
-          type:undefined,
-          targets:undefined,
-          goName:undefined,
-          script:undefined,
-          gradleName:undefined,
-          task:undefined,
-          mavenName:undefined,
-          goals:undefined,
-          nodejsName:undefined,
-          npmName:undefined,
-          cacheLocation:undefined,
-          pythonName:undefined,
-          shellScript:undefined
-        }],
-        jobName: undefined,
-        jdkId: undefined,
-        remark: undefined,
-        status:undefined,
-        instanceCode: undefined
-    })
+
+  const formDefault = {
+      id: undefined,
+      scmType: undefined,
+      toolsType: undefined,
+      jdkId: undefined,
+      scm:{
+        url:undefined,
+        credentialsId:undefined,
+        branch:undefined
+      },
+      params: [{
+        id:undefined,
+        jobId:undefined,
+        paramName:undefined,
+        paramValue:undefined,
+        defaultValue:undefined,
+        description:undefined
+      }],
+      buildDependencys: [],
+      setups: [{
+        id:undefined,
+        setupType:undefined,
+        sequence:undefined,
+        type:undefined,
+        targets:undefined,
+        goName:undefined,
+        script:undefined,
+        gradleName:undefined,
+        task:undefined,
+        mavenName:undefined,
+        goals:undefined,
+        nodejsName:undefined,
+        npmName:undefined,
+        cacheLocation:undefined,
+        pythonName:undefined,
+        shellScript:undefined
+      }],
+      jobName: undefined,
+      remark: undefined,
+      status:undefined,
+      instanceCode: undefined
+  };
+
+  const form = reactive(formDefault)
   const title = ref("")
   const pluginInstance = reactive([]);
   const pluginCode = "jenkins"
 
   // 重置表单
   const reset = ()=> {
-      Object.assign(form,{
-        id: undefined,
-        scmType: undefined,
-        toolsType: undefined,
-        jdkId: undefined,
-        scm:{
-          url:undefined,
-          credentialsId:undefined,
-          branch:"*/main"
-        },
-        params: [{}],
-        buildDependencys: [],
-        setups: [{
-          id:undefined,
-          setupType:undefined,
-          sequence:undefined,
-          type:undefined,
-          targets:undefined,
-          goName:undefined,
-          script:undefined,
-          gradleName:undefined,
-          task:undefined,
-          mavenName:undefined,
-          goals:undefined,
-          nodejsName:undefined,
-          npmName:undefined,
-          cacheLocation:undefined,
-          pythonName:undefined,
-          shellScript:undefined
-        }],
-        jobName: undefined,
-        jdkId: undefined,
-        remark: undefined,
-        status:1,
-        instanceCode: undefined
-      })
+      Object.assign(form,formDefault)
   }
 
   // 获取列表
@@ -315,43 +284,43 @@
   const submitForm = async (isBuild)=>{
     loading.value = true;
     //todo 这里校验全部失败，需要改
-    // await formRef.value?.validate()
-    //     .catch((err:Error)=>{
-    //         ElMessage.error('表单验证失败');
-    //         loading.value = false;
-    //         throw err;
-    //     });
-
-    if (form.id != undefined) {
-      addJob(form).then(response => {
-          if(response?.code == 200){
-            ElMessage({
-                  showClose: true,
-                  message: '修改成功',
-                  type: 'success',
-            });
-            build(form,isBuild)
-          }
-        });
-      } else {
-        addJob(form).then(response => {
-          if(response?.code == 200){
-            ElMessage({
-                  showClose: true,
-                  message: '新增成功',
-                  type: 'success',
-            });
-            build(form,isBuild)
-          }else{
-            ElMessage.error('新增出现异常');
+    await formRef.value?.validate()
+        .catch((err:Error)=>{
+            ElMessage.error('表单验证失败');
             loading.value = false;
-            throw response?.msg;
-          }
+            throw err;
         });
-      }
 
-      open.value = false;
-      getList();
+    // if (form.id != undefined) {
+    //   addJob(form).then(response => {
+    //       if(response?.code == 200){
+    //         ElMessage({
+    //               showClose: true,
+    //               message: '修改成功',
+    //               type: 'success',
+    //         });
+    //         build(form,isBuild)
+    //       }
+    //     });
+    //   } else {
+    //     addJob(form).then(response => {
+    //       if(response?.code == 200){
+    //         ElMessage({
+    //               showClose: true,
+    //               message: '新增成功',
+    //               type: 'success',
+    //         });
+    //         build(form,isBuild)
+    //       }else{
+    //         ElMessage.error('新增出现异常');
+    //         loading.value = false;
+    //         throw response?.msg;
+    //       }
+    //     });
+    //   }
+
+    //   open.value = false;
+    //   getList();
   }
 
   const build = (form,isBuild)=>{
@@ -594,7 +563,7 @@
       <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
         <el-row>
           <el-col :span="12">
-            <el-form-item label="插件实例" prop="form.instanceCode">
+            <el-form-item label="插件实例" prop="instanceCode">
               <el-select
                 class="search-select2" 
                 v-model="form.instanceCode"
@@ -610,14 +579,14 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="任务名" prop="form.jobName">
+            <el-form-item label="任务名" prop="jobName">
               <el-input v-model="form.jobName" placeholder="请输入参数名" maxlength="30" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
           <el-col :span="12">
-            <el-form-item label="仓库类型" prop="form.scmType" >
+            <el-form-item label="仓库类型" prop="scmType" >
               <el-select
                 class="search-select2" 
                 v-model="form.scmType"
@@ -633,19 +602,19 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="url" prop="form.scm.url">
+            <el-form-item label="url" prop="scm.url">
               <el-input v-model="form.scm.url" placeholder="请输入远程仓库地址" maxlength="200" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
           <el-col :span="12">
-            <el-form-item label="分支" prop="form.scm.branch">
+            <el-form-item label="分支" prop="scm.branch">
               <el-input v-model="form.scm.branch" placeholder="请输入分支:*/main" maxlength="100" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="凭证" prop="form.scm.credentialsId">
+            <el-form-item label="凭证" prop="scm.credentialsId">
               <el-select
                 class="search-select2" 
                 v-model="form.scm.credentialsId"
@@ -660,48 +629,6 @@
               </el-select>
             </el-form-item>
           </el-col>
-        </el-row>
-
-        <el-row v-for="(item, index) in form.params">
-            <el-col :span="12" >
-              <el-form-item label="参数id" :prop="`params.${index}.id`" v-if="false">
-                <el-input v-model="item.id" maxlength="100" />
-              </el-form-item>
-              <el-form-item label="参数名" :prop="`params.${index}.paramName`">
-                <el-input v-model="item.paramName" placeholder="请输入参数名" maxlength="100" />
-              </el-form-item>
-            </el-col>
-            <el-col :span="12" >
-              <el-form-item label="参数值" :prop="`params.${index}.paramValue`">
-                <el-input v-model="item.paramValue" placeholder="请输入参数值" maxlength="100" />
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="默认值" :prop="`params.${index}.defaultValue`">
-                <el-input v-model="item.defaultValue" placeholder="请输入默认值" maxlength="100" />
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="参数类型" :prop="`params.${index}.paramType`">
-              <el-select
-                  class="search-select2" 
-                  v-model="item.paramType"
-                  placeholder="请选择参数类型"
-                  clearable
-                  style="width: 240px"
-                >
-                <el-option v-for="param in paramTypes"
-                  :key="param.value"
-                  :label="param.label"
-                  :value="param.value"/>
-                </el-select>
-            </el-form-item>
-            </el-col>
-            <el-col :span="24">
-              <el-form-item label="参数备注" :prop="`params.${index}.description`">
-                <el-input v-model="item.description" type="textarea" placeholder="请输入内容" />
-              </el-form-item>
-            </el-col>
         </el-row>
 
         <el-row>
