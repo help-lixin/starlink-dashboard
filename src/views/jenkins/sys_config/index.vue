@@ -3,7 +3,7 @@
   import { showStatusOperateFun , status , showStatusFun , addDateRange } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
-  import {sysConfigList,addConfig,queryConfigInfoById,changeConfigStatus,sysConfigSelectOption} from "@/api/jenkins/sys_config"
+  import {sysConfigList,addConfig,queryConfigInfoById,changeConfigStatus,sysConfigSelectOption,checkHome,checkName,toolsSelectOption} from "@/api/jenkins/sys_config"
  
   const queryFormRef = ref(null);
   //查询列表信息
