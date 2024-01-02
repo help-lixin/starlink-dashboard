@@ -66,7 +66,7 @@
 
   const formDefault = {
       id: undefined,
-      scmType: undefined,
+      scmType: "GIT",
       toolsType: undefined,
       jdkId: undefined,
       scm:{
@@ -608,7 +608,7 @@
           </el-col>
         </el-row>
         <el-row>
-          <el-col :span="12">
+          <el-col :span="12" v-if="form.scmType == 'GIT'">
             <el-form-item label="分支" prop="scm.branch">
               <el-input v-model="form.scm.branch" placeholder="请输入分支:*/main" maxlength="100" />
             </el-form-item>
@@ -833,7 +833,7 @@
 
         <el-row>
             <el-col :span="12" >
-              <el-form-item label="构建顺序" >
+              <el-form-item label="构建依赖" >
                 <el-select
                   class="search-select2" 
                   placeholder="请选择项目"
