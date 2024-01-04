@@ -49,6 +49,7 @@ async function onSubmit() {
 
     if (validate) {
         let loginRes: any = await login(form);
+        // const loginRes = {code:200}
         if (loginRes.code == 200) {
             let authorizeRes = await authorize(loginRes.url);
             if (authorizeRes.code == 200) {

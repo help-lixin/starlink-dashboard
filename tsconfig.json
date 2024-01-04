@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
-    "moduleResolution" : "node"
+    "moduleResolution" : "node",
+    "types": ["element-plus/global"]
   },
   "files": [],
   "references": [
