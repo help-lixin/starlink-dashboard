@@ -3,9 +3,9 @@
   import { showStatusOperateFun , status , showStatusFun , addDateRange , addDateRangeRuoyi } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
-  import { sysCredentialList } from "@/api/sys_credential/credential"
+  import { credentialOption } from "@/api/sys_credential/credential"
   import {toolsSelectOption , jdkSelectOption} from "@/api/jenkins/sys_config"
-  import {addJob, changeStatus, pageList, tools ,scmType, queryJobDetail, paramTypes, buildJob} from "@/api/jenkins/job"
+  import {addJob, changeStatus, pageList, tools ,scmType, queryJobDetail, paramTypes, jobSelectOption,  buildJob , jobNameIsExist} from "@/api/jenkins/job"
 import type { pushScopeId } from "vue"
 
   const queryFormRef = ref(null);
@@ -22,6 +22,22 @@ import type { pushScopeId } from "vue"
     jobName: undefined
   }) 
 
+  const validJobName = (rule:any,value:any, callback:any)=>{
+    if(value == curJobName.jobName){
+      callback()
+    }
+
+    jobNameIsExist(value).then((res)=>{
+        if(res.code == 200){
+          if(res.data){
+            callback()
+          }else{
+            callback(new Error('任务名称已存在，请确认后修改'));
+          }
+        }
+    })
+  }
+
   // 表单验证规则
   const rules = reactive<FormRules>({
       'instanceCode' : [
@@ -29,7 +45,8 @@ import type { pushScopeId } from "vue"
       ],
       'jobName': [
         { required: true, message: "任务名称不能为空", trigger: "blur" },
-        { min: 2, max: 20, message: '任务名称长度必须介于 2 和 20 之间', trigger: 'blur' }
+        { min: 2, max: 20, message: '任务名称长度必须介于 2 和 20 之间', trigger: 'blur' },
+        { validator: validJobName}
       ],
       'scmType': [
         { required: true, message: "仓库类型不能为空", trigger: "change" },
@@ -72,7 +89,7 @@ import type { pushScopeId } from "vue"
   const open = ref(false);
   const formRef = ref<FormInstance>();
 
-  const formDefault = {
+  const formDefault = reactive({
       id: undefined,
       scmType: "GIT",
       toolsType: undefined,
@@ -105,17 +122,50 @@ import type { pushScopeId } from "vue"
       remark: undefined,
       status:undefined,
       instanceCode: undefined
-  };
+  });
 
   const form = reactive(formDefault)
-  const title = ref("")
+  const title = ref(null)
   const pluginInstance = reactive([]);
   const pluginCode = "jenkins"
 
   // 重置表单
   const reset = ()=> {
-      Object.assign(form,formDefault)
-  }
+      Object.assign(form,{
+      id: undefined,
+      scmType: "GIT",
+      toolsType: undefined,
+      jdkId: undefined,
+      scm:{
+        url:undefined,
+        credentialsId:undefined,
+        branch:undefined
+      },
+      buildDependencys: [],
+      setups: [{
+        id:undefined,
+        setupType:undefined,
+        sequence:undefined,
+        type:undefined,
+        targets:undefined,
+        goName:undefined,
+        script:undefined,
+        gradleName:undefined,
+        task:undefined,
+        mavenName:undefined,
+        goals:undefined,
+        nodejsName:undefined,
+        npmName:undefined,
+        cacheLocation:undefined,
+        pythonName:undefined,
+        shellScript:undefined
+      }],
+      jobName: undefined,
+      remark: undefined,
+      status:undefined,
+      instanceCode: undefined
+  })
+}
 
   // 获取列表
   const getList = ()=>{
@@ -155,6 +205,8 @@ import type { pushScopeId } from "vue"
 
   // 下拉选择添加标签
   const handleSelectChange = (value) =>{
+      if(value == ""){ return }
+
       if (!form.buildDependencys.includes(value)) {
         if(form.buildDependencys.length = 0){
           form.buildDependencys.push(value);  
@@ -173,24 +225,34 @@ import type { pushScopeId } from "vue"
   // 凭证列表
   const credentials = reactive([])
   const formInstance = reactive([])
+  // 构建依赖任务下拉列表
   const jobs = reactive([])
   const jdkList = reactive([])
   // 处理新增按钮
   const handleAdd = function(){
     reset()
-
+    // 查询实例编码下拉列表
     queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
       if(res.code == 200){
         Object.assign(formInstance,res?.data)
         let instanceCode = formInstance[0].instanceCode;
         form.instanceCode = instanceCode
 
-        sysCredentialList(instanceCode).then(response => {
+        // 查询凭证下拉列表
+        credentialOption(instanceCode).then(response => {
           if(response?.code == 200){
             Object.assign(credentials,response?.data)
           }
         })
+
+        // 查询依赖构建下拉列表
+        jobSelectOption(instanceCode).then(response =>{
+          if(response?.code == 200){
+            Object.assign(jobs,response?.data)
+          }
+        })
         
+        // 查询jdk下拉列表
         jdkSelectOption(instanceCode).then((response)=>{
           if(response?.code == 200){
             Object.assign(jdkList,response?.data)
@@ -206,18 +268,28 @@ import type { pushScopeId } from "vue"
   // 处理更新按钮
   const handleUpdate = function(row){
     reset();
+    // 查询实例编码下拉列表
     queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
       if(res.code == 200){
         Object.assign(formInstance,res?.data)
         let instanceCode = formInstance[0].instanceCode;
         form.instanceCode = instanceCode
 
-        sysCredentialList(instanceCode).then(response => {
+        // 查询凭证下拉列表
+        credentialOption(instanceCode).then(response => {
           if(response?.code == 200){
             Object.assign(credentials,response?.data)
           }
         })
+
+        // 查询依赖构建下拉列表
+        jobSelectOption(instanceCode).then(response =>{
+          if(response?.code == 200){
+            Object.assign(jobs,response?.data)
+          }
+        })
         
+        // 查询jdk下拉列表
         jdkSelectOption(instanceCode).then((response)=>{
           if(response?.code == 200){
             Object.assign(jdkList,response?.data)
@@ -231,6 +303,9 @@ import type { pushScopeId } from "vue"
     title.value = "修改jenkins配置信息";
   }
 
+  // 保存当前查询详情的任务名称（主要用于校验）
+  const curJobName = reactive({})
+
   // 查询任务详情
   const detail = (id)=>{
     queryJobDetail(id).then(jobRes => {
@@ -239,6 +314,7 @@ import type { pushScopeId } from "vue"
               if(response?.code == 200){
                 Object.assign(languages,response?.data)
                 Object.assign(form,jobRes?.data)
+                Object.assign(curJobName,jobRes?.data)
 
                 form.setups.forEach((setup)=>{
                   setup.type = setup.setupType
@@ -280,40 +356,36 @@ import type { pushScopeId } from "vue"
             throw err;
         });
 
-    console.log("========================================================");
-    console.log(form);    
-    console.log("========================================================");
+    if (form.id != undefined) {
+      addJob(form).then(response => {
+          if(response?.code == 200){
+            ElMessage({
+                  showClose: true,
+                  message: '修改成功',
+                  type: 'success',
+            });
+            build(form,isBuild)
+          }
+        });
+      } else {
+        addJob(form).then(response => {
+          if(response?.code == 200){
+            ElMessage({
+                  showClose: true,
+                  message: '新增成功',
+                  type: 'success',
+            });
+            build(form,isBuild)
+          }else{
+            ElMessage.error('新增出现异常');
+            loading.value = false;
+            throw response?.msg;
+          }
+        });
+      }
 
-    // if (form.id != undefined) {
-    //   addJob(form).then(response => {
-    //       if(response?.code == 200){
-    //         ElMessage({
-    //               showClose: true,
-    //               message: '修改成功',
-    //               type: 'success',
-    //         });
-    //         build(form,isBuild)
-    //       }
-    //     });
-    //   } else {
-    //     addJob(form).then(response => {
-    //       if(response?.code == 200){
-    //         ElMessage({
-    //               showClose: true,
-    //               message: '新增成功',
-    //               type: 'success',
-    //         });
-    //         build(form,isBuild)
-    //       }else{
-    //         ElMessage.error('新增出现异常');
-    //         loading.value = false;
-    //         throw response?.msg;
-    //       }
-    //     });
-    //   }
-
-    //   open.value = false;
-    //   getList();
+      open.value = false;
+      getList();
   }
 
   const build = (form,isBuild)=>{

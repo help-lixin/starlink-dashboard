@@ -12,9 +12,13 @@ export const credentialTypes=[
     label:"USERNAME_PASSWORD"
   },
   {
-    value:"FILE",
-    label:"FILE"
+    value:"SECRET",
+    label:"SECRET"
   },
+  {
+    value:"SSH",
+    label:"SSH"
+  }
 ]
 
 // 查询凭证列表
@@ -51,9 +55,9 @@ return request({
 }
 
 // 检查credentialKey值是否存在
-export function checkKey(credentialKey:string,instanceCode:string) {
+export function checkKey(checkValue:any) {
 return request({
-      url: STARLINK_SERVICE + '/checkKey/' + credentialKey + "/" + instanceCode,
+      url: STARLINK_SERVICE + '/credential/checkKey/' + checkValue.credentialKey + "/" + checkValue.instanceCode,
       method: 'get'
   }).then((res)=>{
       return res?.data;
@@ -65,6 +69,16 @@ export function changeStatus(instanceCode:string,status:number,id:number) {
 return request({
       url: STARLINK_SERVICE + '/changeStatus/' + instanceCode + "/" + status + "/" +id,
       method: 'put'
+  }).then((res)=>{
+      return res?.data;
+  });
+}
+
+// 查询凭证下拉列表
+export function credentialOption(instanceCode:string) {
+return request({
+      url: STARLINK_SERVICE + '/credential/option/' + instanceCode ,
+      method: 'get'
   }).then((res)=>{
       return res?.data;
   });

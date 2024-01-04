@@ -91,15 +91,15 @@ export function changeStatus(jobId:any, status:any) {
 
 
 
-// 查询工具下拉列表
-// export function jobSelectOption(instanceCode:string) {
-//     return request({
-//       url: STARLINK_SERVICE + '/jenkins/job/jobOption/'+instanceCode,
-//       method: 'get'
-//     }).then((res)=>{
-//         return res?.data;
-//     });
-// }
+// 查询构建依赖任务下拉列表
+export function jobSelectOption(instanceCode:string) {
+    return request({
+      url: STARLINK_SERVICE + '/jenkins/job/jobOption/'+instanceCode,
+      method: 'get'
+    }).then((res)=>{
+        return res?.data;
+    });
+}
 
 
 
@@ -120,6 +120,16 @@ export function buildJob(params:any) {
       url: STARLINK_SERVICE + '/jenkins/job/buildJob',
       method: 'get',
       params:params
+    }).then((res)=>{
+        return res?.data;
+    });
+}
+
+// 查询任务名称是否可用
+export function jobNameIsExist(jobName:string) {
+    return request({
+      url: STARLINK_SERVICE + '/jenkins/job/jobNameIsExist/' + jobName,
+      method: 'get'
     }).then((res)=>{
         return res?.data;
     });
