@@ -1,5 +1,5 @@
 <script setup lang="ts">
-    // @ts-nocheck  
+    // @ts-nocheck
     import { useMenuStore } from "@/stores/menu";
     import {isCollapse} from "./isCollapse"
     import { getMenuTree, type MenuList } from "@/api/menus";
@@ -14,6 +14,7 @@
     if(menuStore.menus.length == 0){
         console.log("pinina中没有菜单数据,正准备通过网络请求,获得菜单数据");
         getMenuTree().then((res)=>{
+          console.log(res, 'res111')
             if(res.length > 0) {
                 // 深拷贝
                 Object.assign(menus,res);
@@ -46,45 +47,45 @@
 <template>
     <el-aside>
         <el-scrollbar>
-            <el-menu  
-            router 
+            <el-menu
+            router
             unique-opened
             :default-active="0+''"
             :default-openeds="['0']"
             class="el-menu-vertical"
-            :collapse="isCollapse" 
+            :collapse="isCollapse"
             @select="menuSelect"
             >
                 <a href="/" class="logo">
                     <img src="@/assets/logo.svg" alt=""/>
                     <h1>星链管理平台</h1>
                 </a>
-                
-                <template v-for="(menu,index) in menus">
-                    <el-sub-menu :index="index+''" >
-                        <template #title v-if="menu.menuType == 'M'">
-                            <el-icon><i-ep-setting/></el-icon>
-                            <span>{{  menu.menuName  }}</span>
+
+                <template v-for="(menu,index) in menus" :key="index">
+                    <el-sub-menu :index="index+''">
+                        <template #title>
+                          <el-icon v-if="menu.icon">
+                            <component :is="menu.icon" v-if="menu.icon && menu.icon !== '#'"></component>
+                          </el-icon>
+                          <span>{{  menu.menuName  }}</span>
                         </template>
-                        
                         <template v-if="menu.children?.length > 0">
-                            <template v-for="childMenu in menu.children">
+                            <template v-for="(childMenu,index) in menu.children" :key="index">
                                 <el-menu-item :index="processUrl(childMenu.component)">
-                                    <el-icon><i-ep-setting/></el-icon>
-                                    <span>{{ childMenu.menuName }}</span>    
+                                  <component :is="menu.icon" v-if="menu.icon && menu.icon !== '#'"></component>
+                                  <span>{{ childMenu.menuName }}</span>
                                 </el-menu-item>
                             </template>
                         </template>
                     </el-sub-menu>
                 </template>
             </el-menu>
-        </el-scrollbar>    
+        </el-scrollbar>
     </el-aside>
 </template>
 
 <style lang="scss" scoped>
 .el-aside {
-    background-color: #e9e9eb;
     height: 100vh;
     width: auto;
 }
@@ -94,9 +95,9 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    text-decoration: none; 
+    text-decoration: none;
     height: 60px;
-    color: black;
+    color: var(--el-text-color-primary);
 
     img {
         width: 32px;
@@ -107,7 +108,6 @@
 
 /** 设置菜单样式 */
 .el-menu {
-    background-color: #e9e9eb;
     border-right: none;
     width: 200px;
     &.el-menu--collapse {

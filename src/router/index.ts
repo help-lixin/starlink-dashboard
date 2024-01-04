@@ -42,7 +42,8 @@ export const dynamicRoutes = [
   {
     path : '/system/user/index',
     name : 'user',
-    component: ()=> import("../views/system/user/index.vue"),
+    component: ()=> import("../views/system/user/indexCopy.vue"),
+    // component: ()=> import("../views/system/user/index.vue"),
     meta: {
         requiresAuth: true
     },

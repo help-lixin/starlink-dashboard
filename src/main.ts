@@ -1,23 +1,21 @@
-import './assets/main.css'
-
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 
 import App from './App.vue'
 import router from './router'
-
+import YtCard from '@/components/YtCard.vue'
 import { usePermsStore } from './stores/perms';
 
-import '@/styles/index.scss'
-
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import "virtual:svg-icons-register";
-
-
-import 'element-plus/dist/index.css'
-import 'element-plus/theme-chalk/src/base.scss'
-
+// import "element-plus/theme-chalk/src/index.scss";
+import '@/styles/index.scss'
 const app = createApp(App)
-
+app.component('YtCard', YtCard)
+// 注册所有图标
+for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+    app.component(key, component)
+}
 app.use(createPinia())
 app.use(router)
 

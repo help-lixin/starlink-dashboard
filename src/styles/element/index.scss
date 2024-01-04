@@ -1,0 +1,74 @@
+$--colors: (
+  "primary": (
+    "base": green,
+  ),
+  "success": (
+    "base": #21ba45,
+  ),
+  "warning": (
+    "base": #f2711c,
+  ),
+  "danger": (
+    "base": #db2828,
+  ),
+  "error": (
+    "base": #db2828,
+  ),
+  "info": (
+    "base": #42b8dd,
+  ),
+);
+
+// we can add this to custom namespace, default is 'el'
+//@forward "element-plus/theme-chalk/src/mixins/config.scss" with (
+//  $namespace: "ep"
+//);
+
+// You should use them in scss, because we calculate it by sass.
+// comment next lines to use default color
+@forward "element-plus/theme-chalk/src/common/var.scss" with (
+  // do not use same name, it will override.
+  $colors: $--colors,
+  $button-padding-horizontal: ("default": 50px)
+);
+
+// if you want to import all
+// @use "element-plus/theme-chalk/src/index.scss" as *;
+
+// You can comment it to hide debug info.
+// @debug $--colors;
+
+// custom dark variables
+@use "./dark.scss";
+
+// 加入自己的css变量
+html.dark {
+  /* 自定义深色背景颜色 */
+  --el-bg-main-color: var(--el-bg-color-overlay);
+  --el-dialog-border-radius: 8px;
+}
+html {
+  /* 自定义浅色背景颜色 */
+  --el-bg-main-color: #f6f6f7;
+  --el-dialog-border-radius: 8px;
+}
+// 覆盖dialog样式
+.el-dialog {
+  border-radius: 8px;
+  .el-dialog__header {
+  }
+  .el-dialog__body {
+    padding: 12px;
+    background-color: var(--el-bg-main-color);
+  }
+  .el-dialog__footer {
+    margin-left: -12px;
+    margin-right: -12px;
+    padding: 12px 24px;
+    text-align: right;
+  }
+}
+// 覆盖表单样式
+.el-range-editor.el-input__inner {
+  padding: 0 10px;
+}
