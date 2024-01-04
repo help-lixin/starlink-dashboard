@@ -282,18 +282,6 @@ const handleBlobStoresTypeShow = (type) => {
 const handleSoftQuotaShow = (val) => {
   if (val) {
     form.value.softQuota.enabled = true;
-
-    // 动态添加验证规则
-    const softQuotaRules = {
-      type : [ { required: true, message: "警戒值不能为空", trigger: "blur" } ],
-      limit : [ { required: true, message: "预警类型不能为空", trigger: "blur" } ]
-    }
-    rules["softQuota"] = softQuotaRules
-  } else {
-    form.value.softQuota.enabled = false;
-    
-    // 清除验证规则上的两个验证信息
-    delete rules.softQuotaRules
   }
 };
 
@@ -442,7 +430,7 @@ selectFirstInstanceQuery();
   <!-- 添加或修改组配置对话框 -->
   <el-dialog :title="title" v-model="open" width="800px" append-to-body>
     <div class="main-wrapp">
-      <el-form ref="formRef" :model="form" :rules="rules" label-width="200px">
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="200px" :validate-on-rule-change="false">
         <el-form-item label="插件实例" prop="instanceCode" label-width="150px">
             <el-select
               class="search-select2" 
@@ -463,7 +451,7 @@ selectFirstInstanceQuery();
               @click="handleBlobStoresTypeShow(item)" />
           </el-select>
         </el-form-item>
-        <div v-show="fileIsShow">
+        <div v-if="fileIsShow == true">
           <el-row>
             <el-form-item label="存储库名称" prop="name"  label-width="150px">
               <el-input v-model="form.name" placeholder="请输入库名称" maxlength="30" style="width:240px"
@@ -482,9 +470,9 @@ selectFirstInstanceQuery();
             </el-form-item>
           </el-row>
         </div>
-        <div v-show="form.softQuota.enabled">
+        <div v-if="form.softQuota.enabled == true">
           <el-row>
-            <el-form-item label="预警类型" prop="softQuota.type" label-width="150px">
+            <el-form-item label="预警类型" prop="softQuota.type" label-width="150px" :rules="[ { required: true, message: '警戒值不能为空', trigger: 'blur' }  ]">
               <el-select v-model="form.softQuota.type" clearable style="width: 240px">
                 <el-option v-for="item in constraintType" :key="item.value" :label="item.label" :value="item.value" />
               </el-select>
@@ -492,7 +480,7 @@ selectFirstInstanceQuery();
           </el-row>
 
           <el-row>
-            <el-form-item label="警戒值(单位:MB)" prop="softQuota.limit" label-width="150px">
+            <el-form-item label="警戒值(单位:MB)" prop="softQuota.limit" label-width="150px" :rules="[ { required: true, message: '预警类型不能为空', trigger: 'blur' }  ]">
               <el-input v-model="form.softQuota.limit" maxlength="100" style="width:240px" />
             </el-form-item>
           </el-row>
