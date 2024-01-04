@@ -1,10 +1,9 @@
 <script setup lang="ts">
   // @ts-nocheck  
   import { showStatusOperateFun , status , showStatusFun , addDateRange } from "@/utils/common"
-  import { queryInstanceInfoByPluginCode } from "@/api/common-api"
+  import { queryInstanceInfoByPluginCode,pluginOptionSelect } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
-  import {sysConfigList,addConfig,queryConfigInfoById,changeConfigStatus,sysConfigSelectOption,
-    checkHome,checkName,toolsSelectOption,tools,pluginTypeSelectOption} from "@/api/jenkins/sys_config"
+  import {sysCredentialList, addCredential, queryCredentialInfoById, checkKey , changeStatus ,credentialTypes} from "@/api/sys_credential/credential"
  
   const queryFormRef = ref(null);
   //查询列表信息
@@ -15,7 +14,8 @@
     endTime: undefined,
     status: undefined,
     instanceCode:undefined,
-    name: undefined
+    credentialType:undefined,
+    credentialName: undefined
   })
 
 
@@ -29,63 +29,70 @@
 
 
   const total= ref(0)
-  const sysConfigPageList = reactive([])
+  const sysCredentialPageList = reactive([])
 
   // 表单
   const open = ref(false);
+  // 插件编码下拉列表框对象
+  const pluginCodes = reactive([]);
+  const formPluginCodes = reactive([]);
   const formRef = ref<FormInstance>();
 
-  const validHome = (rule:any,value:any, callback:any)=>{
+  const validKey = (rule:any,value:any, callback:any)=>{
       const checkValue = reactive({
-        jenkinsManageToolsModule:undefined,
-        homePath:undefined,
+        credentialKey:undefined,
         instanceCode:undefined
       })
-      if(form.pluginType == undefined || form.pluginType == ''){
-        callback(new Error('请选择插件类型后再次编辑'));
-      }
-      checkValue.jenkinsManageToolsModule = form.pluginType
-      checkValue.homePath = value
+
+      checkValue.credentialKey = form.credentialKey
       checkValue.instanceCode = form.instanceCode
 
-      checkHome(checkValue).then((res)=>{
+      checkKey(checkValue).then((res)=>{
         if(res?.data){
-          callback();
+          callback(new Error('名称已存在:'+value));
         }else{
-          callback(new Error('路径不存在:'+value));
+          callback();
         }
       })
   }
 
   // 表单验证规则
   const rules = reactive<FormRules>({
-      pluginType: [
-        { required: true, message: "插件类型不能为空", trigger: "blur" }
+      credentialKey: [
+        { required: true, message: "任务名称不能为空", trigger: "blur" },
+        { min: 2, max: 20, message: '任务名称长度必须介于 2 和 20 之间', trigger: 'blur' },
+        { validator:validKey, trigger: "blur"}
       ],
-      name : [
-        { required: true,  message: "插件名称不能为空", trigger: "blur" },
-        { min: 2, max: 200, message: '插件名称长度必须介于 2 和 200 之间', trigger: 'blur' }
+      instanceCode : [
+        { required: true,  message: "实例编码不能为空", trigger: "blur" }
       ],
-      value : [
-        { required: true, message: "插件路径不能为空", trigger: "blur" },
-        { required: true, validator: validHome,  trigger: "blur" },
-        { min: 2, max: 200, message: '插件路径长度必须介于 2 和 200 之间', trigger: 'blur' }
+      pluginCode : [
+        { required: true,  message: "插件编码不能为空", trigger: "blur" }
       ],
+      credentialName : [
+        { required: true,  message: "凭证名称不能为空", trigger: "blur" }
+      ],
+      credentialType : [
+        { required: true,  message: "凭证类型不能为空", trigger: "blur" }
+      ]
   })
 
   
 
   const form = reactive({
         id: undefined,
-        name: undefined,
-        pluginType: undefined,
-        value: undefined,
+        credentialKey: undefined,
+        credentialName: undefined,
+        pluginCode: undefined,
+        remark: undefined,
         status: undefined,
         instanceCode: undefined
   })
   const title = ref("")
+  // 查询页面的实例编码
   const pluginInstance = reactive([]);
-  const pluginCode = "jenkins"
+  // 表单中的实例编码
+  const formPluginInstance = reactive([]);
 
   // 重置表单
   const reset = ()=> {
@@ -98,19 +105,20 @@
         instanceCode: undefined
       })
   }
+  
 
   // 获取列表
   const getList = ()=>{
     loading.value = true;
-    sysConfigList(addDateRange(queryParams, dateRange.value))
+    sysCredentialList(addDateRange(queryParams, dateRange.value))
     .then(response => {
           loading.value = false
           if(response?.data?.records.length > 0){
-            sysConfigPageList.splice(0,sysConfigPageList.length);
-            Object.assign(sysConfigPageList, response?.data?.records)
+            sysCredentialPageList.splice(0,sysCredentialPageList.length);
+            Object.assign(sysCredentialPageList, response?.data?.records)
             total.value = response?.data?.total
           }else{
-            sysConfigPageList.splice(0,sysConfigPageList.length);
+            sysCredentialPageList.splice(0,sysCredentialPageList.length);
             total.value = 0;
           }
         }
@@ -129,13 +137,16 @@
     handleQuery();
   }
 
+  
   // 处理新增按钮
   const handleAdd = function(){
     reset()
-    form.instanceCode = pluginInstance[0].instanceCode
+    pluginOptionSelect().then((res)=>{
+      Object.assign(formPluginCodes,res?.data);
+    })
     form.status = 1
     open.value = true
-    title.value = "添加插件工具信息"
+    title.value = "添加凭证信息"
   }
 
   // 处理更新按钮
@@ -145,9 +156,17 @@
       if(response?.code == 200){
         Object.assign(form,response?.data)
         open.value = true;
-        title.value = "修改插件工具信息";
+        title.value = "修改凭证信息";
       }
     });
+  }
+
+  // 表单切换插件编码是修改实例编码下拉列表数据
+  const changeInstance = (pluginCode)=>{
+    formPluginInstance.splice(0,formPluginInstance.length)
+    queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
+      Object.assign(formPluginInstance,res?.data)
+    })
   }
   
 
@@ -240,18 +259,25 @@
   }
 
 
-  
-  // 进入页面时,就初始化实例列表
-  queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
+  // 触发查询
+  getList();
+
+  // 初始化插件编码
+  pluginOptionSelect().then((res)=>{
     if(res.code == 200){
-      Object.assign(pluginInstance,res?.data)
-      queryParams.instanceCode = pluginInstance[0].instanceCode
-
-      // 触发查询
-      getList();
-
+      Object.assign(pluginCodes,res?.data)
     }
-  });
+  })
+  
+  const queryInstance = (pluginCode)=>{
+    queryParams.instanceCode = undefined
+    queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
+      if(res.code == 200){
+        Object.assign(pluginInstance,res?.data)
+        queryParams.instanceCode = pluginInstance[0].instanceCode
+      }
+    });
+  }
 </script>
 
 <template>
@@ -259,6 +285,23 @@
     <!--sousuo  -->
     <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" size="small" :inline="true" v-show="showSearch" label-width="68px">
       <el-row :gutter="20">
+        <el-col :span="8">
+          <el-form-item label="插件编码" prop="pluginCode">
+            <el-select
+            class="search-select"
+              v-model="queryParams.pluginCode"
+              @keyup.enter.native="handleQuery"
+              placeholder="请选择插件编码"
+              @change="queryInstance"
+              style="width: 240px"
+            >
+            <el-option v-for="item in pluginCodes"
+              :key="item.label"
+              :label="item.value"
+              :value="item.label"/>
+            </el-select>
+          </el-form-item>
+        </el-col>
         <el-col :span="8">
           <el-form-item label="插件实例" prop="instanceCode">
             <el-select
@@ -275,36 +318,38 @@
             </el-select>
           </el-form-item>
         </el-col>
+      </el-row>
+      <el-row :gutter="20">
         <el-col :span="8">
-          <el-form-item label="名称" prop="name">
+          <el-form-item label="凭证别名" prop="credentialName">
             <el-input
-              v-model="queryParams.name"
-              placeholder="请输入名称"
+              v-model="queryParams.credentialName"
+              placeholder="请输入凭证别名"
               clearable
               style="width: 240px"
               @keyup.enter.native="handleQuery"
             />
           </el-form-item>
         </el-col> 
-      </el-row>
-      <el-row :gutter="20">
         <el-col :span="8">
-          <el-form-item label="插件类型" prop="pluginType">
+          <el-form-item label="凭证类型" prop="credentialType">
             <el-select
             class="search-select"
-              v-model="queryParams.pluginType"
+              v-model="queryParams.credentialType"
               @keyup.enter.native="handleQuery"
               placeholder="请选择插件类型"
               clearable
               style="width: 240px"
             >
-            <el-option v-for="item in tools"
+            <el-option v-for="item in credentialTypes"
               :key="item.value"
               :label="item.label"
               :value="item.value"/>
             </el-select>
           </el-form-item>
         </el-col> 
+      </el-row>
+      <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="状态" prop="status">
             <el-select
@@ -321,8 +366,6 @@
             </el-select>
           </el-form-item>
         </el-col> 
-      </el-row>
-      <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="创建时间">
             <el-date-picker
@@ -356,11 +399,13 @@
 
     <!--table  -->
     <div class="table-wrap">
-      <el-table v-loading="loading" :data="sysConfigPageList" @selection-change="handleSelectionChange">
+      <el-table v-loading="loading" :data="sysCredentialPageList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="30" align="center" />
           <el-table-column label="编号" align="center" key="id" prop="id" />
-          <el-table-column label="名称" align="center" key="name" prop="name"  :show-overflow-tooltip="true"  width="200" />
-          <el-table-column label="执行路径" align="center" key="value" prop="value"  :show-overflow-tooltip="true"  width="200" />
+          <el-table-column label="凭证唯一名称" align="center" key="credentialKey" prop="credentialKey"  :show-overflow-tooltip="true"  width="200" />
+          <el-table-column label="凭证别名" align="center" key="credentialName" prop="credentialName"  :show-overflow-tooltip="true"  width="200" />
+          <el-table-column label="凭证类型" align="center" key="credentialType" prop="credentialType"  :show-overflow-tooltip="true"  width="200" />
+          <el-table-column label="备注" align="center" key="remark" prop="remark"  :show-overflow-tooltip="true"  width="200" />
           <el-table-column label="状态" align="center" key="status"  width="100">
             <template #default="scope">
               {{  showStatusFun(scope.row.status) }}
@@ -381,12 +426,12 @@
               <el-button
                 size="default"
                 @click="handleUpdate(scope.row)"
-                v-hasPerms="['/jenkins/systemConfig/add']"
+                v-hasPerms="['/credential/add']"
               >修改</el-button>
               <el-button
                 size="default"
                 @click="handleStatusChange(scope.row)"
-                v-hasPerms="['/jenkins/systemConfig/changeStatus/**']"
+                v-hasPerms="['/credential/changeStatus/**']"
               >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
              </div>
             </template>
@@ -411,6 +456,23 @@
       <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
         <el-row>
           <el-col :span="12">
+            <el-form-item label="插件编码" prop="pluginCode">
+              <el-select
+              class="search-select"
+                v-model="form.pluginCode"
+                placeholder="请选择插件编码"
+                style="width: 240px"
+                @change="changeInstance"
+              >
+              <el-option v-for="item in formPluginCodes"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"/>
+              </el-select>
+            </el-form-item>
+          </el-col> 
+
+          <el-col :span="12">
             <el-form-item label="插件实例" prop="instanceCode">
               <el-select
                 class="search-select2" 
@@ -418,22 +480,23 @@
                 placeholder="请选择插件实例"
                 style="width: 240px"
               >
-              <el-option v-for="item in pluginInstance"
+              <el-option v-for="item in formPluginInstance"
               :key="item.pluginCode"
               :label="item.instanceName"
               :value="item.instanceCode"/>
               </el-select>
             </el-form-item>
           </el-col>
+          
           <el-col :span="12">
-            <el-form-item label="插件类型" prop="pluginType">
+            <el-form-item label="凭证类型" prop="credentialType">
               <el-select
               class="search-select"
-                v-model="form.pluginType"
-                placeholder="请选择实例"
+                v-model="form.credentialType"
+                placeholder="请选择凭证类型"
                 style="width: 240px"
               >
-              <el-option v-for="item in tools"
+              <el-option v-for="item in credentialTypes"
                 :key="item.value"
                 :label="item.label"
                 :value="item.value"/>
@@ -441,13 +504,18 @@
             </el-form-item>
           </el-col> 
           <el-col :span="12">
-            <el-form-item label="名称" prop="name">
-              <el-input v-model="form.name" placeholder="请输入名称" maxlength="200" />
+            <el-form-item label="凭证唯一名称" prop="credentialKey">
+              <el-input v-model="form.credentialKey" placeholder="请输入凭证唯一名称" maxlength="200" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="执行路径" prop="value">
-              <el-input v-model="form.value" placeholder="请输入执行路径" maxlength="200" />
+            <el-form-item label="凭证名称" prop="credentialName">
+              <el-input v-model="form.credentialName" placeholder="请输入名称" maxlength="200" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="备注" prop="remark">
+              <el-input v-model="form.remark" type="textarea" placeholder="请输入备注" maxlength="200" />
             </el-form-item>
           </el-col>
         </el-row>

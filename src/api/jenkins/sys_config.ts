@@ -2,19 +2,50 @@ import request from "@/utils/request";
 import {STARLINK_SERVICE} from "@/utils/env"
 
 
-// 查询组列表
+export const tools = [
+    {
+        value: 'MAVEN',
+        label: 'maven',
+    },
+    {
+        value: 'GRADLE',
+        label: 'gradle',
+    },
+    {
+        value: 'PYTHON',
+        label: 'python',
+    },
+    {
+        value: 'GO',
+        label: 'go',
+    },
+    {
+        value: 'NODEJS',
+        label: 'nodeJs',
+    },
+    {
+        value: 'ANT',
+        label: 'ant',
+    },
+    {
+        value: 'GIT',
+        label: 'git',
+    }
+];
+
+// 查询系统配置列表
 export function sysConfigList(query:any) {
     return request({
       url: STARLINK_SERVICE + '/jenkins/systemConfig/list',
-      method: 'post',
-      data: query
+      method: 'get',
+      params: query
     }).then((res)=>{
         return res?.data;
     });
 }
 
 
-// 新增组
+// 新增系统配置
 export function addConfig(data:any) {
 return request({
         url: STARLINK_SERVICE + '/jenkins/systemConfig/add',
@@ -26,7 +57,7 @@ return request({
 }
   
 
-// 根据id查询组信息
+// 根据id查询系统配置信息
 export function queryConfigInfoById(id:string) {
 return request({
         url: STARLINK_SERVICE + '/jenkins/systemConfig/info/' + id,
@@ -36,7 +67,7 @@ return request({
     });
 }
 
-// 组状态修改
+// 系统配置状态修改
 export function changeConfigStatus(sysConfigId:any, status:any) {
     return request({
         url: STARLINK_SERVICE + '/jenkins/systemConfig/changeStatus/'+sysConfigId+"/"+status,
@@ -47,7 +78,7 @@ export function changeConfigStatus(sysConfigId:any, status:any) {
 }
 
 
-// 查询组下拉列表
+// 查询系统配置下拉列表
 export function sysConfigSelectOption(query:any) {
     return request({
       url: STARLINK_SERVICE + '/jenkins/systemConfig/selectOption',
@@ -84,6 +115,16 @@ export function checkName(params:any) {
 export function toolsSelectOption(pluginType:string,instanceCode:string) {
     return request({
       url: STARLINK_SERVICE + '/jenkins/systemConfig/optionSelect/'+pluginType+"/"+instanceCode,
+      method: 'get'
+    }).then((res)=>{
+        return res?.data;
+    });
+}
+
+// 查询工具下拉列表
+export function pluginTypeSelectOption(instanceCode:string) {
+    return request({
+      url: STARLINK_SERVICE + '/jenkins/systemConfig/pluginType/optionSelect/' + instanceCode,
       method: 'get'
     }).then((res)=>{
         return res?.data;

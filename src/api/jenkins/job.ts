@@ -92,14 +92,14 @@ export function changeStatus(jobId:any, status:any) {
 
 
 // 查询工具下拉列表
-export function jobSelectOption(instanceCode:string) {
-    return request({
-      url: STARLINK_SERVICE + '/jenkins/job/jobOption/'+instanceCode,
-      method: 'get'
-    }).then((res)=>{
-        return res?.data;
-    });
-}
+// export function jobSelectOption(instanceCode:string) {
+//     return request({
+//       url: STARLINK_SERVICE + '/jenkins/job/jobOption/'+instanceCode,
+//       method: 'get'
+//     }).then((res)=>{
+//         return res?.data;
+//     });
+// }
 
 
 
