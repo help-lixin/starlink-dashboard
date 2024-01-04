@@ -3,9 +3,9 @@
   import { showStatusOperateFun , status , showStatusFun , addDateRange , addDateRangeRuoyi } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
-  import { credentialList } from "@/api/sys_credential/credential"
+  import { sysCredentialList } from "@/api/sys_credential/credential"
   import {toolsSelectOption , jdkSelectOption} from "@/api/jenkins/sys_config"
-  import {addJob, changeStatus, pageList, tools ,scmType, jobSelectOption, queryJobDetail, paramTypes, buildJob} from "@/api/jenkins/job"
+  import {addJob, changeStatus, pageList, tools ,scmType, queryJobDetail, paramTypes, buildJob} from "@/api/jenkins/job"
 import type { pushScopeId } from "vue"
 
   const queryFormRef = ref(null);
@@ -185,18 +185,12 @@ import type { pushScopeId } from "vue"
         let instanceCode = formInstance[0].instanceCode;
         form.instanceCode = instanceCode
 
-        credentialList(instanceCode).then(response => {
+        sysCredentialList(instanceCode).then(response => {
           if(response?.code == 200){
             Object.assign(credentials,response?.data)
           }
         })
         
-        jobSelectOption(instanceCode).then((response)=>{
-          if(response?.code == 200){
-            Object.assign(jobs,response?.data)
-          }
-        })
-
         jdkSelectOption(instanceCode).then((response)=>{
           if(response?.code == 200){
             Object.assign(jdkList,response?.data)
@@ -218,26 +212,18 @@ import type { pushScopeId } from "vue"
         let instanceCode = formInstance[0].instanceCode;
         form.instanceCode = instanceCode
 
-        credentialList(instanceCode).then(response => {
+        sysCredentialList(instanceCode).then(response => {
           if(response?.code == 200){
             Object.assign(credentials,response?.data)
           }
         })
         
-        jobSelectOption(instanceCode).then((response)=>{
-          if(response?.code == 200){
-            Object.assign(jobs,response?.data)
-          }
-        })
-
         jdkSelectOption(instanceCode).then((response)=>{
           if(response?.code == 200){
             Object.assign(jdkList,response?.data)
-
-            detail(row.id)
           }
-
         })
+        detail(row.id)
       }
     });
     
@@ -681,7 +667,7 @@ import type { pushScopeId } from "vue"
           <template 
             v-for="(item, index) in form.setups">
             <el-col :span="12">
-              <el-form-item label="maven" :prop="`setups.${index}.mavenName`" :rules="[  { required: true, message: 'maven版本是必选项', trigger: 'change' } ]" >
+              <el-form-item label="maven版本选择" :prop="`setups.${index}.mavenName`" :rules="[  { required: true, message: 'maven版本是必选项', trigger: 'change' } ]" >
                 <el-select
                   class="search-select2" 
                   v-model="item.mavenName"
@@ -750,6 +736,23 @@ import type { pushScopeId } from "vue"
         <el-row v-if="form.toolsType == 'ANT'" >
           <template 
             v-for="(item, index) in form.setups">
+            <el-col :span="12">
+              <el-form-item label="ant版本" :prop="`setups.${index}.items`">
+                <el-select
+                  class="search-select2" 
+                  v-model="item.ant"
+                  placeholder="请选择ant"
+                  clearable
+                  @change="handleToolChange(item,'ANT')"
+                  style="width: 240px"
+                >
+                <el-option v-for="version in languages"
+                :key="version.label"
+                :label="version.label"
+                :value="version.label"/>
+                </el-select>
+              </el-form-item>
+            </el-col>
             <el-col :span="24">
                 <el-form-item  label="脚本" :prop="`setups.${index}.targets`">
                   <el-input v-model="item.targets" type="textarea" placeholder="请输入脚本内容"/>

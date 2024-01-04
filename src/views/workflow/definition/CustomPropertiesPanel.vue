@@ -179,20 +179,7 @@ const formProperties = {
 				if(!properties){
 					return;
 				}
-				// 对所有的属性(all)进行遍历,如果,发现属性(x-reactions)上配置的dependencies正好依赖于当前属性(field)的话
-				// 则,记住所有属性中,是哪一个属性依赖当前(field)
-				// x-reactions: {  "dependencies": ["instanceCode"] }
-				// 
-				for(let key in properties){
-					const dependencies = properties[key]?.["x-reactions"]?.dependencies
-					if(dependencies){
-						dependencies.forEach(el => {
-							if(el == field?.props?.name){
-								dependenciesArray.push(key)
-							}
-						});
-					}
-				}
+				extraField(field,properties,dependenciesArray)
 			}
 		}
 
@@ -200,7 +187,7 @@ const formProperties = {
 			for(let i=0;i<dependenciesArray.length;i++){
 				const dependenciesItem = dependenciesArray[i]
 				// 当前属性(field)发生变改时,找出那些依赖于我的属性.调用:onChangeCallback方法
-				const address = form.query(dependenciesItem)?.addresses
+				const address = form.query("*."+dependenciesItem)?.addresses
 				for(let i=0;i<address.length;i++){
 					const addr = address[i]
 					const targetField = form.fields[addr]
@@ -237,11 +224,42 @@ const formProperties = {
 			}
 			const callbackArray = field.data?.onChangeCallback
 			callbackArray.forEach(callback => {
+			  
               callback(ctx)
             });
 		}
 	})
   }
+}
+
+// 提取属性
+const extraField = (field,properties,dependenciesArray)=>{
+	// 对所有的属性(all)进行遍历,如果,发现属性(x-reactions)上配置的dependencies正好依赖于当前属性(field)的话
+	// 则,记住所有属性中,是哪一个属性依赖当前(field)
+	// x-reactions: {  "dependencies": ["instanceCode"] }
+	// 
+	for(let key in properties){
+		if(properties[key]?.type == 'object') {
+			// properties
+			const objectProperties = properties[key]?.["properties"];
+			if(objectProperties){
+				extraField(field,objectProperties,dependenciesArray)
+			}
+		} else if(properties[key]?.type == 'array'){
+			// TODO lixin
+			console.log("array");
+		} else{
+			// 普通对象
+			const dependencies = properties[key]?.["x-reactions"]?.dependencies
+			if(dependencies){
+				dependencies.forEach(el => {
+					if(el == field?.props?.name){
+						dependenciesArray.push(key)
+					}
+				});
+			}
+		}
+	}
 }
 
 

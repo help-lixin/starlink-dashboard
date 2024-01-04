@@ -129,6 +129,14 @@ export const dynamicRoutes = [
     },
   },
   {
+    path : '/system/credential/index',
+    name : 'sys-credential',
+    component: ()=> import("../views/system/credential/index.vue"),
+    meta: {
+        requiresAuth: true
+    },
+  },
+  {
     path : '/workflow/definition/index',
     name : 'workflow-definition',
     component: ()=> import("../views/workflow/definition/index.vue"),
