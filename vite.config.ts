@@ -10,7 +10,6 @@ import IconsResolver from 'unplugin-icons/resolver'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
-// import ElementPlus from 'unplugin-element-plus/vite'
 import _ from 'lodash';
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 
