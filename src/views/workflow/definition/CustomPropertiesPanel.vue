@@ -192,17 +192,17 @@ const formProperties = {
 					const addr = address[i]
 					const targetField = form.fields[addr]
 					if(targetField){
-						const ctx = {
-							field:targetField,
-							form,
-							request,
-							formValues:form.values,
-							urlPrefix:STARLINK_SERVICE
-						}
-
 						const callbacks = targetField?.data?.onChangeCallback;
 						if(callbacks){
 							callbacks.forEach(callback => {
+								const ctx = {
+									field:targetField,
+									form,
+									request,
+									formValues:form.values,
+									urlPrefix:STARLINK_SERVICE
+								}
+								
 								callback(ctx)
 							});
 						} // end if
@@ -246,9 +246,16 @@ const extraField = (field,properties,dependenciesArray)=>{
 				extraField(field,objectProperties,dependenciesArray)
 			}
 		} else if(properties[key]?.type == 'array'){
-			// TODO lixin
-			console.log("array");
-		} else{
+			const itemsProperties = properties[key]?.items?.properties;
+			if(itemsProperties){
+				extraField(field,itemsProperties,dependenciesArray)
+			}
+		} else if( properties[key]?.type == 'string' ||
+				   properties[key]?.type == 'number' ||
+				   properties[key]?.type == 'boolean' ||
+				   properties[key]?.type == 'date' ||
+				   properties[key]?.type == 'datetime'
+		 ){
 			// 普通对象
 			const dependencies = properties[key]?.["x-reactions"]?.dependencies
 			if(dependencies){

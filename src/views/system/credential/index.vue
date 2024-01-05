@@ -39,6 +39,16 @@
   const formRef = ref<FormInstance>();
 
   const validKey = (rule:any,value:any, callback:any)=>{
+      if(form.id != undefined){
+        queryCredentialInfoById(form.id).then((res) =>{
+          if(res.code == 200){
+            if(form.credentialKey == res?.data?.credentialKey){
+              callback()
+            }
+          }
+        })
+        
+      }
       const checkValue = reactive({
         credentialKey:undefined,
         instanceCode:undefined
@@ -47,6 +57,7 @@
       checkValue.credentialKey = form.credentialKey
       checkValue.instanceCode = form.instanceCode
 
+      
       checkKey(checkValue).then((res)=>{
         if(res?.data){
           callback(new Error('名称已存在:'+value));
@@ -77,6 +88,9 @@
       ]
   })
 
+  const handleCredentialType = (type)=>{
+    form.type = type;
+  }
   
 
   const form = reactive({
@@ -96,14 +110,7 @@
 
   // 重置表单
   const reset = ()=> {
-      Object.assign(form,{
-        id: undefined,
-        name: undefined,
-        pluginType: undefined,
-        value: undefined,
-        status: undefined,
-        instanceCode: undefined
-      })
+    Object.keys(form).forEach(key => (form[key] = undefined));
   }
   
 
@@ -152,9 +159,16 @@
   // 处理更新按钮
   const handleUpdate = function(row){
     reset();
-    queryConfigInfoById(row.id).then(response => {
+    pluginOptionSelect().then((res)=>{
+      Object.assign(formPluginCodes,res?.data);
+    })
+    
+    queryCredentialInfoById(row.id).then(response => {
       if(response?.code == 200){
-        Object.assign(form,response?.data)
+        let data = response?.data
+        Object.assign(form,data)
+        changeInstance(data.pluginCode)
+        form.type = data.credentialType
         open.value = true;
         title.value = "修改凭证信息";
       }
@@ -185,8 +199,8 @@
             throw err;
         });
 
-    if (form.groupId != undefined) {
-      addConfig(form).then(response => {
+    if (form.id != undefined) {
+        addCredential(form).then(response => {
           if(response?.code == 200){
             ElMessage({
                   showClose: true,
@@ -196,7 +210,7 @@
           }
         });
       } else {
-        addConfig(form).then(response => {
+        addCredential(form).then(response => {
           if(response?.code){
             ElMessage({
                   showClose: true,
@@ -238,7 +252,7 @@
         }else{
           tmpStatus = 0
         }
-        changeConfigStatus(id,tmpStatus).then((res)=>{
+        changeStatus(id,tmpStatus).then((res)=>{
             if(res.code == 200){
                 getList()
                 ElMessage({
@@ -495,6 +509,7 @@
                 v-model="form.credentialType"
                 placeholder="请选择凭证类型"
                 style="width: 240px"
+                @change="handleCredentialType"
               >
               <el-option v-for="item in credentialTypes"
                 :key="item.value"
@@ -503,16 +518,108 @@
               </el-select>
             </el-form-item>
           </el-col> 
+        </el-row>
+
+        <el-row v-if="form.credentialType == 'SECRET'">
           <el-col :span="12">
-            <el-form-item label="凭证唯一名称" prop="credentialKey">
+            <el-form-item label="密钥" prop="password" :rules="[       
+                  { required: true, message: '密钥不能为空', trigger: 'blur' },
+                  { min: 2, max: 200, message: '密钥长度必须介于 2 和 200 之间', trigger: 'blur' } ]">
+              <el-input v-model="form.password" placeholder="请输入密钥信息" maxlength="200" />
+            </el-form-item>
+          </el-col>
+
+          <el-col :span="12">
+            <el-form-item label="文件" prop="secretText">
+              <el-input v-model="form.secretText" type="textarea" placeholder="请输入备注"  />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row v-if="form.credentialType == 'SSH'">
+          <el-col :span="12">
+            <el-form-item label="用户名" prop="userName" :rules="[       
+                  { required: true, message: '用户名不能为空', trigger: 'blur' },
+                  { min: 2, max: 20, message: '用户名长度必须介于 2 和 20 之间', trigger: 'blur' } ]">
+              <el-input v-model="form.userName" placeholder="请输入用户名" maxlength="20" />
+            </el-form-item>
+          </el-col>
+
+          <el-col :span="12">
+            <el-form-item label="公钥" prop="publicKey" :rules="[       
+                  { required: true, message: '公钥不能为空', trigger: 'blur' },
+                  { min: 2, max: 2000, message: '公钥长度必须介于 2 和 2000 之间', trigger: 'blur' } ]">
+              <el-input v-model="form.publicKey" placeholder="请输入公钥"  maxlength="2000"/>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="私钥" prop="privateKey" :rules="[       
+                  { required: true, message: '私钥不能为空', trigger: 'blur' },
+                  { min: 2, max: 2000, message: '私钥长度必须介于 2 和 2000 之间', trigger: 'blur' } ]">
+              <el-input v-model="form.privateKey" placeholder="请输入私钥"  maxlength="2000"/>
+            </el-form-item>
+          </el-col>
+
+          <el-col :span="12">
+            <el-form-item label="密钥" prop="passphrase" :rules="[       
+                  { required: true, message: '密钥不能为空', trigger: 'blur' },
+                  { min: 2, max: 2000, message: '密钥长度必须介于 2 和 2000 之间', trigger: 'blur' } ]">
+              <el-input v-model="form.passphrase" placeholder="请输入密钥" maxlength="2000" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row v-if="form.credentialType == 'USERNAME_PASSWORD'">
+          <el-col :span="12">
+            <el-form-item label="用户名" prop="userName" :rules="[       
+                  { required: true, message: '用户名不能为空', trigger: 'blur' },
+                  { min: 2, max: 20, message: '用户名长度必须介于 2 和 20 之间', trigger: 'blur' } ]">
+              <el-input v-model="form.userName" placeholder="请输入用户名" maxlength="20" />
+            </el-form-item>
+          </el-col>
+
+          <el-col :span="12">
+            <el-form-item label="密码" prop="password" :rules="[       
+                  { required: true, message: '密码不能为空', trigger: 'blur' },
+                  { min: 2, max: 200, message: '密码长度必须介于 2 和 200 之间', trigger: 'blur' } ]">
+              <el-input v-model="form.password" type="password" placeholder="请输入密码" maxlength="200" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row v-if="form.credentialType == 'TOKEN'">
+          <el-col :span="12">
+            <el-form-item label="用户名" prop="userName" :rules="[       
+                  { required: true, message: '用户名不能为空', trigger: 'blur' },
+                  { min: 2, max: 20, message: '用户名长度必须介于 2 和 20 之间', trigger: 'blur' } ]">
+              <el-input v-model="form.userName" placeholder="请输入用户名" maxlength="20" />
+            </el-form-item>
+          </el-col>
+
+          <el-col :span="12">
+            <el-form-item label="token" prop="token" :rules="[       
+                  { required: true, message: 'token不能为空', trigger: 'blur' },
+                  { min: 2, max: 2000, message: 'token长度必须介于 2 和 2000 之间', trigger: 'blur' } ]">
+              <el-input v-model="form.token"  placeholder="请输入token" maxlength="2000" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="凭证key" prop="credentialKey">
               <el-input v-model="form.credentialKey" placeholder="请输入凭证唯一名称" maxlength="200" />
             </el-form-item>
           </el-col>
+
           <el-col :span="12">
             <el-form-item label="凭证名称" prop="credentialName">
               <el-input v-model="form.credentialName" placeholder="请输入名称" maxlength="200" />
             </el-form-item>
           </el-col>
+        </el-row>
+
+        <el-row>
           <el-col :span="12">
             <el-form-item label="备注" prop="remark">
               <el-input v-model="form.remark" type="textarea" placeholder="请输入备注" maxlength="200" />
