@@ -8,7 +8,7 @@ import { usePermsStore } from './stores/perms';
 
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import "virtual:svg-icons-register";
-// import "element-plus/theme-chalk/src/index.scss";
+import 'element-plus/theme-chalk/src/base.scss'
 import '@/styles/index.scss'
 const app = createApp(App)
 app.component('YtCard', YtCard)

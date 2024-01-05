@@ -62,7 +62,7 @@ export default defineConfig({
         IconsResolver({
           enabledCollections: ['ep'],
         }),
-        ElementPlusResolver()
+        ElementPlusResolver({ importStyle : "sass"})
       ],
       dts: path.resolve(pathSrc, 'components.d.ts'),
     }),
@@ -74,7 +74,6 @@ export default defineConfig({
         {
           libName: '@formily/element-plus',
           libDirectory: 'esm',
-          replaceOldImport : false,
           style(name) {
             return `@formily/element-plus/esm/${name}/style.js`
           },
@@ -83,11 +82,11 @@ export default defineConfig({
     }),
   ],
   css: {
-    preprocessorOptions: {
-      scss: {
-        additionalData: `@use "@/styles/element/index.scss" as *;`,
-      },
-    },
+    // preprocessorOptions: {
+    //   scss: {
+    //     additionalData: `@use "@/styles/element/index.scss" as *;`,
+    //   },
+    // },
   },
   // define :{
   //   'process.env' : process.env
