@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  // @ts-nocheck  
+  // @ts-nocheck
   import { Plus , Search , RefreshRight , Sort } from '@element-plus/icons-vue'
   import {  status , showStatusFun , addDateRange } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
@@ -7,8 +7,8 @@
   import { memberList , addGroupMember , updateGroupMember  , removeMember} from "@/api/gitlab/members"
   import { userSelectOption} from "@/api/gitlab/users"
   import { groupSelectOption } from "@/api/gitlab/groups"
-  
- 
+
+
   const queryFormRef = ref(null);
   //查询列表信息
   const queryParams = reactive({
@@ -98,7 +98,7 @@
 
     memberList(addDateRange(requesParams, dateRange.value))
     .then(response => {
-          loading.value = false 
+          loading.value = false
           if(response?.data?.records.length > 0){
             dataList.splice(0,dataList.length);
             Object.assign(dataList, response?.data?.records)
@@ -110,7 +110,7 @@
         }
     );
   }
-  
+
 
   // 处理搜索按钮
   const handleQuery = function(){
@@ -219,7 +219,7 @@
               getList()
               ElMessage({ type: 'success', message: '操作成功', })
           }
-        })    
+        })
     }).catch(() => {
       getList()
       ElMessage({type: 'warning',message: '删除失败',})
@@ -228,7 +228,7 @@
 
   // 加载"项目组下拉表框"
   const groupListFunc = (instanceCode:any,callback:any) =>{
-    const groupParams = { 
+    const groupParams = {
         instanceCode : instanceCode
     }
 
@@ -295,7 +295,7 @@
         Object.assign(pluginInstance,res?.data)
         queryParams.instanceCode = res?.data[0].instanceCode
       }
-      
+
       groupListFunc(queryParams.instanceCode,(response)=>{
         queryParams.groups = response?.data
         queryParams.groupId = response?.data[0]?.id
@@ -310,7 +310,7 @@
   <div class="main-wrapp">
     <!--sousuo  -->
     <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" size="small" :inline="true" v-show="showSearch" label-width="80px">
-      
+
       <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="插件实例" prop="instanceCode">
@@ -328,7 +328,7 @@
               :value="item.instanceCode"/>
             </el-select>
           </el-form-item>
-        </el-col> 
+        </el-col>
         <el-col :span="8">
           <el-form-item label="成员组" prop="groupId">
             <el-select
@@ -344,7 +344,7 @@
               :value="dict.gitlabGroupId"/>
             </el-select>
           </el-form-item>
-        </el-col> 
+        </el-col>
       </el-row>
 
       <el-row :gutter="20">
@@ -358,7 +358,7 @@
               @keyup.enter.native="handleQuery"
             />
           </el-form-item>
-        </el-col> 
+        </el-col>
         <el-col :span="8">
           <el-form-item label="状态" prop="status">
             <el-select
@@ -374,7 +374,7 @@
               :value="dict.value"/>
             </el-select>
           </el-form-item>
-        </el-col> 
+        </el-col>
       </el-row>
 
       <el-row :gutter="20">
@@ -390,14 +390,14 @@
               end-placeholder="结束日期"
             ></el-date-picker>
           </el-form-item>
-        </el-col> 
+        </el-col>
         <el-col :span="8">
           <div>
             <el-button type="primary" size="small" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
             <el-button  size="small" @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
           </div>
         </el-col>
-      </el-row>  
+      </el-row>
     </el-form>
 
     <!--  option-->
@@ -412,7 +412,7 @@
     <!--table  -->
     <div class="table-wrap">
       <el-table v-loading="loading" :data="dataList" @selection-change="handleSelectionChange">
-          <el-table-column type="selection" width="30" align="center" />
+          <el-table-column type="selection" width="60" align="center" />
           <el-table-column label="用户编号" align="center" key="userId" prop="userId" v-if="false"/>
           <el-table-column label="成员编号" align="center" key="id" prop="id"/>
           <el-table-column label="成员昵称" align="center" key="nickName" prop="nickName"  :show-overflow-tooltip="true"  width="100" />
@@ -451,7 +451,7 @@
       v-show="total>0"
       :total="total"
       :page-sizes=[10,20]
-      background layout="prev, pager, next" 
+      background layout="prev, pager, next"
       v-model:current-page="queryParams.pageNum"
       v-model:page-size="queryParams.pageSize"
       @current-change="getList"
@@ -466,7 +466,7 @@
           <el-col :span="24">
             <el-form-item label="实例" prop="instanceCode">
               <el-select
-              class="search-select2" 
+              class="search-select2"
                 v-model="form.instanceCode"
                 :change="formSwitchInstance()"
                 placeholder="请选择实例"
@@ -478,7 +478,7 @@
                 :value="item.instanceCode"/>
               </el-select>
             </el-form-item>
-          </el-col> 
+          </el-col>
         </el-row>
 
         <el-row>
@@ -497,7 +497,7 @@
                 :value="dict.gitlabGroupId"/>
               </el-select>
             </el-form-item>
-          </el-col> 
+          </el-col>
         </el-row>
 
         <el-row>

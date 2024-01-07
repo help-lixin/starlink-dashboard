@@ -383,7 +383,7 @@ getList()
         <!--table  -->
         <div class="table-wrap">
           <el-table v-loading="loading" :data="userList" @selection-change="handleSelectionChange">
-            <el-table-column type="selection" width="30" align="center" />
+            <el-table-column type="selection" width="60" align="center" />
             <el-table-column label="用户编号" align="center" key="userId" prop="userId"/>
             <el-table-column label="用户名称" align="center" key="userName" prop="userName"  :show-overflow-tooltip="true" />
             <el-table-column label="用户昵称" align="center" key="nickName" prop="nickName" :show-overflow-tooltip="true" />

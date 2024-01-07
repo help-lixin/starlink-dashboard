@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  // @ts-nocheck  
+  // @ts-nocheck
   import { showStatusOperateFun , status , showStatusFun , addDateRange , addDateRangeRuoyi } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
@@ -20,7 +20,7 @@ import type { pushScopeId } from "vue"
     instanceCode:undefined,
     tools: undefined,
     jobName: undefined
-  }) 
+  })
 
   const validJobName = (rule:any,value:any, callback:any)=>{
     if(value == curJobName.jobName){
@@ -209,11 +209,11 @@ import type { pushScopeId } from "vue"
 
       if (!form.buildDependencys.includes(value)) {
         if(form.buildDependencys.length = 0){
-          form.buildDependencys.push(value);  
+          form.buildDependencys.push(value);
         }else{
           form.buildDependencys.unshift(value)
         }
-        
+
       }
   }
 
@@ -251,7 +251,7 @@ import type { pushScopeId } from "vue"
             Object.assign(jobs,response?.data)
           }
         })
-        
+
         // 查询jdk下拉列表
         jdkSelectOption(instanceCode).then((response)=>{
           if(response?.code == 200){
@@ -288,7 +288,7 @@ import type { pushScopeId } from "vue"
             Object.assign(jobs,response?.data)
           }
         })
-        
+
         // 查询jdk下拉列表
         jdkSelectOption(instanceCode).then((response)=>{
           if(response?.code == 200){
@@ -298,7 +298,7 @@ import type { pushScopeId } from "vue"
         detail(row.id)
       }
     });
-    
+
     open.value = true;
     title.value = "修改jenkins配置信息";
   }
@@ -322,10 +322,10 @@ import type { pushScopeId } from "vue"
               }
             })
           }
-          
+
     });
   }
-  
+
   // 工具版本对象
   const languages = reactive([]);
   // 工具版本名称选择
@@ -343,7 +343,7 @@ import type { pushScopeId } from "vue"
 
   // 多选框选中数据
   const handleSelectionChange = function(selection){
- 
+
   }
   // 表单提交处理
   const submitForm = async (isBuild)=>{
@@ -437,7 +437,7 @@ import type { pushScopeId } from "vue"
                   message: '操作成功',
                 })
             }
-        })    
+        })
     })
     .catch(() => { })
   }
@@ -463,101 +463,99 @@ import type { pushScopeId } from "vue"
 <template>
   <div class="main-wrapp">
     <!--sousuo  -->
-    <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="插件实例" prop="instanceCode">
-            <el-select
-            class="search-select"
-              v-model="queryParams.instanceCode"
-              @keyup.enter.native="handleQuery"
-              placeholder="请选择实例"
-              clearable
-              style="width: 240px"
-            >
-            <el-option v-for="item in pluginInstance"
-              :key="item.pluginCode"
-              :label="item.instanceName"
-              :value="item.instanceCode"/>
-            </el-select>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="工具类型" prop="queryParams.tools">
-            <el-select
-            class="search-select"
-              v-model="queryParams.tools"
-              placeholder="请选择工具类型"
-              clearable
-              style="width: 240px"
-            >
-            <el-option v-for="tool in tools"
-              :key="tool.value"
-              :label="tool.label"
-              :value="tool.value"/>
-            </el-select>
-          </el-form-item>
-        </el-col> 
-      </el-row>
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="任务名" prop="queryParams.jobName">
+    <yt-card>
+      <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" size="small" :inline="true" v-show="showSearch" label-width="68px">
+        <el-row :gutter="20">
+          <el-col :span="8">
+            <el-form-item label="插件实例" prop="instanceCode">
+              <el-select
+                class="search-select"
+                v-model="queryParams.instanceCode"
+                @keyup.enter.native="handleQuery"
+                placeholder="请选择实例"
+                clearable
+                style="width: 240px"
+              >
+                <el-option v-for="item in pluginInstance"
+                           :key="item.pluginCode"
+                           :label="item.instanceName"
+                           :value="item.instanceCode"/>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="工具类型" prop="queryParams.tools">
+              <el-select
+                class="search-select"
+                v-model="queryParams.tools"
+                placeholder="请选择工具类型"
+                clearable
+                style="width: 240px"
+              >
+                <el-option v-for="tool in tools"
+                           :key="tool.value"
+                           :label="tool.label"
+                           :value="tool.value"/>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="任务名" prop="queryParams.jobName">
               <el-input v-model="queryParams.jobName" placeholder="请输入任务名"  style="width: 240px"/>
-          </el-form-item>
-        </el-col> 
-        <el-col :span="8">
-          <el-form-item label="状态" prop="status">
-            <el-select
-            class="search-select"
-              v-model="queryParams.status"
-              placeholder="任务状态"
-              clearable
-              style="width: 240px"
-            >
-            <el-option v-for="dict in status"
-              :key="dict.value"
-              :label="dict.label"
-              :value="dict.value"/>
-            </el-select>
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="创建时间">
-            <el-date-picker
-              v-model="dateRange"
-              style="width: 240px"
-              value-format="YYYY-MM-DD"
-              type="daterange"
-              range-separator="-"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-            ></el-date-picker>
-          </el-form-item>
-        </el-col> 
-        <el-col :span="8">
-          <div>
-            <el-button type="primary" size="small" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
-            <el-button  size="small" @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
-          </div>
-        </el-col>
-      </el-row>  
-    </el-form>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="状态" prop="status">
+              <el-select
+                class="search-select"
+                v-model="queryParams.status"
+                placeholder="任务状态"
+                clearable
+                style="width: 240px"
+              >
+                <el-option v-for="dict in status"
+                           :key="dict.value"
+                           :label="dict.label"
+                           :value="dict.value"/>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="创建时间">
+              <el-date-picker
+                v-model="dateRange"
+                style="width: 240px"
+                value-format="YYYY-MM-DD"
+                type="daterange"
+                range-separator="-"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
+              ></el-date-picker>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <div>
+              <el-button type="primary" size="small" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
+              <el-button  size="small" @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
+            </div>
+          </el-col>
+        </el-row>
+      </el-form>
+    </yt-card>
+    <yt-card>
+      <!--  option-->
+      <div class="option-wrap">
+        <el-button
+          type="primary"
+          plain
+          size="default"
+          @click="handleAdd" v-hasPerms="['/jenkins/job/add']" ><el-icon><Plus /></el-icon>新增</el-button>
+      </div>
 
-    <!--  option-->
-    <div class="option-wrap">
-      <el-button
-        type="primary"
-        plain
-        size="default"
-        @click="handleAdd" v-hasPerms="['/jenkins/job/add']" ><el-icon><Plus /></el-icon>新增</el-button>
-    </div>
-
-    <!--table  -->
-    <div class="table-wrap">
-      <el-table v-loading="loading" :data="jobList" @selection-change="handleSelectionChange">
-          <el-table-column type="selection" width="30" align="center" />
+      <!--table  -->
+      <div class="table-wrap">
+        <el-table v-loading="loading" :data="jobList" @selection-change="handleSelectionChange">
+          <el-table-column type="selection" width="60" align="center" />
           <el-table-column label="任务编号" align="center" key="id" prop="id"/>
           <el-table-column label="任务名称" align="center" key="jobName" prop="jobName"  :show-overflow-tooltip="true"  width="100" />
           <el-table-column label="仓库类型" align="center" key="scm" prop="scm" :show-overflow-tooltip="true"  width="100" />
@@ -589,368 +587,371 @@ import type { pushScopeId } from "vue"
             width="220"
           >
             <template #default="scope">
-             <div class="action-btn">
-              <el-button
-                size="default"
-                @click="handleUpdate(scope.row)"
-                v-hasPerms="['/jenkins/job/add']"
-              >修改</el-button>
-              <el-button
-                size="default"
-                @click="build(scope.row,true)"
-                v-hasPerms="['/jenkins/job/buildJob']"
-              >构建</el-button>
-              <el-button
-                size="default"
-                @click="handleStatusChange(scope.row)"
-                v-hasPerms="['/jenkins/job/changeStatus/**']"
-              >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-             </div>
+              <div class="action-btn">
+                <el-button
+                  size="default"
+                  @click="handleUpdate(scope.row)"
+                  v-hasPerms="['/jenkins/job/add']"
+                >修改</el-button>
+                <el-button
+                  size="default"
+                  @click="build(scope.row,true)"
+                  v-hasPerms="['/jenkins/job/buildJob']"
+                >构建</el-button>
+                <el-button
+                  size="default"
+                  @click="handleStatusChange(scope.row)"
+                  v-hasPerms="['/jenkins/job/changeStatus/**']"
+                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
+              </div>
             </template>
           </el-table-column>
-    </el-table>
-    </div>
-    <div class="page-wrap">
-      <el-pagination
-      v-show="total>0"
-      :total="total"
-      :page-sizes=[10,20]
-      background layout="prev, pager, next" 
-      v-model:current-page="queryParams.pageNum"
-      v-model:page-size="queryParams.pageSize"
-      @current-change="getList"
-    />
-    </div>
+        </el-table>
+      </div>
+      <div class="page-wrap">
+        <el-pagination
+          v-show="total>0"
+          :total="total"
+          :page-sizes=[10,20]
+          background layout="prev, pager, next"
+          v-model:current-page="queryParams.pageNum"
+          v-model:page-size="queryParams.pageSize"
+          @current-change="getList"
+        />
+      </div>
+    </yt-card>
+
 
 
     <!-- 添加或修改组配置对话框 -->
     <el-dialog :title="title" v-model="open" width="600px" append-to-body>
-      <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
-        <el-row>
-          <el-col :span="12">
-            <el-form-item label="插件实例" prop="instanceCode">
-              <el-select
-                class="search-select2" 
-                v-model="form.instanceCode"
-                placeholder="请选择插件实例"
-                clearable
-                style="width: 240px"
-              >
-              <el-option v-for="item in formInstance"
-              :key="item.pluginCode"
-              :label="item.instanceName"
-              :value="item.instanceCode"/>
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="任务名" prop="jobName">
-              <el-input v-model="form.jobName" placeholder="请输入参数名" maxlength="30" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="12">
-            <el-form-item label="仓库类型" prop="scmType" >
-              <el-select
-                class="search-select2" 
-                v-model="form.scmType"
-                placeholder="仓库类型"
-                clearable
-                style="width: 240px"
-              >
-              <el-option v-for="item in scmType"
-              :key="item.value"
-              :label="item.lable"
-              :value="item.value"/>
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="url" prop="scm.url">
-              <el-input v-model="form.scm.url" placeholder="请输入远程仓库地址" maxlength="200" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="12" v-if="form.scmType == 'GIT'">
-            <el-form-item label="分支" prop="scm.branch">
-              <el-input v-model="form.scm.branch" placeholder="请输入分支:*/main" maxlength="100" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="凭证" prop="scm.credentialsId">
-              <el-select
-                class="search-select2" 
-                v-model="form.scm.credentialsId"
-                placeholder="请选择凭证"
-                clearable
-                style="width: 240px"
-              >
-              <el-option v-for="item in credentials"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"/>
-              </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
+      <yt-card>
+        <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
+          <el-row>
+            <el-col :span="12">
+              <el-form-item label="插件实例" prop="instanceCode">
+                <el-select
+                  class="search-select2"
+                  v-model="form.instanceCode"
+                  placeholder="请选择插件实例"
+                  clearable
+                  style="width: 240px"
+                >
+                  <el-option v-for="item in formInstance"
+                             :key="item.pluginCode"
+                             :label="item.instanceName"
+                             :value="item.instanceCode"/>
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="任务名" prop="jobName">
+                <el-input v-model="form.jobName" placeholder="请输入参数名" maxlength="30" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="12">
+              <el-form-item label="仓库类型" prop="scmType" >
+                <el-select
+                  class="search-select2"
+                  v-model="form.scmType"
+                  placeholder="仓库类型"
+                  clearable
+                  style="width: 240px"
+                >
+                  <el-option v-for="item in scmType"
+                             :key="item.value"
+                             :label="item.lable"
+                             :value="item.value"/>
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="url" prop="scm.url">
+                <el-input v-model="form.scm.url" placeholder="请输入远程仓库地址" maxlength="200" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="12" v-if="form.scmType == 'GIT'">
+              <el-form-item label="分支" prop="scm.branch">
+                <el-input v-model="form.scm.branch" placeholder="请输入分支:*/main" maxlength="100" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="凭证" prop="scm.credentialsId">
+                <el-select
+                  class="search-select2"
+                  v-model="form.scm.credentialsId"
+                  placeholder="请选择凭证"
+                  clearable
+                  style="width: 240px"
+                >
+                  <el-option v-for="item in credentials"
+                             :key="item.value"
+                             :label="item.label"
+                             :value="item.value"/>
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
 
-        <el-row>
-          <el-col :span="12">
-            <el-form-item label="语言选择" prop="toolsType">
-              <el-select
-                  class="search-select2" 
+          <el-row>
+            <el-col :span="12">
+              <el-form-item label="语言选择" prop="toolsType">
+                <el-select
+                  class="search-select2"
                   v-model="form.toolsType"
                   placeholder="请选择语言"
                   clearable
                   style="width: 240px"
                   @change="switchLanguage"
                 >
-                <el-option v-for="item in tools"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"/>
-                </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <el-row v-if="form.toolsType != undefined &&  ( form.toolsType == 'MAVEN' || form.toolsType == 'ANT' || form.toolsType == 'GRADLE' ) " >
-          <el-col :span="12">
-            <el-form-item label="jdk" prop="jdkId">
-              <el-select
-                class="search-select2" 
-                v-model="form.jdkId"
-                placeholder="请选择插件实例"
-                clearable
-                style="width: 240px"
-              >
-              <el-option v-for="item in jdkList"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"/>
-              </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <el-row v-if="form.toolsType == 'MAVEN'" >
-          <template 
-            v-for="(item, index) in form.setups">
-            <el-col :span="12">
-              <el-form-item label="maven版本选择" :prop="`setups.${index}.mavenName`" :rules="[  { required: true, message: 'maven版本是必选项', trigger: 'change' } ]" >
-                <el-select
-                  class="search-select2" 
-                  v-model="item.mavenName"
-                  placeholder="请选择maven"
-                  clearable
-                  @change="handleToolChange(item,'MAVEN')"
-                  style="width: 240px"
-                >
-                <el-option v-for="version in languages"
-                :key="version.label"
-                :label="version.label"
-                :value="version.label"/>
+                  <el-option v-for="item in tools"
+                             :key="item.value"
+                             :label="item.label"
+                             :value="item.value"/>
                 </el-select>
               </el-form-item>
             </el-col>
-            <el-col :span="24">
-                <el-form-item  label="脚本" :prop="`setups.${index}.goals`" :rules="[       
+          </el-row>
+
+          <el-row v-if="form.toolsType != undefined &&  ( form.toolsType == 'MAVEN' || form.toolsType == 'ANT' || form.toolsType == 'GRADLE' ) " >
+            <el-col :span="12">
+              <el-form-item label="jdk" prop="jdkId">
+                <el-select
+                  class="search-select2"
+                  v-model="form.jdkId"
+                  placeholder="请选择插件实例"
+                  clearable
+                  style="width: 240px"
+                >
+                  <el-option v-for="item in jdkList"
+                             :key="item.value"
+                             :label="item.label"
+                             :value="item.value"/>
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row v-if="form.toolsType == 'MAVEN'" >
+            <template
+              v-for="(item, index) in form.setups">
+              <el-col :span="12">
+                <el-form-item label="maven版本选择" :prop="`setups.${index}.mavenName`" :rules="[  { required: true, message: 'maven版本是必选项', trigger: 'change' } ]" >
+                  <el-select
+                    class="search-select2"
+                    v-model="item.mavenName"
+                    placeholder="请选择maven"
+                    clearable
+                    @change="handleToolChange(item,'MAVEN')"
+                    style="width: 240px"
+                  >
+                    <el-option v-for="version in languages"
+                               :key="version.label"
+                               :label="version.label"
+                               :value="version.label"/>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item  label="脚本" :prop="`setups.${index}.goals`" :rules="[
                   { required: true, message: '脚本内容不能为空', trigger: 'blur' },
                   { min: 2, max: 200, message: '分支长度必须介于 2 和 200 之间', trigger: 'blur' } ]" >
                   <el-input v-model="item.goals" type="textarea" placeholder="请输入脚本内容"/>
                 </el-form-item>
-            </el-col>
-        </template>
-         
-        </el-row>
+              </el-col>
+            </template>
 
-        <el-row v-if="form.toolsType == 'GO'" >
-          <template 
-            v-for="(item, index) in form.setups">
-            <el-col :span="12">
-              <el-form-item label="go" :prop="`setups.${index}.goName`">
-                <el-select
-                  class="search-select2" 
-                  v-model="item.goName"
-                  placeholder="请选择go"
-                  clearable
-                  @change="handleToolChange(item,'GO')"
-                  style="width: 240px"
-                >
-                <el-option v-for="version in languages"
-                :key="version.label"
-                :label="version.label"
-                :value="version.label"/>
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :span="24">
+          </el-row>
+
+          <el-row v-if="form.toolsType == 'GO'" >
+            <template
+              v-for="(item, index) in form.setups">
+              <el-col :span="12">
+                <el-form-item label="go" :prop="`setups.${index}.goName`">
+                  <el-select
+                    class="search-select2"
+                    v-model="item.goName"
+                    placeholder="请选择go"
+                    clearable
+                    @change="handleToolChange(item,'GO')"
+                    style="width: 240px"
+                  >
+                    <el-option v-for="version in languages"
+                               :key="version.label"
+                               :label="version.label"
+                               :value="version.label"/>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
                 <el-form-item  label="脚本" :prop="`setups.${index}.script`">
                   <el-input v-model="item.script" type="textarea" placeholder="请输入脚本内容"/>
                 </el-form-item>
-            </el-col>
-          </template>
-        </el-row>
+              </el-col>
+            </template>
+          </el-row>
 
-        <el-row v-if="form.toolsType == 'SHELL'" >
-          <template 
-            v-for="(item, index) in form.setups">
-            <el-col :span="24">
+          <el-row v-if="form.toolsType == 'SHELL'" >
+            <template
+              v-for="(item, index) in form.setups">
+              <el-col :span="24">
                 <el-form-item  label="脚本" :prop="`setups.${index}.shellScript`">
                   <el-input v-model="item.shellScript" type="textarea"/>
                 </el-form-item>
-            </el-col>
-          </template>
-        </el-row>
+              </el-col>
+            </template>
+          </el-row>
 
-        <el-row v-if="form.toolsType == 'ANT'" >
-          <template 
-            v-for="(item, index) in form.setups">
-            <el-col :span="12">
-              <el-form-item label="ant版本" :prop="`setups.${index}.items`">
-                <el-select
-                  class="search-select2" 
-                  v-model="item.ant"
-                  placeholder="请选择ant"
-                  clearable
-                  @change="handleToolChange(item,'ANT')"
-                  style="width: 240px"
-                >
-                <el-option v-for="version in languages"
-                :key="version.label"
-                :label="version.label"
-                :value="version.label"/>
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :span="24">
+          <el-row v-if="form.toolsType == 'ANT'" >
+            <template
+              v-for="(item, index) in form.setups">
+              <el-col :span="12">
+                <el-form-item label="ant版本" :prop="`setups.${index}.items`">
+                  <el-select
+                    class="search-select2"
+                    v-model="item.ant"
+                    placeholder="请选择ant"
+                    clearable
+                    @change="handleToolChange(item,'ANT')"
+                    style="width: 240px"
+                  >
+                    <el-option v-for="version in languages"
+                               :key="version.label"
+                               :label="version.label"
+                               :value="version.label"/>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
                 <el-form-item  label="脚本" :prop="`setups.${index}.targets`">
                   <el-input v-model="item.targets" type="textarea" placeholder="请输入脚本内容"/>
                 </el-form-item>
-            </el-col>
-          </template>
-        </el-row>
+              </el-col>
+            </template>
+          </el-row>
 
-        <el-row v-if="form.toolsType == 'GRADLE'" >
-          <template 
-            v-for="(item, index) in form.setups">
-            <el-col :span="12">
-              <el-form-item label="gradle" :prop="`setups.${index}.items`">
-                <el-select
-                  class="search-select2" 
-                  v-model="item.gradleName"
-                  placeholder="请选择gradle"
-                  clearable
-                  @change="handleToolChange(item,'GRADLE')"
-                  style="width: 240px"
-                >
-                <el-option v-for="version in languages"
-                :key="version.label"
-                :label="version.label"
-                :value="version.label"/>
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :span="24">
+          <el-row v-if="form.toolsType == 'GRADLE'" >
+            <template
+              v-for="(item, index) in form.setups">
+              <el-col :span="12">
+                <el-form-item label="gradle" :prop="`setups.${index}.items`">
+                  <el-select
+                    class="search-select2"
+                    v-model="item.gradleName"
+                    placeholder="请选择gradle"
+                    clearable
+                    @change="handleToolChange(item,'GRADLE')"
+                    style="width: 240px"
+                  >
+                    <el-option v-for="version in languages"
+                               :key="version.label"
+                               :label="version.label"
+                               :value="version.label"/>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
                 <el-form-item  label="脚本" :prop="`setups.${index}.task`">
                   <el-input v-model="item.task" type="textarea" placeholder="请输入脚本内容"/>
                 </el-form-item>
-            </el-col>
-        </template>
-        </el-row>
+              </el-col>
+            </template>
+          </el-row>
 
-        <el-row v-if="form.toolsType == 'NODEJS'" >
-          <template 
-            v-for="(item, index) in form.setups">
-            <el-col :span="12">
-              <el-form-item label="nodejs" :prop="`setups.${index}.items`">
-                <el-select
-                  class="search-select2" 
-                  v-model="item.nodejsName"
-                  placeholder="请选择nodejs"
-                  clearable
-                  @change="handleToolChange(item,'NODEJS')"
-                  style="width: 240px"
-                >
-                <el-option v-for="version in languages"
-                :key="version.label"
-                :label="version.label"
-                :value="version.label"/>
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :span="24">
+          <el-row v-if="form.toolsType == 'NODEJS'" >
+            <template
+              v-for="(item, index) in form.setups">
+              <el-col :span="12">
+                <el-form-item label="nodejs" :prop="`setups.${index}.items`">
+                  <el-select
+                    class="search-select2"
+                    v-model="item.nodejsName"
+                    placeholder="请选择nodejs"
+                    clearable
+                    @change="handleToolChange(item,'NODEJS')"
+                    style="width: 240px"
+                  >
+                    <el-option v-for="version in languages"
+                               :key="version.label"
+                               :label="version.label"
+                               :value="version.label"/>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
                 <el-form-item  label="脚本" :prop="`setups.${index}.script`">
                   <el-input v-model="item.script" type="textarea" placeholder="请输入脚本内容"/>
                 </el-form-item>
-            </el-col>
-        </template>
-        </el-row>
+              </el-col>
+            </template>
+          </el-row>
 
-        <el-row v-if="form.toolsType == 'PYTHON'" >
-          <template 
-            v-for="(item, index) in form.setups">
-            <el-col :span="12">
-              <el-form-item label="python" :prop="`setups.${index}.items`">
-                <el-select
-                  class="search-select2" 
-                  v-model="item.pythonName"
-                  placeholder="请选择python"
-                  clearable
-                  @change="handleToolChange(item,'PYTHON')"
-                  style="width: 240px"
-                >
-                <el-option v-for="version in languages"
-                :key="version.label"
-                :label="version.label"
-                :value="version.label"/>
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :span="24">
+          <el-row v-if="form.toolsType == 'PYTHON'" >
+            <template
+              v-for="(item, index) in form.setups">
+              <el-col :span="12">
+                <el-form-item label="python" :prop="`setups.${index}.items`">
+                  <el-select
+                    class="search-select2"
+                    v-model="item.pythonName"
+                    placeholder="请选择python"
+                    clearable
+                    @change="handleToolChange(item,'PYTHON')"
+                    style="width: 240px"
+                  >
+                    <el-option v-for="version in languages"
+                               :key="version.label"
+                               :label="version.label"
+                               :value="version.label"/>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
                 <el-form-item  label="脚本" :prop="`setups.${index}.script`">
                   <el-input v-model="item.script" type="textarea" placeholder="请输入脚本内容"/>
                 </el-form-item>
-            </el-col>
-          </template>
-        </el-row>
+              </el-col>
+            </template>
+          </el-row>
 
-        <el-row>
+          <el-row>
             <el-col :span="12" >
               <el-form-item label="构建依赖" >
                 <el-select
-                  class="search-select2" 
+                  class="search-select2"
                   placeholder="请选择项目"
                   clearable
                   @change="handleSelectChange"
                 >
-                <el-option v-for="job in jobs"
-                :key="job"
-                :label="job"
-                :value="job"/>
+                  <el-option v-for="job in jobs"
+                             :key="job"
+                             :label="job"
+                             :value="job"/>
                 </el-select>
               </el-form-item>
             </el-col>
-        </el-row>
+          </el-row>
 
-        <el-row>
-          <el-col :span="24" >
-                <div v-for="(tag, index) in form.buildDependencys" :key="index" style="display: inline-block; margin: 5px;">
-                  <el-tag
-                    :closable="true"
-                    @close="handleTagClose(index)">
-                    {{ tag }}
-                  </el-tag>
-                </div>
-          </el-col>
-        </el-row>
-        
+          <el-row>
+            <el-col :span="24" >
+              <div v-for="(tag, index) in form.buildDependencys" :key="index" style="display: inline-block; margin: 5px;">
+                <el-tag
+                  :closable="true"
+                  @close="handleTagClose(index)">
+                  {{ tag }}
+                </el-tag>
+              </div>
+            </el-col>
+          </el-row>
 
-        <el-row>
-          <el-col :span="12">
-            <el-form-item label="状态">
+
+          <el-row>
+            <el-col :span="12">
+              <el-form-item label="状态">
                 <el-radio-group v-model="form.status">
                   <el-radio
                     v-for="dict in status"
@@ -959,18 +960,19 @@ import type { pushScopeId } from "vue"
                   >{{dict.label}}</el-radio>
                 </el-radio-group>
               </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="任务备注">
-              <el-input v-model="form.remark" type="textarea" placeholder="请输入内容"></el-input>
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
+            </el-col>
+            <el-col :span="24">
+              <el-form-item label="任务备注">
+                <el-input v-model="form.remark" type="textarea" placeholder="请输入内容"></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form>
+      </yt-card>
+      <template #footer>
         <el-button type="primary" @click="submitForm(false)">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
-      </div>
+      </template>
     </el-dialog>
   </div>
 </template>

@@ -1,10 +1,10 @@
 <script setup lang="ts">
-  // @ts-nocheck  
+  // @ts-nocheck
   import { showStatusOperateFun , status , showStatusFun , addDateRange , addDateRangeRuoyi } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
   import {addGroup , updateGroup , queryGroupInfoById, changeGroupStatus, groupList} from "@/api/gitlab/groups"
- 
+
   const queryFormRef = ref(null);
   //查询列表信息
   const queryParams = reactive({
@@ -117,11 +117,11 @@
       }
     });
   }
-  
+
 
   // 多选框选中数据
   const handleSelectionChange = function(selection){
- 
+
   }
 
   // 表单提交处理
@@ -195,7 +195,7 @@
                   message: '操作成功',
                 })
             }
-        })    
+        })
     })
     .catch(() => { })
   }
@@ -250,7 +250,7 @@
               @keyup.enter.native="handleQuery"
             />
           </el-form-item>
-        </el-col> 
+        </el-col>
       </el-row>
       <el-row :gutter="20">
         <el-col :span="8">
@@ -269,7 +269,7 @@
               :value="item"/>
             </el-select>
           </el-form-item>
-        </el-col> 
+        </el-col>
         <el-col :span="8">
           <el-form-item label="状态" prop="status">
             <el-select
@@ -285,7 +285,7 @@
               :value="dict.value"/>
             </el-select>
           </el-form-item>
-        </el-col> 
+        </el-col>
       </el-row>
       <el-row :gutter="20">
         <el-col :span="8">
@@ -300,14 +300,14 @@
               end-placeholder="结束日期"
             ></el-date-picker>
           </el-form-item>
-        </el-col> 
+        </el-col>
         <el-col :span="8">
           <div>
             <el-button type="primary" size="small" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
             <el-button  size="small" @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
           </div>
         </el-col>
-      </el-row>  
+      </el-row>
     </el-form>
 
     <!--  option-->
@@ -322,7 +322,7 @@
     <!--table  -->
     <div class="table-wrap">
       <el-table v-loading="loading" :data="groupPageList" @selection-change="handleSelectionChange">
-          <el-table-column type="selection" width="30" align="center" />
+          <el-table-column type="selection" width="60" align="center" />
           <el-table-column label="组编号" align="center" key="id" prop="id"/>
           <el-table-column label="组名称" align="center" key="gitlabGroupName" prop="gitlabGroupName"  :show-overflow-tooltip="true"  width="100" />
           <el-table-column label="备注" align="center" key="remark" prop="remark" :show-overflow-tooltip="true"  width="100" />
@@ -363,7 +363,7 @@
       v-show="total>0"
       :total="total"
       :page-sizes=[10,20]
-      background layout="prev, pager, next" 
+      background layout="prev, pager, next"
       v-model:current-page="queryParams.pageNum"
       v-model:page-size="queryParams.pageSize"
       @current-change="getList"
@@ -378,7 +378,7 @@
           <el-col :span="12">
             <el-form-item label="插件实例" prop="instanceCode">
               <el-select
-                class="search-select2" 
+                class="search-select2"
                 v-model="form.instanceCode"
                 @keyup.enter.native="handleQuery"
                 placeholder="请选择插件实例"
@@ -412,14 +412,14 @@
               :value="item"/>
             </el-select>
             </el-form-item>
-          </el-col> 
+          </el-col>
           <el-col :span="12">
             <el-form-item label="路径" prop="path">
               <el-input v-model="form.path" placeholder="请输路径" maxlength="30" />
             </el-form-item>
           </el-col>
         </el-row>
-        
+
         <el-row>
           <el-col :span="12">
             <el-form-item label="状态">

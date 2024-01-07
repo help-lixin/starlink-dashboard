@@ -1,10 +1,10 @@
 <script setup lang="ts">
-  // @ts-nocheck  
+  // @ts-nocheck
   import { showStatusOperateFun , status , showStatusFun , addDateRange } from "@/utils/common"
   import { queryInstanceInfoByPluginCode,pluginOptionSelect } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
   import {sysCredentialList, addCredential, queryCredentialInfoById, checkKey , changeStatus ,credentialTypes} from "@/api/sys_credential/credential"
- 
+
   const queryFormRef = ref(null);
   //查询列表信息
   const queryParams = reactive({
@@ -47,7 +47,7 @@
             }
           }
         })
-        
+
       }
       const checkValue = reactive({
         credentialKey:undefined,
@@ -57,7 +57,7 @@
       checkValue.credentialKey = form.credentialKey
       checkValue.instanceCode = form.instanceCode
 
-      
+
       checkKey(checkValue).then((res)=>{
         if(res?.data){
           callback(new Error('名称已存在:'+value));
@@ -91,7 +91,7 @@
   const handleCredentialType = (type)=>{
     form.type = type;
   }
-  
+
 
   const form = reactive({
         id: undefined,
@@ -112,7 +112,7 @@
   const reset = ()=> {
     Object.keys(form).forEach(key => (form[key] = undefined));
   }
-  
+
 
   // 获取列表
   const getList = ()=>{
@@ -144,7 +144,7 @@
     handleQuery();
   }
 
-  
+
   // 处理新增按钮
   const handleAdd = function(){
     reset()
@@ -162,7 +162,7 @@
     pluginOptionSelect().then((res)=>{
       Object.assign(formPluginCodes,res?.data);
     })
-    
+
     queryCredentialInfoById(row.id).then(response => {
       if(response?.code == 200){
         let data = response?.data
@@ -182,11 +182,11 @@
       Object.assign(formPluginInstance,res?.data)
     })
   }
-  
+
 
   // 多选框选中数据
   const handleSelectionChange = function(selection){
- 
+
   }
 
   // 表单提交处理
@@ -260,7 +260,7 @@
                   message: '操作成功',
                 })
             }
-        })    
+        })
     })
     .catch(() => { })
   }
@@ -282,7 +282,7 @@
       Object.assign(pluginCodes,res?.data)
     }
   })
-  
+
   const queryInstance = (pluginCode)=>{
     queryParams.instanceCode = undefined
     queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
@@ -297,124 +297,123 @@
 <template>
   <div class="main-wrapp">
     <!--sousuo  -->
-    <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="插件编码" prop="pluginCode">
-            <el-select
-            class="search-select"
-              v-model="queryParams.pluginCode"
-              @keyup.enter.native="handleQuery"
-              placeholder="请选择插件编码"
-              @change="queryInstance"
-              style="width: 240px"
-            >
-            <el-option v-for="item in pluginCodes"
-              :key="item.label"
-              :label="item.value"
-              :value="item.label"/>
-            </el-select>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="插件实例" prop="instanceCode">
-            <el-select
-            class="search-select"
-              v-model="queryParams.instanceCode"
-              @keyup.enter.native="handleQuery"
-              placeholder="请选择实例"
-              style="width: 240px"
-            >
-            <el-option v-for="item in pluginInstance"
-              :key="item.pluginCode"
-              :label="item.instanceName"
-              :value="item.instanceCode"/>
-            </el-select>
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="凭证别名" prop="credentialName">
-            <el-input
-              v-model="queryParams.credentialName"
-              placeholder="请输入凭证别名"
-              clearable
-              style="width: 240px"
-              @keyup.enter.native="handleQuery"
-            />
-          </el-form-item>
-        </el-col> 
-        <el-col :span="8">
-          <el-form-item label="凭证类型" prop="credentialType">
-            <el-select
-            class="search-select"
-              v-model="queryParams.credentialType"
-              @keyup.enter.native="handleQuery"
-              placeholder="请选择插件类型"
-              clearable
-              style="width: 240px"
-            >
-            <el-option v-for="item in credentialTypes"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"/>
-            </el-select>
-          </el-form-item>
-        </el-col> 
-      </el-row>
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="状态" prop="status">
-            <el-select
-            class="search-select"
-              v-model="queryParams.status"
-              placeholder="工具状态"
-              clearable
-              style="width: 240px"
-            >
-            <el-option v-for="dict in status"
-              :key="dict.value"
-              :label="dict.label"
-              :value="dict.value"/>
-            </el-select>
-          </el-form-item>
-        </el-col> 
-        <el-col :span="8">
-          <el-form-item label="创建时间">
-            <el-date-picker
-              v-model="dateRange"
-              style="width: 240px"
-              value-format="YYYY-MM-DD"
-              type="daterange"
-              range-separator="-"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-            ></el-date-picker>
-          </el-form-item>
-        </el-col> 
-        <el-col :span="8">
-          <div>
-            <el-button type="primary" size="small" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
-            <el-button  size="small" @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
-          </div>
-        </el-col>
-      </el-row>  
-    </el-form>
+    <yt-card>
+      <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" size="small" :inline="true" v-show="showSearch" label-width="68px">
+        <el-row :gutter="20">
+          <el-col :span="8">
+            <el-form-item label="插件编码" prop="pluginCode">
+              <el-select
+                class="search-select"
+                v-model="queryParams.pluginCode"
+                @keyup.enter.native="handleQuery"
+                placeholder="请选择插件编码"
+                @change="queryInstance"
+                style="width: 240px"
+              >
+                <el-option v-for="item in pluginCodes"
+                           :key="item.label"
+                           :label="item.value"
+                           :value="item.label"/>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="插件实例" prop="instanceCode">
+              <el-select
+                class="search-select"
+                v-model="queryParams.instanceCode"
+                @keyup.enter.native="handleQuery"
+                placeholder="请选择实例"
+                style="width: 240px"
+              >
+                <el-option v-for="item in pluginInstance"
+                           :key="item.pluginCode"
+                           :label="item.instanceName"
+                           :value="item.instanceCode"/>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="凭证别名" prop="credentialName">
+              <el-input
+                v-model="queryParams.credentialName"
+                placeholder="请输入凭证别名"
+                clearable
+                style="width: 240px"
+                @keyup.enter.native="handleQuery"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="凭证类型" prop="credentialType">
+              <el-select
+                class="search-select"
+                v-model="queryParams.credentialType"
+                @keyup.enter.native="handleQuery"
+                placeholder="请选择插件类型"
+                clearable
+                style="width: 240px"
+              >
+                <el-option v-for="item in credentialTypes"
+                           :key="item.value"
+                           :label="item.label"
+                           :value="item.value"/>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="状态" prop="status">
+              <el-select
+                class="search-select"
+                v-model="queryParams.status"
+                placeholder="工具状态"
+                clearable
+                style="width: 240px"
+              >
+                <el-option v-for="dict in status"
+                           :key="dict.value"
+                           :label="dict.label"
+                           :value="dict.value"/>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="创建时间">
+              <el-date-picker
+                v-model="dateRange"
+                style="width: 240px"
+                value-format="YYYY-MM-DD"
+                type="daterange"
+                range-separator="-"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
+              ></el-date-picker>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <div>
+              <el-button type="primary" size="small" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
+              <el-button  size="small" @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
+            </div>
+          </el-col>
+        </el-row>
+      </el-form>
+    </yt-card>
 
-    <!--  option-->
-    <div class="option-wrap">
-      <el-button
-        type="primary"
-        plain
-        size="default"
-        @click="handleAdd" v-hasPerms="['/jenkins/systemConfig/add']" ><el-icon><Plus /></el-icon>新增</el-button>
-    </div>
+    <yt-card>
+      <!--  option-->
+      <div class="option-wrap">
+        <el-button
+          type="primary"
+          plain
+          size="default"
+          @click="handleAdd" v-hasPerms="['/jenkins/systemConfig/add']" ><el-icon><Plus /></el-icon>新增</el-button>
+      </div>
 
-    <!--table  -->
-    <div class="table-wrap">
-      <el-table v-loading="loading" :data="sysCredentialPageList" @selection-change="handleSelectionChange">
-          <el-table-column type="selection" width="30" align="center" />
+      <!--table  -->
+      <div class="table-wrap">
+        <el-table v-loading="loading" :data="sysCredentialPageList" @selection-change="handleSelectionChange">
+          <el-table-column type="selection" width="60" align="center" />
           <el-table-column label="编号" align="center" key="id" prop="id" />
           <el-table-column label="凭证唯一名称" align="center" key="credentialKey" prop="credentialKey"  :show-overflow-tooltip="true"  width="200" />
           <el-table-column label="凭证别名" align="center" key="credentialName" prop="credentialName"  :show-overflow-tooltip="true"  width="200" />
@@ -436,215 +435,218 @@
             width="220"
           >
             <template #default="scope">
-             <div class="action-btn">
-              <el-button
-                size="default"
-                @click="handleUpdate(scope.row)"
-                v-hasPerms="['/credential/add']"
-              >修改</el-button>
-              <el-button
-                size="default"
-                @click="handleStatusChange(scope.row)"
-                v-hasPerms="['/credential/changeStatus/**']"
-              >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-             </div>
+              <div class="action-btn">
+                <el-button
+                  size="default"
+                  @click="handleUpdate(scope.row)"
+                  v-hasPerms="['/credential/add']"
+                >修改</el-button>
+                <el-button
+                  size="default"
+                  @click="handleStatusChange(scope.row)"
+                  v-hasPerms="['/credential/changeStatus/**']"
+                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
+              </div>
             </template>
           </el-table-column>
-    </el-table>
-    </div>
-    <div class="page-wrap">
-      <el-pagination
-      v-show="total>0"
-      :total="total"
-      :page-sizes=[10,20]
-      background layout="prev, pager, next" 
-      v-model:current-page="queryParams.pageNum"
-      v-model:page-size="queryParams.pageSize"
-      @current-change="getList"
-    />
-    </div>
+        </el-table>
+      </div>
+      <div class="page-wrap">
+        <el-pagination
+          v-show="total>0"
+          :total="total"
+          :page-sizes=[10,20]
+          background layout="prev, pager, next"
+          v-model:current-page="queryParams.pageNum"
+          v-model:page-size="queryParams.pageSize"
+          @current-change="getList"
+        />
+      </div>
+    </yt-card>
 
 
     <!-- 添加或修改工具配置对话框 -->
     <el-dialog :title="title" v-model="open" width="600px" append-to-body>
-      <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
-        <el-row>
-          <el-col :span="12">
-            <el-form-item label="插件编码" prop="pluginCode">
-              <el-select
-              class="search-select"
-                v-model="form.pluginCode"
-                placeholder="请选择插件编码"
-                style="width: 240px"
-                @change="changeInstance"
-              >
-              <el-option v-for="item in formPluginCodes"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"/>
-              </el-select>
-            </el-form-item>
-          </el-col> 
+      <yt-card>
+        <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
+          <el-row>
+            <el-col :span="12">
+              <el-form-item label="插件编码" prop="pluginCode">
+                <el-select
+                  class="search-select"
+                  v-model="form.pluginCode"
+                  placeholder="请选择插件编码"
+                  style="width: 240px"
+                  @change="changeInstance"
+                >
+                  <el-option v-for="item in formPluginCodes"
+                             :key="item.value"
+                             :label="item.label"
+                             :value="item.value"/>
+                </el-select>
+              </el-form-item>
+            </el-col>
 
-          <el-col :span="12">
-            <el-form-item label="插件实例" prop="instanceCode">
-              <el-select
-                class="search-select2" 
-                v-model="form.instanceCode"
-                placeholder="请选择插件实例"
-                style="width: 240px"
-              >
-              <el-option v-for="item in formPluginInstance"
-              :key="item.pluginCode"
-              :label="item.instanceName"
-              :value="item.instanceCode"/>
-              </el-select>
-            </el-form-item>
-          </el-col>
-          
-          <el-col :span="12">
-            <el-form-item label="凭证类型" prop="credentialType">
-              <el-select
-              class="search-select"
-                v-model="form.credentialType"
-                placeholder="请选择凭证类型"
-                style="width: 240px"
-                @change="handleCredentialType"
-              >
-              <el-option v-for="item in credentialTypes"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"/>
-              </el-select>
-            </el-form-item>
-          </el-col> 
-        </el-row>
+            <el-col :span="12">
+              <el-form-item label="插件实例" prop="instanceCode">
+                <el-select
+                  class="search-select2"
+                  v-model="form.instanceCode"
+                  placeholder="请选择插件实例"
+                  style="width: 240px"
+                >
+                  <el-option v-for="item in formPluginInstance"
+                             :key="item.pluginCode"
+                             :label="item.instanceName"
+                             :value="item.instanceCode"/>
+                </el-select>
+              </el-form-item>
+            </el-col>
 
-        <el-row v-if="form.credentialType == 'SECRET'">
-          <el-col :span="12">
-            <el-form-item label="密钥" prop="password" :rules="[       
+            <el-col :span="12">
+              <el-form-item label="凭证类型" prop="credentialType">
+                <el-select
+                  class="search-select"
+                  v-model="form.credentialType"
+                  placeholder="请选择凭证类型"
+                  style="width: 240px"
+                  @change="handleCredentialType"
+                >
+                  <el-option v-for="item in credentialTypes"
+                             :key="item.value"
+                             :label="item.label"
+                             :value="item.value"/>
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row v-if="form.credentialType == 'SECRET'">
+            <el-col :span="12">
+              <el-form-item label="密钥" prop="password" :rules="[
                   { required: true, message: '密钥不能为空', trigger: 'blur' },
                   { min: 2, max: 200, message: '密钥长度必须介于 2 和 200 之间', trigger: 'blur' } ]">
-              <el-input v-model="form.password" placeholder="请输入密钥信息" maxlength="200" />
-            </el-form-item>
-          </el-col>
+                <el-input v-model="form.password" placeholder="请输入密钥信息" maxlength="200" />
+              </el-form-item>
+            </el-col>
 
-          <el-col :span="12">
-            <el-form-item label="文件" prop="secretText">
-              <el-input v-model="form.secretText" type="textarea" placeholder="请输入备注"  />
-            </el-form-item>
-          </el-col>
-        </el-row>
+            <el-col :span="12">
+              <el-form-item label="文件" prop="secretText">
+                <el-input v-model="form.secretText" type="textarea" placeholder="请输入备注"  />
+              </el-form-item>
+            </el-col>
+          </el-row>
 
-        <el-row v-if="form.credentialType == 'SSH'">
-          <el-col :span="12">
-            <el-form-item label="用户名" prop="userName" :rules="[       
+          <el-row v-if="form.credentialType == 'SSH'">
+            <el-col :span="12">
+              <el-form-item label="用户名" prop="userName" :rules="[
                   { required: true, message: '用户名不能为空', trigger: 'blur' },
                   { min: 2, max: 20, message: '用户名长度必须介于 2 和 20 之间', trigger: 'blur' } ]">
-              <el-input v-model="form.userName" placeholder="请输入用户名" maxlength="20" />
-            </el-form-item>
-          </el-col>
+                <el-input v-model="form.userName" placeholder="请输入用户名" maxlength="20" />
+              </el-form-item>
+            </el-col>
 
-          <el-col :span="12">
-            <el-form-item label="公钥" prop="publicKey" :rules="[       
+            <el-col :span="12">
+              <el-form-item label="公钥" prop="publicKey" :rules="[
                   { required: true, message: '公钥不能为空', trigger: 'blur' },
                   { min: 2, max: 2000, message: '公钥长度必须介于 2 和 2000 之间', trigger: 'blur' } ]">
-              <el-input v-model="form.publicKey" placeholder="请输入公钥"  maxlength="2000"/>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="私钥" prop="privateKey" :rules="[       
+                <el-input v-model="form.publicKey" placeholder="请输入公钥"  maxlength="2000"/>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="私钥" prop="privateKey" :rules="[
                   { required: true, message: '私钥不能为空', trigger: 'blur' },
                   { min: 2, max: 2000, message: '私钥长度必须介于 2 和 2000 之间', trigger: 'blur' } ]">
-              <el-input v-model="form.privateKey" placeholder="请输入私钥"  maxlength="2000"/>
-            </el-form-item>
-          </el-col>
+                <el-input v-model="form.privateKey" placeholder="请输入私钥"  maxlength="2000"/>
+              </el-form-item>
+            </el-col>
 
-          <el-col :span="12">
-            <el-form-item label="密钥" prop="passphrase" :rules="[       
+            <el-col :span="12">
+              <el-form-item label="密钥" prop="passphrase" :rules="[
                   { required: true, message: '密钥不能为空', trigger: 'blur' },
                   { min: 2, max: 2000, message: '密钥长度必须介于 2 和 2000 之间', trigger: 'blur' } ]">
-              <el-input v-model="form.passphrase" placeholder="请输入密钥" maxlength="2000" />
-            </el-form-item>
-          </el-col>
-        </el-row>
+                <el-input v-model="form.passphrase" placeholder="请输入密钥" maxlength="2000" />
+              </el-form-item>
+            </el-col>
+          </el-row>
 
-        <el-row v-if="form.credentialType == 'USERNAME_PASSWORD'">
-          <el-col :span="12">
-            <el-form-item label="用户名" prop="userName" :rules="[       
+          <el-row v-if="form.credentialType == 'USERNAME_PASSWORD'">
+            <el-col :span="12">
+              <el-form-item label="用户名" prop="userName" :rules="[
                   { required: true, message: '用户名不能为空', trigger: 'blur' },
                   { min: 2, max: 20, message: '用户名长度必须介于 2 和 20 之间', trigger: 'blur' } ]">
-              <el-input v-model="form.userName" placeholder="请输入用户名" maxlength="20" />
-            </el-form-item>
-          </el-col>
+                <el-input v-model="form.userName" placeholder="请输入用户名" maxlength="20" />
+              </el-form-item>
+            </el-col>
 
-          <el-col :span="12">
-            <el-form-item label="密码" prop="password" :rules="[       
+            <el-col :span="12">
+              <el-form-item label="密码" prop="password" :rules="[
                   { required: true, message: '密码不能为空', trigger: 'blur' },
                   { min: 2, max: 200, message: '密码长度必须介于 2 和 200 之间', trigger: 'blur' } ]">
-              <el-input v-model="form.password" type="password" placeholder="请输入密码" maxlength="200" />
-            </el-form-item>
-          </el-col>
-        </el-row>
+                <el-input v-model="form.password" type="password" placeholder="请输入密码" maxlength="200" />
+              </el-form-item>
+            </el-col>
+          </el-row>
 
-        <el-row v-if="form.credentialType == 'TOKEN'">
-          <el-col :span="12">
-            <el-form-item label="用户名" prop="userName" :rules="[       
+          <el-row v-if="form.credentialType == 'TOKEN'">
+            <el-col :span="12">
+              <el-form-item label="用户名" prop="userName" :rules="[
                   { required: true, message: '用户名不能为空', trigger: 'blur' },
                   { min: 2, max: 20, message: '用户名长度必须介于 2 和 20 之间', trigger: 'blur' } ]">
-              <el-input v-model="form.userName" placeholder="请输入用户名" maxlength="20" />
-            </el-form-item>
-          </el-col>
+                <el-input v-model="form.userName" placeholder="请输入用户名" maxlength="20" />
+              </el-form-item>
+            </el-col>
 
-          <el-col :span="12">
-            <el-form-item label="token" prop="token" :rules="[       
+            <el-col :span="12">
+              <el-form-item label="token" prop="token" :rules="[
                   { required: true, message: 'token不能为空', trigger: 'blur' },
                   { min: 2, max: 2000, message: 'token长度必须介于 2 和 2000 之间', trigger: 'blur' } ]">
-              <el-input v-model="form.token"  placeholder="请输入token" maxlength="2000" />
-            </el-form-item>
-          </el-col>
-        </el-row>
+                <el-input v-model="form.token"  placeholder="请输入token" maxlength="2000" />
+              </el-form-item>
+            </el-col>
+          </el-row>
 
-        <el-row>
-          <el-col :span="12">
-            <el-form-item label="凭证key" prop="credentialKey">
-              <el-input v-model="form.credentialKey" placeholder="请输入凭证唯一名称" maxlength="200" />
-            </el-form-item>
-          </el-col>
+          <el-row>
+            <el-col :span="12">
+              <el-form-item label="凭证key" prop="credentialKey">
+                <el-input v-model="form.credentialKey" placeholder="请输入凭证唯一名称" maxlength="200" />
+              </el-form-item>
+            </el-col>
 
-          <el-col :span="12">
-            <el-form-item label="凭证名称" prop="credentialName">
-              <el-input v-model="form.credentialName" placeholder="请输入名称" maxlength="200" />
-            </el-form-item>
-          </el-col>
-        </el-row>
+            <el-col :span="12">
+              <el-form-item label="凭证名称" prop="credentialName">
+                <el-input v-model="form.credentialName" placeholder="请输入名称" maxlength="200" />
+              </el-form-item>
+            </el-col>
+          </el-row>
 
-        <el-row>
-          <el-col :span="12">
-            <el-form-item label="备注" prop="remark">
-              <el-input v-model="form.remark" type="textarea" placeholder="请输入备注" maxlength="200" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        
-        <el-row>
-          <el-col :span="12">
-            <el-form-item label="状态">
-              <el-radio-group v-model="form.status">
-                <el-radio
-                  v-for="dict in status"
-                  :key="dict.value"
-                  :label="dict.value"
-                >{{dict.label}}</el-radio>
-              </el-radio-group>
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
+          <el-row>
+            <el-col :span="12">
+              <el-form-item label="备注" prop="remark">
+                <el-input v-model="form.remark" type="textarea" placeholder="请输入备注" maxlength="200" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row>
+            <el-col :span="12">
+              <el-form-item label="状态">
+                <el-radio-group v-model="form.status">
+                  <el-radio
+                    v-for="dict in status"
+                    :key="dict.value"
+                    :label="dict.value"
+                  >{{dict.label}}</el-radio>
+                </el-radio-group>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form>
+      </yt-card>
+      <template #footer>
         <el-button type="primary" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
-      </div>
+      </template>
     </el-dialog>
   </div>
 </template>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  // @ts-nocheck  
+  // @ts-nocheck
   import { Plus ,Delete, Edit, EditPen, Search , RefreshRight , Sort , QuestionFilled} from '@element-plus/icons-vue'
   import { parseTime , statusDicts , sexDicts , addDateRangeRuoyi } from "@/utils/common"
   import { listUser , getUser , addUser , updateUser , delUser , changeUserStatus , resetUserPwd } from "@/api/users"
@@ -142,10 +142,10 @@
         open.value = true;
         title.value = "修改用户";
         form.password = "";
-      } 
+      }
     });
   }
-  
+
   const handleDelete = function(row){
     const userIds = row.userId || ids.value;
 
@@ -266,7 +266,7 @@
                 })
               }
             });
-      }).catch(() => { })  
+      }).catch(() => { })
   }
 
     /** 分配角色操作 */
@@ -274,7 +274,7 @@
 
       // const userId = row.userId;
       // this.$router.push("/system/user-auth/role/" + userId);
-    }  
+    }
 
   // 表单取消处理
   const cancel = ()=>{
@@ -301,7 +301,7 @@
               @keyup.enter.native="handleQuery"
             />
           </el-form-item>
-        </el-col> 
+        </el-col>
         <el-col :span="8">
           <el-form-item label="手机号码" prop="phonenumber">
             <el-input
@@ -312,7 +312,7 @@
               @keyup.enter.native="handleQuery"
             />
           </el-form-item>
-        </el-col> 
+        </el-col>
       </el-row>
       <el-row :gutter="20">
         <el-col :span="8">
@@ -330,7 +330,7 @@
               :value="dict.value"/>
             </el-select>
           </el-form-item>
-        </el-col> 
+        </el-col>
         <el-col :span="8">
           <el-form-item label="创建时间">
             <el-date-picker
@@ -343,14 +343,14 @@
               end-placeholder="结束日期"
             ></el-date-picker>
           </el-form-item>
-        </el-col> 
+        </el-col>
         <el-col :span="8">
           <div>
             <el-button type="primary" size="small" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
             <el-button  size="small" @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
           </div>
         </el-col>
-      </el-row>  
+      </el-row>
     </el-form>
 
     <!--  option-->
@@ -367,7 +367,7 @@
         plain
         size="default"
         :disabled="single"
-        @click="handleUpdate" v-hasPerms="['/system/user/edit']" ><el-icon><EditPen /></el-icon>修改</el-button>  
+        @click="handleUpdate" v-hasPerms="['/system/user/edit']" ><el-icon><EditPen /></el-icon>修改</el-button>
 
       <el-button
         type="danger"
@@ -381,7 +381,7 @@
     <!--table  -->
     <div class="table-wrap">
       <el-table v-loading="loading" :data="userList" @selection-change="handleSelectionChange">
-          <el-table-column type="selection" width="30" align="center" />
+          <el-table-column type="selection" width="60" align="center" />
           <el-table-column label="用户编号" align="center" key="userId" prop="userId"/>
           <el-table-column label="用户名称" align="center" key="userName" prop="userName"  :show-overflow-tooltip="true"  width="100" />
           <el-table-column label="用户昵称" align="center" key="nickName" prop="nickName" :show-overflow-tooltip="true"  width="100" />
@@ -413,13 +413,13 @@
                 @click="handleUpdate(scope.row)"
                 v-hasPerms="['/system/user/edit']"
               >修改</el-button>
-              
+
               <el-button
                 size="default"
                 @click="handleDelete(scope.row)"
-                v-hasPerms="['/system/user/del/*']" 
+                v-hasPerms="['/system/user/del/*']"
               >删除</el-button>
-            
+
 
               <el-dropdown size="default" @command="(command) => handleCommand(command, scope.row)" v-hasPerms="['/system/user/resetPwd', '/system/user/edit']">
                 <el-button size="default">更多</el-button>
@@ -430,7 +430,7 @@
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
-              
+
              </div>
             </template>
           </el-table-column>
@@ -441,7 +441,7 @@
       v-show="total>0"
       :total="total"
       :page-sizes=[10,20]
-      background layout="prev, pager, next" 
+      background layout="prev, pager, next"
       v-model:current-page="queryParams.pageNum"
       v-model:page-size="queryParams.pageSize"
       @current-change="getList"
