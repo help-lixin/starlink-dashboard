@@ -4,8 +4,8 @@ import { Plus ,Delete, Edit, EditPen, Search , RefreshRight , Sort , QuestionFil
 import { parseTime , statusDicts , sexDicts , addDateRangeRuoyi } from "@/utils/common"
 import { listUser , getUser , addUser , updateUser , delUser , changeUserStatus , resetUserPwd } from "@/api/users"
 import { getRoles } from "@/api/roles"
-
-
+import TsxTest from '@/views/system/user/components/TsxTest'
+import FormCreateTest from '@/views/system/user/components/FormCreateTest.vue'
 const queryForm = ref(null);
 
 const queryParams = reactive({
@@ -289,6 +289,7 @@ getList()
 <template>
     <div class="main-wrapp">
       <yt-card>
+        <FormCreateTest></FormCreateTest>
         <!--sousuo  -->
         <el-form class="form-wrap" :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
           <el-row :gutter="20">

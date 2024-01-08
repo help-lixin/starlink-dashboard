@@ -70,13 +70,13 @@ export default defineConfig({
     }),
     vitePluginImp({
       libList: [
-        {
-          libName: '@formily/element-plus',
-          libDirectory: 'esm',
-          style(name) {
-            return `@formily/element-plus/esm/${name}/style.js`
-          },
-        },
+        // {
+        //   libName: '@formily/element-plus',
+        //   libDirectory: 'esm',
+        //   style(name) {
+        //     return `@formily/element-plus/esm/${name}/style.js`
+        //   },
+        // },
       ],
     }),
   ],
