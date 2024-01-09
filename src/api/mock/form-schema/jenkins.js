@@ -15,18 +15,48 @@ export default `
             props: {
                 multiple: false
             },
+            validate:[
+                { required: true, message: '请选择实例', trigger: 'blur' },
+            ],
+            update(val, rule, fApi, arg){
+                if(val.length > 0){
+                    // 发布instanceCode事件
+                    mitt.emit("instanceCode",val);
+                }  
+            },
             effect:{
                 fetch:{
                     action: ()=>{
-                        return new Promise((resolve) => {
-                            
-                            fetch('https://cdn.jsdelivr.net/gh/modood/Administrative-divisions-of-China@2.4.0/dist/pc-code.json').then(res => {
-                              console.log(res)
-                            //   res.json().then(res => {
-                            //     resolve(tidy(res));
-                            //   })
+
+                        function toSelect(instances){
+                            let datas = [];
+                            for(let i=0;i<instances.length;i++){
+                                const item= {
+                                    label: instances[i].instanceName,
+                                    value: instances[i].instanceCode
+                                };
+                                datas.push(item);
+                            }
+                            return datas;
+                        }
+
+
+                        return new Promise((resolve)=>{
+                            fetch('/api/system-service/system/plugin/instance/optionSelects/jenkins',{
+                                headers: {
+                                    "Authorization" : "bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3R5cGUiOiIwMCIsInVzZXJfaWQiOjEsInVzZXJfbmFtZSI6ImFkbWluIiwic2NvcGUiOlsiYWxsIl0sIm5pY2tfbmFtZSI6IuiLpeS-nTEiLCJhdmF0YXIiOiIiLCJleHAiOjE3NDc5ODgzMTksImRlcHRfaWQiOjEwMywiYXV0aG9yaXRpZXMiOlsiYWRtaW4iXSwianRpIjoiS0NQQlp0MzczaElLNDhnNVZoeXM5TDVyNXpnIiwiY2xpZW50X2lkIjoiY2xpZW50MSIsImVtYWlsIjoiYWRtaW5AMTYzLmNvbSJ9.lxwystBgPNkMoRlw3GG4H0ViGM7Fr5g7Rbr4JaDoVoLBD6SXSMr9iXp29cmUY4CzKWQ3zRai37yrKL_SsOeIJwcGDilw8Lkd_-m4KT1R4N9oXWzqH0zkFH37Y9JALkn2c3S_scBUl_VSDTw7v1_IYQ6EZq7QYTIh1f42meP3BP5Y4fqRTPpK40C69Clk8rAqlrHb04XoUkVLWAAvmwlTroTmPhJ3RLCIxU7pAhUUP9MP-OapNufzvWmIuvrEuwbjaZm1-yIEIyptQ-bcQIZW_EzKaew1qNjKHDqb6ZBmSD-ZgxshpGcIVjNgBR0GuoRFZxH1Gm3crdY8Uix5xTKtzA"
+                                }
                             })
-                          })
+                            .then(res => {
+                                res.json().then(res => { 
+                                    if(res?.code == 200){
+                                        resolve(toSelect(res.data)); 
+                                        // 发布instanceCode事件
+                                        mitt.emit("instanceCode",undefined);
+                                    }
+                                })
+                            })
+                        });
                     },
                     to: "options"
                 }
@@ -35,8 +65,11 @@ export default `
         {
             type: "select",
             field: "scmType",
-            title: "仓库类型",
+            title: "仓库",
             value: ["GIT"],
+            validate:[
+                { required: true, message: '请选择仓库', trigger: 'blur' },
+            ],
             options: [
                 { "value": "GIT", "label": "Git" },
                 { "value": "SVN", "label": "Svn" }
@@ -46,7 +79,6 @@ export default `
             },
             update(val, rule, fApi, arg){
                 if(arg?.origin == "init"){
-
                 }else if(arg?.origin == "change" && val.length > 0){
                     // 找到分支
                     const scm = fApi.getRule("scm");
@@ -65,7 +97,6 @@ export default `
                         if(branch){
                             branch.hidden = false;
                         }
-                        // fApi.updateRules({'branch': {hidden: false}})
                     } else if("SVN" == val) {
                         if(branch){
                             branch.hidden = true;
@@ -77,13 +108,37 @@ export default `
         {
             type: 'subForm',
             field: 'scm',
-            title: '仓库',
+            title: '',
             value: { url: 'http://192.168.1.10/root/spring-web-demo.git', branch: '*/main' },
             props: {
                 rule: [
-                    {  type: 'input', field: 'url', title: '项目地址'   },
-                    {  type: 'input', field: 'branch', title: '项目分支'  },
-                    {  type: 'input', field: 'credentialId', title: '凭证'  }
+                    {  type: 'input', field: 'url', title: '项目地址', validate:[ { required: true, message: '请配置项子地址', trigger: 'blur' } ],   },
+                    {  type: 'input', field: 'branch', title: '项目分支' , validate:[ { required: true, message: '请配置项目分支', trigger: 'blur' } ], },
+                    {  type: 'select', field: 'credentialId', title: '凭证' , validate:[ { required: true, message: '请选择凭证', trigger: 'blur' } ] ,
+                       effect: {
+                            dependencies: 'instanceCode'
+                       },
+                       update(val, rule, fApi, arg){
+                            if(arg?.origin == "dependencies"){
+                                const instanceCode = fApi.getValue(val);
+                                
+                                fetch('/api/starlink-service/credential/option/'+instanceCode , {
+                                    headers: {
+                                        "Authorization" : "bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3R5cGUiOiIwMCIsInVzZXJfaWQiOjEsInVzZXJfbmFtZSI6ImFkbWluIiwic2NvcGUiOlsiYWxsIl0sIm5pY2tfbmFtZSI6IuiLpeS-nTEiLCJhdmF0YXIiOiIiLCJleHAiOjE3NDc5ODgzMTksImRlcHRfaWQiOjEwMywiYXV0aG9yaXRpZXMiOlsiYWRtaW4iXSwianRpIjoiS0NQQlp0MzczaElLNDhnNVZoeXM5TDVyNXpnIiwiY2xpZW50X2lkIjoiY2xpZW50MSIsImVtYWlsIjoiYWRtaW5AMTYzLmNvbSJ9.lxwystBgPNkMoRlw3GG4H0ViGM7Fr5g7Rbr4JaDoVoLBD6SXSMr9iXp29cmUY4CzKWQ3zRai37yrKL_SsOeIJwcGDilw8Lkd_-m4KT1R4N9oXWzqH0zkFH37Y9JALkn2c3S_scBUl_VSDTw7v1_IYQ6EZq7QYTIh1f42meP3BP5Y4fqRTPpK40C69Clk8rAqlrHb04XoUkVLWAAvmwlTroTmPhJ3RLCIxU7pAhUUP9MP-OapNufzvWmIuvrEuwbjaZm1-yIEIyptQ-bcQIZW_EzKaew1qNjKHDqb6ZBmSD-ZgxshpGcIVjNgBR0GuoRFZxH1Gm3crdY8Uix5xTKtzA"
+                                    }
+                                })
+                                .then(res => {
+                                    res.json().then(res => { 
+                                        if(res?.code == 200){
+                                            rule.options=res.data
+                                        }
+                                    })
+                                })
+                            }else if(arg?.origin == "change" && val.length > 0){
+                                
+                            }
+                       },
+                    }, 
                 ]
             }
         },

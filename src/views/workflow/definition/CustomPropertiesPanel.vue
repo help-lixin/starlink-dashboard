@@ -1,6 +1,9 @@
 <script setup lang="ts">
 // @ts-nocheck
 
+import mitt from '@/mitt/bus'
+window.mitt = mitt;
+
 import formCreate from "@form-create/element-ui";
 import install from '@form-create/element-ui/auto-import'
 formCreate.use(install);
@@ -17,6 +20,7 @@ const actionMetasStore = useActionMetasStore();
 import jenkins from '@/api/mock/form-schema/jenkins';
 
 
+
 const props = defineProps({
 	modeler: Object,
 })
@@ -24,6 +28,56 @@ const props = defineProps({
 const selectedElements = ref([])
 const element = ref(null)
 
+
+function extraRule(rules,fieldName){
+	for(let i=0;i<rules.length;i++){
+		const rule = rules[i];
+		if(rule.type == "subForm" || rule.type == "group"){
+			return (rule?.rule?.rule,fieldName);
+		} else{
+			if(rule.field == fieldName){
+				return rule;
+			}
+		}
+	}
+}
+
+
+
+const eventBridge = {};
+formCreate.register({
+	name: "dependencies",
+	init({value}, rule) {
+		const events = eventBridge[value];
+		if(events == undefined){
+			eventBridge[value]=[];
+		}
+
+		const funTemplate = (val,_rule,fApi)=>{
+			if(_rule?.update){
+				_rule.update(val,_rule,fApi.value,{origin:"dependencies"})
+			}
+		}
+		eventBridge[value].push({ event:value,rule:rule, fApi: fApi,action: funTemplate})
+
+		mitt.off(value)
+		mitt.on(value,()=>{
+			let events = eventBridge[value];
+			for(let i=0;i<events.length;i++){
+				const _event = events[i]?.event 
+				const _rule = events[i]?.rule
+				const _fApi = events[i]?.fApi
+				const _action = events[i]?.action
+				
+				_action(_event,_rule,_fApi);
+			}
+		})
+	},
+	deleted({value}, rule, fapi) {
+		mitt.off(value)
+		delete eventBridge[value]
+    },
+});
 
 //获取 formCreate 组件
 const FormCreate = formCreate.$form();
@@ -41,8 +95,16 @@ const options = ref({
   //表单提交事件
   onSubmit: function (formData) {
     alert(JSON.stringify(formData))
+  },
+  // 
+  beforeFetch: function(config,form) {
+	console.log("^^^^^^^^^^^^^^^^^^^beforeFetch^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+	console.log(config)
+	console.log(form)
+	console.log("^^^^^^^^^^^^^^^^^^^beforeFetch^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
   }
 });
+
 
 const rule = ref([]);
 
