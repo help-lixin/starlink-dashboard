@@ -102,20 +102,22 @@ import type { pushScopeId } from "vue"
       buildDependencys: [],
       setups: [{
         id:undefined,
+        instanceCode:undefined,
+        status:undefined,
         setupType:undefined,
         sequence:undefined,
         type:undefined,
         targets:undefined,
-        goName:undefined,
+        antId:undefined,
+        goId:undefined,
         script:undefined,
-        gradleName:undefined,
+        gradleId:undefined,
         task:undefined,
-        mavenName:undefined,
+        mavenId:undefined,
         goals:undefined,
-        nodejsName:undefined,
-        npmName:undefined,
+        nodejsId:undefined,
         cacheLocation:undefined,
-        pythonName:undefined,
+        pythonId:undefined,
         shellScript:undefined
       }],
       jobName: undefined,
@@ -144,25 +146,27 @@ import type { pushScopeId } from "vue"
       buildDependencys: [],
       setups: [{
         id:undefined,
+        instanceCode:form.instanceCode,
+        status:form.status,
         setupType:undefined,
         sequence:undefined,
         type:undefined,
         targets:undefined,
-        goName:undefined,
+        antId:undefined,
+        goId:undefined,
         script:undefined,
-        gradleName:undefined,
+        gradleId:undefined,
         task:undefined,
-        mavenName:undefined,
+        mavenId:undefined,
         goals:undefined,
-        nodejsName:undefined,
-        npmName:undefined,
+        nodejsId:undefined,
         cacheLocation:undefined,
-        pythonName:undefined,
+        pythonId:undefined,
         shellScript:undefined
       }],
       jobName: undefined,
       remark: undefined,
-      status:undefined,
+      status:1,
       instanceCode: undefined
   })
 }
@@ -199,7 +203,6 @@ import type { pushScopeId } from "vue"
 
   //处理工具变更时的type
   const handleToolChange = (item,type)=>{
-    item.type = type
     item.setupType = type
   }
 
@@ -237,6 +240,7 @@ import type { pushScopeId } from "vue"
         Object.assign(formInstance,res?.data)
         let instanceCode = formInstance[0].instanceCode;
         form.instanceCode = instanceCode
+        console.log(form.instanceCode)
 
         // 查询凭证下拉列表
         credentialOption(instanceCode).then(response => {
@@ -295,6 +299,7 @@ import type { pushScopeId } from "vue"
             Object.assign(jdkList,response?.data)
           }
         })
+        
         detail(row.id)
       }
     });
@@ -326,14 +331,25 @@ import type { pushScopeId } from "vue"
     });
   }
 
+  // 更换实例时会修改凭证下拉列表信息
+  const switchInstance = (instanceCode)=>{
+    credentials.splice(0, credentials.length)
+    // 查询凭证下拉列表
+    credentialOption(instanceCode).then(response => {
+      if(response?.code == 200){
+        Object.assign(credentials,response?.data)
+      }
+    })
+  }
+  
   // 工具版本对象
   const languages = reactive([]);
   // 工具版本名称选择
-  const switchLanguage = ()=>{
+  const switchLanguage = (item)=>{
+    languages.splice(0, languages.length)
     // 根据工具类型,查询出所有的工具信息
     // 例如: MAVEN --> { label: "maven-3.6.3" , "value" : "/home/app/maven-3.6.3" }
     toolsSelectOption(form.toolsType,form.instanceCode).then(response => {
-      languages.splice(0, languages.length);
       if(response?.code == 200){
         Object.assign(languages,response?.data)
       }
@@ -634,7 +650,7 @@ import type { pushScopeId } from "vue"
                   class="search-select2"
                   v-model="form.instanceCode"
                   placeholder="请选择插件实例"
-                  clearable
+                  @change="switchInstance"
                   style="width: 240px"
                 >
                   <el-option v-for="item in formInstance"
@@ -740,10 +756,10 @@ import type { pushScopeId } from "vue"
             <template
               v-for="(item, index) in form.setups">
               <el-col :span="12">
-                <el-form-item label="maven版本选择" :prop="`setups.${index}.mavenName`" :rules="[  { required: true, message: 'maven版本是必选项', trigger: 'change' } ]" >
+                <el-form-item label="maven版本选择" :prop="`setups.${index}.mavenId`" :rules="[  { required: true, message: 'maven版本是必选项', trigger: 'change' } ]" >
                   <el-select
                     class="search-select2"
-                    v-model="item.mavenName"
+                    v-model="item.mavenId"
                     placeholder="请选择maven"
                     clearable
                     @change="handleToolChange(item,'MAVEN')"
@@ -752,7 +768,7 @@ import type { pushScopeId } from "vue"
                     <el-option v-for="version in languages"
                                :key="version.label"
                                :label="version.label"
-                               :value="version.label"/>
+                               :value="version.value"/>
                   </el-select>
                 </el-form-item>
               </el-col>
@@ -771,10 +787,10 @@ import type { pushScopeId } from "vue"
             <template
               v-for="(item, index) in form.setups">
               <el-col :span="12">
-                <el-form-item label="go" :prop="`setups.${index}.goName`">
+                <el-form-item label="go版本" :prop="`setups.${index}.goId`">
                   <el-select
                     class="search-select2"
-                    v-model="item.goName"
+                    v-model="item.goId"
                     placeholder="请选择go"
                     clearable
                     @change="handleToolChange(item,'GO')"
@@ -783,7 +799,7 @@ import type { pushScopeId } from "vue"
                     <el-option v-for="version in languages"
                                :key="version.label"
                                :label="version.label"
-                               :value="version.label"/>
+                               :value="version.value"/>
                   </el-select>
                 </el-form-item>
               </el-col>
@@ -799,8 +815,8 @@ import type { pushScopeId } from "vue"
             <template
               v-for="(item, index) in form.setups">
               <el-col :span="24">
-                <el-form-item  label="脚本" :prop="`setups.${index}.shellScript`">
-                  <el-input v-model="item.shellScript" type="textarea"/>
+                <el-form-item   label="脚本" :prop="`setups.${index}.shellScript`">
+                  <el-input v-model="item.shellScript"  @blur="handleToolChange(item,'SHELL')" type="textarea"/>
                 </el-form-item>
               </el-col>
             </template>
@@ -813,7 +829,7 @@ import type { pushScopeId } from "vue"
                 <el-form-item label="ant版本" :prop="`setups.${index}.items`">
                   <el-select
                     class="search-select2"
-                    v-model="item.ant"
+                    v-model="item.antId"
                     placeholder="请选择ant"
                     clearable
                     @change="handleToolChange(item,'ANT')"
@@ -822,7 +838,7 @@ import type { pushScopeId } from "vue"
                     <el-option v-for="version in languages"
                                :key="version.label"
                                :label="version.label"
-                               :value="version.label"/>
+                               :value="version.value"/>
                   </el-select>
                 </el-form-item>
               </el-col>
@@ -838,10 +854,10 @@ import type { pushScopeId } from "vue"
             <template
               v-for="(item, index) in form.setups">
               <el-col :span="12">
-                <el-form-item label="gradle" :prop="`setups.${index}.items`">
+                <el-form-item label="gradle版本" :prop="`setups.${index}.items`">
                   <el-select
                     class="search-select2"
-                    v-model="item.gradleName"
+                    v-model="item.gradleId"
                     placeholder="请选择gradle"
                     clearable
                     @change="handleToolChange(item,'GRADLE')"
@@ -850,7 +866,7 @@ import type { pushScopeId } from "vue"
                     <el-option v-for="version in languages"
                                :key="version.label"
                                :label="version.label"
-                               :value="version.label"/>
+                               :value="version.value"/>
                   </el-select>
                 </el-form-item>
               </el-col>
@@ -862,23 +878,23 @@ import type { pushScopeId } from "vue"
             </template>
           </el-row>
 
-          <el-row v-if="form.toolsType == 'NODEJS'" >
+          <el-row v-if="form.toolsType == 'NODE_JS'" >
             <template
               v-for="(item, index) in form.setups">
               <el-col :span="12">
-                <el-form-item label="nodejs" :prop="`setups.${index}.items`">
+                <el-form-item label="nodejs版本" :prop="`setups.${index}.items`">
                   <el-select
                     class="search-select2"
-                    v-model="item.nodejsName"
+                    v-model="item.nodejsId"
                     placeholder="请选择nodejs"
                     clearable
-                    @change="handleToolChange(item,'NODEJS')"
+                    @change="handleToolChange(item,'NODE_JS')"
                     style="width: 240px"
                   >
                     <el-option v-for="version in languages"
                                :key="version.label"
                                :label="version.label"
-                               :value="version.label"/>
+                               :value="version.value"/>
                   </el-select>
                 </el-form-item>
               </el-col>
@@ -894,10 +910,10 @@ import type { pushScopeId } from "vue"
             <template
               v-for="(item, index) in form.setups">
               <el-col :span="12">
-                <el-form-item label="python" :prop="`setups.${index}.items`">
+                <el-form-item label="python版本" :prop="`setups.${index}.items`">
                   <el-select
                     class="search-select2"
-                    v-model="item.pythonName"
+                    v-model="item.pythonId"
                     placeholder="请选择python"
                     clearable
                     @change="handleToolChange(item,'PYTHON')"
@@ -906,7 +922,7 @@ import type { pushScopeId } from "vue"
                     <el-option v-for="version in languages"
                                :key="version.label"
                                :label="version.label"
-                               :value="version.label"/>
+                               :value="version.value"/>
                   </el-select>
                 </el-form-item>
               </el-col>

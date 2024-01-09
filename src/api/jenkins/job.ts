@@ -25,7 +25,7 @@ export const tools = [
         label: 'shell命令',
     },
     {
-        value: 'NODEJS',
+        value: 'NODE_JS',
         label: 'nodeJs',
     },
     {
