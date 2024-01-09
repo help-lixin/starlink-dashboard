@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// @ts-nocheck  
+// @ts-nocheck
 
 import formCreate from "@form-create/element-ui";
 import install from '@form-create/element-ui/auto-import'
@@ -30,6 +30,14 @@ const FormCreate = formCreate.$form();
 const fApi = ref({});
 const formData = ref({});
 const options = ref({
+  form: {
+    labelPosition: 'top',
+    inline: false,
+    labelWidth: 'auto',
+  },
+  mounted: function() {
+      console.log('mounted')
+  },
   //表单提交事件
   onSubmit: function (formData) {
     alert(JSON.stringify(formData))
@@ -45,8 +53,8 @@ function init() {
 		selectedElements.value = e.newSelection
 		// 被选中的节点
 		element.value = e.newSelection[0]
-		
-		
+
+
 		// 元数据对象(右侧表单动态展示)
 		if (element.value?.businessObject?.$attrs?.plugin) {
 			// 从store里拿数据
@@ -68,7 +76,7 @@ function init() {
 			const decodeParams = JSON.parse(decodeParamsString);
 			Object.assign(params,decodeParams)
 		}
-	
+
 		// 节点名称
 		if (element.value?.businessObject?.$attrs?._name) {
 			element.value['name'] = element.value?.businessObject?.$attrs?._name
@@ -153,7 +161,9 @@ init()
 
 <template>
 	<div v-if="selectedElements.length === 1" class="custom-properties-panel">
-		<FormCreate :rule="rule" :option="options" v-model="formData" v-model:api="fApi"></FormCreate>
+    <yt-card>
+      <FormCreate :rule="rule" :option="options" v-model="formData" v-model:api="fApi"></FormCreate>
+    </yt-card>
 	</div>
 </template>
 
@@ -166,7 +176,15 @@ init()
 	width: 300px;
 	min-height: 100vh;
 	background-color: #f8f8f8;
-
+  ::v-deep(.yt-card) {
+    padding: 0;
+  }
+  ::v-deep(.content) {
+    min-height: 100vh;
+    overflow: auto;
+    box-sizing: border-box;
+    max-height: 100vh;
+  }
 	.element-item {
 		padding: 9px 15px;
 
