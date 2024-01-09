@@ -14,13 +14,13 @@ const formData = ref({});
 const options = ref({
   //表单提交事件
   onSubmit: function (formData) {
-    alert(JSON.stringify(formData))
+    console.log(fApi.value.getRule('goods_name2'), 'test')
   }
 });
 const rule = ref([
   {
     type:'input',
-    field:'goods_name',
+    field:'goods_name1',
     title:'商品名称',
     value:'form-create'
   },
@@ -36,5 +36,24 @@ const rule = ref([
       {label:'全能',value:3},
     ]
   },
+  {
+    type: 'row',
+    children: [
+      {
+        type: 'col',
+        props: {
+          span: 12
+        },
+        children: [
+          {
+            type: 'input',
+            field: 'goods_name2',
+            title: '商品名称1',
+            value: 'form-create'
+          }
+        ]
+      }
+    ]
+  }
 ]);
 </script>
