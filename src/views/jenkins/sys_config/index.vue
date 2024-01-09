@@ -178,14 +178,12 @@
         });
       } else {
         addConfig(form).then(response => {
-          if(response?.code){
+          if(response?.code == 200 ){
             ElMessage({
                   showClose: true,
                   message: '新增成功',
                   type: 'success',
             });
-            open.value = false;
-            getList();
           }
         });
       }

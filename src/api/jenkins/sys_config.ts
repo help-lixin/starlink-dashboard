@@ -20,7 +20,7 @@ export const tools = [
         label: 'go',
     },
     {
-        value: 'NODEJS',
+        value: 'NODE_JS',
         label: 'nodeJs',
     },
     {

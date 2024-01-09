@@ -65,9 +65,9 @@ return request({
 }
 
 // 修改凭证状态
-export function changeStatus(instanceCode:string,status:number,id:number) {
+export function changeStatus(id:number,status:number) {
 return request({
-      url: STARLINK_SERVICE + '/changeStatus/' + instanceCode + "/" + status + "/" +id,
+      url: STARLINK_SERVICE + '/credential/changeStatus/'  + status + "/" +id,
       method: 'put'
   }).then((res)=>{
       return res?.data;
