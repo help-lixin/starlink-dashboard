@@ -10,7 +10,6 @@ import IconsResolver from 'unplugin-icons/resolver'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
-// import ElementPlus from 'unplugin-element-plus/vite'
 import _ from 'lodash';
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 
@@ -62,7 +61,7 @@ export default defineConfig({
         IconsResolver({
           enabledCollections: ['ep'],
         }),
-        ElementPlusResolver()
+        ElementPlusResolver({ importStyle : "sass"})
       ],
       dts: path.resolve(pathSrc, 'components.d.ts'),
     }),
@@ -71,23 +70,22 @@ export default defineConfig({
     }),
     vitePluginImp({
       libList: [
-        {
-          libName: '@formily/element-plus',
-          libDirectory: 'esm',
-          replaceOldImport : false,
-          style(name) {
-            return `@formily/element-plus/esm/${name}/style.js`
-          },
-        },
+        // {
+        //   libName: '@formily/element-plus',
+        //   libDirectory: 'esm',
+        //   style(name) {
+        //     return `@formily/element-plus/esm/${name}/style.js`
+        //   },
+        // },
       ],
     }),
   ],
   css: {
-    preprocessorOptions: {
-      scss: {
-        additionalData: `@use "@/styles/element/index.scss" as *;`,
-      },
-    },
+    // preprocessorOptions: {
+    //   scss: {
+    //     additionalData: `@use "@/styles/element/index.scss" as *;`,
+    //   },
+    // },
   },
   // define :{
   //   'process.env' : process.env

@@ -1,10 +1,10 @@
 <script setup lang="ts">
-  // @ts-nocheck  
+  // @ts-nocheck
   import { showStatusOperateFun , status , showStatusFun , addDateRange , addDateRangeRuoyi , enable } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
   import { userList , addUser , updateUser , queryUserInfoById , changeUserStatus} from "@/api/gitlab/users"
- 
+
   const queryForm = ref(null);
 
   //查询列表信息
@@ -107,7 +107,7 @@
       }
     });
   }
-  
+
   // 表单提交处理
   const submitForm = async ()=>{
     loading.value = true;
@@ -116,7 +116,7 @@
             ElMessage.error('表单验证失败');
             loading.value = false;
             throw err;
-        });        
+        });
 
     if (form.id != undefined) {
         updateUser(form)
@@ -154,7 +154,7 @@
       }
   }
 
-  
+
   const handleStatusChange = (row)=>{
     const id = row.id
     const curStatus = row.status
@@ -174,7 +174,7 @@
       msg = '是否启用编号为"' + id + '"的数据项？'
       changeStatusParams.status = 1
     }
-      
+
     ElMessageBox.confirm(
       msg,
       'Warning',
@@ -193,7 +193,7 @@
                   message: '操作成功',
                 })
             }
-        })    
+        })
     })
     .catch(() => { })
   }
@@ -232,7 +232,7 @@
               @keyup.enter.native="handleQuery"
             />
           </el-form-item>
-        </el-col> 
+        </el-col>
         <el-col :span="8">
           <el-form-item label="状态" prop="status">
             <el-select
@@ -248,7 +248,7 @@
               :value="dict.value"/>
             </el-select>
           </el-form-item>
-        </el-col> 
+        </el-col>
       </el-row>
       <el-row :gutter="20">
         <el-col :span="8">
@@ -263,14 +263,14 @@
               end-placeholder="结束日期"
             ></el-date-picker>
           </el-form-item>
-        </el-col> 
+        </el-col>
         <el-col :span="8">
           <div>
             <el-button type="primary" size="small" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
             <el-button  size="small" @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
           </div>
         </el-col>
-      </el-row>  
+      </el-row>
     </el-form>
 
     <!--  option-->
@@ -285,7 +285,7 @@
     <!--table  -->
     <div class="table-wrap">
       <el-table v-loading="loading" :data="userRow">
-          <el-table-column type="selection" width="30" align="center" />
+          <el-table-column type="selection" width="60" align="center" />
           <el-table-column label="用户编号" align="center" key="id" prop="id"/>
           <el-table-column label="用户昵称" align="center" key="nickName" prop="nickName"  :show-overflow-tooltip="true"  width="100" />
           <el-table-column label="邮箱" align="center" key="email" prop="email"  :show-overflow-tooltip="true"  width="100" />
@@ -327,7 +327,7 @@
       v-show="total>0"
       :total="total"
       :page-sizes=[10,20]
-      background layout="prev, pager, next" 
+      background layout="prev, pager, next"
       v-model:current-page="queryParams.pageNum"
       v-model:page-size="queryParams.pageSize"
       @current-change="getList"
@@ -342,7 +342,7 @@
           <el-col :span="12">
             <el-form-item label="插件实例" prop="instanceCode">
               <el-select
-              class="search-select2" 
+              class="search-select2"
                 v-model="form.instanceCode"
                 @keyup.enter.native="handleQuery"
                 placeholder="请选择实例"
@@ -355,7 +355,7 @@
                 :value="item.instanceCode"/>
               </el-select>
             </el-form-item>
-          </el-col> 
+          </el-col>
           <el-col :span="12">
             <el-form-item label="用户名称" prop="userName">
               <el-input v-model="form.userName" placeholder="请输入用户名称" maxlength="30" />

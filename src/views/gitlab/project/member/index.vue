@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  // @ts-nocheck  
+  // @ts-nocheck
   import { Plus ,Delete, Edit, Search , RefreshRight , Sort , QuestionFilled} from '@element-plus/icons-vue'
   import { showStatusOperateFun , status , showStatusFun , addDateRange } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
@@ -7,7 +7,7 @@
   import { memberList , addProjectMember , updateProjectMember , projectList , removeMember, showMemberProject} from "@/api/gitlab/project-member"
   import { userList} from "@/api/gitlab/users"
   import { groupList } from "@/api/gitlab/groups"
- 
+
   const queryForm = ref(null);
 
   //查询列表信息
@@ -151,7 +151,7 @@
         }
     );
   }
-  
+
 
   // 处理搜索按钮
   const handleQuery = function(){
@@ -233,7 +233,7 @@
       }
   }
 
-  
+
   // 修改状态弹出框处理
   const handleDelete = (row)=>{
     const memberName = row.userName
@@ -261,8 +261,8 @@
                   message: '操作成功',
                 })
             }
-        })    
-    }).catch(() => { 
+        })
+    }).catch(() => {
       getList()
       ElMessage({
                   type: 'warning',
@@ -277,7 +277,7 @@
     open.value = false;
     reset();
   }
-  
+
 
   // 查询实例列表
   queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
@@ -318,7 +318,7 @@
               :value="item.instanceCode"/>
             </el-select>
           </el-form-item>
-        </el-col> 
+        </el-col>
         <el-col :span="8">
           <el-form-item label="状态" prop="status">
             <el-select
@@ -334,7 +334,7 @@
               :value="dict.value"/>
             </el-select>
           </el-form-item>
-        </el-col> 
+        </el-col>
       </el-row>
       <el-row :gutter="20">
         <el-col :span="8">
@@ -347,7 +347,7 @@
               @keyup.enter.native="handleQuery"
             />
           </el-form-item>
-        </el-col> 
+        </el-col>
         <el-col :span="8">
           <el-form-item label="项目" prop="projectId">
             <el-select
@@ -363,7 +363,7 @@
               :value="dict.id"/>
             </el-select>
           </el-form-item>
-        </el-col> 
+        </el-col>
       </el-row>
       <el-row :gutter="20">
         <el-col :span="8">
@@ -378,14 +378,14 @@
               end-placeholder="结束日期"
             ></el-date-picker>
           </el-form-item>
-        </el-col> 
+        </el-col>
         <el-col :span="8">
           <div>
             <el-button type="primary" size="small" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
             <el-button  size="small" @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
           </div>
         </el-col>
-      </el-row>  
+      </el-row>
     </el-form>
 
     <!--  option-->
@@ -400,7 +400,7 @@
     <!--table  -->
     <div class="table-wrap">
       <el-table v-loading="loading" :data="memberRow" @selection-change="handleSelectionChange">
-          <el-table-column type="selection" width="30" align="center" />
+          <el-table-column type="selection" width="60" align="center" />
           <el-table-column label="用户编号" align="center" key="userId" prop="userId" v-if="false"/>
           <el-table-column label="成员编号" align="center" key="id" prop="id"/>
           <el-table-column label="成员昵称" align="center" key="nickName" prop="nickName"  :show-overflow-tooltip="true"  width="100" />
@@ -439,7 +439,7 @@
       v-show="total>0"
       :total="total"
       :page-sizes=[10,20]
-      background layout="prev, pager, next" 
+      background layout="prev, pager, next"
       v-model:current-page="queryParams.pageNum"
       v-model:page-size="queryParams.pageSize"
       @current-change="getList"
@@ -454,7 +454,7 @@
           <el-col :span="8">
             <el-form-item label="插件实例" prop="instanceCode">
               <el-select
-              class="search-select2" 
+              class="search-select2"
                 v-model="form.instanceCode"
                 @keyup.enter.native="handleQuery"
                 placeholder="请选择实例"
@@ -467,7 +467,7 @@
                 :value="item.instanceCode"/>
               </el-select>
             </el-form-item>
-          </el-col> 
+          </el-col>
           <el-col :span="8">
             <el-form-item label="项目" prop="projectId">
               <el-select
@@ -482,7 +482,7 @@
                 :value="dict.id"/>
               </el-select>
             </el-form-item>
-          </el-col> 
+          </el-col>
         </el-row>
         <el-row>
           <el-col :span="8">
@@ -499,7 +499,7 @@
                 :value="user.id"/>
               </el-select>
             </el-form-item>
-          </el-col>   
+          </el-col>
           <el-col :span="8">
             <el-form-item label="权限" prop="accessLevel">
               <el-select

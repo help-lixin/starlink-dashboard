@@ -1,7 +1,10 @@
 {
   "compilerOptions": {
     "moduleResolution" : "node",
-    "types": ["element-plus/global"]
+    "types": ["element-plus/global"],
+    "jsx": "preserve",
+    "jsxFactory": "h",
+    "jsxFragmentFactory": "Fragment"
   },
   "files": [],
   "references": [

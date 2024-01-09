@@ -1,11 +1,11 @@
 <script setup lang="ts">
-  // @ts-nocheck  
+  // @ts-nocheck
   import { showStatusOperateFun , status , showStatusFun , addDateRange , enable } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
   import { pageList , addProject , queryProjectInfoById , changeProjectStatus} from "@/api/gitlab/projects"
   import { groupSelectOption } from "@/api/gitlab/groups"
- 
+
   const queryForm = ref(null);
 
   //查询列表信息
@@ -116,7 +116,7 @@
       }
     });
   }
-  
+
 
   // 多选框选中数据
   const handleSelectionChange = function(selection){
@@ -204,7 +204,7 @@
                   message: '操作成功',
                 })
             }
-        })    
+        })
     }).catch(() => { })
   }
 
@@ -256,7 +256,7 @@
               :value="item.instanceCode"/>
             </el-select>
           </el-form-item>
-        </el-col> 
+        </el-col>
 
         <el-col :span="8">
           <el-form-item label="状态" prop="status">
@@ -273,7 +273,7 @@
               :value="dict.value"/>
             </el-select>
           </el-form-item>
-        </el-col> 
+        </el-col>
       </el-row>
       <el-row :gutter="20">
         <el-col :span="8">
@@ -292,7 +292,7 @@
               :value="item"/>
             </el-select>
           </el-form-item>
-        </el-col> 
+        </el-col>
         <el-col :span="8">
           <el-form-item label="成员名称" prop="userName">
             <el-input
@@ -303,7 +303,7 @@
               @keyup.enter.native="handleQuery"
             />
           </el-form-item>
-        </el-col> 
+        </el-col>
       </el-row>
       <el-row :gutter="20">
         <el-col :span="8">
@@ -318,7 +318,7 @@
               end-placeholder="结束日期"
             ></el-date-picker>
           </el-form-item>
-        </el-col> 
+        </el-col>
         <el-col :span="8">
           <div>
             <el-button type="primary" size="small" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
@@ -340,7 +340,7 @@
     <!--table  -->
     <div class="table-wrap">
       <el-table v-loading="loading" :data="projectList" @selection-change="handleSelectionChange">
-          <el-table-column type="selection" width="30" align="center" />
+          <el-table-column type="selection" width="60" align="center" />
           <el-table-column label="项目编号" align="center" key="id" prop="id"/>
           <el-table-column label="项目名称" align="center" key="projectName" prop="projectName"  :show-overflow-tooltip="true"  width="100" />
           <el-table-column label="路径" align="center" key="path" prop="path" :show-overflow-tooltip="true"  width="100" />
@@ -384,7 +384,7 @@
       v-show="total>0"
       :total="total"
       :page-sizes=[10,20]
-      background layout="prev, pager, next" 
+      background layout="prev, pager, next"
       v-model:current-page="queryParams.pageNum"
       v-model:page-size="queryParams.pageSize"
       @current-change="getList"
@@ -412,14 +412,14 @@
                 :value="item.instanceCode"/>
               </el-select>
             </el-form-item>
-          </el-col> 
+          </el-col>
           <el-col :span="12">
             <el-form-item label="项目名称" prop="projectName">
               <el-input v-model="form.projectName" placeholder="请输入项目名称" maxlength="30" />
             </el-form-item>
           </el-col>
         </el-row>
-          
+
         <el-row>
           <el-col :span="12">
             <el-form-item label="组" prop="namespaceByGroup">
@@ -451,7 +451,7 @@
               :value="item"/>
             </el-select>
             </el-form-item>
-          </el-col> 
+          </el-col>
         </el-row>
 
         <el-row>

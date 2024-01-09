@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  // @ts-nocheck  
+  // @ts-nocheck
   import { Plus ,Delete, Edit, EditPen, Search , RefreshRight , Sort , QuestionFilled} from '@element-plus/icons-vue'
   import { parseTime , statusDicts , sexDicts , addDateRangeRuoyi } from "@/utils/common"
   import { listRole , addRole, updateRole , delRole ,getRole , roleMenuTreeSelect , changeRoleStatus } from "@/api/roles"
@@ -126,7 +126,7 @@
   // 处理新增按钮
   const handleAdd = function(){
     reset();
-    
+
     getMenuTreeselect().then((data)=>{
       open.value = true;
       title.value = "添加角色";
@@ -165,10 +165,10 @@
           });
         });
         title.value = "修改角色";
-      } 
+      }
     });
   }
-  
+
   const handleDelete = function(row){
     const roleId = row.roleId || ids.value;
 
@@ -306,103 +306,104 @@
 
 <template>
   <div class="main-wrapp">
-    <!--sousuo  -->
-    <el-form class="form-wrap" :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="角色名称" prop="roleName">
-            <el-input
-              v-model="queryParams.roleName"
-              placeholder="请输入角色名称"
-              clearable
-              style="width: 240px"
-              @keyup.enter.native="handleQuery"
-            />
-          </el-form-item>
-        </el-col> 
-        <el-col :span="8">
-          <el-form-item label="权限字符" prop="roleKey">
-            <el-input
-              v-model="queryParams.roleKey"
-              placeholder="请输入权限字符"
-              clearable
-              style="width: 240px"
-              @keyup.enter.native="handleQuery"
-            />
-          </el-form-item>
-        </el-col> 
-      </el-row>
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="状态" prop="status">
-          <el-select
-              v-model="queryParams.status"
-              placeholder="角色状态"
-              clearable
-              style="width: 240px">
-              <el-option v-for="dict in statusDicts"
-                :key="dict.value"
-                :label="dict.label"
-                :value="dict.value"/>
+    <yt-card>
+
+      <!--sousuo  -->
+      <el-form class="form-wrap" :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
+        <el-row :gutter="20">
+          <el-col :span="8">
+            <el-form-item label="角色名称" prop="roleName">
+              <el-input
+                v-model="queryParams.roleName"
+                placeholder="请输入角色名称"
+                clearable
+                style="width: 240px"
+                @keyup.enter.native="handleQuery"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="权限字符" prop="roleKey">
+              <el-input
+                v-model="queryParams.roleKey"
+                placeholder="请输入权限字符"
+                clearable
+                style="width: 240px"
+                @keyup.enter.native="handleQuery"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="状态" prop="status">
+              <el-select
+                v-model="queryParams.status"
+                placeholder="角色状态"
+                clearable
+                style="width: 240px">
+                <el-option v-for="dict in statusDicts"
+                           :key="dict.value"
+                           :label="dict.label"
+                           :value="dict.value"/>
               </el-select>
-          </el-form-item>
-        </el-col> 
-        <el-col :span="8">
-          <el-form-item label="创建时间">
-            <el-date-picker
-              v-model="dateRange"
-              style="width: 240px"
-              value-format="YYYY-MM-DD"
-              type="daterange"
-              range-separator="-"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-            ></el-date-picker>
-          </el-form-item>
-        </el-col> 
-        <el-col :span="8">
-          <div>
-            <el-button type="primary" size="small" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
-            <el-button  size="small" @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
-          </div>
-        </el-col>
-      </el-row>  
-    </el-form>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="创建时间">
+              <el-date-picker
+                v-model="dateRange"
+                style="width: 240px"
+                value-format="YYYY-MM-DD"
+                type="daterange"
+                range-separator="-"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
+              ></el-date-picker>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <div>
+              <el-button type="primary" size="small" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
+              <el-button  size="small" @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
+            </div>
+          </el-col>
+        </el-row>
+      </el-form>
+    </yt-card>
+    <yt-card>
+      <!--  option-->
+      <div class="option-wrap">
+        <el-button
+          type="primary"
+          plain
+          size="default"
+          @click="handleAdd" v-hasPerms="['/system/role/add']" ><el-icon><Plus /></el-icon>新增</el-button>
 
-    <!--  option-->
-    <div class="option-wrap">
-      <el-button
-        type="primary"
-        plain
-        size="default"
-        @click="handleAdd" v-hasPerms="['/system/role/add']" ><el-icon><Plus /></el-icon>新增</el-button>
 
+        <el-button
+          type="success"
+          plain
+          size="default"
+          :disabled="single"
+          @click="handleUpdate" v-hasPerms="['/system/role/edit']" ><el-icon><EditPen /></el-icon>修改</el-button>
 
-      <el-button
-        type="success"
-        plain
-        size="default"
-        :disabled="single"
-        @click="handleUpdate" v-hasPerms="['/system/role/edit']" ><el-icon><EditPen /></el-icon>修改</el-button>  
+        <el-button
+          type="danger"
+          plain
+          size="default"
+          :disabled="multiple"
+          @click="handleDelete" v-hasPerms="['/system/role/del/*']" ><el-icon><Delete /></el-icon>删除</el-button>
 
-      <el-button
-        type="danger"
-        plain
-        size="default"
-        :disabled="multiple"
-        @click="handleDelete" v-hasPerms="['/system/role/del/*']" ><el-icon><Delete /></el-icon>删除</el-button>
+      </div>
 
-    </div>
-
-    <!--table  -->
-    <div class="table-wrap">
-      <el-table v-loading="loading" :data="roleList" @selection-change="handleSelectionChange">
-          <el-table-column type="selection" width="30" align="center" />
-          <el-table-column label="角色编号" prop="roleId" width="120" />
-          <el-table-column label="角色名称" prop="roleName" :show-overflow-tooltip="true" width="150" />
-          <el-table-column label="权限字符" prop="roleKey" :show-overflow-tooltip="true" width="150" />
-          <el-table-column label="显示顺序" prop="roleSort" width="100" />
-          <el-table-column label="状态" align="center" key="status"  width="100">
+      <!--table  -->
+      <div class="table-wrap">
+        <el-table v-loading="loading" :data="roleList" @selection-change="handleSelectionChange">
+          <el-table-column type="selection" width="60" align="center" />
+          <el-table-column label="角色编号" prop="roleId" />
+          <el-table-column label="角色名称" prop="roleName" :show-overflow-tooltip="true"/>
+          <el-table-column label="权限字符" prop="roleKey" :show-overflow-tooltip="true"/>
+          <el-table-column label="显示顺序" prop="roleSort" />
+          <el-table-column label="状态" align="center" key="status">
             <template v-slot="scope">
               <el-switch
                 v-model="scope.row.status"
@@ -423,82 +424,87 @@
             width="220"
           >
             <template v-slot="scope">
-             <div class="action-btn">
-              <el-button
-                size="default"
-                @click="handleUpdate(scope.row)"
-                v-hasPerms="['/system/role/edit']"
-              >修改</el-button>
-              
-              <el-button
-                size="default"
-                @click="handleDelete(scope.row)"
-                v-hasPerms="['/system/role/del/*']" 
-              >删除</el-button>
-             </div>
+              <div class="action-btn">
+                <el-button
+                  size="default"
+                  @click="handleUpdate(scope.row)"
+                  v-hasPerms="['/system/role/edit']"
+                >修改</el-button>
+
+                <el-button
+                  size="default"
+                  @click="handleDelete(scope.row)"
+                  v-hasPerms="['/system/role/del/*']"
+                >删除</el-button>
+              </div>
             </template>
           </el-table-column>
-    </el-table>
-    </div>
-    <div class="page-wrap">
-      <el-pagination
-      v-show="total>0"
-      :total="total"
-      :page-sizes=[10,20]
-      background layout="prev, pager, next" 
-      v-model:current-page="queryParams.pageNum"
-      v-model:page-size="queryParams.pageSize"
-      @current-change="getList"
-    />
-    </div>
+        </el-table>
+      </div>
+      <div class="page-wrap">
+        <el-pagination
+          v-show="total>0"
+          :total="total"
+          :page-sizes=[10,20]
+          background layout="prev, pager, next"
+          v-model:current-page="queryParams.pageNum"
+          v-model:page-size="queryParams.pageSize"
+          @current-change="getList"
+        />
+      </div>
+    </yt-card>
+
 
 
     <!-- 添加或修改用户配置对话框 -->
     <el-dialog :title="title" v-model="open" width="600px" append-to-body>
-      <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
-        <el-form-item label="角色名称" prop="roleName">
-          <el-input v-model="form.roleName" placeholder="请输入角色名称" />
-        </el-form-item>
-        <el-form-item label="权限字符" prop="roleKey">
-          <el-input v-model="form.roleKey" placeholder="请输入权限字符" />
-        </el-form-item>
-        <el-form-item label="角色顺序" prop="roleSort">
-          <el-input-number v-model="form.roleSort" controls-position="right" :min="0" />
-        </el-form-item>
-        <el-form-item label="状态">
-          <el-radio-group v-model="form.status">
-            <el-radio
-                  v-for="dict in statusDicts"
-                  :key="dict.value"
-                  :label="dict.value"
-                >{{dict.label}}</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="菜单权限">
-          <el-checkbox v-model="menuExpand" @change="handleCheckedTreeExpand($event, 'menu')">展开/折叠</el-checkbox>
-          <el-checkbox v-model="menuNodeAll" @change="handleCheckedTreeNodeAll($event, 'menu')">全选/全不选</el-checkbox>
-          <el-checkbox v-model="form.menuCheckStrictly" @change="handleCheckedTreeConnect($event, 'menu')">父子联动</el-checkbox>
-        </el-form-item>
-        <el-form-item label="">
-          <el-tree
-            class="tree-border"
-            :data="menuOptions"
-            show-checkbox
-            ref="menuRef"
-            node-key="id"
-            :check-strictly="!form.menuCheckStrictly"
-            empty-text="加载中，请稍候"
-            :props="defaultProps"
-          ></el-tree>
-        </el-form-item>
-        <el-form-item label="备注">
-          <el-input v-model="form.remark" type="textarea" placeholder="请输入内容"></el-input>
-        </el-form-item>
-      </el-form>
-      <div class="dialog-footer">
+      <yt-card>
+
+        <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
+          <el-form-item label="角色名称" prop="roleName">
+            <el-input v-model="form.roleName" placeholder="请输入角色名称" />
+          </el-form-item>
+          <el-form-item label="权限字符" prop="roleKey">
+            <el-input v-model="form.roleKey" placeholder="请输入权限字符" />
+          </el-form-item>
+          <el-form-item label="角色顺序" prop="roleSort">
+            <el-input-number v-model="form.roleSort" controls-position="right" :min="0" />
+          </el-form-item>
+          <el-form-item label="状态">
+            <el-radio-group v-model="form.status">
+              <el-radio
+                v-for="dict in statusDicts"
+                :key="dict.value"
+                :label="dict.value"
+              >{{dict.label}}</el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="菜单权限">
+            <el-checkbox v-model="menuExpand" @change="handleCheckedTreeExpand($event, 'menu')">展开/折叠</el-checkbox>
+            <el-checkbox v-model="menuNodeAll" @change="handleCheckedTreeNodeAll($event, 'menu')">全选/全不选</el-checkbox>
+            <el-checkbox v-model="form.menuCheckStrictly" @change="handleCheckedTreeConnect($event, 'menu')">父子联动</el-checkbox>
+          </el-form-item>
+          <el-form-item label="">
+            <el-tree
+              class="tree-border"
+              :data="menuOptions"
+              show-checkbox
+              ref="menuRef"
+              node-key="id"
+              :check-strictly="!form.menuCheckStrictly"
+              empty-text="加载中，请稍候"
+              :props="defaultProps"
+            ></el-tree>
+          </el-form-item>
+          <el-form-item label="备注">
+            <el-input v-model="form.remark" type="textarea" placeholder="请输入内容"></el-input>
+          </el-form-item>
+        </el-form>
+      </yt-card>
+      <template #footer>
         <el-button type="primary" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
-      </div>
+      </template>
     </el-dialog>
   </div>
 </template>
