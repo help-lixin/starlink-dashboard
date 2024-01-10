@@ -29,21 +29,6 @@ const selectedElements = ref([])
 const element = ref(null)
 
 
-function extraRule(rules,fieldName){
-	for(let i=0;i<rules.length;i++){
-		const rule = rules[i];
-		if(rule.type == "subForm" || rule.type == "group"){
-			return (rule?.rule?.rule,fieldName);
-		} else{
-			if(rule.field == fieldName){
-				return rule;
-			}
-		}
-	}
-}
-
-
-
 const eventBridge = {};
 formCreate.register({
 	name: "dependencies",
