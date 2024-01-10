@@ -168,30 +168,20 @@ export default `
                 multiple: false
             },
             update(val, rule, fApi, arg){
-            //    if(arg?.origin == "init"){
-            //    }else if(arg?.origin == "change"){
-                  const setups = fApi.getRule("setups")
-                  if(setups.value.length == 0 && val.length > 0 ){
-                    setups.value.push({});
-                  }
+                const formData = fApi.form
+                
+                const setups = fApi.getRule("setups")
+                if(setups.value.length == 0 ){
+                setups.value.push({});
+                }
 
-                  if(setups.value.length > 0) {
+                const childRules = setups?.props?.rule
+                // 先把所有的元素全部隐藏掉
+                for(let i=0;i<childRules.length;i++){
+                    childRules[i].hidden=true;
+                }
 
-                    const childRules = setups?.props?.rule
-                    // 先把所有的元素全部隐藏掉
-                    for(let i=0;i<childRules.length;i++){
-                        childRules[i].hidden=true;
-                    }
-
-                    // setupType
-                    childRules.filter((item,index,self)=>{
-                        if(item.field == "setupType"){
-                            return item;
-                        }
-                    }).forEach((item)=>{
-                        item.value=val;
-                    });
-                    
+                if(setups.value.length > 0) {
                     // 针对不同的value对UI进行展示
                     let filterRules = [];
                     if(val == "MAVEN"){
@@ -265,14 +255,19 @@ export default `
                             }
                         });
                     } 
-
+                    
                     // 显示指定的UI
                     filterRules.forEach((item)=>{
                         item.hidden=false;
                     });
+                }
 
-                  }
-            //    }
+                // formData.setups
+                formData?.setups.forEach((item)=>{
+                    item.setupType=val;
+                }); 
+
+                fApi.refresh()
             },
         },
         {
@@ -284,14 +279,15 @@ export default `
               rule: [
                 { type:"hidden", field:"setupType",  value:"" },
                 // jdk
-                { type: 'select', field: 'jdk', hidden: true,  title: 'JDK版本' , placeholder : "请选择JDK版本" , props:{ options:[] } , validate:[
+                { type: 'select', field: 'jdk', hidden: true,  title: 'JDK版本' , placeholder : "请选择JDK版本" ,  validate:[
                     // { required: true, message: '请选择JDK版本', trigger: 'blur' },
-                ], update(val, rule, fApi, arg){
-                    // 为什么获取不到:instanceCode
-                    const instanceCode = fApi.getValue("instanceCode");
-                    
-
-                    fetch('/jenkins/systemConfig/optionSelect/JAVA/'+ instanceCode , {
+                ], effect: {
+                    dependencies: 'instanceCode'
+                }, update(val, rule, fApi, arg){
+                    const gApi = globalApi.value;
+                    const instanceCode = gApi.getValue("instanceCode");
+                    if(!instanceCode){return;}
+                    fetch('/api/starlink-service/jenkins/systemConfig/optionSelect/JDK/'+ instanceCode , {
                         headers: {
                             "Authorization" : "bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3R5cGUiOiIwMCIsInVzZXJfaWQiOjEsInVzZXJfbmFtZSI6ImFkbWluIiwic2NvcGUiOlsiYWxsIl0sIm5pY2tfbmFtZSI6IuiLpeS-nTEiLCJhdmF0YXIiOiIiLCJleHAiOjE3NDc5ODgzMTksImRlcHRfaWQiOjEwMywiYXV0aG9yaXRpZXMiOlsiYWRtaW4iXSwianRpIjoiS0NQQlp0MzczaElLNDhnNVZoeXM5TDVyNXpnIiwiY2xpZW50X2lkIjoiY2xpZW50MSIsImVtYWlsIjoiYWRtaW5AMTYzLmNvbSJ9.lxwystBgPNkMoRlw3GG4H0ViGM7Fr5g7Rbr4JaDoVoLBD6SXSMr9iXp29cmUY4CzKWQ3zRai37yrKL_SsOeIJwcGDilw8Lkd_-m4KT1R4N9oXWzqH0zkFH37Y9JALkn2c3S_scBUl_VSDTw7v1_IYQ6EZq7QYTIh1f42meP3BP5Y4fqRTPpK40C69Clk8rAqlrHb04XoUkVLWAAvmwlTroTmPhJ3RLCIxU7pAhUUP9MP-OapNufzvWmIuvrEuwbjaZm1-yIEIyptQ-bcQIZW_EzKaew1qNjKHDqb6ZBmSD-ZgxshpGcIVjNgBR0GuoRFZxH1Gm3crdY8Uix5xTKtzA"
                         }
@@ -303,173 +299,190 @@ export default `
                         })
                     });
 
+                    if(arg?.origin == "change"){
+                        const jdkId = gApi.getRule("jdkId");
+                        jdkId.value = val;
+                        console.log(jdkId);
+                    }
                 } },
                 // mavenId
-                { type: 'select', field: 'mavenId', hidden: true,  title: 'Maven版本' , placeholder : "请选择Maven版本" , validate: [  ] , 
-                    update(val, rule, fApi, arg){
-                        // if(arg?.origin == "init"){
-                        //     return;
-                        // }
-                        // const instanceCode = fApi.getValue("instanceCode");
-                        // fetch('/jenkins/systemConfig/optionSelect/MAVEN/'+instanceCode , {
-                        //     headers: {
-                        //         "Authorization" : "bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3R5cGUiOiIwMCIsInVzZXJfaWQiOjEsInVzZXJfbmFtZSI6ImFkbWluIiwic2NvcGUiOlsiYWxsIl0sIm5pY2tfbmFtZSI6IuiLpeS-nTEiLCJhdmF0YXIiOiIiLCJleHAiOjE3NDc5ODgzMTksImRlcHRfaWQiOjEwMywiYXV0aG9yaXRpZXMiOlsiYWRtaW4iXSwianRpIjoiS0NQQlp0MzczaElLNDhnNVZoeXM5TDVyNXpnIiwiY2xpZW50X2lkIjoiY2xpZW50MSIsImVtYWlsIjoiYWRtaW5AMTYzLmNvbSJ9.lxwystBgPNkMoRlw3GG4H0ViGM7Fr5g7Rbr4JaDoVoLBD6SXSMr9iXp29cmUY4CzKWQ3zRai37yrKL_SsOeIJwcGDilw8Lkd_-m4KT1R4N9oXWzqH0zkFH37Y9JALkn2c3S_scBUl_VSDTw7v1_IYQ6EZq7QYTIh1f42meP3BP5Y4fqRTPpK40C69Clk8rAqlrHb04XoUkVLWAAvmwlTroTmPhJ3RLCIxU7pAhUUP9MP-OapNufzvWmIuvrEuwbjaZm1-yIEIyptQ-bcQIZW_EzKaew1qNjKHDqb6ZBmSD-ZgxshpGcIVjNgBR0GuoRFZxH1Gm3crdY8Uix5xTKtzA"
-                        //     }
-                        // }).then(res => {
-                        //     res.json().then(res => { 
-                        //         if(res?.code == 200){
-                        //             rule.options=res.data
-                        //         }
-                        //     })
-                        // });
+                { type: 'select', field: 'mavenId', hidden: true,  title: 'Maven版本' , placeholder : "请选择Maven版本" , validate: [  ] ,  effect: {
+                        dependencies: 'instanceCode'
+                    }, update(val, rule, fApi, arg){
+                        const gApi = globalApi.value;
+                        const instanceCode = gApi.getValue("instanceCode");
+                        if(!instanceCode){return;}
+                        fetch('/api/starlink-service/jenkins/systemConfig/optionSelect/MAVEN/'+ instanceCode , {
+                            headers: {
+                                "Authorization" : "bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3R5cGUiOiIwMCIsInVzZXJfaWQiOjEsInVzZXJfbmFtZSI6ImFkbWluIiwic2NvcGUiOlsiYWxsIl0sIm5pY2tfbmFtZSI6IuiLpeS-nTEiLCJhdmF0YXIiOiIiLCJleHAiOjE3NDc5ODgzMTksImRlcHRfaWQiOjEwMywiYXV0aG9yaXRpZXMiOlsiYWRtaW4iXSwianRpIjoiS0NQQlp0MzczaElLNDhnNVZoeXM5TDVyNXpnIiwiY2xpZW50X2lkIjoiY2xpZW50MSIsImVtYWlsIjoiYWRtaW5AMTYzLmNvbSJ9.lxwystBgPNkMoRlw3GG4H0ViGM7Fr5g7Rbr4JaDoVoLBD6SXSMr9iXp29cmUY4CzKWQ3zRai37yrKL_SsOeIJwcGDilw8Lkd_-m4KT1R4N9oXWzqH0zkFH37Y9JALkn2c3S_scBUl_VSDTw7v1_IYQ6EZq7QYTIh1f42meP3BP5Y4fqRTPpK40C69Clk8rAqlrHb04XoUkVLWAAvmwlTroTmPhJ3RLCIxU7pAhUUP9MP-OapNufzvWmIuvrEuwbjaZm1-yIEIyptQ-bcQIZW_EzKaew1qNjKHDqb6ZBmSD-ZgxshpGcIVjNgBR0GuoRFZxH1Gm3crdY8Uix5xTKtzA"
+                            }
+                        }).then(res => {
+                            res.json().then(res => { 
+                                if(res?.code == 200){
+                                    rule.options=res.data
+                                }
+                            })
+                        });
                     }  
                 },
                 // goals
                 {
-                    type:"textarea",
+                    type:"input",
                     title:"Script",
                     field:"goals",
                     hidden: true, 
-                    autosize:true,
-                    value: "clean install -DskipTests -X",
                     col:{
                         span:12,
                         labelWidth:150
                     },
                     props: {
-                        type: "text",
+                        type: "textarea",
+                        autosize: {
+                            minRows:2,
+                            maxRows:10
+                        }
                     },
                     validate:[
                         // { required: true, message: '请输入打包脚本', trigger: 'blur' },
                     ],
                 },
                 // antId
-                {type: 'select', field: 'antId', hidden: true,  title: 'Ant版本' , validate: [ { required: true, message: '请选择Ant版本', trigger: 'blur' },] , update(val, rule, fApi, arg){
-                    // if(arg?.origin == "init"){
-                    //     return;
-                    // }
-
-                    // const instanceCode = fApi.getValue("instanceCode");
-                    // fetch('/jenkins/systemConfig/optionSelect/ANT/'+instanceCode , {
-                    //     headers: {
-                    //         "Authorization" : "bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3R5cGUiOiIwMCIsInVzZXJfaWQiOjEsInVzZXJfbmFtZSI6ImFkbWluIiwic2NvcGUiOlsiYWxsIl0sIm5pY2tfbmFtZSI6IuiLpeS-nTEiLCJhdmF0YXIiOiIiLCJleHAiOjE3NDc5ODgzMTksImRlcHRfaWQiOjEwMywiYXV0aG9yaXRpZXMiOlsiYWRtaW4iXSwianRpIjoiS0NQQlp0MzczaElLNDhnNVZoeXM5TDVyNXpnIiwiY2xpZW50X2lkIjoiY2xpZW50MSIsImVtYWlsIjoiYWRtaW5AMTYzLmNvbSJ9.lxwystBgPNkMoRlw3GG4H0ViGM7Fr5g7Rbr4JaDoVoLBD6SXSMr9iXp29cmUY4CzKWQ3zRai37yrKL_SsOeIJwcGDilw8Lkd_-m4KT1R4N9oXWzqH0zkFH37Y9JALkn2c3S_scBUl_VSDTw7v1_IYQ6EZq7QYTIh1f42meP3BP5Y4fqRTPpK40C69Clk8rAqlrHb04XoUkVLWAAvmwlTroTmPhJ3RLCIxU7pAhUUP9MP-OapNufzvWmIuvrEuwbjaZm1-yIEIyptQ-bcQIZW_EzKaew1qNjKHDqb6ZBmSD-ZgxshpGcIVjNgBR0GuoRFZxH1Gm3crdY8Uix5xTKtzA"
-                    //     }
-                    // }).then(res => {
-                    //     res.json().then(res => { 
-                    //         if(res?.code == 200){
-                    //             rule.options=res.data
-                    //         }
-                    //     })
-                    // });
+                {type: 'select', field: 'antId', hidden: true,  title: 'Ant版本' , validate: [ { required: true, message: '请选择Ant版本', trigger: 'blur' },] ,  effect: {
+                    dependencies: 'instanceCode'
+               } , update(val, rule, fApi, arg){
+                        const gApi = globalApi.value;
+                        const instanceCode = gApi.getValue("instanceCode");
+                        if(!instanceCode){return;}
+                        fetch('/api/starlink-service/jenkins/systemConfig/optionSelect/ANT/'+ instanceCode , {
+                            headers: {
+                                "Authorization" : "bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3R5cGUiOiIwMCIsInVzZXJfaWQiOjEsInVzZXJfbmFtZSI6ImFkbWluIiwic2NvcGUiOlsiYWxsIl0sIm5pY2tfbmFtZSI6IuiLpeS-nTEiLCJhdmF0YXIiOiIiLCJleHAiOjE3NDc5ODgzMTksImRlcHRfaWQiOjEwMywiYXV0aG9yaXRpZXMiOlsiYWRtaW4iXSwianRpIjoiS0NQQlp0MzczaElLNDhnNVZoeXM5TDVyNXpnIiwiY2xpZW50X2lkIjoiY2xpZW50MSIsImVtYWlsIjoiYWRtaW5AMTYzLmNvbSJ9.lxwystBgPNkMoRlw3GG4H0ViGM7Fr5g7Rbr4JaDoVoLBD6SXSMr9iXp29cmUY4CzKWQ3zRai37yrKL_SsOeIJwcGDilw8Lkd_-m4KT1R4N9oXWzqH0zkFH37Y9JALkn2c3S_scBUl_VSDTw7v1_IYQ6EZq7QYTIh1f42meP3BP5Y4fqRTPpK40C69Clk8rAqlrHb04XoUkVLWAAvmwlTroTmPhJ3RLCIxU7pAhUUP9MP-OapNufzvWmIuvrEuwbjaZm1-yIEIyptQ-bcQIZW_EzKaew1qNjKHDqb6ZBmSD-ZgxshpGcIVjNgBR0GuoRFZxH1Gm3crdY8Uix5xTKtzA"
+                            }
+                        }).then(res => {
+                            res.json().then(res => { 
+                                if(res?.code == 200){
+                                    rule.options=res.data
+                                }
+                            })
+                        });
                 } },
                 // targets
                 {
-                    type:"textarea",
+                    type:"input",
                     title:"Script",
                     field:"targets",
                     hidden: true, 
-                    value:"clean install -DskipTests -X",
                     col:{
                         span:12,
                         labelWidth:150
                     },
                     props: {
-                        type: "text",
+                        type: "textarea",
                     },
                     validate:[
                         { required: true, message: '请输入打包脚本', trigger: 'blur' },
                     ],
                 },
                 // gradleId
-                {type: 'select', field: 'gradleId', hidden: true,  title: 'Gradle版本' , placeholder : "请选择Gradle版本" , validate: [ { required: true, message: '请选择Gradle版本', trigger: 'blur' },] , update(val, rule, fApi, arg){
-                    // if(arg?.origin == "init"){
-                    //     return;
-                    // }
+                {type: 'select', field: 'gradleId', hidden: true,  title: 'Gradle版本' , placeholder : "请选择Gradle版本" , validate: [ { required: true, message: '请选择Gradle版本', trigger: 'blur' },] ,effect: {
+                    dependencies: 'instanceCode'
+               }, update(val, rule, fApi, arg){
+                        const gApi = globalApi.value;
+                        const instanceCode = gApi.getValue("instanceCode");
+                        if(!instanceCode){return;}
+                        fetch('/api/starlink-service/jenkins/systemConfig/optionSelect/GRADLE/'+ instanceCode , {
+                            headers: {
+                                "Authorization" : "bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3R5cGUiOiIwMCIsInVzZXJfaWQiOjEsInVzZXJfbmFtZSI6ImFkbWluIiwic2NvcGUiOlsiYWxsIl0sIm5pY2tfbmFtZSI6IuiLpeS-nTEiLCJhdmF0YXIiOiIiLCJleHAiOjE3NDc5ODgzMTksImRlcHRfaWQiOjEwMywiYXV0aG9yaXRpZXMiOlsiYWRtaW4iXSwianRpIjoiS0NQQlp0MzczaElLNDhnNVZoeXM5TDVyNXpnIiwiY2xpZW50X2lkIjoiY2xpZW50MSIsImVtYWlsIjoiYWRtaW5AMTYzLmNvbSJ9.lxwystBgPNkMoRlw3GG4H0ViGM7Fr5g7Rbr4JaDoVoLBD6SXSMr9iXp29cmUY4CzKWQ3zRai37yrKL_SsOeIJwcGDilw8Lkd_-m4KT1R4N9oXWzqH0zkFH37Y9JALkn2c3S_scBUl_VSDTw7v1_IYQ6EZq7QYTIh1f42meP3BP5Y4fqRTPpK40C69Clk8rAqlrHb04XoUkVLWAAvmwlTroTmPhJ3RLCIxU7pAhUUP9MP-OapNufzvWmIuvrEuwbjaZm1-yIEIyptQ-bcQIZW_EzKaew1qNjKHDqb6ZBmSD-ZgxshpGcIVjNgBR0GuoRFZxH1Gm3crdY8Uix5xTKtzA"
+                            }
+                        }).then(res => {
+                            res.json().then(res => { 
+                                if(res?.code == 200){
+                                    rule.options=res.data
+                                }
+                            })
+                        });
                 } },
                 // task
                 {
-                    type:"textarea",
+                    type:"input",
                     title:"Script",
                     field:"task",
                     hidden: true, 
-                    value:"clean install -DskipTests -X",
                     col:{
                         span:12,
                         labelWidth:150
                     },
                     props: {
-                        type: "text",
+                        type: "textarea",
                     },
                     validate:[
                         { required: true, message: '请输入打包脚本', trigger: 'blur' },
                     ],
                 },
                 // goId
-                {type: 'select', field: 'goId', hidden: true,  title: 'Go版本' , placeholder : "请选择Go版本" , validate: [ { required: true, message: '请选择Go', trigger: 'blur' },] , update(val, rule, fApi, arg){
-                    // if(arg?.origin == "init"){
-                    //     return;
-                    // }
-
-                    // const instanceCode = fApi.getValue("instanceCode");
-                    // fetch('/jenkins/systemConfig/optionSelect/GO/'+instanceCode , {
-                    //     headers: {
-                    //         "Authorization" : "bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3R5cGUiOiIwMCIsInVzZXJfaWQiOjEsInVzZXJfbmFtZSI6ImFkbWluIiwic2NvcGUiOlsiYWxsIl0sIm5pY2tfbmFtZSI6IuiLpeS-nTEiLCJhdmF0YXIiOiIiLCJleHAiOjE3NDc5ODgzMTksImRlcHRfaWQiOjEwMywiYXV0aG9yaXRpZXMiOlsiYWRtaW4iXSwianRpIjoiS0NQQlp0MzczaElLNDhnNVZoeXM5TDVyNXpnIiwiY2xpZW50X2lkIjoiY2xpZW50MSIsImVtYWlsIjoiYWRtaW5AMTYzLmNvbSJ9.lxwystBgPNkMoRlw3GG4H0ViGM7Fr5g7Rbr4JaDoVoLBD6SXSMr9iXp29cmUY4CzKWQ3zRai37yrKL_SsOeIJwcGDilw8Lkd_-m4KT1R4N9oXWzqH0zkFH37Y9JALkn2c3S_scBUl_VSDTw7v1_IYQ6EZq7QYTIh1f42meP3BP5Y4fqRTPpK40C69Clk8rAqlrHb04XoUkVLWAAvmwlTroTmPhJ3RLCIxU7pAhUUP9MP-OapNufzvWmIuvrEuwbjaZm1-yIEIyptQ-bcQIZW_EzKaew1qNjKHDqb6ZBmSD-ZgxshpGcIVjNgBR0GuoRFZxH1Gm3crdY8Uix5xTKtzA"
-                    //     }
-                    // }).then(res => {
-                    //     res.json().then(res => { 
-                    //         if(res?.code == 200){
-                    //             rule.options=res.data
-                    //         }
-                    //     })
-                    // });
+                {type: 'select', field: 'goId', hidden: true,  title: 'Go版本' , placeholder : "请选择Go版本" , validate: [ { required: true, message: '请选择Go', trigger: 'blur' },] , effect: {
+                    dependencies: 'instanceCode'
+               }, update(val, rule, fApi, arg){
+                        const gApi = globalApi.value;
+                        const instanceCode = gApi.getValue("instanceCode");
+                        if(!instanceCode){return;}
+                        fetch('/api/starlink-service/jenkins/systemConfig/optionSelect/GO/'+ instanceCode , {
+                            headers: {
+                                "Authorization" : "bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3R5cGUiOiIwMCIsInVzZXJfaWQiOjEsInVzZXJfbmFtZSI6ImFkbWluIiwic2NvcGUiOlsiYWxsIl0sIm5pY2tfbmFtZSI6IuiLpeS-nTEiLCJhdmF0YXIiOiIiLCJleHAiOjE3NDc5ODgzMTksImRlcHRfaWQiOjEwMywiYXV0aG9yaXRpZXMiOlsiYWRtaW4iXSwianRpIjoiS0NQQlp0MzczaElLNDhnNVZoeXM5TDVyNXpnIiwiY2xpZW50X2lkIjoiY2xpZW50MSIsImVtYWlsIjoiYWRtaW5AMTYzLmNvbSJ9.lxwystBgPNkMoRlw3GG4H0ViGM7Fr5g7Rbr4JaDoVoLBD6SXSMr9iXp29cmUY4CzKWQ3zRai37yrKL_SsOeIJwcGDilw8Lkd_-m4KT1R4N9oXWzqH0zkFH37Y9JALkn2c3S_scBUl_VSDTw7v1_IYQ6EZq7QYTIh1f42meP3BP5Y4fqRTPpK40C69Clk8rAqlrHb04XoUkVLWAAvmwlTroTmPhJ3RLCIxU7pAhUUP9MP-OapNufzvWmIuvrEuwbjaZm1-yIEIyptQ-bcQIZW_EzKaew1qNjKHDqb6ZBmSD-ZgxshpGcIVjNgBR0GuoRFZxH1Gm3crdY8Uix5xTKtzA"
+                            }
+                        }).then(res => {
+                            res.json().then(res => { 
+                                if(res?.code == 200){
+                                    rule.options=res.data
+                                }
+                            })
+                        });
                 }  },
                 // pythonId
-                {type: 'select', field: 'pythonId', hidden: true,  title: 'Python版本' , placeholder : "请选择Python版本" ,validate: [ { required: true, message: '请选择Python', trigger: 'blur' },] ,update(val, rule, fApi, arg){
-                    // if(arg?.origin == "init"){
-                    //     return;
-                    // }
-
-                    // const instanceCode = fApi.getValue("instanceCode");
-                    // fetch('/jenkins/systemConfig/optionSelect/PYTHON/'+instanceCode , {
-                    //     headers: {
-                    //         "Authorization" : "bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3R5cGUiOiIwMCIsInVzZXJfaWQiOjEsInVzZXJfbmFtZSI6ImFkbWluIiwic2NvcGUiOlsiYWxsIl0sIm5pY2tfbmFtZSI6IuiLpeS-nTEiLCJhdmF0YXIiOiIiLCJleHAiOjE3NDc5ODgzMTksImRlcHRfaWQiOjEwMywiYXV0aG9yaXRpZXMiOlsiYWRtaW4iXSwianRpIjoiS0NQQlp0MzczaElLNDhnNVZoeXM5TDVyNXpnIiwiY2xpZW50X2lkIjoiY2xpZW50MSIsImVtYWlsIjoiYWRtaW5AMTYzLmNvbSJ9.lxwystBgPNkMoRlw3GG4H0ViGM7Fr5g7Rbr4JaDoVoLBD6SXSMr9iXp29cmUY4CzKWQ3zRai37yrKL_SsOeIJwcGDilw8Lkd_-m4KT1R4N9oXWzqH0zkFH37Y9JALkn2c3S_scBUl_VSDTw7v1_IYQ6EZq7QYTIh1f42meP3BP5Y4fqRTPpK40C69Clk8rAqlrHb04XoUkVLWAAvmwlTroTmPhJ3RLCIxU7pAhUUP9MP-OapNufzvWmIuvrEuwbjaZm1-yIEIyptQ-bcQIZW_EzKaew1qNjKHDqb6ZBmSD-ZgxshpGcIVjNgBR0GuoRFZxH1Gm3crdY8Uix5xTKtzA"
-                    //     }
-                    // }).then(res => {
-                    //     res.json().then(res => { 
-                    //         if(res?.code == 200){
-                    //             rule.options=res.data
-                    //         }
-                    //     })
-                    // });
+                {type: 'select', field: 'pythonId', hidden: true,  title: 'Python版本' , placeholder : "请选择Python版本" ,validate: [ { required: true, message: '请选择Python', trigger: 'blur' },] , effect: {
+                    dependencies: 'instanceCode'
+               }, update(val, rule, fApi, arg){
+                        const gApi = globalApi.value;
+                        const instanceCode = gApi.getValue("instanceCode");
+                        if(!instanceCode){return;}
+                        fetch('/api/starlink-service/jenkins/systemConfig/optionSelect/PYTHON/'+ instanceCode , {
+                            headers: {
+                                "Authorization" : "bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3R5cGUiOiIwMCIsInVzZXJfaWQiOjEsInVzZXJfbmFtZSI6ImFkbWluIiwic2NvcGUiOlsiYWxsIl0sIm5pY2tfbmFtZSI6IuiLpeS-nTEiLCJhdmF0YXIiOiIiLCJleHAiOjE3NDc5ODgzMTksImRlcHRfaWQiOjEwMywiYXV0aG9yaXRpZXMiOlsiYWRtaW4iXSwianRpIjoiS0NQQlp0MzczaElLNDhnNVZoeXM5TDVyNXpnIiwiY2xpZW50X2lkIjoiY2xpZW50MSIsImVtYWlsIjoiYWRtaW5AMTYzLmNvbSJ9.lxwystBgPNkMoRlw3GG4H0ViGM7Fr5g7Rbr4JaDoVoLBD6SXSMr9iXp29cmUY4CzKWQ3zRai37yrKL_SsOeIJwcGDilw8Lkd_-m4KT1R4N9oXWzqH0zkFH37Y9JALkn2c3S_scBUl_VSDTw7v1_IYQ6EZq7QYTIh1f42meP3BP5Y4fqRTPpK40C69Clk8rAqlrHb04XoUkVLWAAvmwlTroTmPhJ3RLCIxU7pAhUUP9MP-OapNufzvWmIuvrEuwbjaZm1-yIEIyptQ-bcQIZW_EzKaew1qNjKHDqb6ZBmSD-ZgxshpGcIVjNgBR0GuoRFZxH1Gm3crdY8Uix5xTKtzA"
+                            }
+                        }).then(res => {
+                            res.json().then(res => { 
+                                if(res?.code == 200){
+                                    rule.options=res.data
+                                }
+                            })
+                        });
                 } },
                 // nodejsId
-                {type: 'select', field: 'nodejsId', hidden: true,  title: 'NodeJS版本' , placeholder : "请选择NodeJS版本" ,validate: [ { required: true, message: '请选择NodeJS', trigger: 'blur' },] , update(val, rule, fApi, arg){
-                    // if(arg?.origin == "init"){
-                    //     return;
-                    // }
-                    
-                    // const instanceCode = fApi.getValue("instanceCode");
-                    // fetch('/jenkins/systemConfig/optionSelect/NODE_JS/'+instanceCode , {
-                    //     headers: {
-                    //         "Authorization" : "bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3R5cGUiOiIwMCIsInVzZXJfaWQiOjEsInVzZXJfbmFtZSI6ImFkbWluIiwic2NvcGUiOlsiYWxsIl0sIm5pY2tfbmFtZSI6IuiLpeS-nTEiLCJhdmF0YXIiOiIiLCJleHAiOjE3NDc5ODgzMTksImRlcHRfaWQiOjEwMywiYXV0aG9yaXRpZXMiOlsiYWRtaW4iXSwianRpIjoiS0NQQlp0MzczaElLNDhnNVZoeXM5TDVyNXpnIiwiY2xpZW50X2lkIjoiY2xpZW50MSIsImVtYWlsIjoiYWRtaW5AMTYzLmNvbSJ9.lxwystBgPNkMoRlw3GG4H0ViGM7Fr5g7Rbr4JaDoVoLBD6SXSMr9iXp29cmUY4CzKWQ3zRai37yrKL_SsOeIJwcGDilw8Lkd_-m4KT1R4N9oXWzqH0zkFH37Y9JALkn2c3S_scBUl_VSDTw7v1_IYQ6EZq7QYTIh1f42meP3BP5Y4fqRTPpK40C69Clk8rAqlrHb04XoUkVLWAAvmwlTroTmPhJ3RLCIxU7pAhUUP9MP-OapNufzvWmIuvrEuwbjaZm1-yIEIyptQ-bcQIZW_EzKaew1qNjKHDqb6ZBmSD-ZgxshpGcIVjNgBR0GuoRFZxH1Gm3crdY8Uix5xTKtzA"
-                    //     }
-                    // }).then(res => {
-                    //     res.json().then(res => { 
-                    //         if(res?.code == 200){
-                    //             rule.options=res.data
-                    //         }
-                    //     })
-                    // });
+                {type: 'select', field: 'nodejsId', hidden: true,  title: 'NodeJS版本' , placeholder : "请选择NodeJS版本" ,validate: [ { required: true, message: '请选择NodeJS', trigger: 'blur' },] , effect: {
+                    dependencies: 'instanceCode'
+               }, update(val, rule, fApi, arg){
+                        const gApi = globalApi.value;
+                        const instanceCode = gApi.getValue("instanceCode");
+                        if(!instanceCode){return;}
+                        fetch('/api/starlink-service/jenkins/systemConfig/optionSelect/NODE_JS/'+ instanceCode , {
+                            headers: {
+                                "Authorization" : "bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3R5cGUiOiIwMCIsInVzZXJfaWQiOjEsInVzZXJfbmFtZSI6ImFkbWluIiwic2NvcGUiOlsiYWxsIl0sIm5pY2tfbmFtZSI6IuiLpeS-nTEiLCJhdmF0YXIiOiIiLCJleHAiOjE3NDc5ODgzMTksImRlcHRfaWQiOjEwMywiYXV0aG9yaXRpZXMiOlsiYWRtaW4iXSwianRpIjoiS0NQQlp0MzczaElLNDhnNVZoeXM5TDVyNXpnIiwiY2xpZW50X2lkIjoiY2xpZW50MSIsImVtYWlsIjoiYWRtaW5AMTYzLmNvbSJ9.lxwystBgPNkMoRlw3GG4H0ViGM7Fr5g7Rbr4JaDoVoLBD6SXSMr9iXp29cmUY4CzKWQ3zRai37yrKL_SsOeIJwcGDilw8Lkd_-m4KT1R4N9oXWzqH0zkFH37Y9JALkn2c3S_scBUl_VSDTw7v1_IYQ6EZq7QYTIh1f42meP3BP5Y4fqRTPpK40C69Clk8rAqlrHb04XoUkVLWAAvmwlTroTmPhJ3RLCIxU7pAhUUP9MP-OapNufzvWmIuvrEuwbjaZm1-yIEIyptQ-bcQIZW_EzKaew1qNjKHDqb6ZBmSD-ZgxshpGcIVjNgBR0GuoRFZxH1Gm3crdY8Uix5xTKtzA"
+                            }
+                        }).then(res => {
+                            res.json().then(res => { 
+                                if(res?.code == 200){
+                                    rule.options=res.data
+                                }
+                            })
+                        });
                 } },
                 // script
                 {
-                    type:"textarea",
+                    type:"input",
                     title:"Script",
                     field:"script",
                     hidden: true, 
-                    value:"",
                     props: {
-                        type: "text",
+                        type: "textarea",
                     },
                     validate:[
                         { required: true, message: '请输入打包脚本', trigger: 'blur' },
@@ -477,17 +490,16 @@ export default `
                 },
                 // shellScript
                 {
-                    type:"textarea",
+                    type:"input",
                     title:"Script",
                     field:"shellScript",
                     hidden: true, 
-                    value:"",
                     col:{
                         span:12,
                         labelWidth:150
                     },
                     props: {
-                        type: "text",
+                        type: "textarea",
                     },
                     validate:[
                         { required: true, message: '请输入打包脚本', trigger: 'blur' },

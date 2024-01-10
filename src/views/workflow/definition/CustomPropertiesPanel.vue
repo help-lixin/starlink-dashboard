@@ -67,6 +67,7 @@ formCreate.register({
 //获取 formCreate 组件
 const FormCreate = formCreate.$form();
 const fApi = ref({});
+
 const formData = ref({});
 const options = ref({
   form: {
@@ -92,6 +93,7 @@ const options = ref({
 
 
 const rule = ref([]);
+
 
 
 function init() {
@@ -153,6 +155,8 @@ function init() {
 
 		//  为节点配置默认属性
 		setDefaultProperties()
+
+		window.globalApi=fApi;
 	}) // end  selection.changed
 
 	props.modeler.on('element.changed', e => {
