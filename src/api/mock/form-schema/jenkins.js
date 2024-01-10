@@ -184,77 +184,89 @@ export default `
                 if(setups.value.length > 0) {
                     // 针对不同的value对UI进行展示
                     let filterRules = [];
-                    if(val == "MAVEN"){
-                        // maven-> 
-                        // mavenId:undefined,
-                        // goals:undefined,
-                        filterRules = childRules.filter((item,index,self)=>{
-                            const field =  item.field;
-                            if(field == "mavenId" || field == "goals" || field == "jdk"){
-                                return item;
-                            }
-                        });
-                    } else if(val == "GRADLE"){
-                        // gradle-> 
-                        // gradleId:undefined,
-                        // task:undefined,
-                        filterRules = childRules.filter((item,index,self)=>{
-                            const field =  item.field;
-                            if(field == "gradleId" || field == "task" || field == "jdk"){
-                                return item;
-                            }
-                        });
-                    } else if(val == "ANT"){
-                        // ant->
-                        // antId
-                        // targets:undefined,
-
-                        filterRules = childRules.filter((item,index,self)=>{
-                            const field =  item.field;
-                            if(field == "antId" || field == "targets" || field == "jdk" ){
-                                return item;
-                            }
-                        });
-                    } else if(val == "GO"){
-                        // go-> 
-                        // goId:undefined,
-                        // script:undefined,
-                        filterRules = childRules.filter((item,index,self)=>{
-                            const field =  item.field;
-                            if(field == "goId" || field == "script"){
-                                return item;
-                            }
-                        });
-                    } else if(val == "NODE_JS"){
-                        // nodejs-> 
-                        // nodejsId:undefined,
-                        // script:undefined,
-                        filterRules = childRules.filter((item,index,self)=>{
-                            const field =  item.field;
-                            if(field == "nodejsId" || field == "script"){
-                                return item;
-                            }
-                        });
-                    } else if(val == "PYTHON"){
-                        // python-> 
-                        // pythonId:undefined,
-                        // script:undefined,
-                        filterRules = childRules.filter((item,index,self)=>{
-                            const field =  item.field;
-                            if(field == "pythonId" || field == "script"){
-                                return item;
-                            }
-                        });
-                    } else if(val == "SHELL"){
-                        // shell-> 
-                        // shellScript:undefined
-                        filterRules = childRules.filter((item,index,self)=>{
-                            const field =  item.field;
-                            if(field == "shellScript"){
-                                return item;
-                            }
-                        });
-                    } 
+                    console.log(val, 'val1')
+                    const filedMap = {
+                      MAVEN: ['mavenId','goals','jdk'],
+                      GRADLE: ['gradleId','task','jdk'],
+                       ANT: ['antId','target','jdk'],
+                       PYTHON: ['pythonId','goals','jdk'],
+                       GO: ['goId','goals','jdk'],
+                       NODE_JS: ['nodeJSId','goals','jdk'],
+                       SHELL: ['shellId','command','jdk']
+                    }
+                    const fields = filedMap[val] ?? [];
+                    filterRules = childRules.filter((item,index,self)=> fields.includes(item.field))
+                    // if(val == "MAVEN"){
+                    //     // maven-> 
+                    //     // mavenId:undefined,
+                    //     // goals:undefined,
+                    //     filterRules = childRules.filter((item,index,self)=>{
+                    //         const field =  item.field;
+                    //         if(field == "mavenId" || field == "goals" || field == "jdk"){
+                    //             return item;
+                    //         }
+                    //     });
+                    // } else if(val == "GRADLE"){
+                    //     // gradle-> 
+                    //     // gradleId:undefined,
+                    //     // task:undefined,
+                    //     filterRules = childRules.filter((item,index,self)=>{
+                    //         const field =  item.field;
+                    //         if(field == "gradleId" || field == "task" || field == "jdk"){
+                    //             return item;
+                    //         }
+                    //     });
+                    // } else if(val == "ANT"){
+                    //     // ant->
+                    //     // antId
+                    //     // targets:undefined,
+                    //
+                    //     filterRules = childRules.filter((item,index,self)=>{
+                    //         const field =  item.field;
+                    //         if(field == "antId" || field == "targets" || field == "jdk" ){
+                    //             return item;
+                    //         }
+                    //     });
+                    // } else if(val == "GO"){
+                    //     // go-> 
+                    //     // goId:undefined,
+                    //     // script:undefined,
+                    //     filterRules = childRules.filter((item,index,self)=>{
+                    //         const field =  item.field;
+                    //         if(field == "goId" || field == "script"){
+                    //             return item;
+                    //         }
+                    //     });
+                    // } else if(val == "NODE_JS"){
+                    //     // nodejs-> 
+                    //     // nodejsId:undefined,
+                    //     // script:undefined,
+                    //     filterRules = childRules.filter((item,index,self)=>{
+                    //         const field =  item.field;
+                    //         if(field == "nodejsId" || field == "script"){
+                    //             return item;
+                    //         }
+                    //     });
+                    // } else if(val == "PYTHON"){
+                    //     // python-> 
+                    //     // pythonId:undefined,
+                    //     // script:undefined,
+                    //     filterRules = childRules.filter((item,index,self)=>{
+                    //         const field =  item.field;
+                    //         if(field == "pythonId" || field == "script"){
+                    //             return item;
+                    //         }
+                    //     });
+                    // } else if(val == "SHELL"){
+                    //     // shell-> 
+                    //     // shellScript:undefined
+                    //     filterRules = childRules.filter((item,index,self)=>{
+                    //         const field =  item.field;
+                    //         if(field == "shellScript"){
+                    //             return item;
+                    //         }
+                    //     });
+                    // } 
                     
                     // 显示指定的UI
                     filterRules.forEach((item)=>{

@@ -49,11 +49,11 @@ formCreate.register({
 		mitt.on(value,()=>{
 			let events = eventBridge[value];
 			for(let i=0;i<events.length;i++){
-				const _event = events[i]?.event 
+				const _event = events[i]?.event
 				const _rule = events[i]?.rule
 				const _fApi = events[i]?.fApi
 				const _action = events[i]?.action
-				
+
 				_action(_event,_rule,_fApi);
 			}
 		})
@@ -80,9 +80,29 @@ const options = ref({
   },
   //表单提交事件
   onSubmit: function (formData) {
-    alert(JSON.stringify(formData))
+    console.log(formData, 'formData')
+    console.log(fApi.value.fields(), 'fields')
+    console.log(fApi.value.form, 'form')
+    console.log(fApi.value.getRule('setups'), 'setupsRule')
+    const copyFormData = JSON.parse(JSON.stringify(formData))
+    // 取出rule
+    const {props: {rule}} = fApi.value.getRule('setups')
+    // 找出hidden的
+    const orgRule = toRaw(rule)
+    console.log(orgRule, 'objRule')
+    const hidden = orgRule.filter(item=>item.hidden)
+    copyFormData.setups = copyFormData.setups.map(item=>{
+      Object.keys(item).forEach(key=>{
+        if(hidden.includes(key)){
+          delete item[key]
+        }
+      })
+      return item
+    })
+    // 最好提交的数据，去掉了hidden的
+    console.log(copyFormData, 'copyFormData')
   },
-  // 
+  //
   beforeFetch: function(config,form) {
 	console.log("^^^^^^^^^^^^^^^^^^^beforeFetch^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
 	console.log(config)
