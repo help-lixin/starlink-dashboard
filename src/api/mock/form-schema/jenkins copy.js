@@ -114,7 +114,7 @@ export default `
             value: { url: 'http://192.168.1.10/root/spring-web-demo.git', branch: '*/main' },
             props: {
                 rule: [
-                    {  type: 'input', field: 'url', title: '项目地址', validate:[ { required: true, message: '请配置项目地址', trigger: 'blur' } ],   },
+                    {  type: 'input', field: 'url', title: '项目地址', validate:[ { required: true, message: '请配置项子地址', trigger: 'blur' } ],   },
                     {  type: 'input', field: 'branch', title: '项目分支' , validate:[ { required: true, message: '请配置项目分支', trigger: 'blur' } ], },
                     {  type: 'select', field: 'credentialId', title: '凭证' , placeholder : "请选择凭证"  , validate:[ { required: true, message: '请选择凭证', trigger: 'blur' } ] ,
                        effect: {
