@@ -6,17 +6,19 @@ import locale from 'element-plus/lib/locale/lang/zh-cn'
 
 <template>
   <div class="common-layout">
-    <el-container>
-      <AppMenu />
-      <el-container class="header-and-main">
-        <AppHeader />
-        <el-main>
-          <!-- 配置日期选择期为中文 -->
-          <el-config-provider :locale="locale">
-            <RouterView />
-          </el-config-provider>
-        </el-main>
-      </el-container>
+    <el-container :direction="'vertical'">
+      <AppHeader />
+      <el-scrollbar :height="'calc(100vh - 60px)'">
+        <el-container class="header-and-main">
+          <AppMenu />
+          <el-main>
+            <!-- 配置日期选择期为中文 -->
+            <el-config-provider :locale="locale">
+              <RouterView />
+            </el-config-provider>
+          </el-main>
+        </el-container>
+      </el-scrollbar>
     </el-container>
   </div>
 </template>
@@ -24,12 +26,11 @@ import locale from 'element-plus/lib/locale/lang/zh-cn'
 
 <style scoped lang="scss">
 .header-and-main {
-  flex-direction: column;
-  height: 100vh;
+  //flex-direction: column;
+  //height: 100vh;
 }
 
 .el-main {
-  border: 1px solid var(--el-border-color);
   border-right: 0;
   border-bottom: 0;
   background-color: var(--el-bg-main-color);

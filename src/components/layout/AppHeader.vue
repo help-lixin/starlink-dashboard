@@ -65,22 +65,30 @@ const handlerLogout = () => {
 
 <template>
   <el-header>
-    <!-- 图标 -->
-    <el-icon @click="isCollapse = !isCollapse">
-      <i-ep-expand v-show="isCollapse" />
-      <i-ep-fold v-show="!isCollapse" />
-    </el-icon>
+    <div class="website-icon">
+      <a href="/" class="logo">
+        <img src="@/assets/logo.svg" alt=""/>
+        <span>星链管理平台</span>
+      </a>
+    </div>
+    <div class="nav">
+      <!-- 图标 -->
+      <el-icon :color="'var(--menu-text-color)'" @click="isCollapse = !isCollapse">
+        <i-ep-expand v-show="isCollapse" />
+        <i-ep-fold v-show="!isCollapse" />
+      </el-icon>
 
-    <el-breadcrumb separator="/">
-      <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-      <el-breadcrumb-item v-for="nav in navStore.navArray"> {{ nav }}</el-breadcrumb-item>
-    </el-breadcrumb>
+      <el-breadcrumb separator="/" style="padding-left: 12px;">
+        <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+        <el-breadcrumb-item v-for="nav in navStore.navArray" :key="nav"> {{ nav }}</el-breadcrumb-item>
+      </el-breadcrumb>
+    </div>
     <div class="layout-right">
       <div class="theme-model" @click="toggleDark()">
-        <el-icon>
-          <Moon v-if="!isDark" />
-          <Sunny v-else />
-        </el-icon>
+<!--        <el-icon>-->
+<!--          <Moon v-if="!isDark" />-->
+<!--          <Sunny v-else />-->
+<!--        </el-icon>-->
       </div>
       <!-- 用户信息 -->
       <el-dropdown>
@@ -102,16 +110,39 @@ const handlerLogout = () => {
 </template>
 
 <style lang="scss" scoped>
+::v-deep(.el-breadcrumb__inner.is-link) {
+  color: #E5EAF3;
+}
+/** 给logo配置样式 */
+.logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  height: 60px;
+  color: #fff;
+
+  img {
+    width: 32px;
+    height: 32px;
+  }
+}
+.nav {
+  position: absolute;
+  left: 200px;
+  display: flex;
+}
 .el-header {
   padding-left: 20px;
   padding-right: 20px;
-  border: 1px solid var(--el-border-color-light);
   border-top: 0;
   border-right: 0;
   border-bottom: 0;
   display: flex;
   align-items: center;
-
+  background-color: rgba(31, 35, 57, 1);
+  box-shadow: 0px 4px 8px rgba(31, 35, 57, 0.4);
+  z-index: 11;
   .el-icon {
     margin-right: 0;
   }

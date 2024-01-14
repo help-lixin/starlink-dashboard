@@ -289,7 +289,7 @@ getList()
 <template>
     <div class="main-wrapp">
       <yt-card>
-        <FormCreateTest></FormCreateTest>
+<!--        <FormCreateTest></FormCreateTest>-->
         <!--sousuo  -->
         <el-form class="form-wrap" :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
           <el-row :gutter="20">

@@ -51,15 +51,13 @@
             unique-opened
             :default-active="0+''"
             :default-openeds="['0']"
+            background-color="var(--menu-bg-color)"
+            text-color="var(--menu-text-color)"
+            active-text-color="var(--menu-text-active-color)"
             class="el-menu-vertical"
             :collapse="isCollapse"
             @select="menuSelect"
             >
-                <a href="/" class="logo">
-                    <img src="@/assets/logo.svg" alt=""/>
-                    <h1>星链管理平台</h1>
-                </a>
-
                 <template v-for="(menu,index) in menus" :key="index">
                     <el-sub-menu :index="index+''">
                         <template #title>
@@ -89,23 +87,8 @@
 .el-aside {
     height: 100vh;
     width: auto;
+    background-color: var(--menu-bg-color);
 }
-
-/** 给logo配置样式 */
-.logo {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-decoration: none;
-    height: 60px;
-    color: var(--el-text-color-primary);
-
-    img {
-        width: 32px;
-        height: 32px;
-    }
-}
-
 
 /** 设置菜单样式 */
 .el-menu {
