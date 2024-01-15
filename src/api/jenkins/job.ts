@@ -126,9 +126,9 @@ export function buildJob(params:any) {
 }
 
 // 查询任务名称是否可用
-export function jobNameIsExist(jobName:string) {
+export function jobNameIsExist(jobName:string,instanceCode:string) {
     return request({
-      url: STARLINK_SERVICE + '/jenkins/job/jobNameIsExist/' + jobName,
+      url: STARLINK_SERVICE + '/jenkins/job/jobNameIsExist/' + jobName +"/" + instanceCode,
       method: 'get'
     }).then((res)=>{
         return res?.data;

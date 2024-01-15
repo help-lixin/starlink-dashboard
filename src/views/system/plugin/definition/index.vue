@@ -58,6 +58,7 @@
 
   // 重置表单
   const reset = ()=> {
+      formRef.value?.clearValidate()
       Object.assign(form,{
         id: undefined,
         pluginCode: undefined,

@@ -45,14 +45,28 @@
 
   // 表单规则
   const rules = reactive<FormRules>({
-        groupName: [
+        instanceCode: [
+          { required: true, message: "插件实例不能为空", trigger: "change" }
+        ],
+        projectName: [
           { required: true, message: "项目名称不能为空", trigger: "blur" },
           { min: 2, max: 20, message: '项目名称长度必须介于 2 和 20 之间', trigger: 'blur' }
-        ]
+        ],
+        namespaceByGroup: [
+          { required: true, message: "组不能为空", trigger: "blur" }
+        ],
+        visibility: [
+          { required: true, message: "权限不能为空", trigger: "change" }
+        ],
+        path: [
+          { required: true, message: "路径名称不能为空", trigger: "blur" },
+          { min: 2, max: 20, message: '路径名称长度必须介于 2 和 20 之间', trigger: 'blur' }
+        ],
     })
 
   // 重置表单
   const reset = ()=> {
+      formRef.value?.clearValidate()
       Object.assign(form,{
         id: undefined,
         projectName: undefined,
@@ -60,8 +74,9 @@
         namespaceByGroup : undefined,
         path: undefined,
         remark: undefined,
-        status: undefined,
-        instanceCode: undefined
+        status: 1,
+        instanceCode: undefined,
+        initiallizeWithReadme:1
       })
   }
 
@@ -294,10 +309,10 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="成员名称" prop="userName">
+          <el-form-item label="项目名称" prop="projectName">
             <el-input
-              v-model="queryParams.userName"
-              placeholder="请输入成员名称"
+              v-model="queryParams.projectName"
+              placeholder="请输入项目名称"
               clearable
               style="width: 240px"
               @keyup.enter.native="handleQuery"
@@ -460,14 +475,14 @@
               <el-input v-model="form.path" placeholder="请输入路径名称" maxlength="30" />
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :span="24">
             <el-form-item label="备注" prop="remark">
-              <el-input v-model="form.remark" placeholder="请输入备注信息" maxlength="30" />
+              <el-input v-model="form.remark" type="textarea" placeholder="请输入备注信息" maxlength="255" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
-          <el-col :span="24">
+          <el-col :span="12">
             <el-form-item label="状态">
               <el-radio-group v-model="form.status">
                 <el-radio
@@ -481,8 +496,8 @@
         </el-row>
 
         <el-row>
-          <el-col :span="24">
-            <el-form-item label="readme初始化" label-width="180px">
+          <el-col :span="12">
+            <el-form-item label="readme初始化" >
               <el-radio-group v-model="form.initiallizeWithReadme">
                 <el-radio
                   v-for="dict in enable"

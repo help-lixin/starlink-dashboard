@@ -118,6 +118,7 @@
 
   // 重置表单
   const reset = ()=> {
+    formRef.value?.clearValidate()
     Object.keys(form).forEach(key => (form[key] = undefined));
   }
 
@@ -215,24 +216,33 @@
                   message: '修改成功',
                   type: 'success',
             });
+          }else{
+            ElMessage.error('修改出现异常');
+            throw err;
           }
+          loading.value = false;
+          open.value = false;
+          getList();
         });
       } else {
         addCredential(form).then(response => {
-          if(response?.code){
+          if(response?.code == 200){
             ElMessage({
                   showClose: true,
                   message: '新增成功',
                   type: 'success',
             });
-            open.value = false;
-            getList();
+          }else{
+            ElMessage.error('新增出现异常');
+            throw err;
           }
+          loading.value = false;
+          open.value = false;
+          getList();
         });
       }
 
-      open.value = false;
-      getList();
+      
   }
 
   const handleStatusChange = (row)=>{
@@ -425,7 +435,7 @@
           <el-table-column label="编号" align="center" key="id" prop="id" />
           <el-table-column label="凭证唯一名称" align="center" key="credentialKey" prop="credentialKey"  :show-overflow-tooltip="true"  width="200" />
           <el-table-column label="凭证别名" align="center" key="credentialName" prop="credentialName"  :show-overflow-tooltip="true"  width="200" />
-          <el-table-column label="凭证类型" align="center" key="credentialType" prop="credentialType"  :show-overflow-tooltip="true"  width="200" />
+          <!-- <el-table-column label="凭证类型" align="center" key="credentialType" prop="credentialType"  :show-overflow-tooltip="true"  width="200" /> -->
           <el-table-column label="备注" align="center" key="remark" prop="remark"  :show-overflow-tooltip="true"  width="200" />
           <el-table-column label="状态" align="center" key="status"  width="100">
             <template #default="scope">
@@ -513,6 +523,24 @@
             </el-col>
 
             <el-col :span="12">
+              <el-form-item label="凭证key" prop="credentialKey" :rules="[       
+                  { required: true, message: '凭证key不能为空', trigger: 'blur' },
+                  { min: 2, max: 50, message: '凭证key长度必须介于 2 和 50 之间', trigger: 'blur' } ]">>
+                <el-input v-model="form.credentialKey" placeholder="请输入凭证唯一名称" maxlength="50" />
+              </el-form-item>
+            </el-col>
+
+            <el-col :span="12">
+              <el-form-item label="凭证名称" prop="credentialName" :rules="[       
+                  { required: true, message: '凭证名称不能为空', trigger: 'blur' },
+                  { min: 2, max: 50, message: '凭证名称长度必须介于 2 和 50 之间', trigger: 'blur' } ]">>
+                <el-input v-model="form.credentialName" placeholder="请输入名称" maxlength="50" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row>
+            <el-col :span="12">
               <el-form-item label="凭证类型" prop="credentialType">
                 <el-select
                   class="search-select"
@@ -531,7 +559,7 @@
           </el-row>
 
           <el-row v-if="form.credentialType == 'SECRET'">
-            <el-col :span="12">
+            <el-col :span="24">
               <el-form-item label="密钥" prop="secret" :rules="[
                   { required: true, message: '密钥不能为空', trigger: 'blur' }]">
                 <el-input v-model="form.secret" placeholder="请输入密钥信息" type="textarea" />
@@ -544,8 +572,8 @@
             <el-col :span="12">
               <el-form-item label="用户名" prop="userName" :rules="[
                   { required: true, message: '用户名不能为空', trigger: 'blur' },
-                  { min: 2, max: 20, message: '用户名长度必须介于 2 和 20 之间', trigger: 'blur' } ]">
-                <el-input v-model="form.userName" placeholder="请输入用户名" maxlength="20" />
+                  { min: 2, max: 50, message: '用户名长度必须介于 2 和 50 之间', trigger: 'blur' } ]">
+                <el-input v-model="form.userName" placeholder="请输入用户名" maxlength="50" />
               </el-form-item>
             </el-col>
 
@@ -578,7 +606,7 @@
               <el-form-item label="用户名" prop="userName" :rules="[
                   { required: true, message: '用户名不能为空', trigger: 'blur' },
                   { min: 2, max: 50, message: '用户名长度必须介于 2 和 50 之间', trigger: 'blur' } ]">
-                <el-input v-model="form.userName" placeholder="请输入用户名" maxlength="20" />
+                <el-input v-model="form.userName" placeholder="请输入用户名" maxlength="50" />
               </el-form-item>
             </el-col>
 
@@ -610,25 +638,7 @@
           </el-row>
 
           <el-row>
-            <el-col :span="12">
-              <el-form-item label="凭证key" prop="credentialKey" :rules="[       
-                  { required: true, message: '凭证key不能为空', trigger: 'blur' },
-                  { min: 2, max: 50, message: '凭证key长度必须介于 2 和 50 之间', trigger: 'blur' } ]">>
-                <el-input v-model="form.credentialKey" placeholder="请输入凭证唯一名称" maxlength="50" />
-              </el-form-item>
-            </el-col>
-
-            <el-col :span="12">
-              <el-form-item label="凭证名称" prop="credentialName" :rules="[       
-                  { required: true, message: '凭证名称不能为空', trigger: 'blur' },
-                  { min: 2, max: 50, message: '凭证名称长度必须介于 2 和 50 之间', trigger: 'blur' } ]">>
-                <el-input v-model="form.credentialName" placeholder="请输入名称" maxlength="50" />
-              </el-form-item>
-            </el-col>
-          </el-row>
-
-          <el-row>
-            <el-col :span="12">
+            <el-col :span="24">
               <el-form-item label="备注" prop="remark">
                 <el-input v-model="form.remark" type="textarea" placeholder="请输入备注" maxlength="200" />
               </el-form-item>

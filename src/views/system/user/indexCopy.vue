@@ -72,6 +72,7 @@ const rules = reactive<FormRules>({
 
 // 重置表单
 const reset = ()=> {
+    formRef.value?.clearValidate()
     Object.assign(form,{
         userId: undefined,
         userName: undefined,

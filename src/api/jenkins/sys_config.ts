@@ -30,6 +30,10 @@ export const tools = [
     {
         value: 'GIT',
         label: 'git',
+    },
+    {
+        value: 'JDK',
+        label: 'jdk',
     }
 ];
 
@@ -71,7 +75,7 @@ return request({
 export function changeConfigStatus(sysConfigId:any, status:any) {
     return request({
         url: STARLINK_SERVICE + '/jenkins/systemConfig/changeStatus/'+sysConfigId+"/"+status,
-        method: 'put'
+        method: 'post'
     }).then((res)=>{
         return res?.data;
     });
@@ -134,7 +138,7 @@ export function pluginTypeSelectOption(instanceCode:string) {
 // 查询工具下拉列表
 export function jdkSelectOption(instanceCode:string) {
     return request({
-      url: STARLINK_SERVICE + '/jenkins/systemConfig/optionSelect/JAVA/'+ instanceCode,
+      url: STARLINK_SERVICE + '/jenkins/systemConfig/optionSelect/JDK/'+ instanceCode,
       method: 'get'
     }).then((res)=>{
         return res?.data;

@@ -113,14 +113,23 @@
 
   // 表单规则
   const rules = reactive<FormRules>({
-        projectName: [
-          { required: true, message: "成员名称不能为空", trigger: "blur" },
-          { min: 2, max: 20, message: '成员名称长度必须介于 2 和 20 之间', trigger: 'blur' }
-        ]
+        instanceCode: [
+          { required: true, message: "插件实例不能为空", trigger: "change" }
+        ],
+        projectId: [
+          { required: true, message: "项目不能为空", trigger: "change" }
+        ],
+        userId: [
+          { required: true, message: "成员不能为空", trigger: "change" }
+        ],
+        accessLevel: [
+          { required: true, message: "权限不能为空", trigger: "change" }
+        ],
   })
 
   // 重置表单
   const reset = ()=> {
+      formRef.value?.clearValidate()
       Object.assign(form,{
         id: undefined,
         userName: undefined,
@@ -128,7 +137,7 @@
         path: undefined,
         remark: undefined,
         status: undefined,
-        instanceCode: undefined
+        instanceCode: queryParams.instanceCode
       })
   }
 
@@ -451,7 +460,7 @@
     <el-dialog :title="title" v-model="open" width="600px" append-to-body>
       <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
         <el-row>
-          <el-col :span="8">
+          <el-col :span="12">
             <el-form-item label="插件实例" prop="instanceCode">
               <el-select
               class="search-select2"
@@ -459,7 +468,6 @@
                 @keyup.enter.native="handleQuery"
                 placeholder="请选择实例"
                 clearable
-                style="width: 200px;"
               >
               <el-option v-for="item in pluginInstance"
                 :key="item.pluginCode"
@@ -468,12 +476,12 @@
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :span="12">
             <el-form-item label="项目" prop="projectId">
               <el-select
                 class="search-select"
                 v-model="form.projectId"
-                placeholder="项目"
+                placeholder="请选择项目"
                 clearable
               >
               <el-option v-for="dict in projects"
@@ -485,12 +493,12 @@
           </el-col>
         </el-row>
         <el-row>
-          <el-col :span="8">
+          <el-col :span="12">
             <el-form-item label="成员" prop="userId">
               <el-select
                 class="search-select"
                 v-model="form.userId"
-                placeholder="成员"
+                placeholder="请选择成员"
                 clearable
               >
               <el-option v-for="user in users"
@@ -500,12 +508,12 @@
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :span="12">
             <el-form-item label="权限" prop="accessLevel">
               <el-select
                 class="search-select"
                 v-model="form.accessLevel"
-                placeholder="成员"
+                placeholder="请选择权限"
                 clearable
               >
               <el-option v-for="accessLevel in accessLevels"

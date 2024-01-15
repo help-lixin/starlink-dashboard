@@ -49,6 +49,9 @@
         visibility: [
           { required: true, message: "权限不能为空", trigger: "blur" }
         ],
+        instanceCode: [
+          { required: true, message: "插件实例不能为空", trigger: "change" }
+        ],
         path: [
           { required: true, message: "路径不能为空", trigger: "blur" }
         ]
@@ -56,6 +59,7 @@
 
   // 重置表单
   const reset = ()=> {
+      formRef.value?.clearValidate()
       Object.assign(form,{
         groupId: undefined,
         groupName: undefined,

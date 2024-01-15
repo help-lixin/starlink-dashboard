@@ -74,6 +74,7 @@
 
   // 重置表单
   const reset = ()=> {
+      formRef.value?.clearValidate()
       Object.assign(form,{
         roleId: undefined,
         roleName: undefined,

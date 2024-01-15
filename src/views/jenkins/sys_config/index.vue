@@ -89,6 +89,7 @@
 
   // 重置表单
   const reset = ()=> {
+    formRef.value?.clearValidate()
       Object.assign(form,{
         id: undefined,
         name: undefined,
@@ -132,7 +133,11 @@
   // 处理新增按钮
   const handleAdd = function(){
     reset()
-    form.instanceCode = pluginInstance[0].instanceCode
+    let instanceCode = queryParams.instanceCode
+    if(instanceCode == undefined){
+      instanceCode = pluginInstance[0].instanceCode
+    }
+    form.instanceCode = instanceCode
     form.status = 1
     open.value = true
     title.value = "添加插件工具信息"
@@ -174,7 +179,13 @@
                   message: '修改成功',
                   type: 'success',
             });
+          }else{
+            ElMessage.error('修改出现异常');
+            loading.value = false;
+            throw response?.msg;
           }
+          open.value = false;
+          getList();
         });
       } else {
         addConfig(form).then(response => {
@@ -184,12 +195,17 @@
                   message: '新增成功',
                   type: 'success',
             });
+          }else{
+            ElMessage.error('新增出现异常');
+            loading.value = false;
+            throw response?.msg;
           }
+          open.value = false;
+          getList();
         });
       }
 
-      open.value = false;
-      getList();
+      
   }
 
   const handleStatusChange = (row)=>{

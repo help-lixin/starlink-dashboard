@@ -27,7 +27,7 @@ import type { pushScopeId } from "vue"
       callback()
     }
 
-    jobNameIsExist(value).then((res)=>{
+    jobNameIsExist(value,form.instanceCode).then((res)=>{
         if(res.code == 200){
           if(res.data){
             callback()
@@ -46,7 +46,7 @@ import type { pushScopeId } from "vue"
       'jobName': [
         { required: true, message: "任务名称不能为空", trigger: "blur" },
         { min: 2, max: 20, message: '任务名称长度必须介于 2 和 20 之间', trigger: 'blur' },
-        { validator: validJobName}
+        { validator: validJobName , trigger: 'blur' }
       ],
       'scmType': [
         { required: true, message: "仓库类型不能为空", trigger: "change" },
@@ -133,6 +133,12 @@ import type { pushScopeId } from "vue"
 
   // 重置表单
   const reset = ()=> {
+      formRef.value?.clearValidate()
+      // 清空当前列表中的数据
+      credentials.splice(0, credentials.length)
+      jobs.splice(0, jobs.length)
+      jdkList.splice(0, jdkList.length)
+      
       Object.assign(form,{
       id: undefined,
       scmType: "GIT",
@@ -196,6 +202,7 @@ import type { pushScopeId } from "vue"
 
   // 处理查询按钮
   const resetQuery = function(){
+    queryParams.jobName = undefined
     dateRange.value = [];
     queryFormRef.value.resetFields();
     handleQuery();
@@ -204,6 +211,7 @@ import type { pushScopeId } from "vue"
   //处理工具变更时的type
   const handleToolChange = (item,type)=>{
     item.setupType = type
+    item.instanceCode = form.instanceCode
   }
 
   // 下拉选择添加标签
@@ -238,30 +246,20 @@ import type { pushScopeId } from "vue"
     queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
       if(res.code == 200){
         Object.assign(formInstance,res?.data)
-        let instanceCode = formInstance[0].instanceCode;
+        let instanceCode = queryParams.instanceCode;
+        if(instanceCode == undefined){
+          instanceCode = formInstance[0].instanceCode;
+        }
         form.instanceCode = instanceCode
-        console.log(form.instanceCode)
 
         // 查询凭证下拉列表
-        credentialOption(instanceCode).then(response => {
-          if(response?.code == 200){
-            Object.assign(credentials,response?.data)
-          }
-        })
+        credentialList(instanceCode)
 
         // 查询依赖构建下拉列表
-        jobSelectOption(instanceCode).then(response =>{
-          if(response?.code == 200){
-            Object.assign(jobs,response?.data)
-          }
-        })
+        dependencyList(instanceCode);
 
         // 查询jdk下拉列表
-        jdkSelectOption(instanceCode).then((response)=>{
-          if(response?.code == 200){
-            Object.assign(jdkList,response?.data)
-          }
-        })
+        jdkOptionList(instanceCode)
       }
     });
 
@@ -275,34 +273,11 @@ import type { pushScopeId } from "vue"
     // 查询实例编码下拉列表
     queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
       if(res.code == 200){
-        Object.assign(formInstance,res?.data)
-        let instanceCode = formInstance[0].instanceCode;
-        form.instanceCode = instanceCode
-
-        // 查询凭证下拉列表
-        credentialOption(instanceCode).then(response => {
-          if(response?.code == 200){
-            Object.assign(credentials,response?.data)
-          }
-        })
-
-        // 查询依赖构建下拉列表
-        jobSelectOption(instanceCode).then(response =>{
-          if(response?.code == 200){
-            Object.assign(jobs,response?.data)
-          }
-        })
-
-        // 查询jdk下拉列表
-        jdkSelectOption(instanceCode).then((response)=>{
-          if(response?.code == 200){
-            Object.assign(jdkList,response?.data)
-          }
-        })
-        
-        detail(row.id)
+          Object.assign(formInstance,res?.data)
+          detail(row.id)
       }
-    });
+        
+    })
 
     open.value = true;
     title.value = "修改jenkins配置信息";
@@ -311,35 +286,83 @@ import type { pushScopeId } from "vue"
   // 保存当前查询详情的任务名称（主要用于校验）
   const curJobName = reactive({})
 
+  // 查询jdk下拉列表
+  const jdkOptionList = (instanceCode) => {
+    jdkSelectOption(instanceCode).then((response)=>{
+        if(response?.code == 200){
+          Object.assign(jdkList,response?.data)
+        }
+    })
+  }
+
+  // 查询凭证下拉列表
+  const credentialList = (instanceCode) =>{
+    credentialOption(instanceCode).then(response => {
+      if(response?.code == 200){
+        Object.assign(credentials,response?.data)
+      }
+    })
+  }
+
+  // 查询依赖构建下拉列表
+  const dependencyList = (instanceCode) =>{
+    jobSelectOption(instanceCode).then(response =>{
+          if(response?.code == 200){
+            Object.assign(jobs,response?.data)
+          }
+    })
+  }
+
   // 查询任务详情
   const detail = (id)=>{
     queryJobDetail(id).then(jobRes => {
-          if(jobRes?.code == 200){
-            toolsSelectOption(jobRes?.data.toolsType,form.instanceCode).then(response => {
-              if(response?.code == 200){
-                Object.assign(languages,response?.data)
-                Object.assign(form,jobRes?.data)
-                Object.assign(curJobName,jobRes?.data)
-
-                form.setups.forEach((setup)=>{
-                  setup.type = setup.setupType
-                });
-              }
-            })
+          if(jobRes?.code != 200){
+            ElMessage.error('查询出现异常');
+            loading.value = false;
+            throw response?.msg;
           }
+
+          let instanceCode = jobRes?.data.instanceCode
+          
+          toolsSelectOption(jobRes?.data.toolsType,instanceCode).then(response => {
+            if(response?.code == 200){
+              Object.assign(languages,response?.data)
+              Object.assign(form,jobRes?.data)
+              Object.assign(curJobName,jobRes?.data)
+
+              form.setups.forEach((setup)=>{
+                setup.type = setup.setupType
+              });
+              
+            }
+          })
+
+          // 查询凭证下拉列表
+          credentialList(instanceCode)
+
+          // 查询依赖构建下拉列表
+          dependencyList(instanceCode);
+
+          // 查询jdk下拉列表
+          jdkOptionList(instanceCode)
+          
 
     });
   }
 
   // 更换实例时会修改凭证下拉列表信息
   const switchInstance = (instanceCode)=>{
+    // 清空当前列表中的数据
     credentials.splice(0, credentials.length)
+    jobs.splice(0, jobs.length)
+    jdkList.splice(0, jdkList.length)
+
     // 查询凭证下拉列表
-    credentialOption(instanceCode).then(response => {
-      if(response?.code == 200){
-        Object.assign(credentials,response?.data)
-      }
-    })
+    credentialList(instanceCode)
+    // 查询依赖构建下拉列表
+    dependencyList(instanceCode)
+    // 查询jdk下拉列表
+    jdkOptionList(instanceCode)
   }
   
   // 工具版本对象
@@ -381,7 +404,13 @@ import type { pushScopeId } from "vue"
                   type: 'success',
             });
             build(form,isBuild)
+          }else{
+            ElMessage.error('修改出现异常');
+            loading.value = false;
+            throw response?.msg;
           }
+          open.value = false;
+          getList();
         });
       } else {
         addJob(form).then(response => {
@@ -397,11 +426,11 @@ import type { pushScopeId } from "vue"
             loading.value = false;
             throw response?.msg;
           }
+          open.value = false;
+          getList();
         });
       }
-
-      open.value = false;
-      getList();
+      
   }
 
   const build = (form,isBuild)=>{
@@ -692,7 +721,7 @@ import type { pushScopeId } from "vue"
           <el-row>
             <el-col :span="12" v-if="form.scmType == 'GIT'">
               <el-form-item label="分支" prop="scm.branch">
-                <el-input v-model="form.scm.branch" placeholder="请输入分支:*/main" maxlength="100" />
+                <el-input v-model="form.scm.branch" placeholder="请输入分支" maxlength="100" />
               </el-form-item>
             </el-col>
             <el-col :span="12">
@@ -774,8 +803,7 @@ import type { pushScopeId } from "vue"
               </el-col>
               <el-col :span="24">
                 <el-form-item  label="脚本" :prop="`setups.${index}.goals`" :rules="[
-                  { required: true, message: '脚本内容不能为空', trigger: 'blur' },
-                  { min: 2, max: 200, message: '分支长度必须介于 2 和 200 之间', trigger: 'blur' } ]" >
+                  { required: true, message: '脚本内容不能为空', trigger: 'blur' } ]" >
                   <el-input v-model="item.goals" type="textarea" placeholder="请输入脚本内容"/>
                 </el-form-item>
               </el-col>
@@ -787,7 +815,7 @@ import type { pushScopeId } from "vue"
             <template
               v-for="(item, index) in form.setups">
               <el-col :span="12">
-                <el-form-item label="go版本" :prop="`setups.${index}.goId`">
+                <el-form-item label="go版本" :prop="`setups.${index}.goId`" :rules="[  { required: true, message: 'go版本是必选项', trigger: 'change' } ]" >
                   <el-select
                     class="search-select2"
                     v-model="item.goId"
@@ -804,7 +832,8 @@ import type { pushScopeId } from "vue"
                 </el-form-item>
               </el-col>
               <el-col :span="24">
-                <el-form-item  label="脚本" :prop="`setups.${index}.script`">
+                <el-form-item  label="脚本" :prop="`setups.${index}.script`" :rules="[
+                  { required: true, message: '脚本内容不能为空', trigger: 'blur' }]">
                   <el-input v-model="item.script" type="textarea" placeholder="请输入脚本内容"/>
                 </el-form-item>
               </el-col>
@@ -815,7 +844,9 @@ import type { pushScopeId } from "vue"
             <template
               v-for="(item, index) in form.setups">
               <el-col :span="24">
-                <el-form-item   label="脚本" :prop="`setups.${index}.shellScript`">
+                <el-form-item   label="脚本" :prop="`setups.${index}.shellScript`" 
+                :rules="[
+                  { required: true, message: '脚本内容不能为空', trigger: 'blur' } ]" >
                   <el-input v-model="item.shellScript"  @blur="handleToolChange(item,'SHELL')" type="textarea"/>
                 </el-form-item>
               </el-col>
@@ -826,7 +857,7 @@ import type { pushScopeId } from "vue"
             <template
               v-for="(item, index) in form.setups">
               <el-col :span="12">
-                <el-form-item label="ant版本" :prop="`setups.${index}.items`">
+                <el-form-item label="ant版本" :prop="`setups.${index}.antId`" :rules="[  { required: true, message: 'ant版本是必选项', trigger: 'change' } ]" >
                   <el-select
                     class="search-select2"
                     v-model="item.antId"
@@ -843,7 +874,8 @@ import type { pushScopeId } from "vue"
                 </el-form-item>
               </el-col>
               <el-col :span="24">
-                <el-form-item  label="脚本" :prop="`setups.${index}.targets`">
+                <el-form-item  label="脚本" :prop="`setups.${index}.targets`" :rules="[
+                  { required: true, message: '脚本内容不能为空', trigger: 'blur' } ]">
                   <el-input v-model="item.targets" type="textarea" placeholder="请输入脚本内容"/>
                 </el-form-item>
               </el-col>
@@ -854,7 +886,7 @@ import type { pushScopeId } from "vue"
             <template
               v-for="(item, index) in form.setups">
               <el-col :span="12">
-                <el-form-item label="gradle版本" :prop="`setups.${index}.items`">
+                <el-form-item label="gradle版本" :prop="`setups.${index}.gradleId`" :rules="[  { required: true, message: 'gradle版本是必选项', trigger: 'change' } ]" >
                   <el-select
                     class="search-select2"
                     v-model="item.gradleId"
@@ -871,7 +903,8 @@ import type { pushScopeId } from "vue"
                 </el-form-item>
               </el-col>
               <el-col :span="24">
-                <el-form-item  label="脚本" :prop="`setups.${index}.task`">
+                <el-form-item  label="脚本" :prop="`setups.${index}.task`" :rules="[
+                  { required: true, message: '脚本内容不能为空', trigger: 'blur' } ]">
                   <el-input v-model="item.task" type="textarea" placeholder="请输入脚本内容"/>
                 </el-form-item>
               </el-col>
@@ -882,7 +915,7 @@ import type { pushScopeId } from "vue"
             <template
               v-for="(item, index) in form.setups">
               <el-col :span="12">
-                <el-form-item label="nodejs版本" :prop="`setups.${index}.items`">
+                <el-form-item label="nodejs版本" :prop="`setups.${index}.nodejsId`" :rules="[  { required: true, message: 'nodejs版本是必选项', trigger: 'change' } ]" >
                   <el-select
                     class="search-select2"
                     v-model="item.nodejsId"
@@ -899,7 +932,8 @@ import type { pushScopeId } from "vue"
                 </el-form-item>
               </el-col>
               <el-col :span="24">
-                <el-form-item  label="脚本" :prop="`setups.${index}.script`">
+                <el-form-item  label="脚本" :prop="`setups.${index}.script`" :rules="[
+                  { required: true, message: '脚本内容不能为空', trigger: 'blur' } ]">
                   <el-input v-model="item.script" type="textarea" placeholder="请输入脚本内容"/>
                 </el-form-item>
               </el-col>
@@ -910,7 +944,7 @@ import type { pushScopeId } from "vue"
             <template
               v-for="(item, index) in form.setups">
               <el-col :span="12">
-                <el-form-item label="python版本" :prop="`setups.${index}.items`">
+                <el-form-item label="python版本" :prop="`setups.${index}.pythonId`" :rules="[  { required: true, message: 'python版本是必选项', trigger: 'change' } ]" >
                   <el-select
                     class="search-select2"
                     v-model="item.pythonId"
@@ -927,7 +961,8 @@ import type { pushScopeId } from "vue"
                 </el-form-item>
               </el-col>
               <el-col :span="24">
-                <el-form-item  label="脚本" :prop="`setups.${index}.script`">
+                <el-form-item  label="脚本" :prop="`setups.${index}.script`" :rules="[
+                  { required: true, message: '脚本内容不能为空', trigger: 'blur' } ]">
                   <el-input v-model="item.script" type="textarea" placeholder="请输入脚本内容"/>
                 </el-form-item>
               </el-col>

@@ -37,14 +37,29 @@
 
   // 表单规则
   const rules = reactive<FormRules>({
-        groupName: [
+        instanceCode: [
+          { required: true, message: "插件实例不能为空", trigger: "change" }
+        ],
+        userName: [
           { required: true, message: "用户名称不能为空", trigger: "blur" },
           { min: 2, max: 20, message: '用户名称长度必须介于 2 和 20 之间', trigger: 'blur' }
-        ]
+        ],
+        nickName: [
+          { required: true, message: "用户昵称不能为空", trigger: "blur" },
+          { min: 2, max: 20, message: '用户昵称长度必须介于 2 和 20 之间', trigger: 'blur' }
+        ],
+        email: [
+            {type: "email", message: "请输入正确的邮箱地址", trigger: ["blur", "change"]}
+        ],
+        pwd: [
+          { required: true, message: "密码不能为空", trigger: "blur" },
+          { min: 6, max: 20, message: '密码长度必须介于 5 和 20 之间', trigger: 'blur' }
+        ],
     })
 
   // 重置表单
   const reset = ()=> {
+      formRef.value?.clearValidate()
       Object.assign(form,{
         id: undefined,
         userName: undefined,
@@ -53,7 +68,7 @@
         visibility: undefined,
         path: undefined,
         remark: undefined,
-        status: undefined,
+        status: 1,
         instanceCode: undefined
       })
   }

@@ -67,14 +67,23 @@
 
   // 表单规则
   const rules = reactive<FormRules>({
-        groupName: [
-          { required: true, message: "成员名称不能为空", trigger: "blur" },
-          { min: 2, max: 20, message: '成员名称长度必须介于 2 和 20 之间', trigger: 'blur' }
+        instanceCode: [
+          { required: true, message: "插件实例不能为空", trigger: "change" }
+        ],
+        groupId: [
+          { required: true, message: "成员组不能为空", trigger: "change" }
+        ],
+        userId: [
+          { required: true, message: "成员不能为空", trigger: "change" }
+        ],
+        accessLevel: [
+          { required: true, message: "权限不能为空", trigger: "change" }
         ]
-  })
+    })
 
   // 重置表单
   const resetForm = ()=> {
+      formRef.value?.clearValidate()
       Object.assign(form,{
         id: undefined,
         userName: undefined,
@@ -463,7 +472,7 @@
     <el-dialog :title="title" v-model="open" width="600px" append-to-body>
       <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
         <el-row>
-          <el-col :span="24">
+          <el-col :span="12">
             <el-form-item label="实例" prop="instanceCode">
               <el-select
               class="search-select2"
@@ -479,10 +488,7 @@
               </el-select>
             </el-form-item>
           </el-col>
-        </el-row>
-
-        <el-row>
-          <el-col :span="24">
+          <el-col :span="12">
             <el-form-item label="成员组" prop="groupId">
               <el-select
                 class="search-select"
@@ -500,8 +506,10 @@
           </el-col>
         </el-row>
 
+
+
         <el-row>
-          <el-col :span="24">
+          <el-col :span="12">
             <el-form-item label="成员" prop="userId">
               <el-select
                 class="search-select"
@@ -517,10 +525,7 @@
               </el-select>
             </el-form-item>
           </el-col>
-        </el-row>
-
-        <el-row>
-          <el-col :span="24">
+          <el-col :span="12">
             <el-form-item label="权限" prop="accessLevel">
               <el-select
                 class="search-select"
