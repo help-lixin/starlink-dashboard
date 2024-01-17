@@ -1,12 +1,12 @@
 <script setup lang="ts">
-// @ts-nocheck  
+// @ts-nocheck
 
 import { ref, toRaw } from 'vue'
 import {STARLINK_SERVICE} from "@/utils/env"
 import { pluginInstanceOptionSelect } from '@/api/common-api'
 import { encode, decode } from 'js-base64';
 
-import { 
+import {
 	createForm ,
 	onFormValuesChange,
 	onFieldInit,
@@ -202,7 +202,7 @@ const formProperties = {
 									formValues:form.values,
 									urlPrefix:STARLINK_SERVICE
 								}
-								
+
 								callback(ctx)
 							});
 						} // end if
@@ -224,7 +224,7 @@ const formProperties = {
 			}
 			const callbackArray = field.data?.onChangeCallback
 			callbackArray.forEach(callback => {
-			  
+
               callback(ctx)
             });
 		}
@@ -237,7 +237,7 @@ const extraField = (field,properties,dependenciesArray)=>{
 	// 对所有的属性(all)进行遍历,如果,发现属性(x-reactions)上配置的dependencies正好依赖于当前属性(field)的话
 	// 则,记住所有属性中,是哪一个属性依赖当前(field)
 	// x-reactions: {  "dependencies": ["instanceCode"] }
-	// 
+	//
 	for(let key in properties){
 		if(properties[key]?.type == 'object') {
 			// properties
@@ -323,7 +323,7 @@ function init() {
 		Object.assign(tempScehma,formSchema);
 		tempScehma.properties.layout.properties = {}
 		Object.assign(tempScehma.properties.layout.properties,commonSchmea);
-		
+
 		// 元数据对象(右侧表单动态展示)
 		if (element.value?.businessObject?.$attrs?.plugin) {
 			// 从store里拿数据
@@ -331,7 +331,7 @@ function init() {
 			const pluginInfoStr = plugins.get(element.value.businessObject.$attrs.plugin)
 			const pluginInfo = deserialize(pluginInfoStr)
 
-			
+
 			// 启用实例选择
 			if(pluginInfo?.enableInstanceSelect){
 				Object.assign(tempScehma.properties.layout.properties,commonBussnessSchema);
@@ -355,7 +355,7 @@ function init() {
 			const decodeParams = JSON.parse(decodeParamsString);
 			Object.assign(params,decodeParams)
 		}
-	
+
 		// 节点名称
 		if (element.value?.businessObject?.$attrs?._name) {
 			element.value['name'] = element.value?.businessObject?.$attrs?._name
@@ -441,11 +441,15 @@ init()
 
 
 <template>
-	<div v-if="selectedElements.length === 1" class="custom-properties-panel">
-		<FormProvider :form="form">
-			<SchemaField :schema="schema" />
-		</FormProvider>
-	</div>
+    <div v-if="selectedElements.length === 1" class="custom-properties-panel">
+      <yt-card style="height: 100%;" :content-style="{height: '100%'}">
+        <el-scrollbar>
+          <FormProvider :form="form">
+            <SchemaField :schema="schema" />
+          </FormProvider>
+        </el-scrollbar>
+      </yt-card>
+    </div>
 </template>
 
 <style scoped lang="scss">
@@ -454,7 +458,7 @@ init()
 	top: 0;
 	right: 0;
 	width: 300px;
-	min-height: 100vh;
+	height: calc(100vh - var(--el-header-height));
 	background-color: #f8f8f8;
 
 	.element-item {

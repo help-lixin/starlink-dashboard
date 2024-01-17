@@ -12,48 +12,73 @@ const FormCreate = formCreate.$form();
 const fApi = ref({});
 const formData = ref({});
 const options = ref({
+  global: {
+      '*': {
+        beforeFetch: function() {
+          console.log('run111111111111111111111111111111111111111111111111111111111111111111111111111111')
+        }
+      }
+  },
   //表单提交事件
   onSubmit: function (formData) {
     console.log(fApi.value.getRule('goods_name2'), 'test')
+    console.log(fApi.value.getRule('object'), 'test')
+  },
+  beforeFetch: function() {
+    console.log('run111111111111111111111111111111111111111111111111111111111111111111111111111111')
   }
 });
+
 const rule = ref([
   {
-    type:'input',
-    field:'goods_name1',
-    title:'商品名称',
-    value:'form-create'
-  },
-  {
-    type:'checkbox',
-    field:'label',
-    title:'标签',
-    value:[0,1,2,3],
-    options: [
-      {label:'好用',value:0},
-      {label:'快速',value:1},
-      {label:'高效',value:2},
-      {label:'全能',value:3},
-    ]
-  },
-  {
-    type: 'row',
-    children: [
-      {
-        type: 'col',
-        props: {
-          span: 12
-        },
-        children: [
-          {
-            type: 'input',
-            field: 'goods_name2',
-            title: '商品名称1',
-            value: 'form-create'
+    type: 'select',
+    field: 'city',
+    title: '城市',
+    value: '陕西省',
+    options: [],
+    effect: {
+      fetch: {
+        action: () => {
+          function tidy(list) {
+            return list.map(val => {
+              return {
+                value: val.name,
+                label: val.name,
+                children: val.children ? tidy(val.children) : undefined
+              }
+            })
           }
-        ]
+
+          return new Promise((resolve) => {
+            fetch('https://cdn.jsdelivr.net/gh/modood/Administrative-divisions-of-China@2.4.0/dist/pc-code.json', {
+              headers: {
+                'Content-Type': 'application/json',
+                'test': 111
+              }}).then(res => {
+              console.log(res)
+              res.json().then(res => {
+                console.log(res, 'res1111')
+                resolve(tidy(res));
+              })
+            })
+          })
+        },
+        to: 'options',
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'test': 111
+        },
+        parse(res) {
+          return res.rows.map(row => {
+            return {
+              label: row.name,
+              value: row.adcode
+            }
+          })
+        }
       }
-    ]
+    }
   }
 ]);
 </script>

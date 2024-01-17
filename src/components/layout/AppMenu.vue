@@ -93,7 +93,7 @@
 /** 设置菜单样式 */
 .el-menu {
     border-right: none;
-    width: 200px;
+    width: var(--menu-width);
     &.el-menu--collapse {
         width: 60px;
         // 折叠时,把LOGO边上的h1标签隐藏

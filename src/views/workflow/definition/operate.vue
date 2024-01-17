@@ -2,9 +2,7 @@
 	<div class="bpmn">
 		<div ref="canvasRef" class="canvas"></div>
 		<CustomPropertiesPanel v-if="bpmnModeler" :modeler="bpmnModeler" />
-		<div class="action">
-			<button @click="showSavePage()">保存&运行</button>
-		</div>
+    <YtBottomOperate><el-button @click="showSavePage()">保存&运行</el-button></YtBottomOperate>
 	</div>
 
 	<!-- 弹出层 -->
@@ -32,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-// @ts-nocheck  
+// @ts-nocheck
 
 // bpmn 相关依赖
 import 'bpmn-js/dist/assets/diagram-js.css'
@@ -383,12 +381,12 @@ function jsonToXml(json) {
 	}
 
 	// 最终期望的xml
-	let xml = `<definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" 
-	xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" 
-	xmlns:camunda="http://camunda.org/schema/1.0/bpmn" 
-	xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" 
-	xmlns:di="http://www.omg.org/spec/DD/20100524/DI"  
-	targetNamespace="http://camunda.org/schema/1.0/bpmn" 
+	let xml = `<definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+	xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+	xmlns:camunda="http://camunda.org/schema/1.0/bpmn"
+	xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+	xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+	targetNamespace="http://camunda.org/schema/1.0/bpmn"
 	xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL">
   <process id="${json.id}" isExecutable="true" name="${json.name}">
     ${convertNodes(json.nodes)}

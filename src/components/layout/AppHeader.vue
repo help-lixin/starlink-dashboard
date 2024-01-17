@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { isCollapse } from './isCollapse'
+import { isCollapse, setCollapse } from './isCollapse'
 import { getProfile, logout } from '@/api/users'
 import { useRouter } from 'vue-router'
 import { useTokenStore } from '@/stores/token'
@@ -67,13 +67,13 @@ const handlerLogout = () => {
   <el-header>
     <div class="website-icon">
       <a href="/" class="logo">
-        <img src="@/assets/logo.svg" alt=""/>
-        <span>星链管理平台</span>
+        <img src="@/assets/logo.svg" style="padding-right: 10px;" alt=""/>
+        <span class="title" :class="isCollapse && 'is-collapse'">星链管理平台</span>
       </a>
     </div>
     <div class="nav">
       <!-- 图标 -->
-      <el-icon :color="'var(--menu-text-color)'" @click="isCollapse = !isCollapse">
+      <el-icon :color="'var(--menu-text-color)'" @click="setCollapse()">
         <i-ep-expand v-show="isCollapse" />
         <i-ep-fold v-show="!isCollapse" />
       </el-icon>
@@ -113,6 +113,17 @@ const handlerLogout = () => {
 ::v-deep(.el-breadcrumb__inner.is-link) {
   color: #E5EAF3;
 }
+.website-icon {
+  .title {
+    transition: all 300ms;
+    width: 136px;
+    white-space: nowrap;
+    overflow: hidden;
+    &.is-collapse {
+      width: 0;
+    }
+  }
+}
 /** 给logo配置样式 */
 .logo {
   display: flex;
@@ -128,8 +139,6 @@ const handlerLogout = () => {
   }
 }
 .nav {
-  position: absolute;
-  left: 200px;
   display: flex;
 }
 .el-header {
