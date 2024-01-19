@@ -61,6 +61,7 @@ declare module 'vue' {
     SvgIcon: typeof import('./components/SvgIcon.vue')['default']
     YtBottomOperate: typeof import('./components/YtBottomOperate.vue')['default']
     YtCard: typeof import('./components/YtCard.vue')['default']
+    YtTextList: typeof import('./components/YtTextList.vue')['default']
   }
   export interface ComponentCustomProperties {
     vLoading: typeof import('element-plus/es')['ElLoadingDirective']

@@ -4,10 +4,14 @@ import { Plus ,Delete, Edit, EditPen, Search , RefreshRight , Sort , QuestionFil
 import { parseTime , statusDicts , sexDicts , addDateRangeRuoyi } from "@/utils/common"
 import { listUser , getUser , addUser , updateUser , delUser , changeUserStatus , resetUserPwd } from "@/api/users"
 import { getRoles } from "@/api/roles"
+import UserContractAddressDialog from '@/views/system/user/components/UserContractAddressDialog.vue'
 import TsxTest from '@/views/system/user/components/TsxTest'
 import FormCreateTest from '@/views/system/user/components/FormCreateTest.vue'
 const queryForm = ref(null);
-
+const contractAddress = (row => {
+  selectRow.value = row
+  isShowContractDialog.value = true
+})
 const queryParams = reactive({
     pageNum: 1,
     pageSize: 10,
@@ -17,7 +21,7 @@ const queryParams = reactive({
 })
 
 const loading = ref(false)
-
+const isShowContractDialog = ref(false)
 // 显示搜索条件
 const showSearch = ref(true)
 // 日期范围
@@ -40,7 +44,7 @@ const form = reactive({})
 const initPassword = "123456"
 const title = ref("")
 const roleOptions = reactive([]);
-
+const selectRow = ref({})
 // 表单规则
 const rules = reactive<FormRules>({
     userName: [
@@ -413,7 +417,7 @@ getList()
             <el-table-column
               label="操作"
               align="center"
-              width="220"
+              width="320"
             >
               <template v-slot="scope">
                 <div class="action-btn">
@@ -422,7 +426,10 @@ getList()
                     @click="handleUpdate(scope.row)"
                     v-hasPerms="['/system/user/edit']"
                   >修改</el-button>
-
+                  <el-button
+                    size="small"
+                    @click="contractAddress(scope.row)"
+                  >关联地址</el-button>
                   <el-button
                     size="small"
                     @click="handleDelete(scope.row)"
@@ -546,6 +553,7 @@ getList()
               <el-button @click="cancel">取 消</el-button>
             </template>
         </el-dialog>
+      <UserContractAddressDialog v-model:is-show-dialog="isShowContractDialog" :userInfo="selectRow"></UserContractAddressDialog>
     </div>
 </template>
 

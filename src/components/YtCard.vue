@@ -54,13 +54,17 @@ export default {
 
 <style scoped lang="scss">
 .yt-card {
+  & + .yt-card {
+    .title {
+      margin-top: 16px;
+    }
+  }
   .title {
     font-size: 14px;
     font-weight: bold;
     color: #1E2027;
     line-height: 1;
     margin-bottom: 10px;
-    margin-top: 16px;
     padding-left: 4px;
   }
 
