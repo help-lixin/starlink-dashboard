@@ -77,9 +77,9 @@ const formSchema = {
 			labelAlign: "left",
 			wrapperAlign: "left",
 			labelWrap: true,
-			labelCol: 8,
+			labelCol: 9,
 			wrapperCol: 14,
-			layout: 'horizontal',
+			layout: 'vertical',
 		},
 		properties: {
 
