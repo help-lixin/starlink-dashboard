@@ -307,52 +307,39 @@
 
 <template>
   <div class="main-wrapp">
-    <yt-card>
+    <yt-card padding="18px 18px 0">
 
       <!--sousuo  -->
-      <el-form class="form-wrap" :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-        <el-row :gutter="20">
-          <el-col :span="8">
+      <el-form class="form-wrap" :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch">
+        <el-row>
             <el-form-item label="角色名称" prop="roleName">
               <el-input
                 v-model="queryParams.roleName"
                 placeholder="请输入角色名称"
                 clearable
-                style="width: 240px"
-                @keyup.enter.native="handleQuery"
               />
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="权限字符" prop="roleKey">
               <el-input
                 v-model="queryParams.roleKey"
                 placeholder="请输入权限字符"
                 clearable
-                style="width: 240px"
-                @keyup.enter.native="handleQuery"
               />
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="状态" prop="status">
               <el-select
                 v-model="queryParams.status"
                 placeholder="角色状态"
-                clearable
-                style="width: 240px">
+                clearable>
                 <el-option v-for="dict in statusDicts"
                            :key="dict.value"
                            :label="dict.label"
                            :value="dict.value"/>
               </el-select>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="创建时间">
               <el-date-picker
                 v-model="dateRange"
-                style="width: 240px"
                 value-format="YYYY-MM-DD"
                 type="daterange"
                 range-separator="-"
@@ -360,13 +347,10 @@
                 end-placeholder="结束日期"
               ></el-date-picker>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <div>
-              <el-button type="primary" size="small" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
-              <el-button  size="small" @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
+              <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
+              <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
             </div>
-          </el-col>
         </el-row>
       </el-form>
     </yt-card>

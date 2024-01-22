@@ -52,6 +52,17 @@ async function onSubmit() {
         // const loginRes = {code:200}
         if (loginRes.code == 200) {
             let authorizeRes = await authorize(loginRes.url);
+          // const authorizeRes = {
+          //     "msg": "获取token成功",
+          //     "code": 200,
+          //     "data": {
+          //         "accessToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3R5cGUiOiIwMCIsInVzZXJfaWQiOjEsInVzZXJfbmFtZSI6ImFkbWluIiwic2NvcGUiOlsiYWxsIl0sIm5pY2tfbmFtZSI6IuiLpeS-nTEiLCJhdmF0YXIiOiIiLCJleHAiOjE3NDc0Njk1NzEsImRlcHRfaWQiOjEwMywiYXV0aG9yaXRpZXMiOlsiYWRtaW4iXSwianRpIjoieWFxVUNXZjlKaDFjNmJIX2tjRHZsVnVuUUFFIiwiY2xpZW50X2lkIjoiY2xpZW50MSIsImVtYWlsIjoiYWRtaW5AMTYzLmNvbSJ9.ThnIVsb5F-NFolnx3myDPofQYAIhX0bp3BeNfrMM9kZmQvZfMBDuyUoxEq5Ho4dhV3-NDXrYE13Dm1DXRXXsawsg4cYoOzgC1s-Zh1aoHpVW-GVvDXg5Sb_pxYnDjF3X8SfTih3ar5LZEjQtVSrW9_EOwfzST9vf2pHT_7sA_ZbKE8YjzrDxodGaeHVNnkz0jJscc5_siewcHXbnirRW1Jw-TzlVVb13RpOexgDA0RlrHkwWaj1PrbqpmcDhFkRdsxoYAScD9KYHb0J5iTLVzafx0nddFZ_OUFheNAZIOP7oLPkHHykUemFWqFGhlXwm3M7UYmdnEO4tLswGMAyfTA",
+          //         "tokenType": "bearer",
+          //         "refreshToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJhZG1pbiIsImF2YXRhciI6IiIsImF1dGhvcml0aWVzIjpbImFkbWluIl0sImNsaWVudF9pZCI6ImNsaWVudDEiLCJ1c2VyX3R5cGUiOiIwMCIsInVzZXJfaWQiOjEsInNjb3BlIjpbImFsbCJdLCJhdGkiOiJ5YXFVQ1dmOUpoMWM2Ykhfa2NEdmxWdW5RQUUiLCJuaWNrX25hbWUiOiLoi6Xkvp0xIiwiZXhwIjoxNzMwMTg5NTcxLCJkZXB0X2lkIjoxMDMsImp0aSI6IkZ2SWkxXzF0U29qa1FkaDlvb19jRmlOQmRPNCIsImVtYWlsIjoiYWRtaW5AMTYzLmNvbSJ9.nHL5n465c1vQI2p-1MyMn74wu9paDJVG9-jN0MkDC1pE0fAJmSYhNJvUtIezRcApvVg_xz5ObOFM3n4E3C8ZX-xxRUrFIu38_58rD3hTY5zKIgt633p8W6n4XO6TAVQE1UTRsi7-mkX7blERd9Pmt_6kcNUvzV-kqKmFA9Sa_agE1CVojTObK3-C7fpOY3NCat_Of69GjPGKgjc0tR-cl6v2tftu3cpoBVU7UC0WANWz-Gxqz5Mz_IhCkBsc9IX077pWjegzsfm1-M2qDxuTbWzMEZgZr4XGvEnOrv9pHnxSyXsaEMK6-Rw7pfhdcsLmUJpQWc8eRygR-2kXQCGJEg",
+          //         "expiresIn": 43199999,
+          //         "jti": "yaqUCWf9Jh1c6bH_kcDvlVunQAE"
+          //     }
+          // }
             if (authorizeRes.code == 200) {
                 ElMessage({ message: '登录成功', type: 'success' });
                 // 保存token信息(先把token信息转换成json字符串)

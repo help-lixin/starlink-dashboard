@@ -4,14 +4,18 @@ import ElementPlus from 'element-plus'
 import App from './App.vue'
 import router from './router'
 import YtCard from '@/components/YtCard.vue'
+import YtBottomOperate from '@/components/YtBottomOperate.vue'
 import { usePermsStore } from './stores/perms';
 
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import "virtual:svg-icons-register";
 import 'element-plus/theme-chalk/src/base.scss'
 import '@/styles/index.scss'
+import YtTextList from '@/components/YtTextList.vue'
 const app = createApp(App)
 app.component('YtCard', YtCard)
+app.component('YtBottomOperate', YtBottomOperate)
+app.component('YtTextList', YtTextList)
 app.use(ElementPlus)
 // 注册所有图标
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
