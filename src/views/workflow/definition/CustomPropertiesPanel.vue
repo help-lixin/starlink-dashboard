@@ -76,7 +76,6 @@ const formSchema = {
 		'x-component-props': {
 			labelAlign: "left",
 			wrapperAlign: "left",
-			labelWrap: true,
 			labelCol: 9,
 			wrapperCol: 14,
 			layout: 'vertical',

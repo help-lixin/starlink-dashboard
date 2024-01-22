@@ -16,7 +16,7 @@
     value: undefined
   })
 
-  const defaultInstanceCode = ref(string)
+  const defaultInstanceCode = ref('')
 
   const loading = ref(false)
 
@@ -81,7 +81,7 @@
     if(res.code == 200){
       Object.assign(pluginInstance,res?.data)
       queryParams.instanceCode = pluginInstance[0].instanceCode
-      defaultInstanceCode = pluginInstance[0].instanceCode
+      defaultInstanceCode.value = pluginInstance[0].instanceCode
 
       // 触发查询
       getList();
