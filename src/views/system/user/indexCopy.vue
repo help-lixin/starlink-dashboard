@@ -293,43 +293,29 @@ getList()
 
 <template>
     <div class="main-wrapp">
-      <yt-card>
-<!--        <FormCreateTest></FormCreateTest>-->
-        <!--sousuo  -->
-        <el-form class="form-wrap" :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
-          <el-row :gutter="20">
-            <el-col :span="8">
+      <yt-card padding="18px 18px 0">
+        <el-form class="form-wrap" :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch">
+          <el-row>
               <el-form-item label="用户名称" prop="userName">
                 <el-input
                   v-model="queryParams.userName"
                   placeholder="请输入用户名称"
                   clearable
-                  style="width: 240px"
-                  @keyup.enter.native="handleQuery"
                 />
               </el-form-item>
-            </el-col>
-            <el-col :span="8">
               <el-form-item label="手机号码" prop="phonenumber">
                 <el-input
                   v-model="queryParams.phonenumber"
                   placeholder="请输入手机号码"
                   clearable
-                  style="width: 240px"
-                  @keyup.enter.native="handleQuery"
                 />
               </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row :gutter="20">
-            <el-col :span="8">
               <el-form-item label="状态" prop="status">
                 <el-select
                   class="search-select"
                   v-model="queryParams.status"
                   placeholder="用户状态"
                   clearable
-                  style="width: 240px"
                 >
                   <el-option v-for="dict in statusDicts"
                              :key="dict.value"
@@ -337,12 +323,9 @@ getList()
                              :value="dict.value"/>
                 </el-select>
               </el-form-item>
-            </el-col>
-            <el-col :span="8">
               <el-form-item label="创建时间">
                 <el-date-picker
                   v-model="dateRange"
-                  style="width: 240px"
                   value-format="YYYY-MM-DD"
                   type="daterange"
                   range-separator="-"
@@ -350,13 +333,10 @@ getList()
                   end-placeholder="结束日期"
                 ></el-date-picker>
               </el-form-item>
-            </el-col>
-            <el-col :span="8">
               <div>
                 <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
                 <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
               </div>
-            </el-col>
           </el-row>
         </el-form>
       </yt-card>

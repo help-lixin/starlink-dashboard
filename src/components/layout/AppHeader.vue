@@ -22,6 +22,8 @@ const actionMetasStore = useActionMetasStore()
 navStore.triggerParse()
 const isDark = ref(useDark())
 const toggleDark = useToggle(isDark)
+toggleDark(false)
+console.log(isDark, 'isDark', toggleDark)
 type UserInfo = {
   userName: string,
   avatar: string

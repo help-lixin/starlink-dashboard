@@ -233,7 +233,7 @@
 
 <template>
   <div class="app-container">
-    <yt-card>
+    <yt-card padding="18px 18px 0">
 
       <!-- 搜索处理 -->
       <el-form :model="queryParams" ref="queryForm"  :inline="true" v-show="showSearch">
@@ -242,7 +242,6 @@
             v-model="queryParams.menuName"
             placeholder="请输入菜单名称"
             clearable
-            @keyup.enter.native="handleQuery"
           />
         </el-form-item>
         <el-form-item label="状态" prop="status">
@@ -260,7 +259,7 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary"  @click="handleAdd" v-hasPerms="['/system/menu/add']"><el-icon><Plus /></el-icon>新增</el-button>
-          <el-button   @click="toggleExpandAll"><el-icon><Sort /></el-icon>展开/折叠</el-button>
+          <el-button  @click="toggleExpandAll"><el-icon><Sort /></el-icon>展开/折叠</el-button>
         </el-form-item>
       </el-form>
     </yt-card>

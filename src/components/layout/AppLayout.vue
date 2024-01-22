@@ -35,5 +35,6 @@ import locale from 'element-plus/lib/locale/lang/zh-cn'
   border-bottom: 0;
   background-color: var(--el-bg-main-color);
   padding: 16px;
+  height: calc(100vh - var(--el-header-height));
 }
 </style>

@@ -443,7 +443,7 @@ init()
 <template>
     <div v-if="selectedElements.length === 1" class="custom-properties-panel">
       <yt-card style="height: 100%;" :content-style="{height: '100%'}">
-        <el-scrollbar>
+        <el-scrollbar :height="'calc(100vh - var(--el-header-height) - 88px)'">
           <FormProvider :form="form">
             <SchemaField :schema="schema" />
           </FormProvider>
@@ -459,6 +459,7 @@ init()
 	right: 0;
 	width: 300px;
 	height: calc(100vh - var(--el-header-height));
+  padding-bottom: 58px;
 	background-color: #f8f8f8;
 
 	.element-item {

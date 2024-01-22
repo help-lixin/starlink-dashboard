@@ -332,19 +332,15 @@ const getList = ()=>{
 <template>
   <div class="main-wrapp">
     <!--sousuo  -->
-    <yt-card>
-      <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" size="small" :inline="true" v-show="showSearch" label-width="100px">
-        <el-row :gutter="20">
-          <el-col :span="8">
+    <yt-card padding="18px 18px 0">
+      <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch">
             <el-form-item label="请选择插件" prop="pluginCode">
               <el-select
                 class="search-select"
                 v-model="queryParams.pluginCode"
                 @change="handlePlugin"
-                @keyup.enter.native="handleQuery"
                 placeholder="请选择插件"
                 clearable
-                style="width: 240px"
               >
                 <el-option v-for="item in queryPlugins"
                            :key="item.value"
@@ -352,20 +348,15 @@ const getList = ()=>{
                            :value="item.value"/>
               </el-select>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="插件名称" prop="instanceName">
-              <el-input v-model='queryParams.instanceName' placeholder='请输入插件实例名称' clearable style='width: 240px' @keyup.enter.native='handleQuery' />
+              <el-input v-model='queryParams.instanceName' placeholder='请输入插件实例名称' clearable />
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="状态" prop="status">
               <el-select
                 class="search-select"
                 v-model="queryParams.status"
                 placeholder="状态"
                 clearable
-                style="width: 240px"
               >
                 <el-option v-for="dict in status"
                            :key="dict.value"
@@ -373,12 +364,9 @@ const getList = ()=>{
                            :value="dict.value"/>
               </el-select>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="创建时间">
               <el-date-picker
                 v-model="daterangeArray"
-                style="width: 240px"
                 value-format="YYYY-MM-DD"
                 type="daterange"
                 range-separator="-"
@@ -386,14 +374,10 @@ const getList = ()=>{
                 end-placeholder="结束日期"
               ></el-date-picker>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <div>
-              <el-button type="primary" size="small" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
-              <el-button  size="small" @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
-            </div>
-          </el-col>
-        </el-row>
+            <el-form-item>
+              <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
+              <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
+            </el-form-item>
       </el-form>
     </yt-card>
 

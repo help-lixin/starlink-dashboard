@@ -499,9 +499,9 @@ async function saveAndRun(isRunning: boolean) {
 .bpmn {
 	width: 100%;
 	display: flex;
-
+  height: 100%;
 	.canvas {
-		height: 100vh;
+		height: 100%;
 		flex: 1;
 	}
 

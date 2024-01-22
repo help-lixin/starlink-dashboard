@@ -242,7 +242,7 @@
         });
       }
 
-      
+
   }
 
   const handleStatusChange = (row)=>{
@@ -315,18 +315,14 @@
 <template>
   <div class="main-wrapp">
     <!--sousuo  -->
-    <yt-card>
-      <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" size="small" :inline="true" v-show="showSearch" label-width="68px">
-        <el-row :gutter="20">
-          <el-col :span="8">
+    <yt-card padding="18px 18px 0">
+      <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch">
             <el-form-item label="插件编码" prop="pluginCode">
               <el-select
                 class="search-select"
                 v-model="queryParams.pluginCode"
-                @keyup.enter.native="handleQuery"
                 placeholder="请选择插件编码"
                 @change="queryInstance"
-                style="width: 240px"
               >
                 <el-option v-for="item in pluginCodes"
                            :key="item.label"
@@ -334,15 +330,11 @@
                            :value="item.label"/>
               </el-select>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="插件实例" prop="instanceCode">
               <el-select
                 class="search-select"
                 v-model="queryParams.instanceCode"
-                @keyup.enter.native="handleQuery"
                 placeholder="请选择实例"
-                style="width: 240px"
               >
                 <el-option v-for="item in pluginInstance"
                            :key="item.pluginCode"
@@ -350,27 +342,19 @@
                            :value="item.instanceCode"/>
               </el-select>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="凭证别名" prop="credentialName">
               <el-input
                 v-model="queryParams.credentialName"
                 placeholder="请输入凭证别名"
                 clearable
-                style="width: 240px"
-                @keyup.enter.native="handleQuery"
               />
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="凭证类型" prop="credentialType">
               <el-select
                 class="search-select"
                 v-model="queryParams.credentialType"
-                @keyup.enter.native="handleQuery"
                 placeholder="请选择插件类型"
                 clearable
-                style="width: 240px"
               >
                 <el-option v-for="item in credentialTypes"
                            :key="item.value"
@@ -378,15 +362,12 @@
                            :value="item.value"/>
               </el-select>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="状态" prop="status">
               <el-select
                 class="search-select"
                 v-model="queryParams.status"
                 placeholder="工具状态"
                 clearable
-                style="width: 240px"
               >
                 <el-option v-for="dict in status"
                            :key="dict.value"
@@ -394,12 +375,9 @@
                            :value="dict.value"/>
               </el-select>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="创建时间">
               <el-date-picker
                 v-model="dateRange"
-                style="width: 240px"
                 value-format="YYYY-MM-DD"
                 type="daterange"
                 range-separator="-"
@@ -407,14 +385,10 @@
                 end-placeholder="结束日期"
               ></el-date-picker>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <div>
-              <el-button type="primary" size="small" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
-              <el-button  size="small" @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
-            </div>
-          </el-col>
-        </el-row>
+            <el-form-item>
+              <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
+              <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
+            </el-form-item>
       </el-form>
     </yt-card>
 
@@ -523,7 +497,7 @@
             </el-col>
 
             <el-col :span="12">
-              <el-form-item label="凭证key" prop="credentialKey" :rules="[       
+              <el-form-item label="凭证key" prop="credentialKey" :rules="[
                   { required: true, message: '凭证key不能为空', trigger: 'blur' },
                   { min: 2, max: 50, message: '凭证key长度必须介于 2 和 50 之间', trigger: 'blur' } ]">>
                 <el-input v-model="form.credentialKey" placeholder="请输入凭证唯一名称" maxlength="50" />
@@ -531,7 +505,7 @@
             </el-col>
 
             <el-col :span="12">
-              <el-form-item label="凭证名称" prop="credentialName" :rules="[       
+              <el-form-item label="凭证名称" prop="credentialName" :rules="[
                   { required: true, message: '凭证名称不能为空', trigger: 'blur' },
                   { min: 2, max: 50, message: '凭证名称长度必须介于 2 和 50 之间', trigger: 'blur' } ]">>
                 <el-input v-model="form.credentialName" placeholder="请输入名称" maxlength="50" />
