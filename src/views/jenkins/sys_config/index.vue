@@ -213,9 +213,9 @@
     const status = row.status
     let msg = ""
     if(status == 1){
-      msg = '是否禁用编号为"' + id + '"的数据项？'
+      msg = '是否禁用名称为"' + row.name + '"的数据项？'
     }else{
-      msg = '是否启用编号为"' + id + '"的数据项？'
+      msg = '是否启用名称为"' + row.name + '"的数据项？'
     }
 
     ElMessageBox.confirm(
@@ -371,7 +371,7 @@
       <div class="table-wrap">
         <el-table v-loading="loading" :data="sysConfigPageList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="编号" align="center" key="id" prop="id" />
+          <el-table-column label="编号" align="center" key="id" prop="id" v-show="false"/>
           <el-table-column label="名称" align="center" key="name" prop="name"  :show-overflow-tooltip="true"  width="200" />
           <el-table-column label="执行路径" align="center" key="value" prop="value"  :show-overflow-tooltip="true"  width="200" />
           <el-table-column label="状态" align="center" key="status"  width="100">

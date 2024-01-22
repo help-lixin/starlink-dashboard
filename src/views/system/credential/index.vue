@@ -525,7 +525,7 @@
             <el-col :span="12">
               <el-form-item label="凭证key" prop="credentialKey" :rules="[       
                   { required: true, message: '凭证key不能为空', trigger: 'blur' },
-                  { min: 2, max: 50, message: '凭证key长度必须介于 2 和 50 之间', trigger: 'blur' } ]">>
+                  { min: 2, max: 50, message: '凭证key长度必须介于 2 和 50 之间', trigger: 'blur' } ]">
                 <el-input v-model="form.credentialKey" placeholder="请输入凭证唯一名称" maxlength="50" />
               </el-form-item>
             </el-col>

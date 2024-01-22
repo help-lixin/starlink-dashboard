@@ -137,7 +137,6 @@
     }
 
     function reset() {
-      formRef.value?.clearValidate()
       Object.assign(menuForm , {
         menuId: undefined,
         perms : undefined,

@@ -129,6 +129,22 @@ export const dynamicRoutes = [
     },
   },
   {
+    path : '/harbor/project/index',
+    name : 'harbor-project',
+    component: ()=> import("../views/harbor/project/index.vue"),
+    meta: {
+        requiresAuth: true
+    },
+  },
+  {
+    path : '/harbor/log_info/index',
+    name : 'harbor-logInfo',
+    component: ()=> import("../views/harbor/log_info/index.vue"),
+    meta: {
+        requiresAuth: true
+    },
+  },
+  {
     path : '/system/credential/index',
     name : 'sys-credential',
     component: ()=> import("../views/system/credential/index.vue"),

@@ -1,6 +1,6 @@
 <script setup lang="ts">
   // @ts-nocheck
-  import { showStatusOperateFun , status , showStatusFun , addDateRange , addDateRangeRuoyi } from "@/utils/common"
+  import { showStatusOperateFun , status , showStatusFun , addDateRange  } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
   import { credentialOption } from "@/api/sys_credential/credential"
@@ -75,6 +75,8 @@ import type { pushScopeId } from "vue"
   })
 
   const loading = ref(false)
+  //隐藏id列
+  const isVisible = ref(false)
 
   // 显示搜索条件
   const showSearch = ref(true)
@@ -450,13 +452,13 @@ import type { pushScopeId } from "vue"
   }
 
   const handleStatusChange = (row)=>{
-    const jobId = row.id
+    const jobName = row.jobName
     const status = row.status
     let msg = ""
     if(status == 1){
-      msg = '是否禁用编号为"' + jobId + '"的数据项？'
+      msg = '是否禁用名称为"' + jobName + '"的数据项？'
     }else{
-      msg = '是否启用编号为"' + jobId + '"的数据项？'
+      msg = '是否启用名称为"' + jobName + '"的数据项？'
     }
 
     ElMessageBox.confirm(
@@ -474,7 +476,7 @@ import type { pushScopeId } from "vue"
         }else{
           tmpStatus = 0
         }
-        changeStatus(jobId,tmpStatus).then((res)=>{
+        changeStatus(row.id,tmpStatus).then((res)=>{
             if(res.code == 200){
                 getList()
                 ElMessage({
@@ -601,7 +603,7 @@ import type { pushScopeId } from "vue"
       <div class="table-wrap">
         <el-table v-loading="loading" :data="jobList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="任务编号" align="center" key="id" prop="id"/>
+          <el-table-column label="任务编号" align="center" key="id" prop="id" v-if="isVisible" />
           <el-table-column label="任务名称" align="center" key="jobName" prop="jobName"  :show-overflow-tooltip="true"  width="100" />
           <el-table-column label="仓库类型" align="center" key="scm" prop="scm" :show-overflow-tooltip="true"  width="100" />
           <el-table-column label="工具类型" align="center" key="tools" prop="tools" :show-overflow-tooltip="true"  width="100" />

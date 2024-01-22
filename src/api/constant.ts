@@ -17,5 +17,8 @@ export const navigation = new Map<string,string[]>([
 
     [ "/jenkins/job/index" ,  ["jenkins管理","jenkins任务管理"] ],
     [ "/jenkins/sys_config/index" ,  ["jenkins管理","jenkins工具管理"] ],
+
+    [ "/harbor/project/index" ,  ["harbor管理","harbor项目管理"] ],
+    [ "/harbor/log_info/index" ,  ["harbor管理","harbor日志管理"] ],
 ]);
 
