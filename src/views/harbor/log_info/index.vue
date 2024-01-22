@@ -16,7 +16,7 @@
     value: undefined
   })
 
-  const defaultInstanceCode = ref(null)
+  const defaultInstanceCode = ref('')
 
   const loading = ref(false)
 
