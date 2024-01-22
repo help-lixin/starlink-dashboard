@@ -3,7 +3,7 @@
     <div class="title" v-if="title">
       <slot name="title">{{ title }}</slot>
     </div>
-    <div class="content" :style="{'padding': pad}" :class="{isFirst}" v-if="$slots.default || subTitle">
+    <div class="content" :style="contentStyleObj" :class="{isFirst}" v-if="$slots.default || subTitle">
       <div v-if="subTitle" class="sub-title">
         {{ subTitle }}
       </div>
@@ -20,6 +20,12 @@ export default {
   props: {
     title: undefined,
     subTitle: undefined,
+    contentStyle: {
+      type: Object,
+      default() {
+        return {}
+      }
+    },
     padding: {
       type: [Number, String],
       // 1.默认40，适用于详情表单（数据展示）,填写表单。2. 16适用于附件展示，表格，附件上传，拖拽, 3. 为0时，里面是表单
@@ -38,6 +44,9 @@ export default {
       } else {
         return this.padding + 'px'
       }
+    },
+    contentStyleObj() {
+      return {...{padding: this.pad}, ...this.contentStyle}
     }
   }
 }
@@ -45,13 +54,17 @@ export default {
 
 <style scoped lang="scss">
 .yt-card {
+  & + .yt-card {
+    .title {
+      margin-top: 16px;
+    }
+  }
   .title {
     font-size: 14px;
     font-weight: bold;
     color: #1E2027;
     line-height: 1;
     margin-bottom: 10px;
-    margin-top: 16px;
     padding-left: 4px;
   }
 

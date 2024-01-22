@@ -16,7 +16,7 @@
     value: undefined
   })
 
-  const defaultInstanceCode = ref(string)
+  const defaultInstanceCode = ref(null)
 
   const loading = ref(false)
 
@@ -66,8 +66,8 @@
     queryParams.projectName = undefined
     dateRange.value = [];
     queryFormRef.value.resetFields();
+    queryParams.instanceCode = defaultInstanceCode.value;
     handleQuery();
-    queryParams.instanceCode = defaultInstanceCode;
   }
 
 
@@ -81,7 +81,7 @@
     if(res.code == 200){
       Object.assign(pluginInstance,res?.data)
       queryParams.instanceCode = pluginInstance[0].instanceCode
-      defaultInstanceCode = pluginInstance[0].instanceCode
+      defaultInstanceCode.value = pluginInstance[0].instanceCode
 
       // 触发查询
       getList();
@@ -113,21 +113,23 @@
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-input v-model="queryParams.value" placeholder="请输入内容" style="width: 240px">
-              <template #prepend>
-                <el-select
-                  class="search-select2"
-                  v-model="queryParams.key"
-                  placeholder="请选择资源"
-                  style="width: 100px"
-                >
-                    <el-option v-for="item in resources"
-                             :key="item.value"
-                             :label="item.label"
-                             :value="item.value"/>
-                </el-select>
-              </template>
-            </el-input>
+            <el-form-item label="资源" prop="instanceCode">
+              <el-input v-model="queryParams.value" placeholder="请输入内容" style="width: 240px">
+                <template #prepend>
+                  <el-select
+                    class="search-select2"
+                    v-model="queryParams.key"
+                    placeholder="请选择资源"
+                    style="width: 100px"
+                  >
+                      <el-option v-for="item in resources"
+                              :key="item.value"
+                              :label="item.label"
+                              :value="item.value"/>
+                  </el-select>
+                </template>
+              </el-input>
+            </el-form-item>
           </el-col>
           <el-col :span="8">
             <div>

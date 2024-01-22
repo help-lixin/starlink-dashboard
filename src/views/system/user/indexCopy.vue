@@ -4,10 +4,14 @@ import { Plus ,Delete, Edit, EditPen, Search , RefreshRight , Sort , QuestionFil
 import { parseTime , statusDicts , sexDicts , addDateRangeRuoyi } from "@/utils/common"
 import { listUser , getUser , addUser , updateUser , delUser , changeUserStatus , resetUserPwd } from "@/api/users"
 import { getRoles } from "@/api/roles"
+import UserContractAddressDialog from '@/views/system/user/components/UserContractAddressDialog.vue'
 import TsxTest from '@/views/system/user/components/TsxTest'
 import FormCreateTest from '@/views/system/user/components/FormCreateTest.vue'
 const queryForm = ref(null);
-
+const contractAddress = (row => {
+  selectRow.value = row
+  isShowContractDialog.value = true
+})
 const queryParams = reactive({
     pageNum: 1,
     pageSize: 10,
@@ -17,7 +21,7 @@ const queryParams = reactive({
 })
 
 const loading = ref(false)
-
+const isShowContractDialog = ref(false)
 // 显示搜索条件
 const showSearch = ref(true)
 // 日期范围
@@ -40,7 +44,7 @@ const form = reactive({})
 const initPassword = "123456"
 const title = ref("")
 const roleOptions = reactive([]);
-
+const selectRow = ref({})
 // 表单规则
 const rules = reactive<FormRules>({
     userName: [
@@ -289,43 +293,29 @@ getList()
 
 <template>
     <div class="main-wrapp">
-      <yt-card>
-<!--        <FormCreateTest></FormCreateTest>-->
-        <!--sousuo  -->
-        <el-form class="form-wrap" :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
-          <el-row :gutter="20">
-            <el-col :span="8">
+      <yt-card padding="18px 18px 0">
+        <el-form class="form-wrap" :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch">
+          <el-row>
               <el-form-item label="用户名称" prop="userName">
                 <el-input
                   v-model="queryParams.userName"
                   placeholder="请输入用户名称"
                   clearable
-                  style="width: 240px"
-                  @keyup.enter.native="handleQuery"
                 />
               </el-form-item>
-            </el-col>
-            <el-col :span="8">
               <el-form-item label="手机号码" prop="phonenumber">
                 <el-input
                   v-model="queryParams.phonenumber"
                   placeholder="请输入手机号码"
                   clearable
-                  style="width: 240px"
-                  @keyup.enter.native="handleQuery"
                 />
               </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row :gutter="20">
-            <el-col :span="8">
               <el-form-item label="状态" prop="status">
                 <el-select
                   class="search-select"
                   v-model="queryParams.status"
                   placeholder="用户状态"
                   clearable
-                  style="width: 240px"
                 >
                   <el-option v-for="dict in statusDicts"
                              :key="dict.value"
@@ -333,12 +323,9 @@ getList()
                              :value="dict.value"/>
                 </el-select>
               </el-form-item>
-            </el-col>
-            <el-col :span="8">
               <el-form-item label="创建时间">
                 <el-date-picker
                   v-model="dateRange"
-                  style="width: 240px"
                   value-format="YYYY-MM-DD"
                   type="daterange"
                   range-separator="-"
@@ -346,13 +333,10 @@ getList()
                   end-placeholder="结束日期"
                 ></el-date-picker>
               </el-form-item>
-            </el-col>
-            <el-col :span="8">
               <div>
                 <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
                 <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
               </div>
-            </el-col>
           </el-row>
         </el-form>
       </yt-card>
@@ -413,7 +397,7 @@ getList()
             <el-table-column
               label="操作"
               align="center"
-              width="220"
+              width="320"
             >
               <template v-slot="scope">
                 <div class="action-btn">
@@ -422,7 +406,10 @@ getList()
                     @click="handleUpdate(scope.row)"
                     v-hasPerms="['/system/user/edit']"
                   >修改</el-button>
-
+                  <el-button
+                    size="small"
+                    @click="contractAddress(scope.row)"
+                  >关联地址</el-button>
                   <el-button
                     size="small"
                     @click="handleDelete(scope.row)"
@@ -546,6 +533,7 @@ getList()
               <el-button @click="cancel">取 消</el-button>
             </template>
         </el-dialog>
+      <UserContractAddressDialog v-model:is-show-dialog="isShowContractDialog" :userInfo="selectRow"></UserContractAddressDialog>
     </div>
 </template>
 
