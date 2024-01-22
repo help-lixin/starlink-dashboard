@@ -507,7 +507,7 @@
             <el-col :span="12">
               <el-form-item label="凭证名称" prop="credentialName" :rules="[
                   { required: true, message: '凭证名称不能为空', trigger: 'blur' },
-                  { min: 2, max: 50, message: '凭证名称长度必须介于 2 和 50 之间', trigger: 'blur' } ]">>
+                  { min: 2, max: 50, message: '凭证名称长度必须介于 2 和 50 之间', trigger: 'blur' } ]">
                 <el-input v-model="form.credentialName" placeholder="请输入名称" maxlength="50" />
               </el-form-item>
             </el-col>
