@@ -68,28 +68,28 @@ export default defineConfig({
     Icons({
       autoInstall: true,
     }),
-    vitePluginImp({
-      libList: [
-        // {
-        //   libName: '@formily/element-plus',
-        //   libDirectory: 'esm',
-        //   style(name) {
-        //     return `@formily/element-plus/esm/${name}/style.js`
-        //   },
-        // },
-      ],
-    }),
+    // vitePluginImp({
+    //   libList: [
+    //     {
+    //       libName: '@formily/element-plus',
+    //       libDirectory: 'esm',
+    //       style(name) {
+    //         return `@formily/element-plus/esm/${name}/style.js`
+    //       },
+    //     },
+    //   ],
+    // }),
   ],
   css: {
-    // preprocessorOptions: {
-    //   scss: {
-    //     additionalData: `@use "@/styles/element/index.scss" as *;`,
-    //   },
-    // },
+    preprocessorOptions: {
+      scss: {
+        additionalData: `@use "@/styles/element/index.scss" as *;`,
+      },
+    },
   },
-  // define :{
-  //   'process.env' : process.env
-  // },
+  define :{
+    'process.env' : process.env
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
