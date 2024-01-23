@@ -6,7 +6,6 @@ import { listUser , getUser , addUser , updateUser , delUser , changeUserStatus 
 import { getRoles } from "@/api/roles"
 import UserContractAddressDialog from '@/views/system/user/components/UserContractAddressDialog.vue'
 import TsxTest from '@/views/system/user/components/TsxTest'
-import FormCreateTest from '@/views/system/user/components/FormCreateTest.vue'
 const queryForm = ref(null);
 const contractAddress = (row => {
   selectRow.value = row
