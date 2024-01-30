@@ -14,98 +14,110 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
+import type {PropType}  from 'vue';
+import {defineComponent}  from 'vue';
 import { cloneDeep } from 'lodash'
 
-export default {
-    name: "YtFormList",
-    data() {
-        return {
-            showFormList: []
-        }
-    },
-    props: {
-        formList: {
-            type: Array,
-            default() {
-                return []
-            }
-        },
-        labelBlock: { // label 占一行，和value上下结构
-            type: Boolean,
-            default: false
-        }
-    },
-    methods: {
-        computedMarginBottom(index) {
-            if(this.labelBlock) return {
-                marginBottom: '16px'//上下间距24px要加上本身字体的间距
-            }
-            // 如果最后一个是24，则最后一个margin-bottom为0, span默认为12
-            const len = this.formList.length
-            if (this.formList[len - 1].span === 24) {
-                if (index === len - 1) {
-                    return {
-                        marginBottom: '0'
-                    }
-                }
-            } else if (this.formList[len - 1].span === undefined) {
-                // 最后一个和倒数第二个都为12，则2个都为0
-                if (index === len - 1) {
-                    return {
-                        marginBottom: '0'
-                    }
-                }
-                if (this.formList[len - 2] && this.formList[len - 2].span === undefined) {
-                    if (index === len - 2) {
-                        return {
-                            marginBottom: '0'
-                        }
-                    }
-                }
-            }
-            return {
-                marginBottom: '20px'
-            }
-        },
-        getValue(item, index) {
-            const { value, defaultValue, format } = item
-            return new Promise((resolve, reject) => {
-                if (format instanceof Function) {
-                    Promise.resolve(format(value, item, index)).then(res => {
-                        resolve(res)
-                    })
-                } else {
-                    if (value === undefined || value === null || value === '') {
-                        resolve(defaultValue || '--')
-                    } else {
-                        resolve(value)
-                    }
-                }
-            })
-        }
-    },
-    components: {
-
-    },
-    created() {
-    },
-    watch: {
-        formList: {
-            immediate: true,
-            deep: true,
-            handler(newValue) {
-                const copyValue = cloneDeep(newValue)
-                for (let i in copyValue) {
-                    (async () => {
-                        copyValue[i].value = await this.getValue(copyValue[i], i).catch(e => console.log(e))
-                    })()
-                }
-                this.showFormList = copyValue;
-            }
-        }
-    }
+interface FormItem {
+  label: string;
+  slotLabel?: string;
+  slotContent?: string;
+  class?: string;
+  span?: number;
+  value?: any;
+  defaultValue?: any;
+  format?: (value: any, item: FormItem, index: number) => Promise<any>;
 }
+
+export default defineComponent({
+  name: 'YtFormList',
+  props: {
+    formList: {
+      type: Array as () => FormItem[],
+      default: () => [],
+    },
+    labelBlock: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  setup(props) {
+    const showFormList = ref<FormItem[]>([]);
+
+    const computedMarginBottom = (index: number) => {
+      if(props.labelBlock) return {
+        marginBottom: '16px'//上下间距24px要加上本身字体的间距
+      }
+      // 如果最后一个是24，则最后一个margin-bottom为0, span默认为12
+      const len = props.formList.length
+      if (props.formList[len - 1].span === 24) {
+        if (index === len - 1) {
+          return {
+            marginBottom: '0'
+          }
+        }
+      } else if (props.formList[len - 1].span === undefined) {
+        // 最后一个和倒数第二个都为12，则2个都为0
+        if (index === len - 1) {
+          return {
+            marginBottom: '0'
+          }
+        }
+        if (props.formList[len - 2] && props.formList[len - 2].span === undefined) {
+          if (index === len - 2) {
+            return {
+              marginBottom: '0'
+            }
+          }
+        }
+      }
+      return {
+        marginBottom: '20px'
+      }
+    };
+
+    const getValue = async (item: FormItem, index: number) => {
+      const { value, defaultValue, format } = item
+      return new Promise((resolve, reject) => {
+        if (format instanceof Function) {
+          Promise.resolve(format(value, item, index)).then(res => {
+            resolve(res)
+          })
+        } else {
+          if (value === undefined || value === null || value === '') {
+            resolve(defaultValue || '--')
+          } else {
+            resolve(value)
+          }
+        }
+      })
+    };
+
+    onMounted(() => {
+      updateShowFormList();
+    });
+
+    onUpdated(() => {
+      updateShowFormList();
+    });
+
+    const updateShowFormList = () => {
+      const copyValue = cloneDeep(props.formList);
+      for (let i in copyValue) {
+        (async () => {
+          copyValue[i].value = await getValue(copyValue[i], Number(i)).catch((e) => console.log(e));
+        })();
+      }
+      showFormList.value = copyValue;
+    };
+
+    return {
+      showFormList,
+      computedMarginBottom,
+    };
+  },
+});
 </script>
 <style scoped lang="scss">
     .YtFormList {

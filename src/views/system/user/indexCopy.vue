@@ -6,7 +6,7 @@ import { listUser , getUser , addUser , updateUser , delUser , changeUserStatus 
 import { getRoles } from "@/api/roles"
 import UserContractAddressDialog from '@/views/system/user/components/UserContractAddressDialog.vue'
 import TsxTest from '@/views/system/user/components/TsxTest'
-import FormCreateTest from '@/views/system/user/components/FormCreateTest.vue'
+import formilyjsTest from "./components/formilyjsTest.vue"
 const queryForm = ref(null);
 const contractAddress = (row => {
   selectRow.value = row
@@ -341,6 +341,9 @@ getList()
         </el-form>
       </yt-card>
         <!--  option-->
+      <div class="test">
+        <formilyjsTest></formilyjsTest>
+      </div>
       <yt-card>
         <div class="option-wrap">
           <el-button

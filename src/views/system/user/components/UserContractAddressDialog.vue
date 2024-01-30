@@ -1,10 +1,10 @@
 <script setup lang="ts">
 const props = defineProps<{
   isShowDialog: boolean
-  userInfo: string
+  userInfo: Record<string, any>
 }>()
 const editRow = ref()
-const addressList = ref([])
+const addressList = ref<Record<string, any>[]>([])
 watchEffect(async () => {
   if (props.isShowDialog) {
     // 处理对话框显示逻辑
