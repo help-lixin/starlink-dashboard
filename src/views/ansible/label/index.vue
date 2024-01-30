@@ -1,0 +1,410 @@
+<script setup lang="ts">
+  // @ts-nocheck
+  import { showStatusOperateFun , status , showStatusFun , addDateRange } from "@/utils/common"
+  import { queryInstanceInfoByPluginCode } from "@/api/common-api"
+  import { dayjs } from "@/utils/common-dayjs"
+  import { changeStatus, pageList, addLabel} from "@/api/ansible/label"
+
+  const queryFormRef = ref(null);
+
+  //查询列表信息
+  const queryParams = reactive({
+    pageNum: 1,
+    pageSize: 10,
+    beginTime: undefined,
+    endTime: undefined,
+    status: undefined,
+    instanceCode:undefined,
+    projectName: undefined
+  })
+
+  const validProjectName = (rule:any,value:any, callback:any)=>{
+    projectNameIsExist(value,form.instanceCode).then((res)=>{
+        if(res.code == 200){
+          if(res.data){
+            callback()
+          }else{
+            callback(new Error('项目名称已存在，请确认后修改'));
+          }
+        }
+    })
+  }
+
+  // 表单验证规则
+  const rules = reactive<FormRules>({
+      'instanceCode' : [
+        { required: true, message: "实例编码不能为空", trigger: "change" },
+      ],
+      'projectName': [
+        { required: true, message: "项目名称不能为空", trigger: "blur" },
+        { min: 2, max: 20, message: '项目名称长度必须介于 2 和 20 之间', trigger: 'blur' },
+        { validator: validProjectName , trigger: 'blur' }
+      ],
+      'capacity': [
+        { required: true, message: "容量不能为空", trigger: "blur" }
+      ]
+  })
+
+
+  const loading = ref(false)
+
+  // 显示搜索条件
+  const showSearch = ref(true)
+  // 日期范围
+  const dateRange = ref([])
+
+
+  const total= ref(0)
+  const projectList = reactive([])
+
+  // 详情
+  const detail = ref(false);
+  // 新增表单
+  const addDialog = ref(false);
+  const formRef = ref<FormInstance>();
+
+  const title = ref(null)
+  const pluginInstance = reactive([]);
+
+  const formInstance = reactive([]);
+
+  const form = reactive({
+    labelKey:undefined,
+    labelName:undefined
+  })
+
+  // 获取列表
+  const getList = ()=>{
+    loading.value = true;
+    pageList(addDateRange(queryParams, dateRange.value))
+    .then(response => {
+          loading.value = false
+          if(response?.data?.records.length > 0){
+            projectList.splice(0,projectList.length);
+            Object.assign(projectList, response?.data?.records)
+            total.value = response?.data?.total
+          }else{
+            projectList.splice(0,projectList.length);
+            total.value = 0;
+          }
+        }
+    );
+  }
+
+  // 处理搜索按钮
+  const handleQuery = function(){
+    getList()
+  }
+
+  // 处理查询按钮
+  const resetQuery = function(){
+    
+    queryParams.projectName = undefined
+    dateRange.value = [];
+    queryFormRef.value.resetFields();
+    queryParams.instanceCode = defaultInstanceCode.value;
+    handleQuery();
+  }
+
+
+  // 多选框选中数据
+  const handleSelectionChange = function(selection){
+
+  }
+
+  const handleStatusChange = (row)=>{
+    const id = row.id
+    const status = row.status
+    let msg = ""
+    if(status == 1){
+      msg = '是否禁用"' + row.labelKey + '"的数据项？'
+    }else{
+      msg = '是否启用"' + row.projectName + '"的数据项？'
+    }
+
+    ElMessageBox.confirm(
+      msg,
+      'Warning',
+      {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    ).then(() => {
+        let tmpStatus;
+        if(status == 0){
+          tmpStatus = 1
+        }else{
+          tmpStatus = 0
+        }
+        changeStatus(id,tmpStatus).then((res)=>{
+            if(res.code == 200){
+                getList()
+                ElMessage({
+                  type: 'success',
+                  message: '操作成功',
+                })
+            }
+        })
+    })
+    .catch(() => { })
+  }
+
+  // 重置表单
+  const reset = ()=> {
+    Object.assign(form,{
+      labelKey:undefined,
+      labelName:undefined
+    })
+  }
+
+  // 表单提交处理
+  const submitForm = async ()=>{
+    loading.value = true;
+    //todo 这里校验全部失败，需要改
+    await formRef.value?.validate()
+        .catch((err:Error)=>{
+            ElMessage.error('表单验证失败');
+            loading.value = false;
+            throw err;
+        });
+
+    addLabel(form).then(response => {
+      if(response?.code == 200){
+        ElMessage({
+              showClose: true,
+              message: '新增成功',
+              type: 'success',
+        });
+      }else{
+        ElMessage.error('新增出现异常');
+        loading.value = false;
+        throw response?.msg;
+      }
+      addDialog.value = false;
+      getList();
+    });
+      
+  }
+
+  // 处理新增按钮
+  const handleAdd = function(){
+    reset()
+    addDialog.value = true
+    title.value = "添加ansible配置信息"
+  }
+
+  // 表单取消处理
+  const cancelDetail = ()=>{
+    detail.value = false;
+    reset();
+  }
+  // 表单取消处理
+  const cancelAdd = ()=>{
+    addDialog.value = false;
+    reset();
+  }
+
+
+  
+  // 触发查询
+  getList();
+</script>
+
+<template>
+  <div class="main-wrapp">
+    <!--sousuo  -->
+    <yt-card>
+      <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" size="small" :inline="true" v-show="showSearch" label-width="68px">
+        <el-row :gutter="20">
+          <el-col :span="8">
+            <el-form-item label="标签key" prop="queryParams.labelKey">
+              <el-input v-model="queryParams.labelKey" placeholder="请输入标签key"  style="width: 240px"/>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="标签名" prop="queryParams.labelName">
+              <el-input v-model="queryParams.labelName" placeholder="请输入标签名"  style="width: 240px"/>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="状态" prop="status">
+              <el-select
+                class="search-select"
+                v-model="queryParams.status"
+                placeholder="项目状态"
+                clearable
+                style="width: 240px"
+              >
+                <el-option v-for="dict in status"
+                           :key="dict.value"
+                           :label="dict.label"
+                           :value="dict.value"/>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="创建时间">
+              <el-date-picker
+                v-model="dateRange"
+                style="width: 240px"
+                value-format="YYYY-MM-DD"
+                type="daterange"
+                range-separator="-"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
+              ></el-date-picker>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <div>
+              <el-button type="primary" size="small" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
+              <el-button  size="small" @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
+            </div>
+          </el-col>
+        </el-row>
+      </el-form>
+    </yt-card>
+    <yt-card>
+      <!--  option-->
+      <div class="option-wrap">
+        <el-button
+          type="primary"
+          plain
+          size="default"
+          @click="handleAdd" v-hasPerms="['/ansible/label/add']" ><el-icon><Plus /></el-icon>新增</el-button>
+      </div>
+
+      <!--table  -->
+      <div class="table-wrap">
+        <el-table v-loading="loading" :data="projectList" @selection-change="handleSelectionChange">
+          <el-table-column type="selection" width="60" align="center" />
+          <el-table-column label="编号" align="center" key="id" prop="id" v-if="false"/>
+          <el-table-column label="标签key" align="center" key="labelKey" prop="labelKey"  :show-overflow-tooltip="true"  />
+          <el-table-column label="标签名" align="center" key="labelName" prop="labelName"  :show-overflow-tooltip="true"  />
+          <el-table-column label="状态" align="center" key="status"  >
+            <template #default="scope">
+              {{  showStatusFun(scope.row.status) }}
+            </template>
+          </el-table-column>
+          <el-table-column label="创建时间" align="center" prop="createTime"  width="180">
+            <template #default="scope">
+              {{
+                   scope.row.createTime ? dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss") : ''
+              }}
+            </template>
+          </el-table-column>
+          <el-table-column label="更新时间" align="center" prop="updateTime"  width="180">
+            <template #default="scope">
+              {{ scope.row.updateTime ? dayjs(scope.row.updateTime).format("YYYY-MM-DD HH:mm:ss") : ''  }}
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="操作"
+            align="center"
+          >
+            <template #default="scope">
+              <div class="action-btn">
+                <el-button
+                  size="default"
+                  @click="queryDetail(scope.row)"
+                  v-hasPerms="['/ansible/label/detail/*']"
+                >详情</el-button>
+                <el-button
+                  size="default"
+                  @click="handleStatusChange(scope.row)"
+                  v-hasPerms="['/ansible/label/changeStatus/**']"
+                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
+              </div>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+      <div class="page-wrap">
+        <el-pagination
+          v-show="total>0"
+          :total="total"
+          :page-sizes=[10,20]
+          background layout="prev, pager, next"
+          v-model:current-page="queryParams.pageNum"
+          v-model:page-size="queryParams.pageSize"
+          @current-change="getList"
+        />
+      </div>
+    </yt-card>
+
+    <!-- 新增对话框 -->
+    <el-dialog :title="title" v-model="addDialog" width="600px" append-to-body>
+      <yt-card>
+        <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
+          <el-row>
+            <el-col :span="12">
+              <el-form-item label="标签key" prop="labelKey">
+                <el-input v-model="form.labelKey" placeholder="请输入标签key" maxlength="20" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="标签名" prop="labelName">
+                <el-input v-model="form.projectName" placeholder="请输入标签名" maxlength="20" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+        </el-form>
+      </yt-card>
+      <template #footer>
+        <el-button type="primary" @click="submitForm(false)">确 定</el-button>
+        <el-button @click="cancelAdd">取 消</el-button>
+      </template>
+    </el-dialog>
+
+  </div>
+</template>
+
+<style lang="scss" scoped>
+.main-wrap {
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  background: #fff;
+
+}
+
+.option-wrap {
+  margin-bottom: 8px;
+  .el-button {
+    // margin-right: 6px;
+  }
+}
+.table-wrap {
+  width: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+  .action-btn {
+    display: flex;
+  }
+}
+
+.page-wrap {
+  padding: 20px 0;
+  .el-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: end;
+  }
+
+}
+
+
+</style>
+<style>
+ .el-form-item__label {
+  font-size: 14px;
+ }
+
+.search-select .el-input {
+  --el-input-width: 240px;
+}
+
+</style>
+

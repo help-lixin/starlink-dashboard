@@ -20,5 +20,8 @@ export const navigation = new Map<string,string[]>([
 
     [ "/harbor/project/index" ,  ["harbor管理","harbor项目管理"] ],
     [ "/harbor/log_info/index" ,  ["harbor管理","harbor日志管理"] ],
+
+    [ "/ansible/label/index" ,  ["ansible管理","ansible标签管理"] ],
+    [ "/ansible/host/index" ,  ["ansible管理","ansible主机管理"] ],
 ]);
 

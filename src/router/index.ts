@@ -129,7 +129,7 @@ export const dynamicRoutes = [
     },
   },
   {
-    path : '/harbor/project/index',
+    path : '/harbor/project/index',                                          
     name : 'harbor-project',
     component: ()=> import("../views/harbor/project/index.vue"),
     meta: {
@@ -140,6 +140,22 @@ export const dynamicRoutes = [
     path : '/harbor/log_info/index',
     name : 'harbor-logInfo',
     component: ()=> import("../views/harbor/log_info/index.vue"),
+    meta: {
+        requiresAuth: true
+    },
+  },
+  {
+    path : '/ansible/label/index',
+    name : 'label-manage',
+    component: ()=> import("../views/ansible/label/index.vue"),
+    meta: {
+        requiresAuth: true
+    },
+  },
+  {
+    path : '/ansible/host/index',
+    name : 'host-manage',
+    component: ()=> import("../views/ansible/host/index.vue"),
     meta: {
         requiresAuth: true
     },
