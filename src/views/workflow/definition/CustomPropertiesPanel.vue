@@ -6,6 +6,8 @@ import {STARLINK_SERVICE} from "@/utils/env"
 import { pluginInstanceOptionSelect } from '@/api/common-api'
 import { encode, decode } from 'js-base64';
 
+import jenkins from "@/api/mock/formilyjs/jenkins"
+
 import {
 	createForm ,
 	onFormValuesChange,
@@ -76,8 +78,8 @@ const formSchema = {
 		'x-component-props': {
 			labelAlign: "left",
 			wrapperAlign: "left",
-			labelCol: 9,
-			wrapperCol: 14,
+			labelCol: 24,
+			wrapperCol: 24,
 			layout: 'vertical',
 		},
 		properties: {
@@ -325,6 +327,8 @@ function init() {
 
 		// 元数据对象(右侧表单动态展示)
 		if (element.value?.businessObject?.$attrs?.plugin) {
+			// TODO lixin
+			// const pluginInfoStr = jenkins
 			// 从store里拿数据
 			const plugins = actionMetasStore.getActions
 			const pluginInfoStr = plugins.get(element.value.businessObject.$attrs.plugin)
@@ -346,7 +350,6 @@ function init() {
 		schema.value = tempScehma;
 		// 重点,重新生成表单.
 		form = createForm(formProperties)
-
 
 		const params = {};
 		if(element.value?.businessObject?.$attrs?._params){

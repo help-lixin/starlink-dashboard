@@ -11,11 +11,10 @@
           <SchemaVoidField
             x-component="FormLayout"
             :x-component-props="{
-          labelCol: 24,
-          wrapperCol: 24,
-          layout: 'vertical'
-        }"
-          >
+              labelCol: 24,
+              wrapperCol: 24,
+              layout: 'vertical'
+            }">
             <SchemaStringField
               name="input"
               title="输入框"
