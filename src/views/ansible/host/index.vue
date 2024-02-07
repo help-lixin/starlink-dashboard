@@ -2,9 +2,13 @@
   // @ts-nocheck
   import { showStatusOperateFun , status , showStatusFun , addDateRange } from "@/utils/common"
   import { dayjs } from "@/utils/common-dayjs"
-  import { changeStatus, pageList,  addHost} from "@/api/ansible/host"
+  import { queryInstanceInfoByPluginCode } from "@/api/common-api"
+  import { changeStatus, pageList,  addHost, queryDetail, checkServerName, checkInstanceCode} from "@/api/ansible/host"
 
   const queryFormRef = ref(null);
+  const sshInstanceCodes = reactive([])
+  const curServerName = ref(null)
+  const curInstanceCode = ref(null)
 
 
   //查询列表信息
@@ -18,13 +22,36 @@
     serverName: undefined
   })
 
-  const validProjectName = (rule:any,value:any, callback:any)=>{
-    projectNameIsExist(value,form.instanceCode).then((res)=>{
+  const validServerName = (rule:any,value:any, callback:any)=>{
+    if(form.sshInstanceCode == undefined){
+      callback(new Error('请先选择实例'));
+    }
+    if(value == curServerName.value){
+      callback();
+    }
+
+    checkServerName(value,form.sshInstanceCode).then((res)=>{
         if(res.code == 200){
           if(res.data){
-            callback()
+            callback(new Error('服务名称已存在，请确认后修改'));
           }else{
-            callback(new Error('项目名称已存在，请确认后修改'));
+            callback()
+          }
+        }
+    })
+  }
+
+  const validInstanceCode = (rule:any,value:any, callback:any)=>{
+    if(value == curInstanceCode.value){
+      callback();
+    }
+
+    checkInstanceCode(value).then((res) =>{
+        if(res.code == 200){
+          if(res.data){
+            callback(new Error('实例已存在，请确认后修改'));
+          }else{
+            callback()
           }
         }
     })
@@ -32,16 +59,17 @@
 
   // 表单验证规则
   const rules = reactive<FormRules>({
-      'instanceCode' : [
+      'sshInstanceCode' : [
         { required: true, message: "实例编码不能为空", trigger: "change" },
+        { validator: validInstanceCode , trigger: 'change' }
       ],
-      'projectName': [
-        { required: true, message: "项目名称不能为空", trigger: "blur" },
-        { min: 2, max: 20, message: '项目名称长度必须介于 2 和 20 之间', trigger: 'blur' },
-        { validator: validProjectName , trigger: 'blur' }
+      'serverName': [
+        { required: true, message: "服务名称不能为空", trigger: "blur" },
+        { min: 2, max: 20, message: '服务名称长度必须介于 2 和 20 之间', trigger: 'blur' },
+        { validator: validServerName , trigger: 'blur' }
       ],
-      'capacity': [
-        { required: true, message: "容量不能为空", trigger: "blur" }
+      'ansibleInventoryDir': [
+        { required: true, message: "目录不能为空", trigger: "blur" }
       ]
   })
 
@@ -62,6 +90,7 @@
   // 新增表单
   const addDialog = ref(false);
   const formRef = ref<FormInstance>();
+  const pluginCode = "jsch"
 
   const title = ref(null)
   const pluginInstance = reactive([]);
@@ -90,6 +119,14 @@
           }
         }
     );
+
+    queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
+          if(res.code == 200){
+            Object.assign(sshInstanceCodes,res?.data)
+            console.log(sshInstanceCodes)
+          }
+    })
+    
   }
 
   // 处理搜索按钮
@@ -143,7 +180,7 @@
                 getList()
                 ElMessage({
                   type: 'success',
-                  message: '操作成功',
+                  message: '操作成功'
                 })
             }
         })
@@ -153,6 +190,8 @@
 
   // 重置表单
   const reset = ()=> {
+    curServerName.value = null
+    curInstanceCode.value = null
     Object.assign(form,{
       serverName:undefined,
       sshInstanceCode:undefined,
@@ -189,11 +228,25 @@
       
   }
 
+  // 处理更新按钮
+  const handleUpdate = function(row){
+    reset()
+    curServerName.value = row.serverName
+    curInstanceCode.value = row.sshInstanceCode
+    queryDetail(row.id).then((res) =>{
+        if(res.code == 200){
+            Object.assign(form,res.data)
+        }
+    })
+    addDialog.value = true
+    title.value = "更新ansible主机配置信息"
+  }
+
   // 处理新增按钮
   const handleAdd = function(){
     reset()
     addDialog.value = true
-    title.value = "添加ansible配置信息"
+    title.value = "添加ansible主机配置信息"
   }
 
   // 表单取消处理
@@ -229,7 +282,7 @@
                 style="width: 240px"
               >
                 <el-option v-for="item in sshInstanceCodes"
-                           :key="item.pluginCode"
+                           :key="item.instanceCode"
                            :label="item.instanceName"
                            :value="item.instanceCode"/>
               </el-select>
@@ -293,7 +346,8 @@
         <el-table v-loading="loading" :data="projectList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
           <el-table-column label="编号" align="center" key="id" prop="id" v-if="false"/>
-          <el-table-column label="主机名称" align="center" key="severName" prop="severName"  :show-overflow-tooltip="true"  />
+          <el-table-column label="实例编码" align="center" key="sshInstanceCode" prop="sshInstanceCode"  v-if="false"/>
+          <el-table-column label="主机名称" align="center" key="serverName" prop="serverName"  :show-overflow-tooltip="true"  />
           <el-table-column label="目录" align="center" key="ansibleInventoryDir" prop="ansibleInventoryDir"  :show-overflow-tooltip="true"  />
           <el-table-column label="状态" align="center" key="status"  width="100">
             <template #default="scope">
@@ -323,6 +377,11 @@
                   @click="handleStatusChange(scope.row)"
                   v-hasPerms="['/ansible/host/changeStatus/**']"
                 >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
+                <el-button
+                  size="default"
+                  @click="handleUpdate(scope.row)"
+                  v-hasPerms="['/ansible/host/add']"
+                >更新</el-button>
               </div>
             </template>
           </el-table-column>
@@ -356,12 +415,14 @@
                   style="width: 240px"
                 >
                   <el-option v-for="item in sshInstanceCodes"
-                             :key="item.pluginCode"
+                             :key="item.instanceCode"
                              :label="item.instanceName"
                              :value="item.instanceCode"/>
                 </el-select>
               </el-form-item>
             </el-col>
+          </el-row>
+          <el-row>
             <el-col :span="12">
               <el-form-item label="主机名称" prop="serverName">
                 <el-input v-model="form.serverName" placeholder="请输入主机名称" maxlength="20" />
@@ -370,8 +431,8 @@
           </el-row>
           <el-row>
             <el-col :span="12">
-              <el-form-item label="目录" prop="ansibleInventory">
-                <el-input v-model="form.ansibleInventory" placeholder="请输入目录路径"  />
+              <el-form-item label="inventory目录" prop="ansibleInventoryDir">
+                <el-input v-model="form.ansibleInventoryDir" placeholder="请输入目录路径"  />
               </el-form-item>
             </el-col>
           </el-row>

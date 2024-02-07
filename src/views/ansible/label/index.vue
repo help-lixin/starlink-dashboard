@@ -3,9 +3,11 @@
   import { showStatusOperateFun , status , showStatusFun , addDateRange } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
-  import { changeStatus, pageList, addLabel} from "@/api/ansible/label"
+  import { changeStatus, pageList, addLabel, updateLabel, checkLabelKey, queryLabelDetail} from "@/api/ansible/label"
 
   const queryFormRef = ref(null);
+  const pluginCode = "jsch";
+  const labelKey = ref(null)
 
   //查询列表信息
   const queryParams = reactive({
@@ -18,13 +20,17 @@
     projectName: undefined
   })
 
-  const validProjectName = (rule:any,value:any, callback:any)=>{
-    projectNameIsExist(value,form.instanceCode).then((res)=>{
+  const validKey = (rule:any,value:any, callback:any)=>{
+    if(value == labelKey){
+      callback();
+    }
+
+    checkLabelKey(value).then((res)=>{
         if(res.code == 200){
-          if(res.data){
+          if(!res.data){
             callback()
           }else{
-            callback(new Error('项目名称已存在，请确认后修改'));
+            callback(new Error('标签key已存在，请确认后修改'));
           }
         }
     })
@@ -32,16 +38,14 @@
 
   // 表单验证规则
   const rules = reactive<FormRules>({
-      'instanceCode' : [
-        { required: true, message: "实例编码不能为空", trigger: "change" },
+      'labelKey' : [
+        { required: true, message: "标签key不能为空", trigger: "blur" },
+        { min: 2, max: 20, message: '标签key长度必须介于 2 和 20 之间', trigger: 'blur' },
+        { validator: validKey , trigger: 'blur' }
       ],
-      'projectName': [
-        { required: true, message: "项目名称不能为空", trigger: "blur" },
-        { min: 2, max: 20, message: '项目名称长度必须介于 2 和 20 之间', trigger: 'blur' },
-        { validator: validProjectName , trigger: 'blur' }
-      ],
-      'capacity': [
-        { required: true, message: "容量不能为空", trigger: "blur" }
+      'labelName': [
+        { required: true, message: "标签名不能为空", trigger: "blur" },
+        { min: 2, max: 20, message: '标签名长度必须介于 2 和 20 之间', trigger: 'blur' }
       ]
   })
 
@@ -61,6 +65,8 @@
   const detail = ref(false);
   // 新增表单
   const addDialog = ref(false);
+  // 更新表单
+  const updateDialog = ref(false);
   const formRef = ref<FormInstance>();
 
   const title = ref(null)
@@ -70,7 +76,8 @@
 
   const form = reactive({
     labelKey:undefined,
-    labelName:undefined
+    labelName:undefined,
+    inventorys:[]
   })
 
   // 获取列表
@@ -113,13 +120,14 @@
   }
 
   const handleStatusChange = (row)=>{
+    console.log(row.labelKey)
     const id = row.id
     const status = row.status
     let msg = ""
     if(status == 1){
       msg = '是否禁用"' + row.labelKey + '"的数据项？'
     }else{
-      msg = '是否启用"' + row.projectName + '"的数据项？'
+      msg = '是否启用"' + row.labelKey + '"的数据项？'
     }
 
     ElMessageBox.confirm(
@@ -152,13 +160,39 @@
 
   // 重置表单
   const reset = ()=> {
+    labelKey.value = null
+    formRef.value?.clearValidate()
+    formInstance.splice(0,formInstance.length);
+    form.inventorys.splice(0,form.inventorys.length)
     Object.assign(form,{
       labelKey:undefined,
       labelName:undefined
     })
   }
 
-  // 表单提交处理
+  // 更新表单提交处理
+  const updateForm = async ()=>{
+    loading.value = true;
+
+    updateLabel(form).then(res =>{
+        if(res?.code == 200){
+          ElMessage({
+              showClose: true,
+              message: '修改成功',
+              type: 'success',
+          });
+        }else{
+          ElMessage.error('更新出现异常');
+          loading.value = false;
+          throw response?.msg;
+        }
+
+        updateDialog.value = false;
+        getList();
+    })
+  }
+
+  // 新增表单提交处理
   const submitForm = async ()=>{
     loading.value = true;
     //todo 这里校验全部失败，需要改
@@ -187,21 +221,65 @@
       
   }
 
+  // 处理更新按钮
+  const handleUpdate = function(row){
+    reset()
+    const id = row.id
+    labelKey.value = row.labelKey
+    
+    queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
+        if(res.code == 200){
+          const data = res.data;
+          data.forEach((v) =>{
+              formInstance.push({
+                label:v.instanceName,
+                key:v.instanceCode
+              })
+          })
+          
+        }
+    });
+
+    queryLabelDetail(id).then((res)=>{
+          if(res.code == 200){
+                form.inventorys = res.data
+                form.id = id
+          }
+    })
+
+
+    updateDialog.value = true
+    title.value = "更新ansible标签实例信息"
+  }
+
   // 处理新增按钮
   const handleAdd = function(){
     reset()
+    queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
+        if(res.code == 200){
+          const data = res.data;
+          data.forEach((v) =>{
+
+            formInstance.push({
+              label:v.instanceName,
+              key:v.instanceCode
+            })
+          })
+        }
+    });
+
     addDialog.value = true
-    title.value = "添加ansible配置信息"
+    title.value = "添加ansible标签信息"
   }
 
   // 表单取消处理
-  const cancelDetail = ()=>{
-    detail.value = false;
-    reset();
-  }
-  // 表单取消处理
   const cancelAdd = ()=>{
     addDialog.value = false;
+    reset();
+  }
+
+  const cancelUpdate = ()=>{
+    updateDialog.value = false;
     reset();
   }
 
@@ -307,14 +385,14 @@
               <div class="action-btn">
                 <el-button
                   size="default"
-                  @click="queryDetail(scope.row)"
-                  v-hasPerms="['/ansible/label/detail/*']"
-                >详情</el-button>
-                <el-button
-                  size="default"
                   @click="handleStatusChange(scope.row)"
                   v-hasPerms="['/ansible/label/changeStatus/**']"
                 >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
+                <el-button
+                  size="default"
+                  @click="handleUpdate(scope.row)"
+                  v-hasPerms="['/ansible/label/queryLabelDetail/*']"
+                >修改</el-button>
               </div>
             </template>
           </el-table-column>
@@ -345,8 +423,15 @@
             </el-col>
             <el-col :span="12">
               <el-form-item label="标签名" prop="labelName">
-                <el-input v-model="form.projectName" placeholder="请输入标签名" maxlength="20" />
+                <el-input v-model="form.labelName" placeholder="请输入标签名" maxlength="20" />
               </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row>
+            <el-col style="margin-left:20px">
+              <el-transfer v-model="form.inventorys" :data="formInstance"
+              :titles="[ '未关联' , '已关联']"/>
             </el-col>
           </el-row>
 
@@ -355,6 +440,27 @@
       <template #footer>
         <el-button type="primary" @click="submitForm(false)">确 定</el-button>
         <el-button @click="cancelAdd">取 消</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 更新对话框 -->
+    <el-dialog :title="title" v-model="updateDialog" width="600px" append-to-body>
+      <yt-card>
+        <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
+
+          <el-row>
+            <el-input v-model="form.id" v-if="false" />
+            <el-col style="margin-left:20px">
+              <el-transfer v-model="form.inventorys" :data="formInstance"
+              :titles="[ '未关联' , '已关联']"/>
+            </el-col>
+          </el-row>
+
+        </el-form>
+      </yt-card>
+      <template #footer>
+        <el-button type="primary" @click="updateForm">确 定</el-button>
+        <el-button @click="cancelUpdate">取 消</el-button>
       </template>
     </el-dialog>
 
@@ -406,5 +512,15 @@
   --el-input-width: 240px;
 }
 
+.el-transfer__buttons{
+  width: 80px;
+  padding: 0px;
+  margin-left: 20px;
+}
+.el-transfer__buttons .el-button{
+  width: 50px;
+  padding: 0px;
+  margin-left: 5px;
+}
 </style>
 

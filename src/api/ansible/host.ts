@@ -35,14 +35,31 @@ export function changeStatus(id:any, status:any) {
     });
 }
 
-
+export function queryDetail(id:number){
+    return request({
+        url: STARLINK_SERVICE + '/ansible/host/queryDetail/'+id,
+        method: 'get'
+    }).then((res)=>{
+        return res?.data;
+    });
+}
 
 
 
 // 查询任务名称是否可用
-export function projectNameIsExist(projectName:string,instanceCode:string) {
+export function checkServerName(serverName:string,sshInstanceCode:string) {
     return request({
-      url: STARLINK_SERVICE + '/harbor/project/projectNameIsExist/' + projectName +"/" + instanceCode,
+      url: STARLINK_SERVICE + '/ansible/host/checkServerName/'+serverName + "/" + sshInstanceCode ,
+      method: 'get'
+    }).then((res)=>{
+        return res?.data;
+    });
+}
+
+// 查询实例是否存在
+export function checkInstanceCode(instanceCode:string) {
+    return request({
+      url: STARLINK_SERVICE + '/ansible/host/checkInstance/'+ instanceCode,
       method: 'get'
     }).then((res)=>{
         return res?.data;

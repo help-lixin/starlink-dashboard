@@ -595,9 +595,7 @@
 
           <el-row v-if="form.credentialType == 'TOKEN'">
             <el-col :span="12">
-              <el-form-item label="用户名" prop="userName" :rules="[
-                  { required: true, message: '用户名不能为空', trigger: 'blur' },
-                  { min: 2, max: 50, message: '用户名长度必须介于 2 和 50 之间', trigger: 'blur' } ]">
+              <el-form-item label="用户名" prop="userName" >
                 <el-input v-model="form.userName" placeholder="请输入用户名" maxlength="50" />
               </el-form-item>
             </el-col>
