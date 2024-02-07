@@ -6,6 +6,7 @@
 
 import { useActionMetasStore } from "@/stores/plugin";
 import {STARLINK_SERVICE} from "@/utils/env"
+import jenkins from "@/api/mock/formilyjs/jenkins"
 
 const actionMetasStore = useActionMetasStore();
 
@@ -114,6 +115,8 @@ PaletteProvider.prototype.getPaletteEntries = function (element) {
 	actionMetasStore.initActions()
 	const actions = actionMetasStore.getActions
 	actions.forEach((value, key) => {
+		// TODO lixin 临时测试用
+		// const pluginItem = deserialize(jenkins)
 		const pluginItem = deserialize(value)
 		const pluginMeta = { 
 			"plugin": key 
@@ -144,7 +147,7 @@ PaletteProvider.prototype.getPaletteEntries = function (element) {
 		if(pluginMeta?.pluginIcon){
 			paletteObj[key]["imageUrl"] = pluginMeta?.pluginIcon
 		}
-		
+
 		if(pluginItem?.className){
 			paletteObj[key]["className"] = "custom-task-common " + pluginItem?.className;
 		}else{
