@@ -317,6 +317,7 @@
                 v-model="queryParams.roleName"
                 placeholder="请输入角色名称"
                 clearable
+                style="width: 240px"
               />
             </el-form-item>
             <el-form-item label="权限字符" prop="roleKey">
@@ -324,13 +325,15 @@
                 v-model="queryParams.roleKey"
                 placeholder="请输入权限字符"
                 clearable
+                style="width: 240px"
               />
             </el-form-item>
             <el-form-item label="状态" prop="status">
               <el-select
                 v-model="queryParams.status"
                 placeholder="角色状态"
-                clearable>
+                clearable
+                style="width: 240px">
                 <el-option v-for="dict in statusDicts"
                            :key="dict.value"
                            :label="dict.label"
@@ -345,6 +348,8 @@
                 range-separator="-"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
+                clearable
+                style="width: 240px"
               ></el-date-picker>
             </el-form-item>
             <div>
@@ -411,13 +416,15 @@
             <template v-slot="scope">
               <div class="action-btn">
                 <el-button
-                  size="default"
+                  size="small"
+                  icon="Edit"
                   @click="handleUpdate(scope.row)"
                   v-hasPerms="['/system/role/edit']"
                 >修改</el-button>
 
                 <el-button
-                  size="default"
+                  size="small"
+                  icon="Delete"
                   @click="handleDelete(scope.row)"
                   v-hasPerms="['/system/role/del/*']"
                 >删除</el-button>

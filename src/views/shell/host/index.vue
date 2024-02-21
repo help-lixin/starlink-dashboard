@@ -1,9 +1,10 @@
 <script setup lang="ts">
   // @ts-nocheck
-  import { showStatusOperateFun , status , showStatusFun , addDateRange } from "@/utils/common"
+  import { showStatusOperateFun , status , showStatusFun , addDateRange, getStatusIcon } from "@/utils/common"
   import { dayjs } from "@/utils/common-dayjs"
+  import {  Edit } from '@element-plus/icons-vue'
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
-  import { changeStatus, pageList,  addHost, queryDetail, checkServerName, checkInstanceCode} from "@/api/ansible/host"
+  import { changeStatus, pageList,  addHost, queryDetail, checkServerName, checkInstanceCode} from "@/api/shell/host"
 
   const queryFormRef = ref(null);
   const sshInstanceCodes = reactive([])
@@ -228,7 +229,7 @@
       
   }
 
-  // 处理更新按钮
+  // 处理修改按钮
   const handleUpdate = function(row){
     reset()
     curServerName.value = row.serverName
@@ -239,7 +240,7 @@
         }
     })
     addDialog.value = true
-    title.value = "更新ansible主机配置信息"
+    title.value = "修改 "+row.serverName+" 主机配置信息"
   }
 
   // 处理新增按钮
@@ -269,9 +270,7 @@
   <div class="main-wrapp">
     <!--sousuo  -->
     <yt-card>
-      <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" size="small" :inline="true" v-show="showSearch" label-width="68px">
-        <el-row :gutter="20">
-          <el-col :span="8">
+      <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch">
             <el-form-item label="插件实例" prop="sshInstanceCode">
               <el-select
                 class="search-select"
@@ -287,13 +286,9 @@
                            :value="item.instanceCode"/>
               </el-select>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="主机名" prop="queryParams.serverName">
-              <el-input v-model="queryParams.serverName" placeholder="请输入主机名"  style="width: 240px"/>
+              <el-input v-model="queryParams.serverName" placeholder="请输入主机名" clearable  style="width: 240px"/>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="状态" prop="status">
               <el-select
                 class="search-select"
@@ -308,8 +303,6 @@
                            :value="dict.value"/>
               </el-select>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="创建时间">
               <el-date-picker
                 v-model="dateRange"
@@ -319,16 +312,13 @@
                 range-separator="-"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
+                clearable
               ></el-date-picker>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <div>
-              <el-button type="primary" size="small" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
-              <el-button  size="small" @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
-            </div>
-          </el-col>
-        </el-row>
+            <el-form-item>
+              <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
+              <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
+            </el-form-item>
       </el-form>
     </yt-card>
     <yt-card>
@@ -361,7 +351,7 @@
               }}
             </template>
           </el-table-column>
-          <el-table-column label="更新时间" align="center" prop="updateTime"  width="180">
+          <el-table-column label="修改时间" align="center" prop="updateTime"  width="180">
             <template #default="scope">
               {{ scope.row.updateTime ? dayjs(scope.row.updateTime).format("YYYY-MM-DD HH:mm:ss") : ''  }}
             </template>
@@ -373,15 +363,17 @@
             <template #default="scope">
               <div class="action-btn">
                 <el-button
-                  size="default"
+                  size="small"
+                  :icon="getStatusIcon(scope.row)"
                   @click="handleStatusChange(scope.row)"
                   v-hasPerms="['/ansible/host/changeStatus/**']"
                 >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
                 <el-button
-                  size="default"
+                  size="small"
+                  :icon="Edit"
                   @click="handleUpdate(scope.row)"
                   v-hasPerms="['/ansible/host/add']"
-                >更新</el-button>
+                >修改</el-button>
               </div>
             </template>
           </el-table-column>

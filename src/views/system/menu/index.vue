@@ -241,10 +241,11 @@
             v-model="queryParams.menuName"
             placeholder="请输入菜单名称"
             clearable
+            style="width: 240px"
           />
         </el-form-item>
         <el-form-item label="状态" prop="status">
-          <el-select v-model="queryParams.status" placeholder="菜单状态" clearable>
+          <el-select v-model="queryParams.status" placeholder="菜单状态" clearable style="width: 240px">
             <el-option v-for="dict in statusDicts"
                        :key="dict.value"
                        :label="dict.label"
@@ -256,13 +257,21 @@
           <el-button type="primary"  @click="handleQuery" v-hasPerms="['/system/menu/list']"><el-icon><Search /></el-icon>搜索</el-button>
           <el-button   @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
         </el-form-item>
-        <el-form-item>
-          <el-button type="primary"  @click="handleAdd" v-hasPerms="['/system/menu/add']"><el-icon><Plus /></el-icon>新增</el-button>
-          <el-button  @click="toggleExpandAll"><el-icon><Sort /></el-icon>展开/折叠</el-button>
-        </el-form-item>
       </el-form>
     </yt-card>
     <yt-card>
+      <div class="option-wrap">
+            <el-button
+              type="primary"
+              plain
+              size="default"
+              @click="handleAdd" v-hasPerms="['/system/menu/add']" ><el-icon><Plus /></el-icon>新增</el-button>
+            <el-button
+              type="primary"
+              plain
+              size="default"
+              @click="toggleExpandAll" v-hasPerms="['/system/menu/add']" ><el-icon><Sort /></el-icon>展开/折叠</el-button>
+        </div>
       <!-- table -->
       <el-table
         :data="menuListRef"
@@ -505,6 +514,9 @@
 .box-card {
   width: auto;
 }
-
+.option-wrap {
+  margin-bottom: 8px;
+  text-align: right;
+}
 
 </style>

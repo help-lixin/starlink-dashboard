@@ -23,5 +23,8 @@ export const navigation = new Map<string,string[]>([
 
     [ "/ansible/label/index" ,  ["ansible管理","ansible标签管理"] ],
     [ "/ansible/host/index" ,  ["ansible管理","ansible主机管理"] ],
+
+    [ "/shell/label/index" ,  ["shell管理","shell标签管理"] ],
+    [ "/shell/host/index" ,  ["shell管理","shell主机管理"] ],
 ]);
 

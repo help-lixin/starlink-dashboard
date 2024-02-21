@@ -1,7 +1,7 @@
 <script setup lang="ts">
   // @ts-nocheck
   import { Plus ,Delete, Edit, EditPen, Search , RefreshRight , Sort , QuestionFilled} from '@element-plus/icons-vue'
-  import { parseTime , status ,addDateRange , showStatusFun , showStatusOperateFun  } from "@/utils/common"
+  import { parseTime , status ,addDateRange , showStatusFun , showStatusOperateFun, getStatusIcon  } from "@/utils/common"
   import { getPluginMeta } from '@/api/pluginDefinition';
   import { pluginOptionSelect } from "@/api/common-api"
   import { list , get , update , add , changeStatus } from "@/api/pluginInstance"
@@ -341,6 +341,7 @@ const getList = ()=>{
                 @change="handlePlugin"
                 placeholder="请选择插件"
                 clearable
+                style="width: 240px"
               >
                 <el-option v-for="item in queryPlugins"
                            :key="item.value"
@@ -349,7 +350,7 @@ const getList = ()=>{
               </el-select>
             </el-form-item>
             <el-form-item label="插件名称" prop="instanceName">
-              <el-input v-model='queryParams.instanceName' placeholder='请输入插件实例名称' clearable />
+              <el-input v-model='queryParams.instanceName' placeholder='请输入插件实例名称' clearable style="width: 240px"/>
             </el-form-item>
             <el-form-item label="状态" prop="status">
               <el-select
@@ -357,6 +358,7 @@ const getList = ()=>{
                 v-model="queryParams.status"
                 placeholder="状态"
                 clearable
+                style="width: 240px"
               >
                 <el-option v-for="dict in status"
                            :key="dict.value"
@@ -372,6 +374,8 @@ const getList = ()=>{
                 range-separator="-"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
+                clearable
+                style="width: 240px"
               ></el-date-picker>
             </el-form-item>
             <el-form-item>
@@ -424,13 +428,15 @@ const getList = ()=>{
             <template v-slot="scope">
               <div class="action-btn">
                 <el-button
-                  size="default"
+                  size="small"
+                  icon="Edit"
                   @click="handleUpdate(scope.row)"
                   v-hasPerms="['/system/plugin/instance/edit']"
                 >修改</el-button>
 
                 <el-button
-                  size="default"
+                  size="small"
+                  :icon="getStatusIcon(scope.row)"
                   @click="handleDelete(scope.row)"
                   v-hasPerms="['/system/plugin/instance/changeStatus/**']"
                 >

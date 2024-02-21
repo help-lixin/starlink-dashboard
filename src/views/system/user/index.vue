@@ -298,6 +298,7 @@ getList()
                   v-model="queryParams.userName"
                   placeholder="请输入用户名称"
                   clearable
+                  style="width: 240px"
                 />
               </el-form-item>
               <el-form-item label="手机号码" prop="phonenumber">
@@ -305,6 +306,7 @@ getList()
                   v-model="queryParams.phonenumber"
                   placeholder="请输入手机号码"
                   clearable
+                  style="width: 240px"
                 />
               </el-form-item>
               <el-form-item label="状态" prop="status">
@@ -313,6 +315,7 @@ getList()
                   v-model="queryParams.status"
                   placeholder="用户状态"
                   clearable
+                  style="width: 240px"
                 >
                   <el-option v-for="dict in statusDicts"
                              :key="dict.value"
@@ -328,6 +331,8 @@ getList()
                   range-separator="-"
                   start-placeholder="开始日期"
                   end-placeholder="结束日期"
+                  clearable
+                  style="width: 240px"
                 ></el-date-picker>
               </el-form-item>
               <div>

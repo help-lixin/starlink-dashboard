@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // @ts-nocheck
-import { Plus ,Delete, Edit, EditPen, Search , RefreshRight , Sort , QuestionFilled} from '@element-plus/icons-vue'
+import { Plus ,Delete, Edit, Link, More, EditPen, Search , RefreshRight , Sort , QuestionFilled} from '@element-plus/icons-vue'
 import { parseTime , statusDicts , sexDicts , addDateRangeRuoyi } from "@/utils/common"
 import { listUser , getUser , addUser , updateUser , delUser , changeUserStatus , resetUserPwd } from "@/api/users"
 import { getRoles } from "@/api/roles"
@@ -301,6 +301,7 @@ getList()
                   v-model="queryParams.userName"
                   placeholder="请输入用户名称"
                   clearable
+                  style="width: 240px"
                 />
               </el-form-item>
               <el-form-item label="手机号码" prop="phonenumber">
@@ -308,6 +309,7 @@ getList()
                   v-model="queryParams.phonenumber"
                   placeholder="请输入手机号码"
                   clearable
+                  style="width: 240px"
                 />
               </el-form-item>
               <el-form-item label="状态" prop="status">
@@ -316,6 +318,7 @@ getList()
                   v-model="queryParams.status"
                   placeholder="用户状态"
                   clearable
+                  style="width: 240px"
                 >
                   <el-option v-for="dict in statusDicts"
                              :key="dict.value"
@@ -331,6 +334,8 @@ getList()
                   range-separator="-"
                   start-placeholder="开始日期"
                   end-placeholder="结束日期"
+                  clearable
+                  style="width: 240px"
                 ></el-date-picker>
               </el-form-item>
               <div>
@@ -400,28 +405,31 @@ getList()
             <el-table-column
               label="操作"
               align="center"
-              width="320"
+              width="350"
             >
               <template v-slot="scope">
                 <div class="action-btn">
                   <el-button
                     size="small"
+                    icon="Edit"
                     @click="handleUpdate(scope.row)"
                     v-hasPerms="['/system/user/edit']"
                   >修改</el-button>
                   <el-button
                     size="small"
+                    icon="Link"
                     @click="contractAddress(scope.row)"
                   >关联地址</el-button>
                   <el-button
                     size="small"
+                    icon="Delete"
                     @click="handleDelete(scope.row)"
                     v-hasPerms="['/system/user/del/*']"
                   >删除</el-button>
 
 
                   <el-dropdown size="default" @command="(command) => handleCommand(command, scope.row)" v-hasPerms="['/system/user/resetPwd', '/system/user/edit']">
-                    <el-button size="small">更多</el-button>
+                    <el-button size="small" icon="More">更多</el-button>
                     <template #dropdown>
                       <el-dropdown-menu>
                         <el-dropdown-item command="handleResetPwd" v-hasPerms="['/system/user/resetPwd']" >重置密码</el-dropdown-item>

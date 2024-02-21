@@ -165,32 +165,33 @@
     formInstance.splice(0,formInstance.length);
     form.inventorys.splice(0,form.inventorys.length)
     Object.assign(form,{
+      id:undefined,
       labelKey:undefined,
       labelName:undefined
     })
   }
 
   // 更新表单提交处理
-  const updateForm = async ()=>{
-    loading.value = true;
+  // const updateForm = async ()=>{
+  //   loading.value = true;
 
-    updateLabel(form).then(res =>{
-        if(res?.code == 200){
-          ElMessage({
-              showClose: true,
-              message: '修改成功',
-              type: 'success',
-          });
-        }else{
-          ElMessage.error('更新出现异常');
-          loading.value = false;
-          throw response?.msg;
-        }
+  //   updateLabel(form).then(res =>{
+  //       if(res?.code == 200){
+  //         ElMessage({
+  //             showClose: true,
+  //             message: '修改成功',
+  //             type: 'success',
+  //         });
+  //       }else{
+  //         ElMessage.error('更新出现异常');
+  //         loading.value = false;
+  //         throw response?.msg;
+  //       }
 
-        updateDialog.value = false;
-        getList();
-    })
-  }
+  //       updateDialog.value = false;
+  //       getList();
+  //   })
+  // }
 
   // 新增表单提交处理
   const submitForm = async ()=>{
@@ -203,21 +204,40 @@
             throw err;
         });
 
-    addLabel(form).then(response => {
-      if(response?.code == 200){
-        ElMessage({
+    if(form.id == undefined){
+      addLabel(form).then(response => {
+        if(response?.code == 200){
+          ElMessage({
+                showClose: true,
+                message: '新增成功',
+                type: 'success',
+          });
+        }else{
+          ElMessage.error('新增出现异常');
+          loading.value = false;
+          throw response?.msg;
+        }
+        
+      });
+    }else{
+      updateLabel(form).then(res =>{
+        if(res?.code == 200){
+          ElMessage({
               showClose: true,
-              message: '新增成功',
+              message: '修改成功',
               type: 'success',
-        });
-      }else{
-        ElMessage.error('新增出现异常');
-        loading.value = false;
-        throw response?.msg;
-      }
-      addDialog.value = false;
-      getList();
-    });
+          });
+        }else{
+          ElMessage.error('更新出现异常');
+          loading.value = false;
+          throw response?.msg;
+        }
+
+      })
+    }
+
+    addDialog.value = false;
+    getList();
       
   }
 
@@ -243,7 +263,6 @@
     });
 
     queryLabelDetail(id).then((res)=>{
-      console.log(res)
           if(res.code == 200){
                 form.inventorys = res.data
                 form.id = id
@@ -251,7 +270,7 @@
     })
 
 
-    updateDialog.value = true
+    addDialog.value = true
     title.value = "更新ansible标签实例信息"
   }
 
@@ -282,10 +301,10 @@
   }
 
   // 取消更新表单处理
-  const cancelUpdate = ()=>{
-    updateDialog.value = false;
-    reset();
-  }
+  // const cancelUpdate = ()=>{
+  //   updateDialog.value = false;
+  //   reset();
+  // }
 
   // 触发查询
   getList();
@@ -404,14 +423,14 @@
       </div>
     </yt-card>
 
-    <!-- 新增对话框 -->
+    <!-- 新增/更新对话框 -->
     <el-dialog :title="title" v-model="addDialog" width="600px" append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
           <el-row>
             <el-col :span="12">
               <el-form-item label="标签key" prop="labelKey">
-                <el-input v-model="form.labelKey" placeholder="请输入标签key" maxlength="20" />
+                <el-input v-model="form.labelKey" placeholder="请输入标签key" maxlength="20" :disabled="form.id != undefined"/>
               </el-form-item>
             </el-col>
             <el-col :span="12">
@@ -436,7 +455,7 @@
       </template>
     </el-dialog>
 
-    <!-- 更新对话框 -->
+    <!-- 更新对话框
     <el-dialog :title="title" v-model="updateDialog" width="600px" append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
@@ -448,7 +467,7 @@
             </el-col>
             <el-col :span="12">
               <el-form-item label="标签名" prop="labelName">
-                <el-input v-model="form.labelName" placeholder="请输入标签名" maxlength="20" disabled="true"/>
+                <el-input v-model="form.labelName" placeholder="请输入标签名" maxlength="20" />
               </el-form-item>
             </el-col>
           </el-row>
@@ -466,7 +485,7 @@
         <el-button type="primary" @click="updateForm">确 定</el-button>
         <el-button @click="cancelUpdate">取 消</el-button>
       </template>
-    </el-dialog>
+    </el-dialog> -->
 
   </div>
 </template>

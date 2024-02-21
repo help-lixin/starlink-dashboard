@@ -1,7 +1,7 @@
 <script setup lang="ts">
   // @ts-nocheck
   import { Plus ,Delete, Edit, EditPen, Search , RefreshRight , Sort , QuestionFilled} from '@element-plus/icons-vue'
-  import { parseTime , status ,addDateRange , showStatusFun , showStatusOperateFun  } from "@/utils/common"
+  import { parseTime , status ,addDateRange , showStatusFun , showStatusOperateFun, getStatusIcon  } from "@/utils/common"
   import { list , get , update , add , changeStatus } from "@/api/pluginDefinition"
 
   // 查询的表单引用
@@ -228,6 +228,7 @@
                 v-model="queryParams.pluginCode"
                 placeholder="请输入插件编码"
                 clearable
+                style="width: 240px"
               />
             </el-form-item>
             <el-form-item label="插件名称" prop="pluginName">
@@ -235,6 +236,7 @@
                 v-model="queryParams.pluginName"
                 placeholder="请输入插件名称"
                 clearable
+                style="width: 240px"
               />
             </el-form-item>
             <el-form-item label="状态" prop="status">
@@ -243,6 +245,7 @@
                 v-model="queryParams.status"
                 placeholder="用户状态"
                 clearable
+                style="width: 240px"
               >
                 <el-option v-for="dict in status"
                            :key="dict.value"
@@ -258,6 +261,8 @@
                 range-separator="-"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
+                clearable
+                style="width: 240px"
               ></el-date-picker>
             </el-form-item>
             <div>
@@ -311,13 +316,15 @@
             <template v-slot="scope">
               <div class="action-btn">
                 <el-button
-                  size="default"
+                  size="small"
+                  icon="Edit"
                   @click="handleUpdate(scope.row)"
                   v-hasPerms="['/system/plugin/definition/edit']"
                 >修改</el-button>
 
                 <el-button
-                  size="default"
+                  size="small"
+                  :icon="getStatusIcon(scope.row)"
                   @click="handleDelete(scope.row)"
                   v-hasPerms="['/system/plugin/definition/changeStatus/**']"
                 >

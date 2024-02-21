@@ -1,9 +1,10 @@
 <script setup lang="ts">
   // @ts-nocheck
-  import { showStatusOperateFun , status , showStatusFun , addDateRange } from "@/utils/common"
+  import { showStatusOperateFun , status , showStatusFun , addDateRange, getStatusIcon } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
+  import {  Edit } from '@element-plus/icons-vue'
   import { dayjs } from "@/utils/common-dayjs"
-  import { changeStatus, pageList, addLabel, updateLabel, checkLabelKey, queryLabelDetail} from "@/api/ansible/label"
+  import { changeStatus, pageList, addLabel, updateLabel, checkLabelKey, queryLabelDetail} from "@/api/shell/label"
 
   const queryFormRef = ref(null);
   const pluginCode = "jsch";
@@ -16,8 +17,8 @@
     beginTime: undefined,
     endTime: undefined,
     status: undefined,
-    instanceCode:undefined,
-    projectName: undefined
+    labelKey: undefined,
+    labelName: undefined
   })
 
   const validKey = (rule:any,value:any, callback:any)=>{
@@ -106,10 +107,10 @@
   // 处理查询按钮
   const resetQuery = function(){
     
-    queryParams.projectName = undefined
     dateRange.value = [];
+    queryParams.labelKey = undefined;
+    queryParams.labelName = undefined;
     queryFormRef.value.resetFields();
-    queryParams.instanceCode = defaultInstanceCode.value;
     handleQuery();
   }
 
@@ -120,7 +121,6 @@
   }
 
   const handleStatusChange = (row)=>{
-    console.log(row.labelKey)
     const id = row.id
     const status = row.status
     let msg = ""
@@ -165,32 +165,33 @@
     formInstance.splice(0,formInstance.length);
     form.inventorys.splice(0,form.inventorys.length)
     Object.assign(form,{
+      id:undefined,
       labelKey:undefined,
       labelName:undefined
     })
   }
 
   // 更新表单提交处理
-  const updateForm = async ()=>{
-    loading.value = true;
+  // const updateForm = async ()=>{
+  //   loading.value = true;
 
-    updateLabel(form).then(res =>{
-        if(res?.code == 200){
-          ElMessage({
-              showClose: true,
-              message: '修改成功',
-              type: 'success',
-          });
-        }else{
-          ElMessage.error('更新出现异常');
-          loading.value = false;
-          throw response?.msg;
-        }
+  //   updateLabel(form).then(res =>{
+  //       if(res?.code == 200){
+  //         ElMessage({
+  //             showClose: true,
+  //             message: '修改成功',
+  //             type: 'success',
+  //         });
+  //       }else{
+  //         ElMessage.error('更新出现异常');
+  //         loading.value = false;
+  //         throw response?.msg;
+  //       }
 
-        updateDialog.value = false;
-        getList();
-    })
-  }
+  //       updateDialog.value = false;
+  //       getList();
+  //   })
+  // }
 
   // 新增表单提交处理
   const submitForm = async ()=>{
@@ -203,21 +204,40 @@
             throw err;
         });
 
-    addLabel(form).then(response => {
-      if(response?.code == 200){
-        ElMessage({
+    if(form.id == undefined){
+      addLabel(form).then(response => {
+        if(response?.code == 200){
+          ElMessage({
+                showClose: true,
+                message: '新增成功',
+                type: 'success',
+          });
+        }else{
+          ElMessage.error('新增出现异常');
+          loading.value = false;
+          throw response?.msg;
+        }
+        
+      });
+    }else{
+      updateLabel(form).then(res =>{
+        if(res?.code == 200){
+          ElMessage({
               showClose: true,
-              message: '新增成功',
+              message: '修改成功',
               type: 'success',
-        });
-      }else{
-        ElMessage.error('新增出现异常');
-        loading.value = false;
-        throw response?.msg;
-      }
-      addDialog.value = false;
-      getList();
-    });
+          });
+        }else{
+          ElMessage.error('更新出现异常');
+          loading.value = false;
+          throw response?.msg;
+        }
+
+      })
+    }
+
+    addDialog.value = false;
+    getList();
       
   }
 
@@ -226,6 +246,8 @@
     reset()
     const id = row.id
     labelKey.value = row.labelKey
+    form.labelKey = row.labelKey
+    form.labelName = row.labelName
     
     queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
         if(res.code == 200){
@@ -248,8 +270,8 @@
     })
 
 
-    updateDialog.value = true
-    title.value = "更新ansible标签实例信息"
+    addDialog.value = true
+    title.value = "更新shell标签实例信息"
   }
 
   // 处理新增按钮
@@ -269,22 +291,21 @@
     });
 
     addDialog.value = true
-    title.value = "添加ansible标签信息"
+    title.value = "添加shell标签信息"
   }
 
-  // 表单取消处理
+  // 取消添加表单处理
   const cancelAdd = ()=>{
     addDialog.value = false;
     reset();
   }
 
-  const cancelUpdate = ()=>{
-    updateDialog.value = false;
-    reset();
-  }
+  // 取消更新表单处理
+  // const cancelUpdate = ()=>{
+  //   updateDialog.value = false;
+  //   reset();
+  // }
 
-
-  
   // 触发查询
   getList();
 </script>
@@ -293,19 +314,13 @@
   <div class="main-wrapp">
     <!--sousuo  -->
     <yt-card>
-      <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" size="small" :inline="true" v-show="showSearch" label-width="68px">
-        <el-row :gutter="20">
-          <el-col :span="8">
+      <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch">
             <el-form-item label="标签key" prop="queryParams.labelKey">
-              <el-input v-model="queryParams.labelKey" placeholder="请输入标签key"  style="width: 240px"/>
+              <el-input v-model="queryParams.labelKey" placeholder="请输入标签key" clearable style="width: 240px"/>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="标签名" prop="queryParams.labelName">
-              <el-input v-model="queryParams.labelName" placeholder="请输入标签名"  style="width: 240px"/>
+              <el-input v-model="queryParams.labelName" placeholder="请输入标签名" clearable style="width: 240px"/>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="状态" prop="status">
               <el-select
                 class="search-select"
@@ -320,8 +335,6 @@
                            :value="dict.value"/>
               </el-select>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="创建时间">
               <el-date-picker
                 v-model="dateRange"
@@ -331,16 +344,13 @@
                 range-separator="-"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
+                clearable
               ></el-date-picker>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <div>
-              <el-button type="primary" size="small" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
-              <el-button  size="small" @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
-            </div>
-          </el-col>
-        </el-row>
+            <el-form-item>
+              <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
+              <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
+            </el-form-item>
       </el-form>
     </yt-card>
     <yt-card>
@@ -350,7 +360,7 @@
           type="primary"
           plain
           size="default"
-          @click="handleAdd" v-hasPerms="['/ansible/label/add']" ><el-icon><Plus /></el-icon>新增</el-button>
+          @click="handleAdd" v-hasPerms="['/shell/label/add']" ><el-icon><Plus /></el-icon>新增</el-button>
       </div>
 
       <!--table  -->
@@ -360,7 +370,7 @@
           <el-table-column label="编号" align="center" key="id" prop="id" v-if="false"/>
           <el-table-column label="标签key" align="center" key="labelKey" prop="labelKey"  :show-overflow-tooltip="true"  />
           <el-table-column label="标签名" align="center" key="labelName" prop="labelName"  :show-overflow-tooltip="true"  />
-          <el-table-column label="状态" align="center" key="status"  >
+          <el-table-column label="状态" align="center" key="status" prop="status"  >
             <template #default="scope">
               {{  showStatusFun(scope.row.status) }}
             </template>
@@ -384,14 +394,16 @@
             <template #default="scope">
               <div class="action-btn">
                 <el-button
-                  size="default"
+                  size="small"
+                  :icon="getStatusIcon(scope.row)"
                   @click="handleStatusChange(scope.row)"
-                  v-hasPerms="['/ansible/label/changeStatus/**']"
+                  v-hasPerms="['/shell/label/changeStatus/**']"
                 >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
                 <el-button
-                  size="default"
+                  size="small"
+                  icon="Edit"
                   @click="handleUpdate(scope.row)"
-                  v-hasPerms="['/ansible/label/queryLabelDetail/*']"
+                  v-hasPerms="['/shell/label/queryLabelDetail/*']"
                 >修改</el-button>
               </div>
             </template>
@@ -411,14 +423,14 @@
       </div>
     </yt-card>
 
-    <!-- 新增对话框 -->
+    <!-- 新增/更新对话框 -->
     <el-dialog :title="title" v-model="addDialog" width="600px" append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
           <el-row>
             <el-col :span="12">
               <el-form-item label="标签key" prop="labelKey">
-                <el-input v-model="form.labelKey" placeholder="请输入标签key" maxlength="20" />
+                <el-input v-model="form.labelKey" placeholder="请输入标签key" maxlength="20" :disabled="form.id != undefined"/>
               </el-form-item>
             </el-col>
             <el-col :span="12">
@@ -429,7 +441,7 @@
           </el-row>
 
           <el-row>
-            <el-col style="margin-left:20px">
+            <el-col>
               <el-transfer v-model="form.inventorys" :data="formInstance"
               :titles="[ '未关联' , '已关联']"/>
             </el-col>
@@ -443,14 +455,25 @@
       </template>
     </el-dialog>
 
-    <!-- 更新对话框 -->
+    <!-- 更新对话框
     <el-dialog :title="title" v-model="updateDialog" width="600px" append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
-
+          <el-row>
+            <el-col :span="12">
+              <el-form-item label="标签key" prop="labelKey">
+                <el-input v-model="form.labelKey" placeholder="请输入标签key" maxlength="20" disabled="true"/>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="标签名" prop="labelName">
+                <el-input v-model="form.labelName" placeholder="请输入标签名" maxlength="20" />
+              </el-form-item>
+            </el-col>
+          </el-row>
           <el-row>
             <el-input v-model="form.id" v-if="false" />
-            <el-col style="margin-left:20px">
+            <el-col>
               <el-transfer v-model="form.inventorys" :data="formInstance"
               :titles="[ '未关联' , '已关联']"/>
             </el-col>
@@ -462,7 +485,7 @@
         <el-button type="primary" @click="updateForm">确 定</el-button>
         <el-button @click="cancelUpdate">取 消</el-button>
       </template>
-    </el-dialog>
+    </el-dialog> -->
 
   </div>
 </template>
@@ -521,6 +544,9 @@
   width: 50px;
   padding: 0px;
   margin-left: 5px;
+}
+.el-transfer-panel{
+  width: 217px;
 }
 </style>
 

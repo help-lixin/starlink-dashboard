@@ -1,6 +1,6 @@
 <script setup lang="ts">
   // @ts-nocheck
-  import { showStatusOperateFun , status , showStatusFun , addDateRange } from "@/utils/common"
+  import { showStatusOperateFun , status , showStatusFun , addDateRange, getStatusIcon } from "@/utils/common"
   import { queryInstanceInfoByPluginCode,pluginOptionSelect } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
   import {sysCredentialList, addCredential, queryCredentialInfoById, checkKey , changeStatus ,credentialTypes} from "@/api/sys_credential/credential"
@@ -316,13 +316,15 @@
   <div class="main-wrapp">
     <!--sousuo  -->
     <yt-card padding="18px 18px 0">
-      <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch">
+      <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch">
             <el-form-item label="插件编码" prop="pluginCode">
               <el-select
                 class="search-select"
                 v-model="queryParams.pluginCode"
                 placeholder="请选择插件编码"
                 @change="queryInstance"
+                clearable
+                style="width: 240px"
               >
                 <el-option v-for="item in pluginCodes"
                            :key="item.label"
@@ -335,6 +337,8 @@
                 class="search-select"
                 v-model="queryParams.instanceCode"
                 placeholder="请选择实例"
+                clearable
+                style="width: 240px"
               >
                 <el-option v-for="item in pluginInstance"
                            :key="item.pluginCode"
@@ -347,6 +351,7 @@
                 v-model="queryParams.credentialName"
                 placeholder="请输入凭证别名"
                 clearable
+                style="width: 240px"
               />
             </el-form-item>
             <el-form-item label="凭证类型" prop="credentialType">
@@ -355,6 +360,7 @@
                 v-model="queryParams.credentialType"
                 placeholder="请选择插件类型"
                 clearable
+                style="width: 240px"
               >
                 <el-option v-for="item in credentialTypes"
                            :key="item.value"
@@ -368,6 +374,7 @@
                 v-model="queryParams.status"
                 placeholder="工具状态"
                 clearable
+                style="width: 240px"
               >
                 <el-option v-for="dict in status"
                            :key="dict.value"
@@ -383,6 +390,8 @@
                 range-separator="-"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
+                clearable
+                style="width: 240px"
               ></el-date-picker>
             </el-form-item>
             <el-form-item>
@@ -406,12 +415,12 @@
       <div class="table-wrap">
         <el-table v-loading="loading" :data="sysCredentialPageList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="编号" align="center" key="id" prop="id" />
-          <el-table-column label="凭证唯一名称" align="center" key="credentialKey" prop="credentialKey"  :show-overflow-tooltip="true"  width="200" />
-          <el-table-column label="凭证别名" align="center" key="credentialName" prop="credentialName"  :show-overflow-tooltip="true"  width="200" />
+          <el-table-column label="编号" align="center" key="id" prop="id" v-if="false"/>
+          <el-table-column label="凭证唯一名称" align="center" key="credentialKey" prop="credentialKey"  :show-overflow-tooltip="true" />
+          <el-table-column label="凭证别名" align="center" key="credentialName" prop="credentialName"  :show-overflow-tooltip="true" />
           <!-- <el-table-column label="凭证类型" align="center" key="credentialType" prop="credentialType"  :show-overflow-tooltip="true"  width="200" /> -->
-          <el-table-column label="备注" align="center" key="remark" prop="remark"  :show-overflow-tooltip="true"  width="200" />
-          <el-table-column label="状态" align="center" key="status"  width="100">
+          <el-table-column label="备注" align="center" key="remark" prop="remark"  :show-overflow-tooltip="true" />
+          <el-table-column label="状态" align="center" key="status">
             <template #default="scope">
               {{  showStatusFun(scope.row.status) }}
             </template>
@@ -429,12 +438,14 @@
             <template #default="scope">
               <div class="action-btn">
                 <el-button
-                  size="default"
+                  size="small"
+                  icon="Edit"
                   @click="handleUpdate(scope.row)"
                   v-hasPerms="['/credential/add']"
                 >修改</el-button>
                 <el-button
-                  size="default"
+                  size="small"
+                  :icon="getStatusIcon(scope.row)"
                   @click="handleStatusChange(scope.row)"
                   v-hasPerms="['/credential/changeStatus/**']"
                 >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
@@ -530,6 +541,17 @@
                 </el-select>
               </el-form-item>
             </el-col>
+            <el-col :span="12">
+              <el-form-item label="状态">
+                <el-radio-group v-model="form.status">
+                  <el-radio
+                    v-for="dict in status"
+                    :key="dict.value"
+                    :label="dict.value"
+                  >{{dict.label}}</el-radio>
+                </el-radio-group>
+              </el-form-item>
+            </el-col>
           </el-row>
 
           <el-row v-if="form.credentialType == 'SECRET'">
@@ -617,19 +639,6 @@
             </el-col>
           </el-row>
 
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="状态">
-                <el-radio-group v-model="form.status">
-                  <el-radio
-                    v-for="dict in status"
-                    :key="dict.value"
-                    :label="dict.value"
-                  >{{dict.label}}</el-radio>
-                </el-radio-group>
-              </el-form-item>
-            </el-col>
-          </el-row>
         </el-form>
       </yt-card>
       <template #footer>
