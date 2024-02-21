@@ -226,6 +226,8 @@
     reset()
     const id = row.id
     labelKey.value = row.labelKey
+    form.labelKey = row.labelKey
+    form.labelName = row.labelName
     
     queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
         if(res.code == 200){
@@ -241,6 +243,7 @@
     });
 
     queryLabelDetail(id).then((res)=>{
+      console.log(res)
           if(res.code == 200){
                 form.inventorys = res.data
                 form.id = id
@@ -437,7 +440,18 @@
     <el-dialog :title="title" v-model="updateDialog" width="600px" append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
-
+          <el-row>
+            <el-col :span="12">
+              <el-form-item label="标签key" prop="labelKey">
+                <el-input v-model="form.labelKey" placeholder="请输入标签key" maxlength="20" disabled="true"/>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="标签名" prop="labelName">
+                <el-input v-model="form.labelName" placeholder="请输入标签名" maxlength="20" disabled="true"/>
+              </el-form-item>
+            </el-col>
+          </el-row>
           <el-row>
             <el-input v-model="form.id" v-if="false" />
             <el-col>
