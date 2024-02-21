@@ -1,7 +1,8 @@
 <script setup lang="ts">
   // @ts-nocheck
-  import { showStatusOperateFun , status , showStatusFun , addDateRange } from "@/utils/common"
+  import { showStatusOperateFun , status , showStatusFun , addDateRange, getStatusIcon } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
+  import {  Edit } from '@element-plus/icons-vue'
   import { dayjs } from "@/utils/common-dayjs"
   import {sysConfigList,addConfig,queryConfigInfoById,changeConfigStatus,sysConfigSelectOption,
     checkHome,checkName,toolsSelectOption,tools,pluginTypeSelectOption} from "@/api/jenkins/sys_config"
@@ -73,8 +74,6 @@
       ],
   })
 
-
-
   const form = reactive({
         id: undefined,
         name: undefined,
@@ -123,10 +122,11 @@
     getList()
   }
 
-  // 处理查询按钮
+  // 处理重置按钮
   const resetQuery = function(){
     dateRange.value = [];
     queryFormRef.value.resetFields();
+    queryParams.instanceCode = pluginInstance[0].instanceCode
     handleQuery();
   }
 
@@ -273,9 +273,7 @@
     <yt-card>
 
       <!--sousuo  -->
-      <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" size="small" :inline="true" v-show="showSearch" label-width="68px">
-        <el-row :gutter="20">
-          <el-col :span="8">
+      <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch" >
             <el-form-item label="插件实例" prop="instanceCode">
               <el-select
                 class="search-select"
@@ -290,8 +288,6 @@
                            :value="item.instanceCode"/>
               </el-select>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="名称" prop="name">
               <el-input
                 v-model="queryParams.name"
@@ -301,8 +297,6 @@
                 @keyup.enter.native="handleQuery"
               />
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="插件类型" prop="pluginType">
               <el-select
                 class="search-select"
@@ -318,8 +312,6 @@
                            :value="item.value"/>
               </el-select>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="状态" prop="status">
               <el-select
                 class="search-select"
@@ -334,8 +326,6 @@
                            :value="dict.value"/>
               </el-select>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="创建时间">
               <el-date-picker
                 v-model="dateRange"
@@ -345,16 +335,13 @@
                 range-separator="-"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
+                clearable
               ></el-date-picker>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <div>
-              <el-button type="primary" size="small" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
-              <el-button  size="small" @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
-            </div>
-          </el-col>
-        </el-row>
+            <el-form-item>
+              <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
+              <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
+            </el-form-item>
       </el-form>
     </yt-card>
     <yt-card>
@@ -371,15 +358,15 @@
       <div class="table-wrap">
         <el-table v-loading="loading" :data="sysConfigPageList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="编号" align="center" key="id" prop="id" v-show="false"/>
-          <el-table-column label="名称" align="center" key="name" prop="name"  :show-overflow-tooltip="true"  width="200" />
-          <el-table-column label="执行路径" align="center" key="value" prop="value"  :show-overflow-tooltip="true"  width="200" />
-          <el-table-column label="状态" align="center" key="status"  width="100">
+          <el-table-column label="编号" align="center" key="id" prop="id" v-if="false"/>
+          <el-table-column label="名称" align="center" key="name" prop="name"  :show-overflow-tooltip="true"  />
+          <el-table-column label="执行路径" align="center" key="value" prop="value"  :show-overflow-tooltip="true" />
+          <el-table-column label="状态" align="center" key="status"  >
             <template #default="scope">
               {{  showStatusFun(scope.row.status) }}
             </template>
           </el-table-column>
-          <el-table-column label="创建时间" align="center" prop="createTime"  width="180">
+          <el-table-column label="创建时间" align="center" prop="createTime"  >
             <template #default="scope">
               {{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}
             </template>
@@ -392,12 +379,14 @@
             <template #default="scope">
               <div class="action-btn">
                 <el-button
-                  size="default"
+                  size="small"
+                  icon="Edit"
                   @click="handleUpdate(scope.row)"
                   v-hasPerms="['/jenkins/systemConfig/add']"
                 >修改</el-button>
                 <el-button
-                  size="default"
+                  size="small"
+                  :icon="getStatusIcon(scope.row)"
                   @click="handleStatusChange(scope.row)"
                   v-hasPerms="['/jenkins/systemConfig/changeStatus/**']"
                 >{{ showStatusOperateFun(scope.row.status)  }}</el-button>

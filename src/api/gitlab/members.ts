@@ -3,9 +3,6 @@ import {STARLINK_SERVICE} from "@/utils/env"
 
 // 查询组成员列表
 export function memberList(query:any) {
-    console.log("=================================================");
-    console.log(query);
-    console.log("=================================================");
     return request({
       url: STARLINK_SERVICE + '/gitlab/group/member/list',
       method: 'get',

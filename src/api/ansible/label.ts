@@ -2,7 +2,6 @@ import request from "@/utils/request";
 import {STARLINK_SERVICE} from "@/utils/env"
 
 
-
 // 查询列表
 export function pageList(query:any) {
     return request({

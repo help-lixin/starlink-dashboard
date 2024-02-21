@@ -2,7 +2,7 @@
 // @ts-nocheck
 // 流水线定义管理
 import { Plus, Delete, Edit, EditPen, Search, RefreshRight, Sort, QuestionFilled } from '@element-plus/icons-vue'
-import { parseTime, status, addDateRange, showStatusFun, showStatusOperateFun } from "@/utils/common"
+import { parseTime, status, addDateRange, showStatusFun, showStatusOperateFun, getStatusIcon } from "@/utils/common"
 import { list, get, changeStatus } from "@/api/workflowDefinition"
 import { useRouter, useRoute } from "vue-router";
 const router = useRouter();
@@ -161,19 +161,20 @@ getList()
     <yt-card padding="18px 18px 0">
       <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch">
             <el-form-item label="流程定义key" prop="processDefinitionKey">
-              <el-input v-model="queryParams.processDefinitionKey" placeholder="请输入流程定义key" clearable  />
+              <el-input v-model="queryParams.processDefinitionKey" placeholder="请输入流程定义key" clearable style="width: 240px" />
             </el-form-item>
             <el-form-item label="流程定义名称" prop="processDefinitionName">
-              <el-input v-model="queryParams.processDefinitionName" placeholder="请输入流程定义名称" clearable />
+              <el-input v-model="queryParams.processDefinitionName" placeholder="请输入流程定义名称" clearable style="width: 240px"/>
             </el-form-item>
             <el-form-item label="状态" prop="status">
-              <el-select class="search-select" v-model="queryParams.status" placeholder="状态" clearable>
+              <el-select class="search-select" v-model="queryParams.status" placeholder="状态" clearable style="width: 240px">
                 <el-option v-for="dict in status" :key="dict.value" :label="dict.label" :value="dict.value" />
               </el-select>
             </el-form-item>
             <el-form-item label="创建时间">
               <el-date-picker v-model="daterangeArray" value-format="YYYY-MM-DD" type="daterange"
-                              range-separator="-" start-placeholder="开始日期" end-placeholder="结束日期"></el-date-picker>
+                              range-separator="-" start-placeholder="开始日期" end-placeholder="结束日期" 
+                              clearable style="width: 240px"></el-date-picker>
             </el-form-item>
             <el-form-item>
               <el-button type="primary" @click="handleQuery"><el-icon>
@@ -221,10 +222,12 @@ getList()
           <el-table-column label="操作" align="center" width="220">
             <template v-slot="scope">
               <div class="action-btn">
-                <el-button size="default" @click="handleUpdate(scope.row)"
+                <el-button size="small" @click="handleUpdate(scope.row)"
+                            icon="Edit"
                            v-hasPerms="['/workflow/definition/operate']">修改</el-button>
 
-                <el-button size="default" @click="handleDelete(scope.row)"
+                <el-button size="small" @click="handleDelete(scope.row)"
+                            :icon="getStatusIcon(scope.row)"
                            v-hasPerms="['/workflow/definition/changeStatus/**']">
                   {{ showStatusOperateFun(scope.row.status) }}
                 </el-button>

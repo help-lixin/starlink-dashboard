@@ -1,12 +1,13 @@
 <script setup lang="ts">
   // @ts-nocheck
-  import { showStatusOperateFun , status , showStatusFun , addDateRange  } from "@/utils/common"
+  import { showStatusOperateFun , status , showStatusFun , addDateRange, getStatusIcon  } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
+  import {  Edit ,SwitchButton} from '@element-plus/icons-vue'
   import { credentialOption } from "@/api/sys_credential/credential"
   import {toolsSelectOption , jdkSelectOption} from "@/api/jenkins/sys_config"
   import {addJob, changeStatus, pageList, tools ,scmType, queryJobDetail, paramTypes, jobSelectOption,  buildJob , jobNameIsExist} from "@/api/jenkins/job"
-import type { pushScopeId } from "vue"
+  import type { pushScopeId } from "vue"
 
   const queryFormRef = ref(null);
 
@@ -229,7 +230,6 @@ import type { pushScopeId } from "vue"
 
       }
   }
-
 
   const handleTagClose = (index)=>{
     form.buildDependencys.splice(index, 1); // 移除标签
@@ -511,9 +511,7 @@ import type { pushScopeId } from "vue"
   <div class="main-wrapp">
     <!--sousuo  -->
     <yt-card>
-      <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" size="small" :inline="true" v-show="showSearch" label-width="68px">
-        <el-row :gutter="20">
-          <el-col :span="8">
+      <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch" >
             <el-form-item label="插件实例" prop="instanceCode">
               <el-select
                 class="search-select"
@@ -529,8 +527,6 @@ import type { pushScopeId } from "vue"
                            :value="item.instanceCode"/>
               </el-select>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="工具类型" prop="queryParams.tools">
               <el-select
                 class="search-select"
@@ -545,13 +541,9 @@ import type { pushScopeId } from "vue"
                            :value="tool.value"/>
               </el-select>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="任务名" prop="queryParams.jobName">
-              <el-input v-model="queryParams.jobName" placeholder="请输入任务名"  style="width: 240px"/>
+              <el-input v-model="queryParams.jobName" placeholder="请输入任务名" clearable style="width: 240px"/>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="状态" prop="status">
               <el-select
                 class="search-select"
@@ -566,8 +558,6 @@ import type { pushScopeId } from "vue"
                            :value="dict.value"/>
               </el-select>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="创建时间">
               <el-date-picker
                 v-model="dateRange"
@@ -579,14 +569,10 @@ import type { pushScopeId } from "vue"
                 end-placeholder="结束日期"
               ></el-date-picker>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <div>
-              <el-button type="primary" size="small" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
-              <el-button  size="small" @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
-            </div>
-          </el-col>
-        </el-row>
+            <el-form-item>
+              <el-button type="primary"  @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
+              <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
+            </el-form-item>
       </el-form>
     </yt-card>
     <yt-card>
@@ -603,27 +589,27 @@ import type { pushScopeId } from "vue"
       <div class="table-wrap">
         <el-table v-loading="loading" :data="jobList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="任务编号" align="center" key="id" prop="id" v-if="isVisible" />
-          <el-table-column label="任务名称" align="center" key="jobName" prop="jobName"  :show-overflow-tooltip="true"  width="100" />
-          <el-table-column label="仓库类型" align="center" key="scm" prop="scm" :show-overflow-tooltip="true"  width="100" />
-          <el-table-column label="工具类型" align="center" key="tools" prop="tools" :show-overflow-tooltip="true"  width="100" />
-          <el-table-column label="状态" align="center" key="status"  width="100">
+          <el-table-column label="任务编号" align="center" key="id" prop="id" v-if="false" />
+          <el-table-column label="任务名称" align="center" key="jobName" prop="jobName"  :show-overflow-tooltip="true"   />
+          <el-table-column label="仓库类型" align="center" key="scm" prop="scm" :show-overflow-tooltip="true"  v-if="false" />
+          <el-table-column label="工具类型" align="center" key="tools" prop="tools" :show-overflow-tooltip="true"  />
+          <el-table-column label="状态" align="center" key="status"  >
             <template #default="scope">
               {{  showStatusFun(scope.row.status) }}
             </template>
           </el-table-column>
-          <el-table-column label="最后成功时间" align="center" key="lastSuccess" prop="lastSuccess" :show-overflow-tooltip="true"  width="120" />
-          <el-table-column label="最后失败时间" align="center" key="lastFailure" prop="lastFailure" :show-overflow-tooltip="true"  width="120" />
-          <el-table-column label="最后构建所需时间" align="center" key="lastDuration" prop="lastDuration" :show-overflow-tooltip="true"  width="150" />
-          <el-table-column label="聚合状态" align="center" key="aggregatedStatus" prop="aggregatedStatus" :show-overflow-tooltip="true"  width="100" />
-          <el-table-column label="构建状态" align="center" key="buildStatus" prop="buildStatus" :show-overflow-tooltip="true"  width="100" />
-          <el-table-column label="备注" align="center" key="remark" prop="remark" :show-overflow-tooltip="true"  width="100" />
-          <el-table-column label="创建时间" align="center" prop="createTime"  width="180">
+          <el-table-column label="最后成功时间" align="center" key="lastSuccess" prop="lastSuccess" :show-overflow-tooltip="true"   />
+          <el-table-column label="最后失败时间" align="center" key="lastFailure" prop="lastFailure" :show-overflow-tooltip="true"   />
+          <el-table-column label="最后构建所需时间" align="center" key="lastDuration" prop="lastDuration" :show-overflow-tooltip="true"  />
+          <!-- <el-table-column label="聚合状态" align="center" key="aggregatedStatus" prop="aggregatedStatus" :show-overflow-tooltip="true" /> -->
+          <el-table-column label="构建状态" align="center" key="buildStatus" prop="buildStatus" :show-overflow-tooltip="true" v-if="false" width="100" />
+          <el-table-column label="备注" align="center" key="remark" prop="remark" :show-overflow-tooltip="true"  />
+          <el-table-column label="创建时间" align="center" prop="createTime" >
             <template #default="scope">
               {{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}
             </template>
           </el-table-column>
-          <el-table-column label="更新时间" align="center" prop="updateTime"  width="180">
+          <el-table-column label="更新时间" align="center" prop="updateTime">
             <template #default="scope">
               {{ dayjs(scope.row.updateTime).format("YYYY-MM-DD HH:mm:ss")   }}
             </template>
@@ -636,17 +622,20 @@ import type { pushScopeId } from "vue"
             <template #default="scope">
               <div class="action-btn">
                 <el-button
-                  size="default"
+                  size="small"
+                  icon="Edit"
                   @click="handleUpdate(scope.row)"
                   v-hasPerms="['/jenkins/job/add']"
                 >修改</el-button>
                 <el-button
-                  size="default"
+                  size="small"
+                  icon="SwitchButton"
                   @click="build(scope.row,true)"
                   v-hasPerms="['/jenkins/job/buildJob']"
                 >构建</el-button>
                 <el-button
-                  size="default"
+                  size="small"
+                  :icon="getStatusIcon(scope.row)"
                   @click="handleStatusChange(scope.row)"
                   v-hasPerms="['/jenkins/job/changeStatus/**']"
                 >{{ showStatusOperateFun(scope.row.status)  }}</el-button>

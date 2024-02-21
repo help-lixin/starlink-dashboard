@@ -1,12 +1,12 @@
 <script setup lang="ts">
   // @ts-nocheck
-  import { Plus ,Delete, Edit, Search , RefreshRight , Sort , QuestionFilled} from '@element-plus/icons-vue'
+  import { Delete } from '@element-plus/icons-vue'
   import { showStatusOperateFun , status , showStatusFun , addDateRange } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
   import { memberList , addProjectMember , updateProjectMember , projectList , removeMember, showMemberProject} from "@/api/gitlab/project-member"
   import { userList} from "@/api/gitlab/users"
-  import { groupList } from "@/api/gitlab/groups"
+  import { groupList,accessLevels } from "@/api/gitlab/groups"
 
   const queryForm = ref(null);
 
@@ -66,30 +66,6 @@
   const dateRange = ref([])
   // 成员列表
   const users = ref([]);
-  // 权限列表
-  const accessLevels = [
-  {
-    value: 10,
-    label: 'GUEST',
-  },
-  {
-    value: 20,
-    label: 'REPORTER',
-  },
-  {
-    value: 30,
-    label: 'DEVELOPER',
-  },
-  {
-    value: 40,
-    label: 'MAINTAINER',
-  },
-  {
-    value: 50,
-    label: 'OWNER',
-  }
-];
-
   // 选中数成员
   const ids = ref([])
   // 非单个禁用
@@ -171,6 +147,7 @@
   const resetQuery = function(){
     dateRange.value = [];
     queryForm.value.resetFields();
+    queryParams.instanceCode = pluginInstance[0].instanceCode
     handleQuery();
   }
 
@@ -292,13 +269,16 @@
   queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
       if(res.code == 200){
         Object.assign(pluginInstance,res?.data)
-        groupParams.instanceCode = queryUserParams.instanceCode =  queryParams.instanceCode = projectParams.instanceCode = res?.data[0].instanceCode
+        groupParams.instanceCode = pluginInstance[0].instanceCode
+        queryUserParams.instanceCode = pluginInstance[0].instanceCode 
+        queryParams.instanceCode = pluginInstance[0].instanceCode
+        projectParams.instanceCode = pluginInstance[0].instanceCode
         groupList(groupParams).then((response) =>{
           Object.assign(groups,response?.data?.records)
         })
         projectList(projectParams).then((response)=>{
           Object.assign(projects,response?.data?.records)
-          queryParams.projectId = projects[0]?.id
+          // queryParams.projectId = projects[0]?.id
           getList();
         })
 
@@ -309,17 +289,14 @@
 <template>
   <div class="main-wrapp">
     <!--sousuo  -->
-    <el-form class="form-wrap" :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-row :gutter="20">
-        <el-col :span="8">
+    <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" >
           <el-form-item label="插件实例" prop="instanceCode">
             <el-select
             class="search-select"
               v-model="queryParams.instanceCode"
               @keyup.enter.native="handleQuery"
-              placeholder="请选择实例"
-              clearable
               style="width: 240px"
+              placeholder="请选择实例"
             >
             <el-option v-for="item in pluginInstance"
               :key="item.pluginCode"
@@ -327,8 +304,6 @@
               :value="item.instanceCode"/>
             </el-select>
           </el-form-item>
-        </el-col>
-        <el-col :span="8">
           <el-form-item label="状态" prop="status">
             <el-select
             class="search-select"
@@ -343,10 +318,6 @@
               :value="dict.value"/>
             </el-select>
           </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row :gutter="20">
-        <el-col :span="8">
           <el-form-item label="成员名称" prop="userName">
             <el-input
               v-model="queryParams.userName"
@@ -356,8 +327,6 @@
               @keyup.enter.native="handleQuery"
             />
           </el-form-item>
-        </el-col>
-        <el-col :span="8">
           <el-form-item label="项目" prop="projectId">
             <el-select
             class="search-select"
@@ -372,29 +341,22 @@
               :value="dict.id"/>
             </el-select>
           </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row :gutter="20">
-        <el-col :span="8">
           <el-form-item label="创建时间">
             <el-date-picker
               v-model="dateRange"
-              style="width: 240px"
               value-format="YYYY-MM-DD"
               type="daterange"
               range-separator="-"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
+              clearable
+              style="width: 240px"
             ></el-date-picker>
           </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <div>
-            <el-button type="primary" size="small" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
-            <el-button  size="small" @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
-          </div>
-        </el-col>
-      </el-row>
+          <el-form-item>
+            <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
+            <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
+          </el-form-item>
     </el-form>
 
     <!--  option-->
@@ -411,17 +373,17 @@
       <el-table v-loading="loading" :data="memberRow" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
           <el-table-column label="用户编号" align="center" key="userId" prop="userId" v-if="false"/>
-          <el-table-column label="成员编号" align="center" key="id" prop="id"/>
-          <el-table-column label="成员昵称" align="center" key="nickName" prop="nickName"  :show-overflow-tooltip="true"  width="100" />
-          <el-table-column label="邮箱" align="center" key="email" prop="email"  :show-overflow-tooltip="true"  width="100" />
-          <el-table-column label="成员名称" align="center" key="userName" prop="userName"  :show-overflow-tooltip="true"  width="100" />
-          <el-table-column label="项目" align="center" key="projectName" prop="projectName"  width="100" />
-          <el-table-column label="状态" align="center" key="status"  width="100">
+          <el-table-column label="成员编号" align="center" key="id" prop="id" v-if="false"/>
+          <el-table-column label="成员昵称" align="center" key="nickName" prop="nickName"  :show-overflow-tooltip="true"  />
+          <el-table-column label="邮箱" align="center" key="email" prop="email"  :show-overflow-tooltip="true"  />
+          <el-table-column label="成员名称" align="center" key="userName" prop="userName"  :show-overflow-tooltip="true" />
+          <el-table-column label="项目" align="center" key="projectName" prop="projectName"/>
+          <!-- <el-table-column label="状态" align="center" key="status">
             <template #default="scope">
               {{  showStatusFun(scope.row.status) }}
             </template>
-          </el-table-column>
-          <el-table-column label="创建时间" align="center" prop="createTime"  width="180">
+          </el-table-column> -->
+          <el-table-column label="创建时间" align="center" prop="createTime">
             <template #default="scope">
               {{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}
             </template>
@@ -434,7 +396,8 @@
             <template #default="scope">
              <div class="action-btn">
               <el-button
-                size="default"
+                size="small"
+                icon="Delete"
                 @click="handleDelete(scope.row)"
                 v-hasPerms="['/gitlab/project/member/del']"
               >删除</el-button>
@@ -525,10 +488,10 @@
           </el-col>
         </el-row>
       </el-form>
-      <div slot="footer" class="dialog-footer">
+      <template #footer>
         <el-button type="primary" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
-      </div>
+      </template>
     </el-dialog>
   </div>
 </template>

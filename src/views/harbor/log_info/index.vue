@@ -3,6 +3,7 @@
   import { showStatusOperateFun , status , showStatusFun , addDateRange } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
+  import {  Edit } from '@element-plus/icons-vue'
   import { pageList, resources} from "@/api/harbor/loginfo"
 
   const queryFormRef = ref(null);
@@ -63,9 +64,9 @@
 
   // 处理重置按钮
   const resetQuery = function(){
-    queryParams.projectName = undefined
-    dateRange.value = [];
-    queryFormRef.value.resetFields();
+    // queryFormRef.value.resetFields();
+    queryParams.value = undefined
+    queryParams.key = undefined
     queryParams.instanceCode = defaultInstanceCode.value;
     handleQuery();
   }
@@ -93,12 +94,9 @@
   <div class="main-wrapp">
     <!--sousuo  -->
     <yt-card>
-      <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" size="small" :inline="true" v-show="showSearch" label-width="68px">
-        <el-row :gutter="20">
-          <el-col :span="8">
+      <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch" >
             <el-form-item label="插件实例" prop="instanceCode">
               <el-select
-                class="search-select"
                 v-model="queryParams.instanceCode"
                 @keyup.enter.native="handleQuery"
                 placeholder="请选择实例"
@@ -111,16 +109,15 @@
                            :value="item.instanceCode"/>
               </el-select>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="资源" prop="instanceCode">
-              <el-input v-model="queryParams.value" placeholder="请输入内容" style="width: 240px">
+              <el-input v-model="queryParams.value" placeholder="请输入内容" clearable style="width: 240px">
                 <template #prepend>
                   <el-select
                     class="search-select2"
                     v-model="queryParams.key"
                     placeholder="请选择资源"
                     style="width: 100px"
+                    clearable
                   >
                       <el-option v-for="item in resources"
                               :key="item.value"
@@ -130,14 +127,10 @@
                 </template>
               </el-input>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <div>
-              <el-button type="primary" size="small" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
-              <el-button  size="small" @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
-            </div>
-          </el-col>
-        </el-row>
+            <el-form-item>
+              <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
+              <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
+            </el-form-item>
       </el-form>
     </yt-card>
     <yt-card>
@@ -221,5 +214,3 @@
 }
 
 </style>
-
-@/api/harbor/project/harbor@/api/harbor/project

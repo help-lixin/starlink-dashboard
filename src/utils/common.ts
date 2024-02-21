@@ -265,3 +265,13 @@ export function showBlobStoresState(state: string) {
   }
 
 }
+
+// 根据当前状态获取状态图标
+export const getStatusIcon = (row)=>{
+  const status = row.status
+  if(status == 1){
+    return "VideoPause"
+  }
+
+  return "VideoPlay"
+}

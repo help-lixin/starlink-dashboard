@@ -1,9 +1,10 @@
 <script setup lang="ts">
   // @ts-nocheck
   import {nextTick,ref, getCurrentInstance} from 'vue';
-  import { showStatusOperateFun , status , showStatusFun , addDateRange } from "@/utils/common"
+  import { showStatusOperateFun , status , showStatusFun , addDateRange,getStatusIcon } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
+  import {  Edit, List, CopyDocument, Unlock, Lock } from '@element-plus/icons-vue'
   import { handleTree } from "@/utils/common"
   import { changeStatus, pageList, queryNodeList, addProject, projectNameIsExist, 
     units, pullCommand, pushCommand, showIsPublicFun, changeAccessLevel, showAccessLevelOperateFun} from "@/api/harbor/project"
@@ -269,6 +270,13 @@
     title.value = "添加harbor配置信息"
   }
 
+  const getAccessLevel = (row)=>{
+    if(row.isPublic == 1){
+      return "Lock"
+    }
+
+    return "Unlock"
+  }
   // 表单取消处理
   const cancelDetail = ()=>{
     detail.value = false;
@@ -318,9 +326,7 @@
   <div class="main-wrapp">
     <!--sousuo  -->
     <yt-card>
-      <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" size="small" :inline="true" v-show="showSearch" label-width="68px">
-        <el-row :gutter="20">
-          <el-col :span="8">
+      <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch" >
             <el-form-item label="插件实例" prop="instanceCode">
               <el-select
                 class="search-select"
@@ -336,13 +342,9 @@
                            :value="item.instanceCode"/>
               </el-select>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="项目名" prop="queryParams.projectName">
-              <el-input v-model="queryParams.projectName" placeholder="请输入项目名"  style="width: 240px"/>
+              <el-input v-model="queryParams.projectName" placeholder="请输入项目名" style="width: 240px" />
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="状态" prop="status">
               <el-select
                 class="search-select"
@@ -357,27 +359,21 @@
                            :value="dict.value"/>
               </el-select>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="创建时间">
               <el-date-picker
                 v-model="dateRange"
-                style="width: 240px"
                 value-format="YYYY-MM-DD"
                 type="daterange"
                 range-separator="-"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
+                style="width: 240px"
               ></el-date-picker>
             </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <div>
-              <el-button type="primary" size="small" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
-              <el-button  size="small" @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
-            </div>
-          </el-col>
-        </el-row>
+            <el-form-item>
+              <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
+              <el-button  @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
+            </el-form-item>
       </el-form>
     </yt-card>
     <yt-card>
@@ -395,26 +391,26 @@
         <el-table v-loading="loading" :data="projectList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
           <el-table-column label="项目编号" align="center" key="id" prop="id" v-if="false"/>
-          <el-table-column label="项目名称" align="center" key="projectName" prop="projectName"  :show-overflow-tooltip="true"  width="100"/>
-          <!-- <el-table-column label="容量" align="center" key="capacity" prop="capacity" :show-overflow-tooltip="true"  width="100" /> -->
-          <el-table-column label="访问级别" align="center" key="isPublic" prop="isPublic" :show-overflow-tooltip="true"  width="100" >
+          <el-table-column label="项目名称" align="center" key="projectName" prop="projectName"  :show-overflow-tooltip="true"  />
+          <!-- <el-table-column label="容量" align="center" key="capacity" prop="capacity" :show-overflow-tooltip="true"   /> -->
+          <el-table-column label="访问级别" align="center" key="isPublic" prop="isPublic" :show-overflow-tooltip="true"  width="80" >
             <template #default="scope">
               {{  showIsPublicFun(scope.row.isPublic) }}
             </template>
           </el-table-column>
-          <el-table-column label="状态" align="center" key="status"  width="100">
+          <el-table-column label="状态" align="center" key="status" width="80" >
             <template #default="scope">
               {{  showStatusFun(scope.row.status) }}
             </template>
           </el-table-column>
-          <el-table-column label="创建时间" align="center" prop="createTime"  width="180">
+          <el-table-column label="创建时间" align="center" prop="createTime"  >
             <template #default="scope">
               {{
                    scope.row.createTime ? dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss") : ''
               }}
             </template>
           </el-table-column>
-          <el-table-column label="更新时间" align="center" prop="updateTime"  width="180">
+          <el-table-column label="更新时间" align="center" prop="updateTime"  >
             <template #default="scope">
               {{ scope.row.updateTime ? dayjs(scope.row.updateTime).format("YYYY-MM-DD HH:mm:ss") : ''  }}
             </template>
@@ -422,24 +418,29 @@
           <el-table-column
             label="操作"
             align="center"
+            width="350"
           >
             <template #default="scope">
               <div class="action-btn">
                 <el-button
-                  size="default"
+                  size="small"
+                  icon="List"
                   @click="queryDetail(scope.row)"
                   v-hasPerms="['/harbor/project/queryNodeList/**']"
                 >详情</el-button>
                 <el-button
-                  size="default"
+                  size="small"
+                  :icon="getStatusIcon(scope.row)"
                   @click="handleStatusChange(scope.row)"
                   v-hasPerms="['/harbor/project/changeStatus/**']"
                 >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-                <el-button  @click="changeAccessLevel(scope.row.id,queryParams.instanceCode)" 
+                <el-button size="small"
+                :icon="getAccessLevel(scope.row)" 
+                @click="changeAccessLevel(scope.row.id,queryParams.instanceCode)" 
                   v-hasPerms="['/harbor/project/changeAccessLevel/**']">
                   {{ showAccessLevelOperateFun(scope.row.isPublic)  }}
                 </el-button>
-                <el-button  @click="copyPushCommand(scope.row)">复制push</el-button>
+                <el-button size="small" icon="CopyDocument" @click="copyPushCommand(scope.row)">复制push</el-button>
               </div>
             </template>
           </el-table-column>

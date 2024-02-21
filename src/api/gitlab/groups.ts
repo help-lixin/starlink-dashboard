@@ -2,6 +2,30 @@ import request from "@/utils/request";
 import {STARLINK_SERVICE} from "@/utils/env"
 
 
+// 权限列表
+export const accessLevels = [
+    {
+      value: 10,
+      label: 'GUEST',
+    },
+    {
+      value: 20,
+      label: 'REPORTER',
+    },
+    {
+      value: 30,
+      label: 'DEVELOPER',
+    },
+    {
+      value: 40,
+      label: 'MAINTAINER',
+    },
+    {
+      value: 50,
+      label: 'OWNER',
+    }
+  ];
+
 // 查询组列表
 export function groupList(query:any) {
     return request({
@@ -69,11 +93,11 @@ export function changeGroupStatus(groupId:any, status:any) {
 
 
 // 查询组下拉列表
-export function groupSelectOption(query:any) {
+export function groupSelectOption(instanceCode:string) {
     return request({
       url: STARLINK_SERVICE + '/gitlab/group/selectOption',
       method: 'get',
-      params: query
+      params: {instanceCode:instanceCode}
     }).then((res)=>{
         return res?.data;
     });

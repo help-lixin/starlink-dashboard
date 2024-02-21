@@ -1,8 +1,9 @@
 <script setup lang="ts">
   // @ts-nocheck
-  import { showStatusOperateFun , status , showStatusFun , addDateRange , addDateRangeRuoyi } from "@/utils/common"
+  import { showStatusOperateFun , status , showStatusFun , addDateRange , getStatusIcon } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
+  import {  Edit } from '@element-plus/icons-vue'
   import {addGroup , updateGroup , queryGroupInfoById, changeGroupStatus, groupList} from "@/api/gitlab/groups"
 
   const queryFormRef = ref(null);
@@ -66,7 +67,7 @@
         visibility: undefined,
         path: undefined,
         remark: undefined,
-        status: undefined,
+        status: 1,
         instanceCode: undefined
       })
   }
@@ -225,9 +226,7 @@
 <template>
   <div class="main-wrapp">
     <!--sousuo  -->
-    <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-row :gutter="20">
-        <el-col :span="8">
+    <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch">
           <el-form-item label="插件实例" prop="instanceCode">
             <el-select
             class="search-select"
@@ -243,8 +242,6 @@
               :value="item.instanceCode"/>
             </el-select>
           </el-form-item>
-        </el-col>
-        <el-col :span="8">
           <el-form-item label="组名称" prop="groupName">
             <el-input
               v-model="queryParams.groupName"
@@ -254,10 +251,6 @@
               @keyup.enter.native="handleQuery"
             />
           </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row :gutter="20">
-        <el-col :span="8">
           <el-form-item label="权限" prop="visibility">
             <el-select
             class="search-select"
@@ -273,8 +266,6 @@
               :value="item"/>
             </el-select>
           </el-form-item>
-        </el-col>
-        <el-col :span="8">
           <el-form-item label="状态" prop="status">
             <el-select
             class="search-select"
@@ -289,10 +280,6 @@
               :value="dict.value"/>
             </el-select>
           </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row :gutter="20">
-        <el-col :span="8">
           <el-form-item label="创建时间">
             <el-date-picker
               v-model="dateRange"
@@ -302,16 +289,13 @@
               range-separator="-"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
+              clearable
             ></el-date-picker>
           </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <div>
-            <el-button type="primary" size="small" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
-            <el-button  size="small" @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
-          </div>
-        </el-col>
-      </el-row>
+          <el-form-item>
+            <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
+            <el-button  @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
+          </el-form-item>
     </el-form>
 
     <!--  option-->
@@ -327,15 +311,15 @@
     <div class="table-wrap">
       <el-table v-loading="loading" :data="groupPageList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="组编号" align="center" key="id" prop="id"/>
-          <el-table-column label="组名称" align="center" key="gitlabGroupName" prop="gitlabGroupName"  :show-overflow-tooltip="true"  width="100" />
-          <el-table-column label="备注" align="center" key="remark" prop="remark" :show-overflow-tooltip="true"  width="100" />
-          <el-table-column label="状态" align="center" key="status"  width="100">
+          <el-table-column label="组编号" align="center" key="id" prop="id" v-if="false"/>
+          <el-table-column label="组名称" align="center" key="gitlabGroupName" prop="gitlabGroupName"  :show-overflow-tooltip="true" />
+          <el-table-column label="备注" align="center" key="remark" prop="remark" :show-overflow-tooltip="true"  />
+          <el-table-column label="状态" align="center" key="status" >
             <template #default="scope">
               {{  showStatusFun(scope.row.status) }}
             </template>
           </el-table-column>
-          <el-table-column label="创建时间" align="center" prop="createTime"  width="180">
+          <el-table-column label="创建时间" align="center" prop="createTime" >
             <template #default="scope">
               {{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}
             </template>
@@ -348,12 +332,14 @@
             <template #default="scope">
              <div class="action-btn">
               <el-button
-                size="default"
+                size="small"
+                icon="Edit"
                 @click="handleUpdate(scope.row)"
                 v-hasPerms="['/gitlab/group/add']"
               >修改</el-button>
               <el-button
-                size="default"
+                size="small"
+                :icon="getStatusIcon(scope.row)"
                 @click="handleStatusChange(scope.row)"
                 v-hasPerms="['/gitlab/group/changeStatus/**']"
               >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
@@ -377,78 +363,80 @@
 
     <!-- 添加或修改组配置对话框 -->
     <el-dialog :title="title" v-model="open" width="600px" append-to-body>
-      <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
-        <el-row>
-          <el-col :span="12">
-            <el-form-item label="插件实例" prop="instanceCode">
+      <yt-card>
+        <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
+          <el-row>
+            <el-col :span="12">
+              <el-form-item label="插件实例" prop="instanceCode">
+                <el-select
+                  class="search-select2"
+                  v-model="form.instanceCode"
+                  @keyup.enter.native="handleQuery"
+                  placeholder="请选择插件实例"
+                  clearable
+                  style="width: 240px"
+                >
+                <el-option v-for="item in pluginInstance"
+                :key="item.pluginCode"
+                :label="item.instanceName"
+                :value="item.instanceCode"/>
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="组名称" prop="groupName">
+                <el-input v-model="form.groupName" placeholder="请输入组名称" maxlength="30" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="权限" prop="visibility">
               <el-select
-                class="search-select2"
-                v-model="form.instanceCode"
+                v-model="form.visibility"
                 @keyup.enter.native="handleQuery"
-                placeholder="请选择插件实例"
+                placeholder="请选择权限"
                 clearable
                 style="width: 240px"
               >
-              <el-option v-for="item in pluginInstance"
-              :key="item.pluginCode"
-              :label="item.instanceName"
-              :value="item.instanceCode"/>
+              <el-option v-for="item in visibilityArr"
+                :key="item"
+                :label="item"
+                :value="item"/>
               </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="组名称" prop="groupName">
-              <el-input v-model="form.groupName" placeholder="请输入组名称" maxlength="30" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="权限" prop="visibility">
-            <el-select
-              v-model="form.visibility"
-              @keyup.enter.native="handleQuery"
-              placeholder="请选择权限"
-              clearable
-              style="width: 240px"
-            >
-            <el-option v-for="item in visibilityArr"
-              :key="item"
-              :label="item"
-              :value="item"/>
-            </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="路径" prop="path">
-              <el-input v-model="form.path" placeholder="请输路径" maxlength="30" />
-            </el-form-item>
-          </el-col>
-        </el-row>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="路径" prop="path">
+                <el-input v-model="form.path" placeholder="请输路径" maxlength="30" />
+              </el-form-item>
+            </el-col>
+          </el-row>
 
-        <el-row>
-          <el-col :span="12">
-            <el-form-item label="状态">
-              <el-radio-group v-model="form.status">
-                <el-radio
-                  v-for="dict in status"
-                  :key="dict.value"
-                  :label="dict.value"
-                >{{dict.label}}</el-radio>
-              </el-radio-group>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="24">
-            <el-form-item label="备注">
-              <el-input v-model="form.remark" type="textarea" placeholder="请输入内容"></el-input>
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
+          <el-row>
+            <el-col :span="12">
+              <el-form-item label="状态">
+                <el-radio-group v-model="form.status">
+                  <el-radio
+                    v-for="dict in status"
+                    :key="dict.value"
+                    :label="dict.value"
+                  >{{dict.label}}</el-radio>
+                </el-radio-group>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="24">
+              <el-form-item label="备注">
+                <el-input v-model="form.remark" type="textarea" placeholder="请输入内容"></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form>
+      </yt-card>
+      <template #footer>
         <el-button type="primary" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
-      </div>
+      </template>
     </el-dialog>
   </div>
 </template>
