@@ -359,8 +359,8 @@
         <el-table v-loading="loading" :data="sysConfigPageList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
           <el-table-column label="编号" align="center" key="id" prop="id" v-if="false"/>
-          <el-table-column label="名称" align="center" key="name" prop="name"  :show-overflow-tooltip="true"  />
-          <el-table-column label="执行路径" align="center" key="value" prop="value"  :show-overflow-tooltip="true" />
+          <el-table-column label="别名" align="center" key="name" prop="name"  :show-overflow-tooltip="true"  />
+          <el-table-column label="Path" align="center" key="value" prop="value"  :show-overflow-tooltip="true" />
           <el-table-column label="状态" align="center" key="status"  >
             <template #default="scope">
               {{  showStatusFun(scope.row.status) }}
@@ -447,13 +447,13 @@
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="名称" prop="name">
-                <el-input v-model="form.name" placeholder="请输入名称" maxlength="200" />
+              <el-form-item label="别名" prop="name">
+                <el-input v-model="form.name" placeholder="请输入别名" maxlength="200" />
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="执行路径" prop="value">
-                <el-input v-model="form.value" placeholder="请输入执行路径" maxlength="200" />
+              <el-form-item label="PATH" prop="value">
+                <el-input v-model="form.value" placeholder="请输入Path路径" maxlength="200" />
               </el-form-item>
             </el-col>
           </el-row>

@@ -207,7 +207,7 @@ getList()
           <el-table-column type="selection" width="60" align="center" />
           <el-table-column label="流水线名称" align="center" key="processDefinitionName" prop="processDefinitionName"
                            :show-overflow-tooltip="true" />
-          <el-table-column label="流水线定义key" align="center" key="processDefinitionKey" prop="processDefinitionKey" />
+          <el-table-column label="流水线定义key" align="center" key="processDefinitionKey" prop="processDefinitionKey" width="180"/>
           <el-table-column label="流水线版本" align="center" key="processDefinitionVersion" prop="processDefinitionVersion" />
           <el-table-column label="状态" align="center" key="status" width="100">
             <template v-slot="scope">

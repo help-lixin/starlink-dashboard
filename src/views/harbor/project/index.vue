@@ -403,14 +403,14 @@
               {{  showStatusFun(scope.row.status) }}
             </template>
           </el-table-column>
-          <el-table-column label="创建时间" align="center" prop="createTime"  >
+          <el-table-column label="创建时间" align="center" prop="createTime"  width="180">
             <template #default="scope">
               {{
                    scope.row.createTime ? dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss") : ''
               }}
             </template>
           </el-table-column>
-          <el-table-column label="更新时间" align="center" prop="updateTime"  >
+          <el-table-column label="更新时间" align="center" prop="updateTime" width="180" >
             <template #default="scope">
               {{ scope.row.updateTime ? dayjs(scope.row.updateTime).format("YYYY-MM-DD HH:mm:ss") : ''  }}
             </template>
@@ -419,6 +419,7 @@
             label="操作"
             align="center"
             width="350"
+            flixed="right"
           >
             <template #default="scope">
               <div class="action-btn">
