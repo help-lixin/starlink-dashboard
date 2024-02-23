@@ -162,16 +162,8 @@ export const dynamicRoutes = [
   },
   {
     path : '/shell/label/index',
-    name : 'label-manage',
+    name : 'shell-label-manage',
     component: ()=> import("../views/shell/label/index.vue"),
-    meta: {
-        requiresAuth: true
-    },
-  },
-  {
-    path : '/shell/host/index',
-    name : 'host-manage',
-    component: ()=> import("../views/shell/host/index.vue"),
     meta: {
         requiresAuth: true
     },

@@ -4,10 +4,10 @@
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import {  Edit } from '@element-plus/icons-vue'
   import { dayjs } from "@/utils/common-dayjs"
-  import { changeStatus, pageList, addLabel, updateLabel, checkLabelKey, queryLabelDetail} from "@/api/shell/label"
+  import { changeStatus, pageList, addLabel, checkLabelKey, queryLabelDetail} from "@/api/shell/label"
 
   const queryFormRef = ref(null);
-  const pluginCode = "jsch";
+  const pluginCode = "shell";
   const labelKey = ref(null)
 
   //查询列表信息
@@ -22,7 +22,7 @@
   })
 
   const validKey = (rule:any,value:any, callback:any)=>{
-    if(value == labelKey){
+    if(value == labelKey.value){
       callback();
     }
 
@@ -76,9 +76,10 @@
   const formInstance = reactive([]);
 
   const form = reactive({
+    id:undefined,
     labelKey:undefined,
     labelName:undefined,
-    inventorys:[]
+    hosts:[]
   })
 
   // 获取列表
@@ -163,7 +164,7 @@
     labelKey.value = null
     formRef.value?.clearValidate()
     formInstance.splice(0,formInstance.length);
-    form.inventorys.splice(0,form.inventorys.length)
+    form.hosts.splice(0,form.hosts.length)
     Object.assign(form,{
       id:undefined,
       labelKey:undefined,
@@ -220,7 +221,7 @@
         
       });
     }else{
-      updateLabel(form).then(res =>{
+      addLabel(form).then(res =>{
         if(res?.code == 200){
           ElMessage({
               showClose: true,
@@ -263,8 +264,9 @@
     });
 
     queryLabelDetail(id).then((res)=>{
+      console.log(res)
           if(res.code == 200){
-                form.inventorys = res.data
+                form.hosts = res.data
                 form.id = id
           }
     })
@@ -403,7 +405,7 @@
                   size="small"
                   icon="Edit"
                   @click="handleUpdate(scope.row)"
-                  v-hasPerms="['/shell/label/queryLabelDetail/*']"
+                  v-hasPerms="['/shell/label/add']"
                 >修改</el-button>
               </div>
             </template>
@@ -442,7 +444,7 @@
 
           <el-row>
             <el-col>
-              <el-transfer v-model="form.inventorys" :data="formInstance"
+              <el-transfer v-model="form.hosts" :data="formInstance"
               :titles="[ '未关联' , '已关联']"/>
             </el-col>
           </el-row>
@@ -474,7 +476,7 @@
           <el-row>
             <el-input v-model="form.id" v-if="false" />
             <el-col>
-              <el-transfer v-model="form.inventorys" :data="formInstance"
+              <el-transfer v-model="form.hosts" :data="formInstance"
               :titles="[ '未关联' , '已关联']"/>
             </el-col>
           </el-row>
