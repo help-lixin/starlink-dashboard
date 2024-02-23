@@ -30,7 +30,7 @@ export function addLabel(data:any) {
 export function changeStatus(id:any, status:any) {
     return request({
         url: STARLINK_SERVICE + '/shell/label/changeStatus/'+id+"/"+status,
-        method: 'post'
+        method: 'put'
     }).then((res)=>{
         return res?.data;
     });
