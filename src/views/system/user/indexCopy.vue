@@ -293,7 +293,7 @@ getList()
 
 <template>
     <div class="main-wrapp">
-      <yt-card padding="18px 18px 0">
+      <yt-card>
         <el-form class="form-wrap" :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch">
           <el-row>
               <el-form-item label="用户名称" prop="userName">
@@ -346,9 +346,9 @@ getList()
         </el-form>
       </yt-card>
         <!--  option-->
-      <div class="test">
-        <formilyjsTest></formilyjsTest>
-      </div>
+<!--      <div class="test">-->
+<!--        <formilyjsTest></formilyjsTest>-->
+<!--      </div>-->
       <yt-card>
         <div class="option-wrap">
           <el-button
@@ -405,6 +405,7 @@ getList()
             <el-table-column
               label="操作"
               align="center"
+              fixed="right"
               width="350"
             >
               <template v-slot="scope">
