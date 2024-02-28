@@ -422,11 +422,11 @@
       <div class="table-wrap">
         <el-table v-loading="loading" :data="sysCredentialPageList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="编号" align="center" key="id" prop="id" v-if="false"/>
-          <el-table-column label="凭证唯一名称" align="center" key="credentialKey" prop="credentialKey"  :show-overflow-tooltip="true" />
-          <el-table-column label="凭证别名" align="center" key="credentialName" prop="credentialName"  :show-overflow-tooltip="true" />
+          <el-table-column label="编号" key="id" prop="id" v-if="false"/>
+          <el-table-column label="凭证唯一名称" key="credentialKey" prop="credentialKey"  :show-overflow-tooltip="true" />
+          <el-table-column label="凭证别名" key="credentialName" prop="credentialName"  :show-overflow-tooltip="true" />
           <!-- <el-table-column label="凭证类型" align="center" key="credentialType" prop="credentialType"  :show-overflow-tooltip="true"  width="200" /> -->
-          <el-table-column label="备注" align="center" key="remark" prop="remark"  :show-overflow-tooltip="true" />
+          <el-table-column label="备注" key="remark" prop="remark"  :show-overflow-tooltip="true" />
           <el-table-column label="状态" align="center" key="status">
             <template #default="scope">
               {{  showStatusFun(scope.row.status) }}
@@ -657,47 +657,5 @@
 </template>
 
 <style lang="scss" scoped>
-.main-wrap {
-  height: 100%;
-  width: 100%;
-  box-sizing: border-box;
-  background: #fff;
 
-}
-
-.option-wrap {
-  margin-bottom: 8px;
-  .el-button {
-    // margin-right: 6px;
-  }
-}
-.table-wrap {
-  width: 100%;
-  box-sizing: border-box;
-  overflow-y: auto;
-  .action-btn {
-    display: flex;
-  }
-}
-
-.page-wrap {
-  padding: 20px 0;
-  .el-pagination {
-    display: flex;
-    align-items: center;
-    justify-content: end;
-  }
-
-}
-
-
-</style>
-<style>
- .el-form-item__label {
-  font-size: 14px;
- }
-
-.search-select .el-input {
-  --el-input-width: 240px;
-}
 </style>

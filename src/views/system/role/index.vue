@@ -504,53 +504,5 @@
 </template>
 
 <style lang="scss" scoped>
-.main-wrap {
-  height: 100%;
-  width: 100%;
-  box-sizing: border-box;
-  background: #fff;
 
-}
-
-.option-wrap {
-  margin-bottom: 8px;
-  .el-button {
-    // margin-right: 6px;
-  }
-}
-.table-wrap {
-  width: 100%;
-  box-sizing: border-box;
-  overflow-y: auto;
-  .action-btn {
-    display: flex;
-  }
-}
-
-.page-wrap {
-  padding: 20px 0;
-  .el-pagination {
-    display: flex;
-    align-items: center;
-    justify-content: end;
-  }
-
-}
-
-/* tree border */
-.tree-border {
-    margin-top: 5px;
-    border: 1px solid #e5e6e7;
-    background: #FFFFFF none;
-    border-radius:4px;
-}
-</style>
-<style>
- .el-form-item__label {
-  font-size: 14px;
- }
-
-.search-select .el-input {
-  --el-input-width: 240px;
-}
 </style>

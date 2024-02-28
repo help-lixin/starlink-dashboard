@@ -173,7 +173,7 @@ getList()
             </el-form-item>
             <el-form-item label="创建时间">
               <el-date-picker v-model="daterangeArray" value-format="YYYY-MM-DD" type="daterange"
-                              range-separator="-" start-placeholder="开始日期" end-placeholder="结束日期" 
+                              range-separator="-" start-placeholder="开始日期" end-placeholder="结束日期"
                               clearable style="width: 240px"></el-date-picker>
             </el-form-item>
             <el-form-item>
@@ -205,10 +205,10 @@ getList()
       <div class="table-wrap">
         <el-table v-loading="loading" :data="dataList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="流水线名称" align="center" key="processDefinitionName" prop="processDefinitionName"
+          <el-table-column label="流水线名称" key="processDefinitionName" prop="processDefinitionName"
                            :show-overflow-tooltip="true" />
-          <el-table-column label="流水线定义key" align="center" key="processDefinitionKey" prop="processDefinitionKey" width="180"/>
-          <el-table-column label="流水线版本" align="center" key="processDefinitionVersion" prop="processDefinitionVersion" />
+          <el-table-column label="流水线定义key" key="processDefinitionKey" prop="processDefinitionKey" width="180"/>
+          <el-table-column label="流水线版本" key="processDefinitionVersion" prop="processDefinitionVersion" />
           <el-table-column label="状态" align="center" key="status" width="100">
             <template v-slot="scope">
               {{ showStatusFun(scope.row.status) }}
@@ -247,51 +247,7 @@ getList()
 </template>
 
 <style lang="scss" scoped>
-.main-wrap {
-  height: 100%;
-  width: 100%;
-  box-sizing: border-box;
-  background: #fff;
 
-}
-
-.option-wrap {
-  margin-bottom: 8px;
-
-  .el-button {
-    // margin-right: 6px;
-  }
-}
-
-.table-wrap {
-  width: 100%;
-  box-sizing: border-box;
-  overflow-y: auto;
-
-  .action-btn {
-    display: flex;
-  }
-}
-
-.page-wrap {
-  padding: 20px 0;
-
-  .el-pagination {
-    display: flex;
-    align-items: center;
-    justify-content: end;
-  }
-
-}
-</style>
-<style>
-.el-form-item__label {
-  font-size: 14px;
-}
-
-.search-select .el-input {
-  --el-input-width: 240px;
-}
 </style>
 
 

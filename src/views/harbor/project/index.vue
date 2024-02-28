@@ -37,7 +37,7 @@
                   return;
                 }
           }
-        
+
       } catch (err) {
         ElMessage({
             type: 'error',
@@ -156,7 +156,7 @@
 
   // 处理查询按钮
   const resetQuery = function(){
-    
+
     queryParams.projectName = undefined
     dateRange.value = [];
     queryFormRef.value.resetFields();
@@ -251,7 +251,7 @@
       addDialog.value = false;
       getList();
     });
-      
+
   }
 
   // 处理新增按钮
@@ -312,7 +312,7 @@
   }
 
 
-  
+
   // 进入页面时,就初始化实例列表
   queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
     if(res.code == 200){
@@ -394,8 +394,8 @@
       <div class="table-wrap">
         <el-table v-loading="loading" :data="projectList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="项目编号" align="center" key="id" prop="id" v-if="false"/>
-          <el-table-column label="项目名称" align="center" key="projectName" prop="projectName"  :show-overflow-tooltip="true"  />
+          <el-table-column label="项目编号" key="id" prop="id" v-if="false"/>
+          <el-table-column label="项目名称" key="projectName" prop="projectName"  :show-overflow-tooltip="true"  />
           <!-- <el-table-column label="容量" align="center" key="capacity" prop="capacity" :show-overflow-tooltip="true"   /> -->
           <el-table-column label="访问级别" align="center" key="isPublic" prop="isPublic" :show-overflow-tooltip="true"   >
             <template #default="scope">
@@ -545,7 +545,7 @@
         :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
         style="width: 100%"
       >
-        <el-table-column prop="name" label="名称" :show-overflow-tooltip="true"/>
+        <el-table-column prop="name" label="名称" width="60" :show-overflow-tooltip="true"/>
         <el-table-column prop="digest" label="镜像编码" width="100" :show-overflow-tooltip="true">
           <template #default="scope">
               {{  scope.row.digest ? scope.row.digest : ''  }}
@@ -582,50 +582,5 @@
 </template>
 
 <style lang="scss" scoped>
-.main-wrap {
-  height: 100%;
-  width: 100%;
-  box-sizing: border-box;
-  background: #fff;
-
-}
-
-.option-wrap {
-  margin-bottom: 8px;
-  .el-button {
-    // margin-right: 6px;
-  }
-}
-.table-wrap {
-  width: 100%;
-  box-sizing: border-box;
-  overflow-y: auto;
-  .action-btn {
-    display: flex;
-  }
-}
-
-.page-wrap {
-  padding: 20px 0;
-  .el-pagination {
-    display: flex;
-    align-items: center;
-    justify-content: end;
-  }
-
-}
-
 
 </style>
-<style>
- .el-form-item__label {
-  font-size: 14px;
- }
-
-.search-select .el-input {
-  --el-input-width: 240px;
-}
-
-</style>
-
-@/api/harbor/project/harbor@/api/harbor/project

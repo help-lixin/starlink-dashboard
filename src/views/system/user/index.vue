@@ -376,10 +376,10 @@ getList()
         <div class="table-wrap">
           <el-table v-loading="loading" :data="userList" @selection-change="handleSelectionChange">
             <el-table-column type="selection" width="60" align="center" />
-            <el-table-column label="用户编号" align="center" key="userId" prop="userId"/>
-            <el-table-column label="用户名称" align="center" key="userName" prop="userName"  :show-overflow-tooltip="true" />
-            <el-table-column label="用户昵称" align="center" key="nickName" prop="nickName" :show-overflow-tooltip="true" />
-            <el-table-column label="手机号码" align="center" key="phonenumber" prop="phonenumber" />
+            <el-table-column label="用户编号" key="userId" prop="userId"/>
+            <el-table-column label="用户名称" key="userName" prop="userName"  :show-overflow-tooltip="true" />
+            <el-table-column label="用户昵称" key="nickName" prop="nickName" :show-overflow-tooltip="true" />
+            <el-table-column label="手机号码" key="phonenumber" prop="phonenumber" />
             <el-table-column label="状态" align="center" key="status">
               <template #default="{row}">
                 <el-switch
@@ -390,7 +390,7 @@ getList()
                 ></el-switch>
               </template>
             </el-table-column>
-            <el-table-column label="状态" prop="statusText">
+            <el-table-column label="状态" align="center" prop="statusText">
               <template #default="{row}">
                 <el-tag :type="row.status === '0' ? 'success' : 'danger'">{{ row.status === '0' ? '启用' : '禁用' }}</el-tag>
               </template>
