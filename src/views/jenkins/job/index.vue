@@ -141,7 +141,7 @@
       credentials.splice(0, credentials.length)
       jobs.splice(0, jobs.length)
       jdkList.splice(0, jdkList.length)
-      
+
       Object.assign(form,{
       id: undefined,
       scmType: "GIT",
@@ -278,7 +278,7 @@
           Object.assign(formInstance,res?.data)
           detail(row.id)
       }
-        
+
     })
 
     open.value = true;
@@ -325,7 +325,7 @@
           }
 
           let instanceCode = jobRes?.data.instanceCode
-          
+
           toolsSelectOption(jobRes?.data.toolsType,instanceCode).then(response => {
             if(response?.code == 200){
               Object.assign(languages,response?.data)
@@ -335,7 +335,7 @@
               form.setups.forEach((setup)=>{
                 setup.type = setup.setupType
               });
-              
+
             }
           })
 
@@ -347,7 +347,7 @@
 
           // 查询jdk下拉列表
           jdkOptionList(instanceCode)
-          
+
 
     });
   }
@@ -366,7 +366,7 @@
     // 查询jdk下拉列表
     jdkOptionList(instanceCode)
   }
-  
+
   // 工具版本对象
   const languages = reactive([]);
   // 工具版本名称选择
@@ -432,7 +432,7 @@
           getList();
         });
       }
-      
+
   }
 
   const build = (form,isBuild)=>{
@@ -510,7 +510,7 @@
 <template>
   <div class="main-wrapp">
     <!--sousuo  -->
-    <yt-card>
+    <yt-card :padding="'18px 18px 0'">
       <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch" >
             <el-form-item label="插件实例" prop="instanceCode">
               <el-select
@@ -519,7 +519,6 @@
                 @keyup.enter.native="handleQuery"
                 placeholder="请选择实例"
                 clearable
-                style="width: 240px"
               >
                 <el-option v-for="item in pluginInstance"
                            :key="item.pluginCode"
@@ -533,7 +532,6 @@
                 v-model="queryParams.tools"
                 placeholder="请选择工具类型"
                 clearable
-                style="width: 240px"
               >
                 <el-option v-for="tool in tools"
                            :key="tool.value"
@@ -550,7 +548,6 @@
                 v-model="queryParams.status"
                 placeholder="任务状态"
                 clearable
-                style="width: 240px"
               >
                 <el-option v-for="dict in status"
                            :key="dict.value"
@@ -561,7 +558,6 @@
             <el-form-item label="创建时间">
               <el-date-picker
                 v-model="dateRange"
-                style="width: 240px"
                 value-format="YYYY-MM-DD"
                 type="daterange"
                 range-separator="-"
@@ -589,10 +585,10 @@
       <div class="table-wrap">
         <el-table v-loading="loading" :data="jobList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="任务编号" align="center" key="id" prop="id" v-if="false" />
-          <el-table-column label="任务名称" align="center" key="jobName" prop="jobName"  :show-overflow-tooltip="true"   width="150" />
-          <el-table-column label="仓库类型" align="center" key="scm" prop="scm" :show-overflow-tooltip="true"  v-if="false" />
-          <el-table-column label="工具类型" align="center" key="tools" prop="tools" :show-overflow-tooltip="true"  />
+          <el-table-column label="任务编号" key="id" prop="id" v-if="false" />
+          <el-table-column label="任务名称" key="jobName" prop="jobName"  :show-overflow-tooltip="true"   width="150" />
+          <el-table-column label="仓库类型" key="scm" prop="scm" :show-overflow-tooltip="true"  v-if="false" />
+          <el-table-column label="工具类型" key="tools" prop="tools" :show-overflow-tooltip="true"  />
           <el-table-column label="状态" align="center" key="status"  >
             <template #default="scope">
               {{  showStatusFun(scope.row.status) }}
@@ -609,7 +605,7 @@
               {{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}
             </template>
           </el-table-column>
-          <el-table-column label="更新时间" align="center" prop="updateTime" width="180">
+          <el-table-column label="更新时间" prop="updateTime" width="180">
             <template #default="scope">
               {{ dayjs(scope.row.updateTime).format("YYYY-MM-DD HH:mm:ss")   }}
             </template>
@@ -836,7 +832,7 @@
             <template
               v-for="(item, index) in form.setups">
               <el-col :span="24">
-                <el-form-item   label="脚本" :prop="`setups.${index}.shellScript`" 
+                <el-form-item   label="脚本" :prop="`setups.${index}.shellScript`"
                 :rules="[
                   { required: true, message: '脚本内容不能为空', trigger: 'blur' } ]" >
                   <el-input v-model="item.shellScript"  @blur="handleToolChange(item,'SHELL')" type="textarea"/>

@@ -291,7 +291,7 @@ getList()
 
 <template>
     <div class="main-wrapp">
-      <yt-card padding="18px 18px 0">
+      <yt-card>
         <el-form class="form-wrap" :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch">
           <el-row>
               <el-form-item label="用户名称" prop="userName">
