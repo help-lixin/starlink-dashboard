@@ -161,9 +161,9 @@ export const dynamicRoutes = [
     },
   },
   {
-    path : '/shell/label/index',
-    name : 'shell-label-manage',
-    component: ()=> import("../views/shell/label/index.vue"),
+    path : '/ssh/label/index',
+    name : 'ssh-label-manage',
+    component: ()=> import("../views/ssh/label/index.vue"),
     meta: {
         requiresAuth: true
     },

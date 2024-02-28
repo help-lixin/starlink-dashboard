@@ -137,6 +137,7 @@
     }
 
     function reset() {
+      menuForm.path = undefined
       Object.assign(menuForm , {
         menuId: undefined,
         perms : undefined,

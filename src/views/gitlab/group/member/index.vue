@@ -37,7 +37,15 @@
   // 表单
   const open = ref(false);
   const formRef = ref<FormInstance>();
-  const form = reactive({})
+  const form = reactive({
+        id: undefined,
+        accessLevel: undefined,
+        projectId: undefined,
+        userId: undefined,
+        instanceCode: queryParams.instanceCode,
+        users:[],
+        groups:[]
+  })
   const title = ref("")
   const pluginInstance = reactive([]);
   const pluginCode = "gitlab"
@@ -45,32 +53,30 @@
   // 表单规则
   const rules = reactive<FormRules>({
         instanceCode: [
-          { required: true, message: "插件实例不能为空", trigger: "change" }
+          { required: true, message: "插件实例不能为空", trigger: "blur" }
         ],
         groupId: [
-          { required: true, message: "成员组不能为空", trigger: "change" }
+          { required: true, message: "成员组不能为空", trigger: "blur" }
         ],
         userId: [
-          { required: true, message: "成员不能为空", trigger: "change" }
+          { required: true, message: "成员不能为空", trigger: "blur" }
         ],
         accessLevel: [
-          { required: true, message: "权限不能为空", trigger: "change" }
+          { required: true, message: "权限不能为空", trigger: "blur" }
         ]
     })
 
   // 重置表单
   const resetForm = ()=> {
       formRef.value?.clearValidate()
+      form.groups.splice(0,form.groups.length)
+      form.users.splice(form.users.length)
       Object.assign(form,{
         id: undefined,
-        userName: undefined,
-        visibility: undefined,
-        path: undefined,
-        remark: undefined,
-        status: undefined,
-        instanceCode: undefined,
-        groups: [],
-        users: []
+        accessLevel: undefined,
+        projectId: undefined,
+        userId: undefined,
+        instanceCode: queryParams.instanceCode
       })
   }
 
@@ -103,11 +109,12 @@
     getList()
   }
 
-  // 处理查询按钮
+  // 处理重置按钮
   const resetQuery = function(){
     dateRange.value = [];
     queryFormRef.value.resetFields();
-    handleQuery();
+    queryParams.instanceCode = pluginInstance[0]
+    getList();
   }
 
 
@@ -124,6 +131,7 @@
     })
 
     userListFunc(queryParams.instanceCode,(response)=>{
+      console.log(response)
       form.users = response?.data
     })
     form.instanceCode = queryParams.instanceCode;
@@ -157,27 +165,23 @@
         .then(response => {
           if(response?.code == 200){
             ElMessage({ showClose: true, message: '修改成功', type: 'success', });
-            open.value = false;
-            getList();
           }else{
             ElMessage({ showClose: true, message: response?.msg, type: 'warning', });
-            open.value = false;
-            getList();
           }
-
+          open.value = false;
+          getList();
         });
       } else {
         addGroupMember(requestForm)
         .then(response => {
           if(response?.code == 200){
             ElMessage({ showClose: true, message: '新增成功', type: 'success', });
-            open.value = false;
-            getList();
           }else{
             ElMessage({ showClose: true, message: response?.msg, type: 'warning', });
-            open.value = false;
-            getList();
           }
+
+          open.value = false;
+          getList();
         });
       }
   }
@@ -219,7 +223,7 @@
     }
 
     // TODO 伍岳林,后端开独立的接口,为下拉列表进行赋值.
-    groupSelectOption(addDateRange(groupParams, dateRange.value))
+    groupSelectOption(instanceCode)
       .then(response => {
         if(callback){
           callback(response);
@@ -272,24 +276,27 @@
     }
   }
 
-  // 默认情况下:选择一个"实例"下的一个"组",进行查询
-  queryInstanceInfoByPluginCode(pluginCode)
-  .then((res)=>{
-    if(res.code == 200){
-      // 检查一下数组情况
-      if(res?.data && res?.data.length > 0){
-        Object.assign(pluginInstance,res?.data)
-        queryParams.instanceCode = res?.data[0].instanceCode
-      }
+  const iniOption = ()=>{
+    // 默认情况下:选择一个"实例"下的一个"组",进行查询
+    queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
+        if(res.code == 200){
+          // 检查一下数组情况
+          if(res?.data && res?.data.length > 0){
+            Object.assign(pluginInstance,res?.data)
+            queryParams.instanceCode = res?.data[0].instanceCode
+          }
 
-      groupListFunc(queryParams.instanceCode,(response)=>{
-        queryParams.groups = response?.data
-        queryParams.groupId = response?.data[0]?.id
-        // 触发查询
-        getList();
-      })
-    }
-  });
+          groupListFunc(queryParams.instanceCode,(response)=>{
+            queryParams.groups = response?.data
+            // queryParams.groupId = response?.data[0]?.id
+            // 触发查询
+            getList();
+          })
+        }
+    });
+  }
+
+  iniOption()
 </script>
 
 <template>
@@ -322,7 +329,7 @@
             <el-option v-for="dict in queryParams.groups"
               :key="dict.gitlabGroupName"
               :label="dict.gitlabGroupName"
-              :value="dict.gitlabGroupId"/>
+              :value="dict.id"/>
             </el-select>
           </el-form-item>
           <el-form-item label="成员名称" prop="userName">
@@ -459,7 +466,7 @@
                 <el-option v-for="dict in form.groups"
                   :key="dict.gitlabGroupName"
                   :label="dict.gitlabGroupName"
-                  :value="dict.gitlabGroupId"/>
+                  :value="dict.id"/>
                 </el-select>
               </el-form-item>
             </el-col>

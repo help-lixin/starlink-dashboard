@@ -31,7 +31,17 @@
   // 表单
   const open = ref(false);
   const formRef = ref<FormInstance>();
-  const form = reactive({})
+  const form = reactive({
+        id: undefined,
+        userName: undefined,
+        nickName : undefined,
+        email : undefined,
+        visibility: undefined,
+        path: undefined,
+        remark: undefined,
+        status: 1,
+        instanceCode: undefined
+  })
   const title = ref("")
   const pluginInstance = reactive([]);
   const pluginCode = "gitlab"
@@ -39,7 +49,7 @@
   // 表单规则
   const rules = reactive<FormRules>({
         instanceCode: [
-          { required: true, message: "插件实例不能为空", trigger: "change" }
+          { required: true, message: "插件实例不能为空", trigger: "blur" }
         ],
         userName: [
           { required: true, message: "用户名称不能为空", trigger: "blur" },
@@ -50,7 +60,8 @@
           { min: 2, max: 20, message: '用户昵称长度必须介于 2 和 20 之间', trigger: 'blur' }
         ],
         email: [
-            {type: "email", message: "请输入正确的邮箱地址", trigger: ["blur", "change"]}
+            { required: true, message: "邮箱地址不能为空", trigger: "blur" },
+            {type: "email", message: "请输入正确的邮箱地址", trigger: ["blur"]}
         ],
         pwd: [
           { required: true, message: "密码不能为空", trigger: "blur" },
@@ -118,6 +129,7 @@
     .then(response => {
       if(response?.code == 200){
         Object.assign(form,response?.data)
+        console.log(form)
         open.value = true;
         title.value = "修改用户";
       }
@@ -280,11 +292,11 @@
 
     <!--  option-->
     <div class="option-wrap">
-      <el-button
+      <!-- <el-button
         type="primary"
         plain
         size="default"
-        @click="handleAdd" v-hasPerms="['/gitlab/user/add']" ><el-icon><Plus /></el-icon>新增</el-button>
+        @click="handleAdd" v-hasPerms="['/gitlab/user/add']" ><el-icon><Plus /></el-icon>新增</el-button> -->
     </div>
 
     <!--table  -->
@@ -348,7 +360,7 @@
         <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
           <el-row>
             <el-col :span="12">
-              <el-form-item label="插件实例" prop="instanceCode">
+              <el-form-item label="插件实例" prop="instanceCode" >
                 <el-select
                 class="search-select2"
                   v-model="form.instanceCode"
@@ -356,6 +368,7 @@
                   placeholder="请选择实例"
                   clearable
                   style="width: 200px;"
+                  :disabled="form.id != undefined"
                 >
                 <el-option v-for="item in pluginInstance"
                   :key="item.pluginCode"
@@ -382,8 +395,8 @@
           </el-row>
           <el-row>
             <el-col :span="12">
-              <el-form-item label="密码" prop="pwd">
-                <el-input v-model="form.pwd" placeholder="请输入密码" maxlength="30" minlength="6" type="password" show-password/>
+              <el-form-item label="密码" prop="pwd" v-if="form.id == undefined">
+                <el-input v-model="form.pwd" placeholder="请输入密码" maxlength="30" minlength="6" type="password" show-password />
               </el-form-item>
             </el-col>
           </el-row>

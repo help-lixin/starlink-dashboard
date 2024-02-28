@@ -30,6 +30,7 @@
 
   const total= ref(0)
   const sysCredentialPageList = reactive([])
+  const curCredentialKey = ref(null)
 
   // 表单
   const open = ref(false);
@@ -39,16 +40,21 @@
   const formRef = ref<FormInstance>();
 
   const validKey = (rule:any,value:any, callback:any)=>{
-      if(form.id != undefined){
-        queryCredentialInfoById(form.id).then((res) =>{
-          if(res.code == 200){
-            if(form.credentialKey == res?.data?.credentialKey){
-              callback()
-            }
-          }
-        })
+      // if(form.id != undefined){
+      //   queryCredentialInfoById(form.id).then((res) =>{
+      //     if(res.code == 200){
+      //       if(form.credentialKey == res?.data?.credentialKey){
+      //         callback()
+      //       }
+      //     }
+      //   })
 
+      // }
+
+      if(curCredentialKey.value == form.credentialKey){
+        callback()
       }
+
       const checkValue = reactive({
         credentialKey:undefined,
         instanceCode:undefined
@@ -176,6 +182,7 @@
       if(response?.code == 200){
         let data = response?.data
         Object.assign(form,data)
+        curCredentialKey.value = form.credentialKey
         changeInstance(data.pluginCode)
         form.type = data.credentialType
         open.value = true;
@@ -610,7 +617,7 @@
               <el-form-item label="密码" prop="password" :rules="[
                   { required: true, message: '密码不能为空', trigger: 'blur' },
                   { min: 2, max: 200, message: '密码长度必须介于 2 和 200 之间', trigger: 'blur' } ]">
-                <el-input v-model="form.password" type="password" placeholder="请输入密码" maxlength="200" />
+                <el-input v-model="form.password" type="password" placeholder="请输入密码" maxlength="200" show-password />
               </el-form-item>
             </el-col>
           </el-row>

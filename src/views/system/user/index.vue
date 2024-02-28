@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // @ts-nocheck
-import { Plus ,Delete, Edit, EditPen, Search , RefreshRight , Sort , QuestionFilled} from '@element-plus/icons-vue'
+import { Plus ,Delete, Edit, Link, More, EditPen, Search , RefreshRight , Sort , QuestionFilled} from '@element-plus/icons-vue'
 import { parseTime , statusDicts , sexDicts , addDateRangeRuoyi } from "@/utils/common"
 import { listUser , getUser , addUser , updateUser , delUser , changeUserStatus , resetUserPwd } from "@/api/users"
 import { getRoles } from "@/api/roles"
@@ -82,6 +82,7 @@ const reset = ()=> {
         phonenumber: undefined,
         email: undefined,
         sex: undefined,
+        roleIds: undefined,
         status: "0",
         remark: undefined
     })
@@ -335,17 +336,17 @@ getList()
                   style="width: 240px"
                 ></el-date-picker>
               </el-form-item>
-              <div>
+              <el-form-item>
                 <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
                 <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
-              </div>
+              </el-form-item>
           </el-row>
         </el-form>
       </yt-card>
         <!--  option-->
-      <div class="test">
+      <!-- <div class="test">
         <formilyjsTest></formilyjsTest>
-      </div>
+      </div> -->
       <yt-card>
         <div class="option-wrap">
           <el-button
@@ -402,28 +403,32 @@ getList()
             <el-table-column
               label="操作"
               align="center"
-              width="320"
+              width="350"
             >
               <template v-slot="scope">
                 <div class="action-btn">
                   <el-button
                     size="small"
+                    icon="Edit"
                     @click="handleUpdate(scope.row)"
                     v-hasPerms="['/system/user/edit']"
                   >修改</el-button>
                   <el-button
+                    v-if="false"
                     size="small"
+                    icon="Link"
                     @click="contractAddress(scope.row)"
                   >关联地址</el-button>
                   <el-button
                     size="small"
+                    icon="Delete"
                     @click="handleDelete(scope.row)"
                     v-hasPerms="['/system/user/del/*']"
                   >删除</el-button>
 
 
                   <el-dropdown size="default" @command="(command) => handleCommand(command, scope.row)" v-hasPerms="['/system/user/resetPwd', '/system/user/edit']">
-                    <el-button size="small">更多</el-button>
+                    <el-button size="small" icon="More">更多</el-button>
                     <template #dropdown>
                       <el-dropdown-menu>
                         <el-dropdown-item command="handleResetPwd" v-hasPerms="['/system/user/resetPwd']" >重置密码</el-dropdown-item>

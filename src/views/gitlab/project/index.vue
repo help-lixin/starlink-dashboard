@@ -5,7 +5,7 @@
   import { dayjs } from "@/utils/common-dayjs"
   import {  Edit } from '@element-plus/icons-vue'
   import { pageList , addProject , queryProjectInfoById , changeProjectStatus} from "@/api/gitlab/projects"
-  import { groupSelectOption } from "@/api/gitlab/groups"
+  import {groupSelectOption, queryGitlabAddr} from "@/api/gitlab/groups"
 
   const queryForm = ref(null);
 
@@ -22,7 +22,7 @@
     visibility: undefined
   })
 
-  // 权限列表
+  // 可见性级别列表
   const visibilityArr = ref(["PUBLIC", "PRIVATE", "INTERNAL"])
 
   const loading = ref(false)
@@ -43,25 +43,28 @@
   const title = ref("")
   const pluginInstance = reactive([]);
   const pluginCode = "gitlab"
+  const ipAddr = ref(null)
 
   // 表单规则
   const rules = reactive<FormRules>({
         instanceCode: [
-          { required: true, message: "插件实例不能为空", trigger: "change" }
+          { required: true, message: "插件实例不能为空", trigger: "blur" }
         ],
         projectName: [
           { required: true, message: "项目名称不能为空", trigger: "blur" },
-          { min: 2, max: 20, message: '项目名称长度必须介于 2 和 20 之间', trigger: 'blur' }
+          { min: 2, max: 20, message: '项目名称长度必须介于 2 和 20 之间', trigger: 'blur' },
+          { pattern: /^[-_a-zA-Z0-9|\u4e00-\u9fa5]*$/, message: '只可以输入字母、数字、下划线、中划线和中文字符', trigger: 'blur' }
         ],
         namespaceByGroup: [
-          { required: true, message: "组不能为空", trigger: "blur" }
+          { required: true, message: "群组不能为空", trigger: "blur" }
         ],
         visibility: [
-          { required: true, message: "权限不能为空", trigger: "change" }
+          { required: true, message: "可见性级别不能为空", trigger: "blur" }
         ],
         path: [
-          { required: true, message: "路径名称不能为空", trigger: "blur" },
-          { min: 2, max: 20, message: '路径名称长度必须介于 2 和 20 之间', trigger: 'blur' }
+          { required: true, message: "项目标识符不能为空", trigger: "blur" },
+          { min: 2, max: 20, message: '项目标识符长度必须介于 2 和 20 之间', trigger: 'blur' },
+          { pattern: /^[a-zA-Z0-9]*$/, message: '只可以输入字母、数字', trigger: 'blur' }
         ],
     })
 
@@ -116,9 +119,9 @@
   // 处理新增按钮
   const handleAdd = function(){
     reset()
-    // const instanceCode = pluginInstance[0].instanceCode
-    // formInitFunc(instanceCode)
-    // form.instanceCode = instanceCode
+    const instanceCode = pluginInstance[0].instanceCode
+    formInitFunc(instanceCode)
+    form.instanceCode = instanceCode
     open.value = true
     title.value = "添加项目"
   }
@@ -172,15 +175,21 @@
         });
       } else {
         addProject(form).then(response => {
-          if(response?.code){
+          if(response?.code == 200){
             ElMessage({
                   showClose: true,
                   message: '新增成功',
                   type: 'success',
             });
-            open.value = false;
-            getList();
+          }else{
+            ElMessage({
+                  showClose: true,
+                  message: response?.msg,
+                  type: 'warning',
+            });
           }
+          open.value = false;
+          getList();
         });
       }
   }
@@ -236,9 +245,14 @@
   const formInitFunc = (instanceCode)=>{
     groupSelectOption(instanceCode).then((res)=>{
         if(res.code == 200){
-          Object.assign(groups,res?.data)
+            Object.assign(groups,res?.data)
         }
     });
+    queryGitlabAddr(instanceCode).then((res)=>{
+        if(res.code == 200){
+            ipAddr.value = res.data+"/"
+        }
+    })
   }
 
   // 进入页面,选择一个实例进行查询
@@ -284,12 +298,12 @@
               :value="dict.value"/>
             </el-select>
           </el-form-item>
-          <el-form-item label="权限" prop="visibility">
+          <el-form-item label="可见性级别" prop="visibility">
             <el-select
             class="search-select"
               v-model="queryParams.visibility"
               @keyup.enter.native="handleQuery"
-              placeholder="请选择权限"
+              placeholder="请选择可见性级别"
               clearable
               style="width: 240px"
             >
@@ -337,13 +351,13 @@
     <!--table  -->
     <div class="table-wrap">
       <el-table v-loading="loading" :data="projectList" @selection-change="handleSelectionChange">
-          <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="项目编号" align="center" key="id" prop="id" v-if="false"/>
-          <el-table-column label="项目名称" align="center" key="projectName" prop="projectName"  :show-overflow-tooltip="true" />
-          <el-table-column label="路径" align="center" key="path" prop="path" :show-overflow-tooltip="true" />
-          <el-table-column label="webUrl" align="center" key="webUrl" prop="webUrl" :show-overflow-tooltip="true"  />
-          <el-table-column label="sshUrl" align="center" key="sshUrl" prop="sshUrl" :show-overflow-tooltip="true" />
-          <el-table-column label="备注" align="center" key="remark" prop="remark" :show-overflow-tooltip="true" />
+          <el-table-column type="selection" width="60" align="left" />
+          <el-table-column label="项目编号" align="left" key="id" prop="id" v-if="false"/>
+          <el-table-column label="项目名称" align="left" key="projectName" prop="projectName"  :show-overflow-tooltip="true" />
+          <el-table-column label="项目标识符" align="left" key="path" prop="path" :show-overflow-tooltip="true" />
+          <el-table-column label="webUrl" align="left" key="webUrl" prop="webUrl" :show-overflow-tooltip="true"  />
+          <el-table-column label="sshUrl" align="left" key="sshUrl" prop="sshUrl" :show-overflow-tooltip="true" />
+          <el-table-column label="备注" align="left" key="remark" prop="remark" :show-overflow-tooltip="true" />
           <el-table-column label="状态" align="center" key="status" prop="status">
             <template #default="scope">
               {{  showStatusFun(scope.row.status) }}
@@ -392,9 +406,9 @@
 
 
     <!-- 添加或修改项目配置对话框 -->
-    <el-dialog :title="title" v-model="open" width="600px" append-to-body>
+    <el-dialog :title="title" v-model="open" width="800px" append-to-body>
       <yt-card>
-        <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
+        <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
           <el-row>
             <el-col :span="12">
               <el-form-item label="插件实例" prop="instanceCode">
@@ -406,7 +420,7 @@
                   @change="formInitFunc"
                   clearable
                   style="width: 240px"
-                  :disabled="form.id !== undefined"
+                  :disabled="form.id != undefined"
                 >
                 <el-option v-for="item in pluginInstance"
                   :key="item.pluginCode"
@@ -423,31 +437,42 @@
           </el-row>
 
           <el-row>
-            <el-col :span="12">
-              <el-form-item label="组" prop="namespaceByGroup">
-                <el-select
-                v-model="form.namespaceByGroup"
-                placeholder="请选择组"
-                clearable
-                style="width: 240px"
-                :disabled="form.id !== undefined"
-              >
-              <el-option v-for="group in groups"
-                :key="group.gitlabGroupId"
-                :label="group.gitlabGroupName"
-                :value="group.gitlabGroupId"/>
-              </el-select>
+            <el-col :span="24">
+              <el-form-item label="项目URL" prop="namespaceByGroup">
+                <el-input style="width:380px" class="input-with-select" v-model="ipAddr" disabled >
+                  <template #append>
+                      <el-select
+                        v-model="form.namespaceByGroup"
+                        placeholder="请选择群组"
+                        clearable
+                        style="width: 180px;background-color: var(--el-fill-color-blank);"
+                        :disabled="form.id != undefined"
+                      >
+                      <el-option v-for="group in groups"
+                        :key="group.gitlabGroupId"
+                        :label="group.gitlabGroupName"
+                        :value="group.gitlabGroupId"/>
+                      </el-select>
+                  </template>
+                </el-input>
+                <el-col :span="1" style="display: flex; justify-content: center;">/</el-col>
+                <el-form-item  prop="path">
+                    <el-input v-model="form.path" placeholder="请输入项目标识串" maxlength="30" style="width:228px" :disabled="form.id != undefined"/>
+                </el-form-item>
               </el-form-item>
             </el-col>
+            
+          </el-row>
+          <el-row>
             <el-col :span="12">
-              <el-form-item label="权限" prop="visibility">
+              <el-form-item label="可见性级别" prop="visibility">
               <el-select
                 v-model="form.visibility"
                 @keyup.enter.native="handleQuery"
-                placeholder="请选择权限"
+                placeholder="请选择可见性级别"
                 clearable
                 style="width: 240px"
-                :disabled="form.id !== undefined"
+                :disabled="form.id != undefined"
               >
               <el-option v-for="item in visibilityArr"
                 :key="item"
@@ -458,14 +483,6 @@
             </el-col>
           </el-row>
 
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="路径名称" prop="path">
-                <el-input v-model="form.path" placeholder="请输入路径名称" maxlength="30" :disabled="form.id !== undefined"/>
-              </el-form-item>
-            </el-col>
-            
-          </el-row>
           <el-row>
             <el-col :span="12">
               <el-form-item label="状态">
@@ -479,7 +496,7 @@
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="readme" v-if="form.id == undefined">
+              <el-form-item label="ReadMe Init" v-if="form.id == undefined">
                 <el-radio-group v-model="form.initiallizeWithReadme">
                   <el-radio
                     v-for="dict in enable"
@@ -552,4 +569,11 @@
  .search-select2 .el-input {
   --el-input-width: 200px;
 }
-</style>@/api/gitlab/projects
+
+/* .input-with-select .el-input-group__append {
+  background-color: var(--el-fill-color-blank);
+} */
+.el-input.is-disabled .el-input__inner {
+    color: var(--el-text-color-regular);
+}
+</style>

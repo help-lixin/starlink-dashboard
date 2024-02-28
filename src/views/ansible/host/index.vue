@@ -34,7 +34,7 @@
     checkServerName(value,form.sshInstanceCode).then((res)=>{
         if(res.code == 200){
           if(res.data){
-            callback(new Error('服务名称已存在，请确认后修改'));
+            callback(new Error('主机名称已存在，请确认后修改'));
           }else{
             callback()
           }
@@ -61,12 +61,12 @@
   // 表单验证规则
   const rules = reactive<FormRules>({
       'sshInstanceCode' : [
-        { required: true, message: "实例编码不能为空", trigger: "change" },
-        { validator: validInstanceCode , trigger: 'change' }
+        { required: true, message: "实例编码不能为空", trigger: "blur" },
+        { validator: validInstanceCode , trigger: 'blur' }
       ],
       'serverName': [
-        { required: true, message: "服务名称不能为空", trigger: "blur" },
-        { min: 2, max: 20, message: '服务名称长度必须介于 2 和 20 之间', trigger: 'blur' },
+        { required: true, message: "主机名称不能为空", trigger: "blur" },
+        { min: 2, max: 20, message: '主机名称长度必须介于 2 和 20 之间', trigger: 'blur' },
         { validator: validServerName , trigger: 'blur' }
       ],
       'ansibleInventoryDir': [
@@ -191,6 +191,7 @@
 
   // 重置表单
   const reset = ()=> {
+    formRef.value?.clearValidate()
     curServerName.value = null
     curInstanceCode.value = null
     Object.assign(form,{

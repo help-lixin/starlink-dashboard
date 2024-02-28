@@ -102,3 +102,14 @@ export function groupSelectOption(instanceCode:string) {
         return res?.data;
     });
 }
+
+
+// 查询实例当前ip端口地址
+export function queryGitlabAddr(instanceCode:string) {
+  return request({
+    url: STARLINK_SERVICE + '/gitlab/group/queryGitlabAddr/'+instanceCode,
+    method: 'get'
+  }).then((res)=>{
+      return res?.data;
+  });
+}

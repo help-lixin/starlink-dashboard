@@ -265,10 +265,10 @@
                 style="width: 240px"
               ></el-date-picker>
             </el-form-item>
-            <div>
+            <el-form-item>
               <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
               <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
-            </div>
+            </el-form-item>
         </el-row>
       </el-form>
     </yt-card>
