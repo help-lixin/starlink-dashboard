@@ -407,9 +407,9 @@ const getList = ()=>{
       <div class="table-wrap">
         <el-table v-loading="loading" :data="dataList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="插件编码" align="center" key="pluginCode" prop="pluginCode"/>
-          <el-table-column label="实例编码" align="center" key="instanceCode" prop="instanceCode"/>
-          <el-table-column label="实例名称" align="center" key="instanceName" prop="instanceName"  :show-overflow-tooltip="true" />
+          <el-table-column label="插件编码" key="pluginCode" prop="pluginCode"/>
+          <el-table-column label="实例编码" key="instanceCode" prop="instanceCode"/>
+          <el-table-column label="实例名称" key="instanceName" prop="instanceName"  :show-overflow-tooltip="true" />
           <el-table-column label="状态" align="center" key="status"  width="100">
             <template v-slot="scope">
               {{  showStatusFun(scope.row.status) }}
@@ -545,47 +545,5 @@ const getList = ()=>{
 </template>
 
 <style lang="scss" scoped>
-.main-wrap {
-  height: 100%;
-  width: 100%;
-  box-sizing: border-box;
-  background: #fff;
 
-}
-
-.option-wrap {
-  margin-bottom: 8px;
-  .el-button {
-    // margin-right: 6px;
-  }
-}
-.table-wrap {
-  width: 100%;
-  box-sizing: border-box;
-  overflow-y: auto;
-  .action-btn {
-    display: flex;
-  }
-}
-
-.page-wrap {
-  padding: 20px 0;
-  .el-pagination {
-    display: flex;
-    align-items: center;
-    justify-content: end;
-  }
-
-}
-
-
-</style>
-<style>
- .el-form-item__label {
-  font-size: 14px;
- }
-
-.search-select .el-input {
-  --el-input-width: 240px;
-}
 </style>

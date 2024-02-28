@@ -586,7 +586,7 @@
         <el-table v-loading="loading" :data="jobList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
           <el-table-column label="任务编号" key="id" prop="id" v-if="false" />
-          <el-table-column label="任务名称" key="jobName" prop="jobName"  :show-overflow-tooltip="true"   width="150" />
+          <el-table-column label="任务名称" key="jobName" prop="jobName"  :show-overflow-tooltip="true" />
           <el-table-column label="仓库类型" key="scm" prop="scm" :show-overflow-tooltip="true"  v-if="false" />
           <el-table-column label="工具类型" key="tools" prop="tools" :show-overflow-tooltip="true"  />
           <el-table-column label="状态" align="center" key="status"  >
@@ -1017,49 +1017,6 @@
 </template>
 
 <style lang="scss" scoped>
-.main-wrap {
-  height: 100%;
-  width: 100%;
-  box-sizing: border-box;
-  background: #fff;
-
-}
-
-.option-wrap {
-  margin-bottom: 8px;
-  .el-button {
-    // margin-right: 6px;
-  }
-}
-.table-wrap {
-  width: 100%;
-  box-sizing: border-box;
-  overflow-y: auto;
-  .action-btn {
-    display: flex;
-  }
-}
-
-.page-wrap {
-  padding: 20px 0;
-  .el-pagination {
-    display: flex;
-    align-items: center;
-    justify-content: end;
-  }
-
-}
-
-
-</style>
-<style>
- .el-form-item__label {
-  font-size: 14px;
- }
-
-.search-select .el-input {
-  --el-input-width: 240px;
-}
 
 </style>
 

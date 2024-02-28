@@ -226,93 +226,96 @@
 <template>
   <div class="main-wrapp">
     <!--sousuo  -->
-    <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch">
-          <el-form-item label="插件实例" prop="instanceCode">
-            <el-select
+    <yt-card>
+      <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch">
+        <el-form-item label="插件实例" prop="instanceCode">
+          <el-select
             class="search-select"
-              v-model="queryParams.instanceCode"
-              @keyup.enter.native="handleQuery"
-              placeholder="请选择实例"
-              clearable
-              style="width: 240px"
-            >
+            v-model="queryParams.instanceCode"
+            @keyup.enter.native="handleQuery"
+            placeholder="请选择实例"
+            clearable
+            style="width: 240px"
+          >
             <el-option v-for="item in pluginInstance"
-              :key="item.pluginCode"
-              :label="item.instanceName"
-              :value="item.instanceCode"/>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="组名称" prop="groupName">
-            <el-input
-              v-model="queryParams.groupName"
-              placeholder="请输入组名称"
-              clearable
-              style="width: 240px"
-              @keyup.enter.native="handleQuery"
-            />
-          </el-form-item>
-          <el-form-item label="权限" prop="visibility">
-            <el-select
+                       :key="item.pluginCode"
+                       :label="item.instanceName"
+                       :value="item.instanceCode"/>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="组名称" prop="groupName">
+          <el-input
+            v-model="queryParams.groupName"
+            placeholder="请输入组名称"
+            clearable
+            style="width: 240px"
+            @keyup.enter.native="handleQuery"
+          />
+        </el-form-item>
+        <el-form-item label="权限" prop="visibility">
+          <el-select
             class="search-select"
-              v-model="queryParams.visibility"
-              @keyup.enter.native="handleQuery"
-              placeholder="请选择权限"
-              clearable
-              style="width: 240px"
-            >
+            v-model="queryParams.visibility"
+            @keyup.enter.native="handleQuery"
+            placeholder="请选择权限"
+            clearable
+            style="width: 240px"
+          >
             <el-option v-for="item in visibilityArr"
-              :key="item"
-              :label="item"
-              :value="item"/>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="状态" prop="status">
-            <el-select
+                       :key="item"
+                       :label="item"
+                       :value="item"/>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="状态" prop="status">
+          <el-select
             class="search-select"
-              v-model="queryParams.status"
-              placeholder="组状态"
-              clearable
-              style="width: 240px"
-            >
+            v-model="queryParams.status"
+            placeholder="组状态"
+            clearable
+            style="width: 240px"
+          >
             <el-option v-for="dict in status"
-              :key="dict.value"
-              :label="dict.label"
-              :value="dict.value"/>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="创建时间">
-            <el-date-picker
-              v-model="dateRange"
-              style="width: 240px"
-              value-format="YYYY-MM-DD"
-              type="daterange"
-              range-separator="-"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              clearable
-            ></el-date-picker>
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
-            <el-button  @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
-          </el-form-item>
-    </el-form>
+                       :key="dict.value"
+                       :label="dict.label"
+                       :value="dict.value"/>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="创建时间">
+          <el-date-picker
+            v-model="dateRange"
+            style="width: 240px"
+            value-format="YYYY-MM-DD"
+            type="daterange"
+            range-separator="-"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            clearable
+          ></el-date-picker>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
+          <el-button  @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
+        </el-form-item>
+      </el-form>
+    </yt-card>
+    <yt-card>
 
-    <!--  option-->
-    <div class="option-wrap">
-      <el-button
-        type="primary"
-        plain
-        size="default"
-        @click="handleAdd" v-hasPerms="['/gitlab/group/add']" ><el-icon><Plus /></el-icon>新增</el-button>
-    </div>
+      <!--  option-->
+      <div class="option-wrap">
+        <el-button
+          type="primary"
+          plain
+          size="default"
+          @click="handleAdd" v-hasPerms="['/gitlab/group/add']" ><el-icon><Plus /></el-icon>新增</el-button>
+      </div>
 
-    <!--table  -->
-    <div class="table-wrap">
-      <el-table v-loading="loading" :data="groupPageList" @selection-change="handleSelectionChange">
+      <!--table  -->
+      <div class="table-wrap">
+        <el-table v-loading="loading" :data="groupPageList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="组编号" align="center" key="id" prop="id" v-if="false"/>
-          <el-table-column label="组名称" align="center" key="gitlabGroupName" prop="gitlabGroupName"  :show-overflow-tooltip="true" />
+          <el-table-column label="组编号" key="id" prop="id" v-if="false"/>
+          <el-table-column label="组名称" key="gitlabGroupName" prop="gitlabGroupName"  :show-overflow-tooltip="true" />
           <el-table-column label="备注" align="center" key="remark" prop="remark" :show-overflow-tooltip="true"  />
           <el-table-column label="状态" align="center" key="status" >
             <template #default="scope">
@@ -330,35 +333,37 @@
             width="220"
           >
             <template #default="scope">
-             <div class="action-btn">
-              <el-button
-                size="small"
-                icon="Edit"
-                @click="handleUpdate(scope.row)"
-                v-hasPerms="['/gitlab/group/add']"
-              >修改</el-button>
-              <el-button
-                size="small"
-                :icon="getStatusIcon(scope.row)"
-                @click="handleStatusChange(scope.row)"
-                v-hasPerms="['/gitlab/group/changeStatus/**']"
-              >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-             </div>
+              <div class="action-btn">
+                <el-button
+                  size="small"
+                  icon="Edit"
+                  @click="handleUpdate(scope.row)"
+                  v-hasPerms="['/gitlab/group/add']"
+                >修改</el-button>
+                <el-button
+                  size="small"
+                  :icon="getStatusIcon(scope.row)"
+                  @click="handleStatusChange(scope.row)"
+                  v-hasPerms="['/gitlab/group/changeStatus/**']"
+                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
+              </div>
             </template>
           </el-table-column>
-    </el-table>
-    </div>
-    <div class="page-wrap">
-      <el-pagination
-      v-show="total>0"
-      :total="total"
-      :page-sizes=[10,20]
-      background layout="prev, pager, next"
-      v-model:current-page="queryParams.pageNum"
-      v-model:page-size="queryParams.pageSize"
-      @current-change="getList"
-    />
-    </div>
+        </el-table>
+      </div>
+      <div class="page-wrap">
+        <el-pagination
+          v-show="total>0"
+          :total="total"
+          :page-sizes=[10,20]
+          background layout="prev, pager, next"
+          v-model:current-page="queryParams.pageNum"
+          v-model:page-size="queryParams.pageSize"
+          @current-change="getList"
+        />
+      </div>
+    </yt-card>
+
 
 
     <!-- 添加或修改组配置对话框 -->
@@ -442,47 +447,5 @@
 </template>
 
 <style lang="scss" scoped>
-.main-wrap {
-  height: 100%;
-  width: 100%;
-  box-sizing: border-box;
-  background: #fff;
 
-}
-
-.option-wrap {
-  margin-bottom: 8px;
-  .el-button {
-    // margin-right: 6px;
-  }
-}
-.table-wrap {
-  width: 100%;
-  box-sizing: border-box;
-  overflow-y: auto;
-  .action-btn {
-    display: flex;
-  }
-}
-
-.page-wrap {
-  padding: 20px 0;
-  .el-pagination {
-    display: flex;
-    align-items: center;
-    justify-content: end;
-  }
-
-}
-
-
-</style>
-<style>
- .el-form-item__label {
-  font-size: 14px;
- }
-
-.search-select .el-input {
-  --el-input-width: 240px;
-}
 </style>
