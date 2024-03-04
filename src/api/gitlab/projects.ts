@@ -68,3 +68,13 @@ export function changeProjectStatus(changeStatusParams:any) {
     });
 }
 
+// 项目下拉列表查询
+export function projectOptionSelects(instanceCode:string) {
+    return request({
+        url: STARLINK_SERVICE + '/gitlab/project/optionSelects/' + instanceCode,
+        method: 'get'
+    }).then((res)=>{
+        return res?.data;
+    });
+}
+

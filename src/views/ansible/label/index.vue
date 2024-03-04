@@ -22,7 +22,7 @@
   })
 
   const validKey = (rule:any,value:any, callback:any)=>{
-    if(value == labelKey){
+    if(value == labelKey.value){
       callback();
     }
 

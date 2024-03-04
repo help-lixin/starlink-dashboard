@@ -1,7 +1,7 @@
 <script setup lang="ts">
   // @ts-nocheck
   import { Delete } from '@element-plus/icons-vue'
-  import { showStatusOperateFun , status , showStatusFun , addDateRange } from "@/utils/common"
+  import { addDateRange } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
   import { memberList , addProjectMember , updateProjectMember , projectList , removeMember, showMemberProject} from "@/api/gitlab/project-member"
@@ -90,16 +90,16 @@
   // 表单规则
   const rules = reactive<FormRules>({
         instanceCode: [
-          { required: true, message: "插件实例不能为空", trigger: "change" }
+          { required: true, message: "插件实例不能为空", trigger: "blur" }
         ],
         projectId: [
-          { required: true, message: "项目不能为空", trigger: "change" }
+          { required: true, message: "项目不能为空", trigger: "blur" }
         ],
         userId: [
-          { required: true, message: "成员不能为空", trigger: "change" }
+          { required: true, message: "成员不能为空", trigger: "blur" }
         ],
         accessLevel: [
-          { required: true, message: "权限不能为空", trigger: "change" }
+          { required: true, message: "权限不能为空", trigger: "blur" }
         ],
   })
 
@@ -302,20 +302,6 @@
               :key="item.pluginCode"
               :label="item.instanceName"
               :value="item.instanceCode"/>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="状态" prop="status">
-            <el-select
-            class="search-select"
-              v-model="queryParams.status"
-              placeholder="成员状态"
-              clearable
-              style="width: 240px"
-            >
-            <el-option v-for="dict in status"
-              :key="dict.value"
-              :label="dict.label"
-              :value="dict.value"/>
             </el-select>
           </el-form-item>
           <el-form-item label="成员名称" prop="userName">

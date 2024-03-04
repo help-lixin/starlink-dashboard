@@ -5,7 +5,7 @@ import {STARLINK_SERVICE} from "@/utils/env"
 // 查询列表
 export function pageList(query:any) {
     return request({
-      url: STARLINK_SERVICE + '/shell/label/list',
+      url: STARLINK_SERVICE + '/ssh/label/list',
       method: 'get',
       params: query
     }).then((res)=>{
@@ -16,7 +16,7 @@ export function pageList(query:any) {
 // 新增/更新标签
 export function addLabel(data:any) {
     return request({
-            url: STARLINK_SERVICE + '/shell/label/add',
+            url: STARLINK_SERVICE + '/ssh/label/add',
             method: 'post',
             data: data
         }).then((res)=>{
@@ -29,7 +29,7 @@ export function addLabel(data:any) {
 // 状态修改
 export function changeStatus(id:any, status:any) {
     return request({
-        url: STARLINK_SERVICE + '/shell/label/changeStatus/'+id+"/"+status,
+        url: STARLINK_SERVICE + '/ssh/label/changeStatus/'+id+"/"+status,
         method: 'put'
     }).then((res)=>{
         return res?.data;
@@ -42,7 +42,7 @@ export function changeStatus(id:any, status:any) {
 // 根据labelId查询任务详情
 export function queryLabelDetail(id:number) {
     return request({
-      url: STARLINK_SERVICE + '/shell/label/info/'+ id,
+      url: STARLINK_SERVICE + '/ssh/label/info/'+ id,
       method: 'get'
     }).then((res)=>{
         return res?.data;
@@ -53,7 +53,7 @@ export function queryLabelDetail(id:number) {
 // 查询任务名称是否可用
 export function checkLabelKey(labelKey:string) {
     return request({
-      url: STARLINK_SERVICE + '/shell/label/checkLabelKey/' + labelKey,
+      url: STARLINK_SERVICE + '/ssh/label/checkLabelKey/' + labelKey,
       method: 'get'
     }).then((res)=>{
         return res?.data;

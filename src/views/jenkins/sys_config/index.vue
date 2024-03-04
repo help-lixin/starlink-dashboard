@@ -436,7 +436,7 @@
                 <el-select
                   class="search-select"
                   v-model="form.pluginType"
-                  placeholder="请选择实例"
+                  placeholder="请选择插件类型"
                   style="width: 240px"
                 >
                   <el-option v-for="item in tools"

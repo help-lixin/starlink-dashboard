@@ -42,7 +42,7 @@
   // 表单验证规则
   const rules = reactive<FormRules>({
       'instanceCode' : [
-        { required: true, message: "实例编码不能为空", trigger: "change" },
+        { required: true, message: "实例编码不能为空", trigger: "blur" },
       ],
       'jobName': [
         { required: true, message: "任务名称不能为空", trigger: "blur" },
@@ -50,14 +50,14 @@
         { validator: validJobName , trigger: 'blur' }
       ],
       'scmType': [
-        { required: true, message: "仓库类型不能为空", trigger: "change" },
-        { min: 2, max: 20, message: '任务名称长度必须介于 2 和 20 之间', trigger: 'change' }
+        { required: true, message: "仓库类型不能为空", trigger: "blur" },
+        { min: 2, max: 20, message: '任务名称长度必须介于 2 和 20 之间', trigger: 'blur' }
       ],
       'toolsType': [
-        { required: true, message: "语言不能为空", trigger: "change" },
+        { required: true, message: "语言不能为空", trigger: "blur" },
       ],
       'jdkId' :[
-        { required: true, message: "jdk不能为空", trigger: "change" },
+        { required: true, message: "jdk不能为空", trigger: "blur" },
       ],
 
       'scm':{
@@ -70,7 +70,7 @@
           { min: 2, max: 200, message: '分支长度必须介于 2 和 200 之间', trigger: 'blur' }
         ],
         'credentialsId': [
-          { required: true, message: "凭证不能为空", trigger: "change" }
+          { required: true, message: "凭证不能为空", trigger: "blur" }
         ]
       }
   })
@@ -594,13 +594,13 @@
               {{  showStatusFun(scope.row.status) }}
             </template>
           </el-table-column>
-          <!-- <el-table-column label="最后成功时间" key="lastSuccess" prop="lastSuccess" :show-overflow-tooltip="true" width="180"/> -->
-          <!-- <el-table-column label="最后失败时间" key="lastFailure" prop="lastFailure" :show-overflow-tooltip="true"   width="180"/> -->
-          <!-- <el-table-column label="最后构建所需时间" key="lastDuration" prop="lastDuration" :show-overflow-tooltip="true"  width="180"/> -->
-          <!-- <el-table-column label="聚合状态" key="aggregatedStatus" prop="aggregatedStatus" :show-overflow-tooltip="true" /> -->
-          <el-table-column label="构建状态" key="buildStatus" prop="buildStatus" :show-overflow-tooltip="true" v-if="false" width="120"/>
-          <el-table-column label="备注" key="remark" prop="remark" :show-overflow-tooltip="true"  />
-          <el-table-column label="创建时间" prop="createTime" width="180">
+          <!-- <el-table-column label="最后成功时间" align="center" key="lastSuccess" prop="lastSuccess" :show-overflow-tooltip="true" width="180"/> -->
+          <!-- <el-table-column label="最后失败时间" align="center" key="lastFailure" prop="lastFailure" :show-overflow-tooltip="true"   width="180"/> -->
+          <!-- <el-table-column label="最后构建所需时间" align="center" key="lastDuration" prop="lastDuration" :show-overflow-tooltip="true"  width="180"/> -->
+          <!-- <el-table-column label="聚合状态" align="center" key="aggregatedStatus" prop="aggregatedStatus" :show-overflow-tooltip="true" /> -->
+          <el-table-column label="构建状态" align="center" key="buildStatus" prop="buildStatus" :show-overflow-tooltip="true"  width="120"/>
+          <el-table-column label="备注" align="center" key="remark" prop="remark" :show-overflow-tooltip="true"  />
+          <el-table-column label="创建时间" align="center" prop="createTime" width="180">
             <template #default="scope">
               {{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}
             </template>

@@ -6,8 +6,8 @@
   import { dayjs } from "@/utils/common-dayjs"
   import {  Edit, List, CopyDocument, Unlock, Lock } from '@element-plus/icons-vue'
   import { handleTree } from "@/utils/common"
-  import { changeStatus, pageList, queryNodeList, addProject, projectNameIsExist,
-    units, pullCommand, pushCommand, showIsPublicFun, changeAccessLevel, showAccessLevelOperateFun} from "@/api/harbor/project"
+  import { changeStatus, pageList, queryNodeList, addProject, projectNameIsExist, 
+    units, pullCommand, pushCommand, showIsPublicFun, changeAccessLevel, showAccessLevelOperateFun, isPublic} from "@/api/harbor/project"
 
   const queryFormRef = ref(null);
   const refreshTable = ref(true);
@@ -61,7 +61,7 @@
   const validProjectName = (rule:any,value:any, callback:any)=>{
     projectNameIsExist(value,form.instanceCode).then((res)=>{
         if(res.code == 200){
-          if(res.data){
+          if(!res.data){
             callback()
           }else{
             callback(new Error('项目名称已存在，请确认后修改'));
@@ -73,7 +73,7 @@
   // 表单验证规则
   const rules = reactive<FormRules>({
       'instanceCode' : [
-        { required: true, message: "实例编码不能为空", trigger: "change" },
+        { required: true, message: "实例编码不能为空", trigger: "blur" },
       ],
       'projectName': [
         { required: true, message: "项目名称不能为空", trigger: "blur" },
@@ -170,6 +170,11 @@
 
   }
 
+  const handleChangeAccessLevel = (row)=>{
+    changeAccessLevel(row.id,queryParams.instanceCode);
+    getList();
+  }
+
   const handleStatusChange = (row)=>{
     const projectId = row.id
     const status = row.status
@@ -214,7 +219,7 @@
       instanceCode:queryParams.instanceCode,
       projectName:undefined,
       capacity:undefined,
-      isPublic:undefined,
+      isPublic:1,
       unit:units[0]
     })
   }
@@ -230,8 +235,7 @@
             throw err;
         });
 
-    form.capacity = form.capacity * form.unit;
-    console.log(form.capacity)
+    form.capacity = form.capacity * form.unit.value;
     addProject(form).then(response => {
       if(response?.code == 200){
         ElMessage({
@@ -393,24 +397,24 @@
           <el-table-column label="项目编号" key="id" prop="id" v-if="false"/>
           <el-table-column label="项目名称" key="projectName" prop="projectName"  :show-overflow-tooltip="true"  />
           <!-- <el-table-column label="容量" align="center" key="capacity" prop="capacity" :show-overflow-tooltip="true"   /> -->
-          <el-table-column label="访问级别" key="isPublic" prop="isPublic" :show-overflow-tooltip="true" >
+          <el-table-column label="访问级别" align="center" key="isPublic" prop="isPublic" :show-overflow-tooltip="true"   >
             <template #default="scope">
               {{  showIsPublicFun(scope.row.isPublic) }}
             </template>
           </el-table-column>
-          <el-table-column label="状态" align="center" key="status" width="80" >
+          <el-table-column label="状态" align="center" key="status" >
             <template #default="scope">
               {{  showStatusFun(scope.row.status) }}
             </template>
           </el-table-column>
-          <el-table-column label="创建时间" align="center" prop="createTime">
+          <el-table-column label="创建时间" align="center" prop="createTime"  width="200">
             <template #default="scope">
               {{
                    scope.row.createTime ? dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss") : ''
               }}
             </template>
           </el-table-column>
-          <el-table-column label="更新时间" align="center" prop="updateTime" width="180" >
+          <el-table-column label="更新时间" align="center" prop="updateTime" width="200" >
             <template #default="scope">
               {{ scope.row.updateTime ? dayjs(scope.row.updateTime).format("YYYY-MM-DD HH:mm:ss") : ''  }}
             </template>
@@ -436,8 +440,8 @@
                   v-hasPerms="['/harbor/project/changeStatus/**']"
                 >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
                 <el-button size="small"
-                :icon="getAccessLevel(scope.row)"
-                @click="changeAccessLevel(scope.row.id,queryParams.instanceCode)"
+                :icon="getAccessLevel(scope.row)" 
+                @click="handleChangeAccessLevel(scope.row)" 
                   v-hasPerms="['/harbor/project/changeAccessLevel/**']">
                   {{ showAccessLevelOperateFun(scope.row.isPublic)  }}
                 </el-button>
@@ -509,7 +513,14 @@
             </el-col>
             <el-col :span="12">
               <el-form-item label="访问级别" prop="isPublic">
-                <el-checkbox v-model="form.isPublic">公开</el-checkbox>
+                <el-radio-group v-model="form.isPublic">
+                  <el-radio
+                    v-for="item in isPublic"
+                    :key="item.value"
+                    :label="item.value"
+                  >{{item.label}}
+                  </el-radio>
+                </el-radio-group>
               </el-form-item>
             </el-col>
           </el-row>
@@ -517,7 +528,7 @@
         </el-form>
       </yt-card>
       <template #footer>
-        <el-button type="primary" @click="submitForm(false)">确 定</el-button>
+        <el-button type="primary" @click="submitForm()">确 定</el-button>
         <el-button @click="cancelAdd">取 消</el-button>
       </template>
     </el-dialog>
@@ -558,7 +569,7 @@
         </el-table-column>
         <el-table-column prop="option" label="操作" :show-overflow-tooltip="true">
           <template #default="scope">
-            <el-button type="primary" v-if="scope.row.digest" @click="copyPullCommand(scope.row)">复制pull</el-button>
+            <el-button type="primary" icon="CopyDocument" size="small" v-if="scope.row.digest" @click="copyPullCommand(scope.row)">复制pull</el-button>
           </template>
         </el-table-column>
         <!-- 其他列 -->

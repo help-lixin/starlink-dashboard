@@ -4,7 +4,7 @@
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
   import {  Edit } from '@element-plus/icons-vue'
-  import {addGroup , updateGroup , queryGroupInfoById, changeGroupStatus, groupList} from "@/api/gitlab/groups"
+  import {addGroup , updateGroup , queryGroupInfoById, changeGroupStatus, groupList, queryGitlabAddr} from "@/api/gitlab/groups"
 
   const queryFormRef = ref(null);
   //查询列表信息
@@ -19,7 +19,7 @@
   })
 
 
-  // 权限列表
+  // 可见性等级列表
   const visibilityArr = ref(["PUBLIC", "PRIVATE", "INTERNAL"])
 
   const loading = ref(false)
@@ -36,7 +36,16 @@
   // 表单
   const open = ref(false);
   const formRef = ref<FormInstance>();
-  const form = reactive({})
+  const form = reactive({
+        groupId: undefined,
+        groupName: undefined,
+        visibility: undefined,
+        path: undefined,
+        remark: undefined,
+        status: 1,
+        instanceCode: undefined
+  })
+  const ipAddr = ref(null)
   const title = ref("")
   const pluginInstance = reactive([]);
   const pluginCode = "gitlab"
@@ -44,17 +53,21 @@
   // 表单规则
   const rules = reactive<FormRules>({
         groupName: [
-          { required: true, message: "组名称不能为空", trigger: "blur" },
-          { min: 2, max: 20, message: '组名称长度必须介于 2 和 20 之间', trigger: 'blur' }
+          { required: true, message: "群组名称不能为空", trigger: "blur" },
+          { min: 2, max: 20, message: '群组名称长度必须介于 2 和 20 之间', trigger: 'blur' },
+          { pattern: /^[-_a-zA-Z0-9|\u4e00-\u9fa5]*$/, message: '只可以输入字母、数字、下划线、中划线和中文字符', trigger: 'blur' }
+
         ],
         visibility: [
-          { required: true, message: "权限不能为空", trigger: "blur" }
+          { required: true, message: "可见性等级不能为空", trigger: "blur" }
         ],
         instanceCode: [
-          { required: true, message: "插件实例不能为空", trigger: "change" }
+          { required: true, message: "插件实例不能为空", trigger: "blur" }
         ],
         path: [
-          { required: true, message: "路径不能为空", trigger: "blur" }
+          { required: true, message: "URL不能为空", trigger: "blur" },
+          { pattern: /^[0-9a-zA-Z]*$/, message: '只可以输入数字和字母', trigger: 'blur' },
+          { min: 2, max: 20, message: 'URL长度必须介于 2 和 20 之间', trigger: 'blur' }
         ]
     })
 
@@ -105,6 +118,8 @@
   // 处理新增按钮
   const handleAdd = function(){
     reset()
+    form.instanceCode = pluginInstance[0]
+    queryGitlabAddrFun()
     open.value = true
     title.value = "添加组"
   }
@@ -147,24 +162,37 @@
                   message: '修改成功',
                   type: 'success',
             });
+          }else{
+            ElMessage({
+                  showClose: true,
+                  message: '更新出现异常,请联系管理员',
+                  type: 'error',
+            });
           }
+          open.value = false;
+          getList();
         });
       } else {
         addGroup(form).then(response => {
-          if(response?.code){
+          if(response?.code == 200){
             ElMessage({
                   showClose: true,
                   message: '新增成功',
                   type: 'success',
             });
-            open.value = false;
-            getList();
+          }else{
+            ElMessage({
+                  showClose: true,
+                  message: '新增出现异常,请联系管理员',
+                  type: 'error',
+            });
           }
+          open.value = false;
+          getList();
         });
       }
 
-      open.value = false;
-      getList();
+
   }
 
   const handleStatusChange = (row)=>{
@@ -205,11 +233,16 @@
     .catch(() => { })
   }
 
+  // 查询当前实例ip端口地址
+  const queryGitlabAddrFun = ()=>{
+    queryGitlabAddr(form.instanceCode.instanceCode).then((res)=>{
+      ipAddr.value = res.data+"/";
+    })
+  }
 
   // 表单取消处理
   const cancel = ()=>{
     open.value = false;
-    reset();
   }
 
 
@@ -238,29 +271,29 @@
             style="width: 240px"
           >
             <el-option v-for="item in pluginInstance"
-                       :key="item.pluginCode"
-                       :label="item.instanceName"
-                       :value="item.instanceCode"/>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="组名称" prop="groupName">
-          <el-input
-            v-model="queryParams.groupName"
-            placeholder="请输入组名称"
-            clearable
-            style="width: 240px"
-            @keyup.enter.native="handleQuery"
-          />
-        </el-form-item>
-        <el-form-item label="权限" prop="visibility">
-          <el-select
+              :key="item.pluginCode"
+              :label="item.instanceName"
+              :value="item.instanceCode"/>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="组名称" prop="groupName">
+            <el-input
+              v-model="queryParams.groupName"
+              placeholder="请输入组名称"
+              clearable
+              style="width: 240px"
+              @keyup.enter.native="handleQuery"
+            />
+          </el-form-item>
+          <el-form-item label="可见性等级" prop="visibility">
+            <el-select
             class="search-select"
-            v-model="queryParams.visibility"
-            @keyup.enter.native="handleQuery"
-            placeholder="请选择权限"
-            clearable
-            style="width: 240px"
-          >
+              v-model="queryParams.visibility"
+              @keyup.enter.native="handleQuery"
+              placeholder="请选择可见性等级"
+              clearable
+              style="width: 240px"
+            >
             <el-option v-for="item in visibilityArr"
                        :key="item"
                        :label="item"
@@ -314,9 +347,10 @@
       <div class="table-wrap">
         <el-table v-loading="loading" :data="groupPageList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="组编号" key="id" prop="id" v-if="false"/>
-          <el-table-column label="组名称" key="gitlabGroupName" prop="gitlabGroupName"  :show-overflow-tooltip="true" />
-          <el-table-column label="备注" key="remark" prop="remark" :show-overflow-tooltip="true"  />
+          <el-table-column label="组编号" align="left" key="id" prop="id" v-if="false"/>
+          <el-table-column label="组名称" align="left" key="gitlabGroupName" prop="gitlabGroupName"  :show-overflow-tooltip="true" />
+          <el-table-column label="群组URL" align="left" key="path" prop="path"  :show-overflow-tooltip="true" />
+          <el-table-column label="备注" align="left" key="remark" prop="remark" :show-overflow-tooltip="true"  />
           <el-table-column label="状态" align="center" key="status" >
             <template #default="scope">
               {{  showStatusFun(scope.row.status) }}
@@ -369,15 +403,15 @@
     <!-- 添加或修改组配置对话框 -->
     <el-dialog :title="title" v-model="open" width="600px" append-to-body>
       <yt-card>
-        <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
+        <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
           <el-row>
             <el-col :span="12">
-              <el-form-item label="插件实例" prop="instanceCode">
+              <el-form-item label="实例" prop="instanceCode">
                 <el-select
                   class="search-select2"
                   v-model="form.instanceCode"
                   @keyup.enter.native="handleQuery"
-                  placeholder="请选择插件实例"
+                  placeholder="请选择实例"
                   clearable
                   style="width: 240px"
                 >
@@ -388,17 +422,28 @@
                 </el-select>
               </el-form-item>
             </el-col>
+          </el-row>
+          <el-row>
             <el-col :span="12">
-              <el-form-item label="组名称" prop="groupName">
-                <el-input v-model="form.groupName" placeholder="请输入组名称" maxlength="30" />
+              <el-form-item label="群组名称" prop="groupName">
+                <el-input v-model="form.groupName" placeholder="请输入群组名称" maxlength="30" />
               </el-form-item>
             </el-col>
+          </el-row>
+          <el-row >
+              <el-form-item label="群组URL" prop="path">
+                <el-input v-model="form.path" placeholder="请输入群组URL" maxlength="30" clearable style="width: 435px">
+                  <template #prepend>{{ipAddr}}</template>
+                </el-input>
+              </el-form-item>
+          </el-row>
+          <el-row>
             <el-col :span="12">
-              <el-form-item label="权限" prop="visibility">
+              <el-form-item label="可见性等级" prop="visibility">
               <el-select
                 v-model="form.visibility"
                 @keyup.enter.native="handleQuery"
-                placeholder="请选择权限"
+                placeholder="请选择可见性等级"
                 clearable
                 style="width: 240px"
               >
@@ -409,13 +454,14 @@
               </el-select>
               </el-form-item>
             </el-col>
-            <el-col :span="12">
-              <el-form-item label="路径" prop="path">
-                <el-input v-model="form.path" placeholder="请输路径" maxlength="30" />
+          </el-row>
+          <el-row>
+            <el-col :span="24">
+              <el-form-item label="备注">
+                <el-input v-model="form.remark" type="textarea" placeholder="请输入内容"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
-
           <el-row>
             <el-col :span="12">
               <el-form-item label="状态">
@@ -426,13 +472,6 @@
                     :label="dict.value"
                   >{{dict.label}}</el-radio>
                 </el-radio-group>
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row>
-            <el-col :span="24">
-              <el-form-item label="备注">
-                <el-input v-model="form.remark" type="textarea" placeholder="请输入内容"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
@@ -447,5 +486,44 @@
 </template>
 
 <style lang="scss" scoped>
+.main-wrap {
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  background: #fff;
 
+}
+
+.option-wrap {
+  margin-bottom: 8px;
+  .el-button {
+    // margin-right: 6px;
+  }
+}
+.table-wrap {
+  width: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+  .action-btn {
+    display: flex;
+  }
+}
+
+.page-wrap {
+  padding: 20px 0;
+  .el-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: end;
+  }
+
+}
+
+.el-form-item__label {
+  font-size: 14px;
+ }
+
+.search-select .el-input {
+  --el-input-width: 240px;
+}
 </style>

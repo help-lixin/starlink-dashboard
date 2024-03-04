@@ -15,6 +15,16 @@ export const units =[
         value:1024*1024*1024*1024
     },
 ]
+export const isPublic = [
+    {
+      value: 1,
+      label: '公开',
+    },
+    {
+      value: 0,
+      label: '私有',
+    }
+];
 
 export function showAccessLevelOperateFun(isPublic:number){
     if(isPublic == 1){

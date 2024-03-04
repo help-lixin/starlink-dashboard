@@ -4,10 +4,10 @@
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import {  Edit } from '@element-plus/icons-vue'
   import { dayjs } from "@/utils/common-dayjs"
-  import { changeStatus, pageList, addLabel, checkLabelKey, queryLabelDetail} from "@/api/shell/label"
+  import { changeStatus, pageList, addLabel, checkLabelKey, queryLabelDetail} from "@/api/ssh/label"
 
   const queryFormRef = ref(null);
-  const pluginCode = "shell";
+  const pluginCode = "ssh";
   const labelKey = ref(null)
 
   //查询列表信息
@@ -219,6 +219,8 @@
           throw response?.msg;
         }
         
+        addDialog.value = false;
+        getList();
       });
     }else{
       addLabel(form).then(res =>{
@@ -234,11 +236,12 @@
           throw response?.msg;
         }
 
+        addDialog.value = false;
+        getList();
       })
     }
 
-    addDialog.value = false;
-    getList();
+    
       
   }
 
@@ -273,7 +276,7 @@
 
 
     addDialog.value = true
-    title.value = "更新shell标签实例信息"
+    title.value = "更新ssh标签实例信息"
   }
 
   // 处理新增按钮
@@ -293,7 +296,7 @@
     });
 
     addDialog.value = true
-    title.value = "添加shell标签信息"
+    title.value = "添加ssh标签信息"
   }
 
   // 取消添加表单处理
@@ -362,7 +365,7 @@
           type="primary"
           plain
           size="default"
-          @click="handleAdd" v-hasPerms="['/shell/label/add']" ><el-icon><Plus /></el-icon>新增</el-button>
+          @click="handleAdd" v-hasPerms="['/ssh/label/add']" ><el-icon><Plus /></el-icon>新增</el-button>
       </div>
 
       <!--table  -->
@@ -399,13 +402,13 @@
                   size="small"
                   :icon="getStatusIcon(scope.row)"
                   @click="handleStatusChange(scope.row)"
-                  v-hasPerms="['/shell/label/changeStatus/**']"
+                  v-hasPerms="['/ssh/label/changeStatus/**']"
                 >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
                 <el-button
                   size="small"
                   icon="Edit"
                   @click="handleUpdate(scope.row)"
-                  v-hasPerms="['/shell/label/add']"
+                  v-hasPerms="['/ssh/label/add']"
                 >修改</el-button>
               </div>
             </template>
@@ -552,3 +555,4 @@
 }
 </style>
 
+@/api/ssh/label
