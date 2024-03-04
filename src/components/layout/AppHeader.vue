@@ -115,6 +115,9 @@ const handlerLogout = () => {
 ::v-deep(.el-breadcrumb__inner.is-link) {
   color: #E5EAF3;
 }
+::v-deep(.el-breadcrumb__separator) {
+  color: var(--el-text-color-regular);
+}
 .website-icon {
   .title {
     transition: all 300ms;

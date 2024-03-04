@@ -316,7 +316,7 @@
           <el-table-column type="selection" width="60" align="center" />
           <el-table-column label="组编号" key="id" prop="id" v-if="false"/>
           <el-table-column label="组名称" key="gitlabGroupName" prop="gitlabGroupName"  :show-overflow-tooltip="true" />
-          <el-table-column label="备注" align="center" key="remark" prop="remark" :show-overflow-tooltip="true"  />
+          <el-table-column label="备注" key="remark" prop="remark" :show-overflow-tooltip="true"  />
           <el-table-column label="状态" align="center" key="status" >
             <template #default="scope">
               {{  showStatusFun(scope.row.status) }}
