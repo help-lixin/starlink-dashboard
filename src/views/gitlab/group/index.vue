@@ -56,7 +56,7 @@
           { required: true, message: "群组名称不能为空", trigger: "blur" },
           { min: 2, max: 20, message: '群组名称长度必须介于 2 和 20 之间', trigger: 'blur' },
           { pattern: /^[-_a-zA-Z0-9|\u4e00-\u9fa5]*$/, message: '只可以输入字母、数字、下划线、中划线和中文字符', trigger: 'blur' }
-          
+
         ],
         visibility: [
           { required: true, message: "可见性级别不能为空", trigger: "blur" }
@@ -192,7 +192,7 @@
         });
       }
 
-      
+
   }
 
   const handleStatusChange = (row)=>{

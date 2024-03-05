@@ -58,6 +58,7 @@ html {
   --menu-text-active-color: #fff;
   --el-header-height: 60px;
   --menu-width: 200px;
+  --el-table-header-bg-color-my: #f9fafb;
 }
 // 覆盖dialog样式
 .el-dialog {
@@ -80,5 +81,5 @@ html {
   padding: 0 10px;
 }
 #app .el-table {
-  --el-table-header-bg-color: #f9fafb
+  --el-table-header-bg-color: var(--el-table-header-bg-color-my)
 }
