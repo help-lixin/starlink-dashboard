@@ -6,8 +6,8 @@
   import { dayjs } from "@/utils/common-dayjs"
   import {  Delete } from '@element-plus/icons-vue'
   import { memberList , addGroupMember , updateGroupMember  , removeMember} from "@/api/gitlab/members"
-  import { userSelectOption} from "@/api/gitlab/users"
-  import { groupSelectOption,accessLevels } from "@/api/gitlab/groups"
+  import { selectOption} from "@/api/gitlab/users"
+  import { selectGitlabIdOptions,accessLevels,selectIdOptions } from "@/api/gitlab/groups"
 
 
   const queryFormRef = ref(null);
@@ -41,7 +41,7 @@
         id: undefined,
         accessLevel: undefined,
         projectId: undefined,
-        userId: undefined,
+        userIds: [],
         instanceCode: queryParams.instanceCode,
         users:[],
         groups:[]
@@ -58,11 +58,11 @@
         groupId: [
           { required: true, message: "成员组不能为空", trigger: "blur" }
         ],
-        userId: [
+        userIds: [
           { required: true, message: "成员不能为空", trigger: "blur" }
         ],
         accessLevel: [
-          { required: true, message: "权限不能为空", trigger: "blur" }
+          { required: true, message: "角色不能为空", trigger: "blur" }
         ]
     })
 
@@ -71,11 +71,11 @@
       formRef.value?.clearValidate()
       form.groups.splice(0,form.groups.length)
       form.users.splice(form.users.length)
+      // form.userIds.splice(form.userIds.length)
       Object.assign(form,{
         id: undefined,
         accessLevel: undefined,
         projectId: undefined,
-        userId: undefined,
         instanceCode: queryParams.instanceCode
       })
   }
@@ -113,7 +113,7 @@
   const resetQuery = function(){
     dateRange.value = [];
     queryFormRef.value.resetFields();
-    queryParams.instanceCode = pluginInstance[0]
+    queryParams.instanceCode = pluginInstance[0].instanceCode
     getList();
   }
 
@@ -126,11 +126,14 @@
     title.value = "新增组成员";
 
 
-    groupListFunc(queryParams.instanceCode,(response)=>{
+    selectIdOptions(queryParams.instanceCode).then((response)=>{
       form.groups = response?.data
+      console.log("group->")
+      console.log(form.groups)
     })
 
-    userListFunc(queryParams.instanceCode,(response)=>{
+    selectOption(queryParams.instanceCode).then((response)=>{
+      console.log("user->")
       console.log(response)
       form.users = response?.data
     })
@@ -186,8 +189,12 @@
       }
   }
 
+  // 修改处理
+  const handleEdit = (row)=>{
 
-  // 修改状态弹出框处理
+  }
+
+  // 删除处理
   const handleDelete = (row)=>{
     const memberName = row.userName
     const curStatus = row.status
@@ -216,48 +223,19 @@
     })
   }
 
-  // 加载"项目组下拉表框"
-  const groupListFunc = (instanceCode:any,callback:any) =>{
-    const groupParams = {
-        instanceCode : instanceCode
-    }
-
-    // TODO 伍岳林,后端开独立的接口,为下拉列表进行赋值.
-    groupSelectOption(instanceCode)
-      .then(response => {
-        if(callback){
-          callback(response);
-        }
-    })
-  }
-
-  // 加载"用户下拉表框"
-  const userListFunc = (instanceCode:any,callback:any)=>{
-    const uesrListqueryParams = {
-      instanceCode : instanceCode
-    };
-
-    userSelectOption(uesrListqueryParams)
-    .then(response =>{
-      if(callback){
-        callback(response);
-      }
-    })
-  }
-
-
   // 表单取消处理
   const cancel = ()=>{
     open.value = false;
     resetForm();
   }
 
-  // form表单切换实例
+  // form表单切换实例,修改群组下拉列表
   const formSwitchInstance = ()=>{
-    if(form?.instanceCode && form?.instanceCode.length > 0 ){
+    const instanceCode = queryParams?.instanceCode;
+    if(instanceCode && instanceCode.length > 0 ){
       // 根据instanceCode重新加载用户组
-      groupListFunc(form.instanceCode,(response)=>{
-        form.groups = response?.data
+      selectIdOptions(instanceCode).then(response => {
+          form.groups = response?.data
       })
     }else{
       form.groups = []
@@ -266,11 +244,12 @@
 
   // 列表页面,切换实例操作.
   const listSwitchInstance = ()=>{
-    if(queryParams?.instanceCode && queryParams?.instanceCode.length > 0 ){
+    const instanceCode = queryParams?.instanceCode;
+    if(instanceCode && instanceCode.length > 0 ){
        // 根据instanceCode重新加载用户组
-       groupListFunc(queryParams.instanceCode,(response)=>{
-        queryParams.groups = response?.data;
-      })
+        selectGitlabIdOptions(instanceCode).then(response => {
+            queryParams.groups = response?.data
+        })
     }else{
       queryParams.groups=[];
     }
@@ -286,12 +265,13 @@
             queryParams.instanceCode = res?.data[0].instanceCode
           }
 
-          groupListFunc(queryParams.instanceCode,(response)=>{
+          selectGitlabIdOptions(queryParams.instanceCode).then((response)=>{
             queryParams.groups = response?.data
             // queryParams.groupId = response?.data[0]?.id
             // 触发查询
-            getList();
+            
           })
+          getList();
         }
     });
   }
@@ -327,7 +307,7 @@
               style="width: 240px"
             >
             <el-option v-for="dict in queryParams.groups"
-              :key="dict.gitlabGroupName"
+              :key="dict.id"
               :label="dict.gitlabGroupName"
               :value="dict.id"/>
             </el-select>
@@ -415,6 +395,12 @@
                 @click="handleDelete(scope.row)"
                 v-hasPerms="['/gitlab/group/member/del']"
               >删除</el-button>
+              <!-- <el-button
+                size="small"
+                icon="Edit"
+                @click="handleEdit(scope.row)"
+                v-hasPerms="['/gitlab/group/edit']"
+              >修改</el-button> -->
              </div>
             </template>
           </el-table-column>
@@ -443,7 +429,7 @@
                 <el-select
                 class="search-select2"
                   v-model="form.instanceCode"
-                  :change="formSwitchInstance()"
+                  :change="formSwitchInstance"
                   placeholder="请选择实例"
                   style="width: 240px"
                 >
@@ -459,7 +445,7 @@
                 <el-select
                   class="search-select"
                   v-model="form.groupId"
-                  placeholder="成员组"
+                  placeholder="请选择成员组"
                   clearable
                   style="width: 240px"
                 >
@@ -476,27 +462,22 @@
 
           <el-row>
             <el-col :span="12">
-              <el-form-item label="成员" prop="userId">
-                <el-select
-                  class="search-select"
-                  v-model="form.userId"
-                  placeholder="成员"
-                  style="width: 240px"
-                  clearable
-                >
-                <el-option v-for="user in form.users"
-                  :key="user.userName"
-                  :label="user.userName"
-                  :value="user.id"/>
-                </el-select>
+              <el-form-item label="成员" prop="userIds">
+                  <el-tree-select
+                    v-model="form.userIds"
+                    :data="form.users"
+                    :multiple="true"
+                    show-checkbox
+                    style="width: 240px"
+                  />
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="权限" prop="accessLevel">
+              <el-form-item label="角色" prop="accessLevel">
                 <el-select
                   class="search-select"
                   v-model="form.accessLevel"
-                  placeholder="权限"
+                  placeholder="请选择角色"
                   style="width: 240px"
                   clearable
                 >

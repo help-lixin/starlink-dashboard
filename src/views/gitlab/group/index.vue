@@ -19,7 +19,7 @@
   })
 
 
-  // 可见性等级列表
+  // 可见性级别列表
   const visibilityArr = ref(["PUBLIC", "PRIVATE", "INTERNAL"])
 
   const loading = ref(false)
@@ -59,7 +59,7 @@
           
         ],
         visibility: [
-          { required: true, message: "可见性等级不能为空", trigger: "blur" }
+          { required: true, message: "可见性级别不能为空", trigger: "blur" }
         ],
         instanceCode: [
           { required: true, message: "插件实例不能为空", trigger: "blur" }
@@ -118,7 +118,7 @@
   // 处理新增按钮
   const handleAdd = function(){
     reset()
-    form.instanceCode = pluginInstance[0]
+    form.instanceCode = pluginInstance[0].instanceCode
     queryGitlabAddrFun()
     open.value = true
     title.value = "添加组"
@@ -235,7 +235,7 @@
 
   // 查询当前实例ip端口地址
   const queryGitlabAddrFun = ()=>{
-    queryGitlabAddr(form.instanceCode.instanceCode).then((res)=>{
+    queryGitlabAddr(form.instanceCode).then((res)=>{
       ipAddr.value = res.data+"/";
     })
   }
@@ -285,12 +285,12 @@
               @keyup.enter.native="handleQuery"
             />
           </el-form-item>
-          <el-form-item label="可见性等级" prop="visibility">
+          <el-form-item label="可见性级别" prop="visibility">
             <el-select
             class="search-select"
               v-model="queryParams.visibility"
               @keyup.enter.native="handleQuery"
-              placeholder="请选择可见性等级"
+              placeholder="请选择可见性级别"
               clearable
               style="width: 240px"
             >
@@ -416,7 +416,7 @@
                   style="width: 240px"
                 >
                 <el-option v-for="item in pluginInstance"
-                :key="item.pluginCode"
+                :key="item.instanceCode"
                 :label="item.instanceName"
                 :value="item.instanceCode"/>
                 </el-select>
@@ -439,11 +439,11 @@
           </el-row>
           <el-row>
             <el-col :span="12">
-              <el-form-item label="可见性等级" prop="visibility">
+              <el-form-item label="可见性级别" prop="visibility">
               <el-select
                 v-model="form.visibility"
                 @keyup.enter.native="handleQuery"
-                placeholder="请选择可见性等级"
+                placeholder="请选择可见性级别"
                 clearable
                 style="width: 240px"
               >

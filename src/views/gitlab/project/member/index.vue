@@ -5,7 +5,7 @@
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
   import { memberList , addProjectMember , updateProjectMember , projectList , removeMember, showMemberProject} from "@/api/gitlab/project-member"
-  import { userList} from "@/api/gitlab/users"
+  import { selectOption} from "@/api/gitlab/users"
   import { groupList,accessLevels } from "@/api/gitlab/groups"
 
   const queryForm = ref(null);
@@ -51,13 +51,6 @@
     instanceCode: undefined
   })
 
-  // 根据成员名查询成员信息
-  const queryUserParams = reactive({
-    pageNum: 1,
-    pageSize: 10,
-    instanceCode: undefined
-  })
-
   const loading = ref(false)
 
   // 显示搜索条件
@@ -95,11 +88,11 @@
         projectId: [
           { required: true, message: "项目不能为空", trigger: "blur" }
         ],
-        userId: [
+        userIds: [
           { required: true, message: "成员不能为空", trigger: "blur" }
         ],
         accessLevel: [
-          { required: true, message: "权限不能为空", trigger: "blur" }
+          { required: true, message: "角色不能为空", trigger: "blur" }
         ],
   })
 
@@ -108,6 +101,7 @@
       formRef.value?.clearValidate()
       Object.assign(form,{
         id: undefined,
+        userIds:[],
         userName: undefined,
         visibility: undefined,
         path: undefined,
@@ -128,7 +122,6 @@
             memberRow.splice(0,memberRow.length);
             Object.assign(memberRow, response?.data?.records)
             total.value = response?.data?.total
-            console.log(memberRow)
           }else{
             memberRow.splice(0,memberRow.length);
             total.value = 0;
@@ -154,13 +147,27 @@
   // 处理新增按钮
   const handleAdd = function(){
     reset();
+    // 实例下拉列表
     queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
       if(res.code == 200){
         Object.assign(pluginInstance,res?.data)
-        queryUserParams.instanceCode = res?.data[0].instanceCode
-        userList(queryUserParams).then(response =>{
-          users.value = response?.data.records
+        const instanceCode = pluginInstance[0].instanceCode
+
+        const projectListQueryParam = reactive({instanceCode:instanceCode})
+        // 项目下拉列表
+        projectList(projectListQueryParam).then((response)=>{
+          if(response.code = 200){
+            Object.assign(projects,response?.data?.records)
+          }
         })
+        // 查询用户下拉列表
+        selectOption(instanceCode).then(response =>{
+          if(response.code == 200){
+            console.log(response)
+            users.value = response?.data
+          }
+        })
+        
         open.value = true;
         title.value = "新增项目成员";
       }
@@ -206,21 +213,37 @@
         });
       } else {
         addProjectMember(form).then(response => {
-          if(response?.code){
+          if(response?.code == 200){
             ElMessage({
-                  showClose: true,
-                  message: '新增成功',
-                  type: 'success',
+                showClose: true,
+                message: '新增成功',
+                type: 'success',
             });
-            open.value = false;
-            getList();
+            
+          }else{
+            ElMessage({
+                showClose: true,
+                message: response?.msg,
+                type: 'warning',
+            });
           }
+          open.value = false;
+          getList();
         });
       }
   }
 
+  const instanceChangeHandle = (instanceCode)=>{
+    projectList(instanceCode).then((response)=>{
+        if(response.code == 200){
+              Object.assign(projects,response?.data?.records)
+        }
+    })
+  }
 
-  // 修改状态弹出框处理
+
+
+  // 删除处理
   const handleDelete = (row)=>{
     const memberName = row.userName
     let msg = ""
@@ -235,19 +258,20 @@
         type: 'warning',
       }
     ).then(() => {
-      deleteParams.projectId = row.id
+      deleteParams.projectId = row.projectId
       deleteParams.instanceCode = row.instanceCode
+      deleteParams.userId = row.id
       removeMember(deleteParams).then((res)=>{
-            if(res.code == 200){
-                // 重置查询表单,并进行查询
-                queryParams.pageNum=1
-                getList()
-                ElMessage({
-                  type: 'success',
-                  message: '操作成功',
-                })
-            }
-        })
+          if(res.code == 200){
+              // 重置查询表单,并进行查询
+              queryParams.pageNum=1
+              getList()
+              ElMessage({
+                type: 'success',
+                message: '操作成功',
+              })
+          }
+      })
     }).catch(() => {
       getList()
       ElMessage({
@@ -270,14 +294,15 @@
       if(res.code == 200){
         Object.assign(pluginInstance,res?.data)
         groupParams.instanceCode = pluginInstance[0].instanceCode
-        queryUserParams.instanceCode = pluginInstance[0].instanceCode 
         queryParams.instanceCode = pluginInstance[0].instanceCode
         projectParams.instanceCode = pluginInstance[0].instanceCode
         groupList(groupParams).then((response) =>{
           Object.assign(groups,response?.data?.records)
         })
         projectList(projectParams).then((response)=>{
-          Object.assign(projects,response?.data?.records)
+          if(response.code == 200){
+            Object.assign(projects,response?.data?.records)
+          }
           // queryParams.projectId = projects[0]?.id
           getList();
         })
@@ -360,9 +385,10 @@
           <el-table-column type="selection" width="60" align="center" />
           <el-table-column label="用户编号" align="center" key="userId" prop="userId" v-if="false"/>
           <el-table-column label="成员编号" align="center" key="id" prop="id" v-if="false"/>
+          <el-table-column label="项目编号" align="center" key="projectId" prop="projectId" v-if="false"/>
+          <el-table-column label="成员名称" align="center" key="userName" prop="userName"  :show-overflow-tooltip="true" />
           <el-table-column label="成员昵称" align="center" key="nickName" prop="nickName"  :show-overflow-tooltip="true"  />
           <el-table-column label="邮箱" align="center" key="email" prop="email"  :show-overflow-tooltip="true"  />
-          <el-table-column label="成员名称" align="center" key="userName" prop="userName"  :show-overflow-tooltip="true" />
           <el-table-column label="项目" align="center" key="projectName" prop="projectName"/>
           <!-- <el-table-column label="状态" align="center" key="status">
             <template #default="scope">
@@ -410,11 +436,12 @@
       <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
         <el-row>
           <el-col :span="12">
-            <el-form-item label="插件实例" prop="instanceCode">
+            <el-form-item label="实例" prop="instanceCode">
               <el-select
               class="search-select2"
                 v-model="form.instanceCode"
                 @keyup.enter.native="handleQuery"
+                @change="instanceChangeHandle"
                 placeholder="请选择实例"
                 clearable
               >
@@ -443,26 +470,22 @@
         </el-row>
         <el-row>
           <el-col :span="12">
-            <el-form-item label="成员" prop="userId">
-              <el-select
-                class="search-select"
-                v-model="form.userId"
-                placeholder="请选择成员"
-                clearable
-              >
-              <el-option v-for="user in users"
-                :key="user.userName"
-                :label="user.userName"
-                :value="user.id"/>
-              </el-select>
+            <el-form-item label="成员" prop="userIds">
+              <el-tree-select
+                    v-model="form.userIds"
+                    :data="users"
+                    :multiple="true"
+                    show-checkbox
+                    style="width: 190px"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="权限" prop="accessLevel">
+            <el-form-item label="角色" prop="accessLevel">
               <el-select
                 class="search-select"
                 v-model="form.accessLevel"
-                placeholder="请选择权限"
+                placeholder="请选择角色"
                 clearable
               >
               <el-option v-for="accessLevel in accessLevels"

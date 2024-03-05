@@ -169,15 +169,22 @@
       } else {
         addUser(form)
         .then(response => {
-          if(response?.code){
+          if(response?.code == 200){
             ElMessage({
                   showClose: true,
                   message: '新增成功',
                   type: 'success',
             });
-            open.value = false;
-            getList();
+            
+          }else{
+            ElMessage({
+                  showClose: true,
+                  message: response?.msg,
+                  type: 'warning',
+            });
           }
+          open.value = false;
+          getList();
         });
       }
   }
@@ -304,9 +311,9 @@
       <el-table v-loading="loading" :data="userRow">
           <el-table-column type="selection" width="60" align="center" />
           <el-table-column label="用户编号" align="center" key="id" prop="id" v-if="false"/>
+          <el-table-column label="用户名称" align="center" key="userName" prop="userName"  :show-overflow-tooltip="true"  />
           <el-table-column label="用户昵称" align="center" key="nickName" prop="nickName"  :show-overflow-tooltip="true"  />
           <el-table-column label="邮箱" align="center" key="email" prop="email"  :show-overflow-tooltip="true" />
-          <el-table-column label="用户名称" align="center" key="userName" prop="userName"  :show-overflow-tooltip="true"  />
           <el-table-column label="状态" align="center" key="status" >
             <template #default="scope">
               {{  showStatusFun(scope.row.status) }}
@@ -388,8 +395,8 @@
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="邮件" prop="email">
-                <el-input v-model="form.email" placeholder="请输入邮件名称" maxlength="30" />
+              <el-form-item label="邮箱" prop="email">
+                <el-input v-model="form.email" placeholder="请输入邮箱名称" maxlength="30" />
               </el-form-item>
             </el-col>
           </el-row>

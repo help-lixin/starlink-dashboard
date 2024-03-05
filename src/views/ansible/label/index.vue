@@ -78,6 +78,7 @@
   const form = reactive({
     labelKey:undefined,
     labelName:undefined,
+    status:undefined,
     inventorys:[]
   })
 
@@ -166,6 +167,7 @@
     form.inventorys.splice(0,form.inventorys.length)
     Object.assign(form,{
       id:undefined,
+      status:1,
       labelKey:undefined,
       labelName:undefined
     })
@@ -444,6 +446,20 @@
             <el-col>
               <el-transfer v-model="form.inventorys" :data="formInstance"
               :titles="[ '未关联' , '已关联']"/>
+            </el-col>
+          </el-row>
+
+          <el-row>
+            <el-col :span="12">
+              <el-form-item label="状态">
+                <el-radio-group v-model="form.status">
+                  <el-radio
+                    v-for="dict in status"
+                    :key="dict.value"
+                    :label="dict.value"
+                  >{{dict.label}}</el-radio>
+                </el-radio-group>
+              </el-form-item>
             </el-col>
           </el-row>
 

@@ -92,12 +92,21 @@ export function changeGroupStatus(groupId:any, status:any) {
 }
 
 
-// 查询组下拉列表
-export function groupSelectOption(instanceCode:string) {
+// 查询组gitlabId下拉列表
+export function selectGitlabIdOptions(instanceCode:string) {
     return request({
-      url: STARLINK_SERVICE + '/gitlab/group/selectOption',
-      method: 'get',
-      params: {instanceCode:instanceCode}
+      url: STARLINK_SERVICE + '/gitlab/group/selectGitlabIdOptions/'+instanceCode,
+      method: 'get'
+    }).then((res)=>{
+        return res?.data;
+    });
+}
+
+// 查询组id下拉列表
+export function selectIdOptions(instanceCode:string) {
+    return request({
+      url: STARLINK_SERVICE + '/gitlab/group/selectIdOptions/'+instanceCode,
+      method: 'get'
     }).then((res)=>{
         return res?.data;
     });

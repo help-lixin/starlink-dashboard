@@ -439,7 +439,7 @@
           <el-row>
             <el-col :span="24">
               <el-form-item label="项目URL" prop="namespaceByGroup">
-                <el-input style="width:380px" class="input-with-select" v-model="ipAddr" disabled >
+                <el-input style="width:380px;" class="input-with-select" v-model="ipAddr" disabled >
                   <template #append>
                       <el-select
                         v-model="form.namespaceByGroup"
