@@ -5,7 +5,7 @@ import App from './App.vue'
 import router from './router'
 import YtCard from '@/components/YtCard.vue'
 import YtBottomOperate from '@/components/YtBottomOperate.vue'
-// import 'element-plus/dist/index.css'
+import 'element-plus/dist/index.css'
 import { usePermsStore } from './stores/perms';
 
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
