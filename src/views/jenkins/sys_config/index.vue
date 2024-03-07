@@ -53,7 +53,7 @@
         if(res?.data){
           callback();
         }else{
-          callback(new Error('路径不存在:'+value));
+          callback(new Error('路径不存在或插件不存在:'+value));
         }
       })
   }

@@ -540,6 +540,7 @@
                   placeholder="请选择凭证类型"
                   style="width: 240px"
                   @change="handleCredentialType"
+                  :disabled="form.id != undefined"
                 >
                   <el-option v-for="item in credentialTypes"
                              :key="item.value"

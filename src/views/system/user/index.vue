@@ -46,6 +46,7 @@ const selectRow = ref({})
 const rules = reactive<FormRules>({
     userName: [
         { required: true, message: "用户名称不能为空", trigger: "blur" },
+        { pattern: /^[-_a-zA-Z0-9]*$/, message: '只可以输入字母、数字、下划线及中划线', trigger: 'blur' },
         { min: 2, max: 20, message: '用户名称长度必须介于 2 和 20 之间', trigger: 'blur' }
     ],
     nickName: [
@@ -53,7 +54,8 @@ const rules = reactive<FormRules>({
     ],
     password: [
         { required: true, message: "用户密码不能为空", trigger: "blur" },
-        { min: 5, max: 20, message: '用户密码长度必须介于 5 和 20 之间', trigger: 'blur' }
+        { pattern: /^(?=.*[a-z])(?=.*[A-Z])[A-Za-z\d@$!%*?&]*$/, message: '必须包含大小写字母', trigger: 'blur' },
+        { min: 8, max: 20, message: '用户密码长度必须介于 8 和 20 之间', trigger: 'blur' }
     ],
     email: [
         {
@@ -199,21 +201,35 @@ const submitForm = async ()=>{
                     message: '修改成功',
                     type: 'success',
                 });
-                open.value = false;
-                getList();
+                
+            }else{
+              ElMessage({
+                    showClose: true,
+                    message: '修改失败',
+                    type: 'warning',
+                });
             }
+            open.value = false;
+            getList();
         });
     } else {
         addUser(form).then(response => {
-            if(response?.code){
+            if(response?.code == 200){
                 ElMessage({
                     showClose: true,
                     message: '新增成功',
                     type: 'success',
                 });
-                open.value = false;
-                getList();
+                
+            }else{
+              ElMessage({
+                    showClose: true,
+                    message: '新增失败',
+                    type: 'warning',
+                });
             }
+            open.value = false;
+            getList();
         });
     }
 }
@@ -265,7 +281,7 @@ const handleResetPwd = (row) => {
             if(response?.code == 200){
                 ElMessage({
                     type: 'success',
-                    message: "修改成功,新密码是:" + value,
+                    message: "修改成功",
                 })
             }
         });

@@ -53,7 +53,8 @@
         ],
         userName: [
           { required: true, message: "用户名称不能为空", trigger: "blur" },
-          { min: 2, max: 20, message: '用户名称长度必须介于 2 和 20 之间', trigger: 'blur' }
+          { min: 2, max: 20, message: '用户名称长度必须介于 2 和 20 之间', trigger: 'blur' },
+          { pattern: /^[-_a-zA-Z0-9]*$/, message: '只可以输入字母、数字、下划线及中划线', trigger: 'blur' }
         ],
         nickName: [
           { required: true, message: "用户昵称不能为空", trigger: "blur" },
@@ -330,7 +331,7 @@
             width="220"
           >
             <template #default="scope">
-             <div class="action-btn">
+             <!-- <div class="action-btn">
               <el-button
                 size="small"
                 icon="Edit"
@@ -343,7 +344,7 @@
                 @click="handleStatusChange(scope.row)"
                 v-hasPerms="['/gitlab/user/changeStatus']"
               >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-             </div>
+             </div> -->
             </template>
           </el-table-column>
     </el-table>
