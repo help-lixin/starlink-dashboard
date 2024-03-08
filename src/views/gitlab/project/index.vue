@@ -5,7 +5,7 @@
   import { dayjs } from "@/utils/common-dayjs"
   import {  Edit } from '@element-plus/icons-vue'
   import { pageList , addProject , queryProjectInfoById , changeProjectStatus} from "@/api/gitlab/projects"
-  import {groupSelectOption, queryGitlabAddr} from "@/api/gitlab/groups"
+  import {selectGitlabIdOptions, queryGitlabAddr} from "@/api/gitlab/groups"
 
   const queryForm = ref(null);
 
@@ -243,7 +243,7 @@
 
   // form表单初始化,尽量在表单使用时初始化,会影响列表页面的渲染时间.
   const formInitFunc = (instanceCode)=>{
-    groupSelectOption(instanceCode).then((res)=>{
+    selectGitlabIdOptions(instanceCode).then((res)=>{
         if(res.code == 200){
             Object.assign(groups,res?.data)
         }
