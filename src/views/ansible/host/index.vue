@@ -336,30 +336,30 @@
       <div class="table-wrap">
         <el-table v-loading="loading" :data="projectList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="编号" align="center" key="id" prop="id" v-if="false"/>
-          <el-table-column label="实例编码" align="center" key="sshInstanceCode" prop="sshInstanceCode"  v-if="false"/>
-          <el-table-column label="主机名称" align="center" key="serverName" prop="serverName"  :show-overflow-tooltip="true"  />
-          <el-table-column label="目录" align="center" key="ansibleInventoryDir" prop="ansibleInventoryDir"  :show-overflow-tooltip="true"  />
+          <el-table-column label="编号" align="left" key="id" prop="id" v-if="false"/>
+          <el-table-column label="实例编码" align="left" key="sshInstanceCode" prop="sshInstanceCode"  v-if="false"/>
+          <el-table-column label="主机名称" align="left" key="serverName" prop="serverName"  :show-overflow-tooltip="true"  />
+          <el-table-column label="目录" align="left" key="ansibleInventoryDir" prop="ansibleInventoryDir"  :show-overflow-tooltip="true"  />
           <el-table-column label="状态" align="center" key="status"  width="100">
             <template #default="scope">
               {{  showStatusFun(scope.row.status) }}
             </template>
           </el-table-column>
-          <el-table-column label="创建时间" align="center" prop="createTime"  width="180">
+          <el-table-column label="创建时间" align="left" prop="createTime"  width="200">
             <template #default="scope">
               {{
                    scope.row.createTime ? dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss") : ''
               }}
             </template>
           </el-table-column>
-          <el-table-column label="修改时间" align="center" prop="updateTime"  width="180">
+          <el-table-column label="修改时间" align="left" prop="updateTime"  width="200">
             <template #default="scope">
               {{ scope.row.updateTime ? dayjs(scope.row.updateTime).format("YYYY-MM-DD HH:mm:ss") : ''  }}
             </template>
           </el-table-column>
           <el-table-column
             label="操作"
-            align="center"
+            align="left"
           >
             <template #default="scope">
               <div class="action-btn">

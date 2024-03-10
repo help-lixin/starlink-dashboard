@@ -392,10 +392,10 @@ getList()
         <div class="table-wrap">
           <el-table v-loading="loading" :data="userList" @selection-change="handleSelectionChange">
             <el-table-column type="selection" width="60" align="center" />
-            <el-table-column label="用户编号" key="userId" prop="userId"/>
-            <el-table-column label="用户名称" key="userName" prop="userName"  :show-overflow-tooltip="true" />
-            <el-table-column label="用户昵称" key="nickName" prop="nickName" :show-overflow-tooltip="true" />
-            <el-table-column label="手机号码" key="phonenumber" prop="phonenumber" />
+            <el-table-column label="用户编号" align="left" key="userId" prop="userId"/>
+            <el-table-column label="用户名称" align="left" key="userName" prop="userName"  :show-overflow-tooltip="true" />
+            <el-table-column label="用户昵称" align="left" key="nickName" prop="nickName" :show-overflow-tooltip="true" />
+            <el-table-column label="手机号码" align="left" key="phonenumber" prop="phonenumber" />
             <el-table-column label="状态" align="center" key="status">
               <template #default="{row}">
                 <el-switch
@@ -411,14 +411,14 @@ getList()
                 <el-tag :type="row.status === '0' ? 'success' : 'danger'">{{ row.status === '0' ? '启用' : '禁用' }}</el-tag>
               </template>
             </el-table-column>
-            <el-table-column label="创建时间" align="center" prop="createTime">
+            <el-table-column label="创建时间" align="left" prop="createTime" width="200">
               <template v-slot="scope">
                 <span>{{ parseTime(scope?.row?.createTime) }}</span>
               </template>
             </el-table-column>
             <el-table-column
               label="操作"
-              align="center"
+              align="left"
               width="350"
             >
               <template v-slot="scope">

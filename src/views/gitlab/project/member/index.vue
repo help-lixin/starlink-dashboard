@@ -383,19 +383,19 @@
     <div class="table-wrap">
       <el-table v-loading="loading" :data="memberRow" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="用户编号" align="center" key="userId" prop="userId" v-if="false"/>
-          <el-table-column label="成员编号" align="center" key="id" prop="id" v-if="false"/>
-          <el-table-column label="项目编号" align="center" key="projectId" prop="projectId" v-if="false"/>
-          <el-table-column label="成员名称" align="center" key="userName" prop="userName"  :show-overflow-tooltip="true" />
-          <el-table-column label="成员昵称" align="center" key="nickName" prop="nickName"  :show-overflow-tooltip="true"  />
-          <el-table-column label="邮箱" align="center" key="email" prop="email"  :show-overflow-tooltip="true"  />
-          <el-table-column label="项目" align="center" key="projectName" prop="projectName"/>
+          <el-table-column label="用户编号" align="left" key="userId" prop="userId" v-if="false"/>
+          <el-table-column label="成员编号" align="left" key="id" prop="id" v-if="false"/>
+          <el-table-column label="项目编号" align="left" key="projectId" prop="projectId" v-if="false"/>
+          <el-table-column label="成员名称" align="left" key="userName" prop="userName"  :show-overflow-tooltip="true" />
+          <el-table-column label="成员昵称" align="left" key="nickName" prop="nickName"  :show-overflow-tooltip="true"  />
+          <el-table-column label="邮箱" align="left" key="email" prop="email"  :show-overflow-tooltip="true"  />
+          <el-table-column label="项目" align="left" key="projectName" prop="projectName"/>
           <!-- <el-table-column label="状态" align="center" key="status">
             <template #default="scope">
               {{  showStatusFun(scope.row.status) }}
             </template>
           </el-table-column> -->
-          <el-table-column label="创建时间" align="center" prop="createTime">
+          <el-table-column label="创建时间" align="left" prop="createTime" width="180">
             <template #default="scope">
               {{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}
             </template>

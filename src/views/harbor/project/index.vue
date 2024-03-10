@@ -394,8 +394,8 @@
       <div class="table-wrap">
         <el-table v-loading="loading" :data="projectList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="项目编号" key="id" prop="id" v-if="false"/>
-          <el-table-column label="项目名称" key="projectName" prop="projectName"  :show-overflow-tooltip="true"  />
+          <el-table-column label="项目编号" align="left" key="id" prop="id" v-if="false"/>
+          <el-table-column label="项目名称" align="left" key="projectName" prop="projectName"  :show-overflow-tooltip="true"  />
           <!-- <el-table-column label="容量" align="center" key="capacity" prop="capacity" :show-overflow-tooltip="true"   /> -->
           <el-table-column label="访问级别" align="center" key="isPublic" prop="isPublic" :show-overflow-tooltip="true"   >
             <template #default="scope">
@@ -407,14 +407,14 @@
               {{  showStatusFun(scope.row.status) }}
             </template>
           </el-table-column>
-          <el-table-column label="创建时间" align="center" prop="createTime"  width="200">
+          <el-table-column label="创建时间" align="left" prop="createTime"  width="200">
             <template #default="scope">
               {{
                    scope.row.createTime ? dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss") : ''
               }}
             </template>
           </el-table-column>
-          <el-table-column label="更新时间" align="center" prop="updateTime" width="200" >
+          <el-table-column label="更新时间" align="left" prop="updateTime" width="200" >
             <template #default="scope">
               {{ scope.row.updateTime ? dayjs(scope.row.updateTime).format("YYYY-MM-DD HH:mm:ss") : ''  }}
             </template>

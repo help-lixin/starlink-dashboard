@@ -311,27 +311,27 @@
     <div class="table-wrap">
       <el-table v-loading="loading" :data="userRow">
           <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="用户编号" align="center" key="id" prop="id" v-if="false"/>
-          <el-table-column label="用户名称" align="center" key="userName" prop="userName"  :show-overflow-tooltip="true"  />
-          <el-table-column label="用户昵称" align="center" key="nickName" prop="nickName"  :show-overflow-tooltip="true"  />
-          <el-table-column label="邮箱" align="center" key="email" prop="email"  :show-overflow-tooltip="true" />
+          <el-table-column label="用户编号" align="left" key="id" prop="id" v-if="false"/>
+          <el-table-column label="用户名称" align="left" key="userName" prop="userName"  :show-overflow-tooltip="true"  />
+          <el-table-column label="用户昵称" align="left" key="nickName" prop="nickName"  :show-overflow-tooltip="true"  />
+          <el-table-column label="邮箱" align="left" key="email" prop="email"  :show-overflow-tooltip="true" />
           <el-table-column label="状态" align="center" key="status" >
             <template #default="scope">
               {{  showStatusFun(scope.row.status) }}
             </template>
           </el-table-column>
-          <el-table-column label="创建时间" align="center" prop="createTime">
+          <el-table-column label="创建时间" align="left" prop="createTime" width="180">
             <template #default="scope">
               {{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}
             </template>
           </el-table-column>
-          <el-table-column
+          <!-- <el-table-column
             label="操作"
-            align="center"
+            align="left"
             width="220"
           >
             <template #default="scope">
-             <!-- <div class="action-btn">
+             <div class="action-btn">
               <el-button
                 size="small"
                 icon="Edit"
@@ -344,9 +344,9 @@
                 @click="handleStatusChange(scope.row)"
                 v-hasPerms="['/gitlab/user/changeStatus']"
               >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-             </div> -->
+             </div>
             </template>
-          </el-table-column>
+          </el-table-column> -->
     </el-table>
     </div>
     <div class="page-wrap">

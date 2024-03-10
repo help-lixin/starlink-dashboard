@@ -139,12 +139,12 @@
       <div class="table-wrap">
         <el-table v-loading="loading" :data="projectList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="项目编号" align="center" key="id" prop="id" v-if="false"/>
+          <el-table-column label="项目编号" align="left" key="id" prop="id" v-if="false"/>
           <el-table-column label="资源" align="left" key="resource" prop="resource"  :show-overflow-tooltip="true"  />
-          <el-table-column label="资源类型" align="center" key="resourceType" prop="resourceType"  :show-overflow-tooltip="true"  />
-          <el-table-column label="用户名" align="center" key="username" prop="username" :show-overflow-tooltip="true"   />
-          <el-table-column label="操作" align="center" key="operation" prop="operation" :show-overflow-tooltip="true"   />
-          <el-table-column label="创建时间" align="center" prop="opTime"  width="180">
+          <el-table-column label="资源类型" align="left" key="resourceType" prop="resourceType"  :show-overflow-tooltip="true"  />
+          <el-table-column label="用户名" align="left" key="username" prop="username" :show-overflow-tooltip="true"   />
+          <el-table-column label="操作" align="left" key="operation" prop="operation" :show-overflow-tooltip="true"   />
+          <el-table-column label="创建时间" align="left" prop="opTime"  width="180">
             <template #default="scope">
               {{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}
             </template>

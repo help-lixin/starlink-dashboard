@@ -391,10 +391,10 @@
       <div class="table-wrap">
         <el-table v-loading="loading" :data="roleList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="角色编号" prop="roleId" />
-          <el-table-column label="角色名称" prop="roleName" :show-overflow-tooltip="true"/>
-          <el-table-column label="权限字符" prop="roleKey" :show-overflow-tooltip="true"/>
-          <el-table-column label="显示顺序" prop="roleSort" />
+          <el-table-column label="角色编号" align="left" prop="roleId" />
+          <el-table-column label="角色名称" align="left" prop="roleName" :show-overflow-tooltip="true"/>
+          <el-table-column label="权限字符" align="left" prop="roleKey" :show-overflow-tooltip="true"/>
+          <el-table-column label="显示顺序" align="left" prop="roleSort" />
           <el-table-column label="状态" align="center" key="status">
             <template v-slot="scope">
               <el-switch
@@ -405,14 +405,14 @@
               ></el-switch>
             </template>
           </el-table-column>
-          <el-table-column label="创建时间" align="center" prop="createTime"  width="180">
+          <el-table-column label="创建时间" align="left" prop="createTime"  width="200">
             <template v-slot="scope">
               <span>{{ parseTime(scope.row.createTime) }}</span>
             </template>
           </el-table-column>
           <el-table-column
             label="操作"
-            align="center"
+            align="left"
             width="220"
           >
             <template v-slot="scope">

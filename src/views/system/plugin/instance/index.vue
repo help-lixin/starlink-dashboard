@@ -407,22 +407,22 @@ const getList = ()=>{
       <div class="table-wrap">
         <el-table v-loading="loading" :data="dataList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="插件编码" key="pluginCode" prop="pluginCode"/>
-          <el-table-column label="实例编码" key="instanceCode" prop="instanceCode"/>
-          <el-table-column label="实例名称" key="instanceName" prop="instanceName"  :show-overflow-tooltip="true" />
+          <el-table-column label="插件编码" align="left" key="pluginCode" prop="pluginCode"/>
+          <el-table-column label="实例编码" align="left" key="instanceCode" prop="instanceCode"/>
+          <el-table-column label="实例名称" align="left" key="instanceName" prop="instanceName"  :show-overflow-tooltip="true" />
           <el-table-column label="状态" align="center" key="status"  width="100">
             <template v-slot="scope">
               {{  showStatusFun(scope.row.status) }}
             </template>
           </el-table-column>
-          <el-table-column label="创建时间" align="center" prop="createdTime">
+          <el-table-column label="创建时间" align="left" prop="createdTime" width="200">
             <template v-slot="scope">
               <span>{{ parseTime(scope.row.createdTime) }}</span>
             </template>
           </el-table-column>
           <el-table-column
             label="操作"
-            align="center"
+            align="left"
             width="220"
           >
             <template v-slot="scope">

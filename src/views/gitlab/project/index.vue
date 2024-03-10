@@ -363,14 +363,14 @@
               {{  showStatusFun(scope.row.status) }}
             </template>
           </el-table-column>
-          <el-table-column label="创建时间" align="center" prop="createTime" >
+          <el-table-column label="创建时间" align="left" prop="createTime" width="180">
             <template #default="scope">
               <span>{{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}</span>
             </template>
           </el-table-column>
           <el-table-column
             label="操作"
-            align="center"
+            align="left"
             width="220"
           >
             <template #default="scope">

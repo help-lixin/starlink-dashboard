@@ -422,24 +422,24 @@
       <div class="table-wrap">
         <el-table v-loading="loading" :data="sysCredentialPageList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="编号" key="id" prop="id" v-if="false"/>
-          <el-table-column label="凭证唯一名称" key="credentialKey" prop="credentialKey"  :show-overflow-tooltip="true" />
-          <el-table-column label="凭证别名" key="credentialName" prop="credentialName"  :show-overflow-tooltip="true" />
+          <el-table-column label="编号" align="left" key="id" prop="id" v-if="false"/>
+          <el-table-column label="凭证唯一名称" align="left" key="credentialKey" prop="credentialKey"  :show-overflow-tooltip="true" />
+          <el-table-column label="凭证别名" align="left" key="credentialName" prop="credentialName"  :show-overflow-tooltip="true" />
           <!-- <el-table-column label="凭证类型" align="center" key="credentialType" prop="credentialType"  :show-overflow-tooltip="true"  width="200" /> -->
-          <el-table-column label="备注" key="remark" prop="remark"  :show-overflow-tooltip="true" />
+          <el-table-column label="备注" align="left" key="remark" prop="remark"  :show-overflow-tooltip="true" />
           <el-table-column label="状态" align="center" key="status">
             <template #default="scope">
               {{  showStatusFun(scope.row.status) }}
             </template>
           </el-table-column>
-          <el-table-column label="创建时间" align="center" prop="createTime"  width="180">
+          <el-table-column label="创建时间" align="left" prop="createTime"  width="200">
             <template #default="scope">
               {{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}
             </template>
           </el-table-column>
           <el-table-column
             label="操作"
-            align="center"
+            align="left"
             width="220"
           >
             <template #default="scope">

@@ -585,10 +585,10 @@
       <div class="table-wrap">
         <el-table v-loading="loading" :data="jobList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="任务编号" key="id" prop="id" v-if="false" />
-          <el-table-column label="任务名称" key="jobName" prop="jobName"  :show-overflow-tooltip="true" />
-          <el-table-column label="仓库类型" key="scm" prop="scm" :show-overflow-tooltip="true"  v-if="false" />
-          <el-table-column label="工具类型" key="tools" prop="tools" :show-overflow-tooltip="true"  />
+          <el-table-column label="任务编号" align="left" key="id" prop="id" v-if="false" />
+          <el-table-column label="任务名称" align="left" key="jobName" prop="jobName"  :show-overflow-tooltip="true" />
+          <el-table-column label="仓库类型" align="left" key="scm" prop="scm" :show-overflow-tooltip="true"  v-if="false" />
+          <el-table-column label="工具类型" align="left" key="tools" prop="tools" :show-overflow-tooltip="true"  />
           <el-table-column label="状态" align="center" key="status"  >
             <template #default="scope">
               {{  showStatusFun(scope.row.status) }}
@@ -598,21 +598,21 @@
           <!-- <el-table-column label="最后失败时间" align="center" key="lastFailure" prop="lastFailure" :show-overflow-tooltip="true"   width="180"/> -->
           <!-- <el-table-column label="最后构建所需时间" align="center" key="lastDuration" prop="lastDuration" :show-overflow-tooltip="true"  width="180"/> -->
           <!-- <el-table-column label="聚合状态" align="center" key="aggregatedStatus" prop="aggregatedStatus" :show-overflow-tooltip="true" /> -->
-          <el-table-column label="构建状态" align="center" key="buildStatus" prop="buildStatus" :show-overflow-tooltip="true"  width="120"/>
-          <el-table-column label="备注" align="center" key="remark" prop="remark" :show-overflow-tooltip="true"  />
-          <el-table-column label="创建时间" align="center" prop="createTime" width="180">
+          <el-table-column label="构建状态" align="left" key="buildStatus" prop="buildStatus" :show-overflow-tooltip="true"  width="120"/>
+          <el-table-column label="备注" align="left" key="remark" prop="remark" :show-overflow-tooltip="true"  />
+          <el-table-column label="创建时间" align="left" prop="createTime" width="180">
             <template #default="scope">
               {{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}
             </template>
           </el-table-column>
-          <el-table-column label="更新时间" prop="updateTime" width="180">
+          <el-table-column label="更新时间" align="left" prop="updateTime" width="180">
             <template #default="scope">
               {{ dayjs(scope.row.updateTime).format("YYYY-MM-DD HH:mm:ss")   }}
             </template>
           </el-table-column>
           <el-table-column
             label="操作"
-            align="center"
+            align="left"
             width="280"
             flxed="right"
           >
