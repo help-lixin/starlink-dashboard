@@ -6,7 +6,7 @@ import {STARLINK_SERVICE} from "@/utils/env"
 import { pluginInstanceOptionSelect } from '@/api/common-api'
 import { encode, decode } from 'js-base64';
 
-import jenkins from "@/api/mock/formilyjs/jenkins"
+import mockFile from "@/api/mock/formilyjs/ssh-docker-build"
 
 import {
 	createForm ,
@@ -65,6 +65,7 @@ const props = defineProps({
 	modeler: Object,
 })
 
+const isShowProperties = ref(false)
 const selectedElements = ref([])
 const element = ref(null)
 
@@ -146,9 +147,9 @@ const formProperties = {
 	// 当表单被更改时,序列化表单的内容为json,并base64给bpmnjs进行保存好
     onFormValuesChange((form)=>{
 		if(element.value){
-			const formJsonString = JSON.stringify(form.values)
-			const encodeFormValues = encode(formJsonString)
-			changeForm(encodeFormValues)
+			// const formJsonString = JSON.stringify(form.values)
+			// const encodeFormValues = encode(formJsonString)
+			changeForm(form)
 		}
 	})
 
@@ -316,9 +317,20 @@ function init() {
 		selectedElements.value = e.newSelection
 		// 被选中的节点
 		element.value = e.newSelection[0]
+		
+		if(undefined == element.value ||
+			element.value?.type=="bpmn:SequenceFlow" ||
+			element.value?.type=="bpmn:StartEvent" ||
+			element.value?.type=="bpmn:EndEvent" ){
+				isShowProperties.value=false;
+				return;
+		}else{
+			// 展示右侧属性面板
+			isShowProperties.value=true;
+		}
+
 		// 先置空
 		delete schema.value?.properties?.layout?.properties
-
 		//拷贝出一份新的schema
 		const tempScehma = {};
 		Object.assign(tempScehma,formSchema);
@@ -328,7 +340,8 @@ function init() {
 		// 元数据对象(右侧表单动态展示)
 		if (element.value?.businessObject?.$attrs?.plugin) {
 			// TODO lixin
-			// const pluginInfoStr = jenkins
+			// const pluginInfoStr = mockFile
+			
 			// 从store里拿数据
 			const plugins = actionMetasStore.getActions
 			const pluginInfoStr = plugins.get(element.value.businessObject.$attrs.plugin)
@@ -348,6 +361,8 @@ function init() {
 
 		// 重点,要重新为schema赋值
 		schema.value = tempScehma;
+		// 先清空表单里的内容
+		form.setValues({});
 		// 重点,重新生成表单.
 		form = createForm(formProperties)
 
@@ -357,7 +372,7 @@ function init() {
 			const decodeParams = JSON.parse(decodeParamsString);
 			Object.assign(params,decodeParams)
 		}
-
+		
 		// 节点名称
 		if (element.value?.businessObject?.$attrs?._name) {
 			element.value['name'] = element.value?.businessObject?.$attrs?._name
@@ -413,12 +428,26 @@ function setDefaultProperties() {
 /**
  * 改变控件触发的事件
  */
-function changeForm(value) {
-	const propertyName = "_params"
-	element.value[propertyName] = value
+function changeForm(form) {
+	// 当前表单的最新内容
+	const formObject = form.values
 
+	// 读取xml中的_params进行,此时xml中的信息是需要解码的
+	const oldParamsBase64String = element?.value?.businessObject?.$attrs?._params
+	// base64解码
+	const oldParamsString = decode(oldParamsBase64String)
+	// 解码后转换成json对象
+	const oldParams = JSON.parse(oldParamsString)
+	// 在xml的基础上,把"表单"中的最新内容进行应用,这样,就不存在丢失内容了
+	Object.assign(oldParams,formObject);
+	
+	const formJsonString = JSON.stringify(oldParams)
+	const encodeFormValues = encode(formJsonString)
+
+	const propertyName = "_params"
+	element.value[propertyName] = encodeFormValues
 	const properties = {}
-	properties[propertyName] = value
+	properties[propertyName] = encodeFormValues
 	updateProperties(properties)
 }
 
@@ -443,7 +472,7 @@ init()
 
 
 <template>
-    <div v-if="selectedElements.length === 1" class="custom-properties-panel">
+    <div v-if="isShowProperties" class="custom-properties-panel">
       <yt-card style="height: 100%;" :content-style="{height: '100%'}">
         <el-scrollbar :height="'calc(100vh - var(--el-header-height) - 88px)'">
           <FormProvider :form="form">

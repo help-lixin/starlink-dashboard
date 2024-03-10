@@ -1,4 +1,6 @@
 <script setup lang="ts">
+// @ts-nocheck
+
 import { MonacoEditor } from './MonacoEditor'
 import { onMounted, ref, nextTick, defineEmits } from 'vue'
 const props = defineProps<{visible: boolean, initData: string}>()

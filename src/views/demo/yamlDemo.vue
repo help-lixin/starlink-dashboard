@@ -1,4 +1,6 @@
 <script setup lang="ts">
+// @ts-nocheck
+
 import YamlEditor from '@/views/demo/utils/yamlEditor.vue'
 import type { FormInstance } from 'element-plus'
 const ruleFormRef = ref<FormInstance>()

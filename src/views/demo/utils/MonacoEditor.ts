@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import * as monaco from 'monaco-editor';
 import { editor } from 'monaco-editor'
 // 启用语言支持
