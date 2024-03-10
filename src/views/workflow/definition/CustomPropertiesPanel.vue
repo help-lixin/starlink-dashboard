@@ -147,9 +147,9 @@ const formProperties = {
 	// 当表单被更改时,序列化表单的内容为json,并base64给bpmnjs进行保存好
     onFormValuesChange((form)=>{
 		if(element.value){
-			const formJsonString = JSON.stringify(form.values)
-			const encodeFormValues = encode(formJsonString)
-			changeForm(encodeFormValues)
+			// const formJsonString = JSON.stringify(form.values)
+			// const encodeFormValues = encode(formJsonString)
+			changeForm(form)
 		}
 	})
 
@@ -428,12 +428,26 @@ function setDefaultProperties() {
 /**
  * 改变控件触发的事件
  */
-function changeForm(value) {
-	const propertyName = "_params"
-	element.value[propertyName] = value
+function changeForm(form) {
+	// 当前表单的最新内容
+	const formObject = form.values
 
+	// 读取xml中的_params进行,此时xml中的信息是需要解码的
+	const oldParamsBase64String = element?.value?.businessObject?.$attrs?._params
+	// base64解码
+	const oldParamsString = decode(oldParamsBase64String)
+	// 解码后转换成json对象
+	const oldParams = JSON.parse(oldParamsString)
+	// 在xml的基础上,把"表单"中的最新内容进行应用,这样,就不存在丢失内容了
+	Object.assign(oldParams,formObject);
+	
+	const formJsonString = JSON.stringify(oldParams)
+	const encodeFormValues = encode(formJsonString)
+
+	const propertyName = "_params"
+	element.value[propertyName] = encodeFormValues
 	const properties = {}
-	properties[propertyName] = value
+	properties[propertyName] = encodeFormValues
 	updateProperties(properties)
 }
 
