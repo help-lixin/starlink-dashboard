@@ -6,7 +6,9 @@
 
 import { useActionMetasStore } from "@/stores/plugin";
 import {STARLINK_SERVICE} from "@/utils/env"
-import jenkins from "@/api/mock/formilyjs/jenkins"
+
+
+import mockFile from "@/api/mock/formilyjs/ssh-docker-build"
 
 const actionMetasStore = useActionMetasStore();
 
@@ -116,7 +118,8 @@ PaletteProvider.prototype.getPaletteEntries = function (element) {
 	const actions = actionMetasStore.getActions
 	actions.forEach((value, key) => {
 		// TODO lixin 临时测试用
-		// const pluginItem = deserialize(jenkins)
+		// const pluginItem = deserialize(mockFile)
+
 		const pluginItem = deserialize(value)
 		const pluginMeta = { 
 			"plugin": key 
