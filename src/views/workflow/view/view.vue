@@ -1,7 +1,8 @@
 <template>
 	<div class="bpmn">
 		<div ref="canvasRef" class="canvas"></div>
-		<CustomPropertiesPanel v-if="bpmnModeler" :modeler="bpmnModeler" />
+		<CustomPropertiesPanel v-if="bpmnModeler" :modeler="bpmnModeler" 
+		:processInstanceId="processInstanceId"/>
 	</div>
 </template>
 
@@ -16,7 +17,7 @@ import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css'
 // 左边工具栏以及编辑节点的样式
 import 'bpmn-js-properties-panel/dist/assets/bpmn-js-properties-panel.css'
 
-import { ref, onMounted } from 'vue'
+import { ref, onMounted , onUnmounted } from 'vue'
 import CustomModeler from './customModeler'
 import propertiesPanelModule from 'bpmn-js-properties-panel'
 import propertiesProviderModule from 'bpmn-js-properties-panel/lib/provider/camunda'
@@ -34,6 +35,8 @@ const route = useRoute();
 
 const bpmnModeler = ref()
 const canvasRef = ref()
+const processInstanceId = ref()
+const timerUpdateTask = ref()
 
 // 获取xml
 function getXml(cb: any) {
@@ -80,182 +83,36 @@ function init() {
 	setDiagram(workflowXml)
 
 	// 流程定义内容
-	const params = route.params;
-	if(params?.processInstnaceId){
-		getProcessDefinition(params.processInstnaceId)
+	processInstanceId.value = route.params?.processInstnaceId;
+	if(processInstanceId.value){
+		getProcessDefinition(processInstanceId.value)
 		  .then((res)=>{
 			if(res?.code == 200){
-				const processDefinitionBody = res?.data?.processDefinitionBody;
+				const processDefinitionBody = res?.data?.processDefinitionBody
 				// 把json转换成xml进行展示
-				if (processDefinitionBody) {
+				if (processInstanceId.value) {
 					const processDefinitionJson = JSON.parse(processDefinitionBody)
 					const processDefinitionXml = jsonToXml(processDefinitionJson)
 					setDiagram(processDefinitionXml)
 					// 定时任务获取状态
-
+					timerUpdateTask.value = setInterval(function(){
+						// TODO 朱捷
+						const elementRegistry = bpmnModeler.value.get('elementRegistry');
+						const elementToSelect = elementRegistry.get('Activity_0pb7r4o');
+						const modeling = bpmnModeler.value.get('modeling');
+						modeling.setColor(elementToSelect, {
+							stroke: 'red'
+						});
+						
+						// canvas.addMarker(elementToSelect, 'selected');
+						// console.log(bpmnModeler.value)
+						// console.log(processInstanceId.value)
+						console.log(elementToSelect)
+					},10000);
 				}
 			}
 		  })
 	}
-}
-
-// xml转json
-function xmlToJson(xmlString) {
-	const NAMESPACE_BPMN = 'http://www.omg.org/spec/BPMN/20100524/MODEL'
-	const NAMESPACE_BPMNDI = 'http://www.omg.org/spec/BPMN/20100524/DI'
-	const NAMESPACE_DDDI = 'http://www.omg.org/spec/DD/20100524/DI'
-	const NAMESPACE_DC = 'http://www.omg.org/spec/DD/20100524/DC'
-
-	const parser = new DOMParser()
-	const xmlDoc = parser.parseFromString(xmlString, 'text/xml')
-
-	const definitionsNode = xmlDoc.getElementsByTagNameNS(
-		NAMESPACE_BPMN,
-		'definitions',
-	)[0]
-
-	// 获得节点<process>
-	const processNode = definitionsNode.getElementsByTagNameNS(
-		NAMESPACE_BPMN,
-		'process',
-	)[0]
-
-	const result = {
-		id: processNode.getAttribute('id'),
-		name: processNode.getAttribute('name'),
-		nodes: [],
-		diagram: {
-			id: null,
-			plane: {
-				id: null,
-				ref: processNode.getAttribute('id'),
-				elements: [],
-			},
-		},
-	}
-
-
-	// 处理节点
-	for (let i = 0; i < processNode.children.length; i++) {
-		const el = processNode.children[i]
-		const obj = {
-			id: el.id,
-			nodeType: el.nodeName,
-		}
-
-		const name = el.getAttribute('name')
-		if (name) obj.name = name
-
-		const source = el.getAttribute('sourceRef')
-		if (source) obj.source = source
-
-		const target = el.getAttribute('targetRef')
-		if (target) obj.target = target
-
-		const sources = el.getElementsByTagName('incoming')?.[0]?.textContent
-		if (sources) obj.sources = [sources]
-
-		const targets = el.getElementsByTagName('outgoing')?.[0]?.textContent
-		if (targets) obj.targets = [targets]
-
-		if (el.nodeName === 'serviceTask') {
-			obj.nodeType = "serviceTask"
-		}
-
-		// 只有serviceTask的情况下才会有plugin属性和pluginCode属性
-		const plugin = el.getAttribute('plugin')
-		if (plugin) obj.plugin = plugin;
-
-		const pluginCode = el.getAttribute('pluginCode')
-		if (pluginCode) obj.pluginCode = pluginCode;
-
-		const params = el.getAttribute('_params')
-		if(params) obj.params = decode(params)
-
-		const pluginIcon = el.getAttribute('pluginIcon')
-		if(pluginIcon) obj.pluginIcon = pluginIcon
-
-		// 重点
-		result.nodes.push(obj);
-	}
-
-	const bpmndiDiagramNode = xmlDoc.getElementsByTagNameNS(
-		NAMESPACE_BPMNDI,
-		'BPMNDiagram',
-	)[0]
-	if (bpmndiDiagramNode) {
-		result.diagram.id = bpmndiDiagramNode.getAttribute('id')
-
-		const bpmndiPlaneNode = bpmndiDiagramNode.getElementsByTagNameNS(
-			NAMESPACE_BPMNDI,
-			'BPMNPlane',
-		)[0]
-		if (bpmndiPlaneNode) {
-			result.diagram.plane.id = bpmndiPlaneNode.getAttribute('id')
-
-			const bpmndiShapeNodes = bpmndiPlaneNode.getElementsByTagNameNS(
-				NAMESPACE_BPMNDI,
-				'BPMNShape',
-			)
-			for (let i = 0; i < bpmndiShapeNodes.length; i++) {
-				const bpmndiShapeNode = bpmndiShapeNodes[i]
-				const shapeId = bpmndiShapeNode.getAttribute('id')
-				const bpmnElement = bpmndiShapeNode.getAttribute('bpmnElement')
-
-				const boundsNode = bpmndiShapeNode.getElementsByTagNameNS(
-					NAMESPACE_DC,
-					'Bounds',
-				)[0]
-				if (!boundsNode) continue
-
-				const bounds = {
-					x: parseFloat(boundsNode.getAttribute('x')),
-					y: parseFloat(boundsNode.getAttribute('y')),
-					width: parseFloat(boundsNode.getAttribute('width')),
-					height: parseFloat(boundsNode.getAttribute('height')),
-				}
-
-				result.diagram.plane.elements.push({
-					id: shapeId,
-					ref: bpmnElement,
-					type: 'shape',
-					bounds: bounds,
-				})
-			}
-
-			const bpmndiEdgeNodes = bpmndiPlaneNode.getElementsByTagNameNS(
-				NAMESPACE_BPMNDI,
-				'BPMNEdge',
-			)
-			for (let i = 0; i < bpmndiEdgeNodes.length; i++) {
-				const bpmndiEdgeNode = bpmndiEdgeNodes[i]
-				const edgeId = bpmndiEdgeNode.getAttribute('id')
-				const bpmnElement = bpmndiEdgeNode.getAttribute('bpmnElement')
-
-				const waypointNodes = bpmndiEdgeNode.getElementsByTagNameNS(
-					NAMESPACE_DDDI,
-					'waypoint',
-				)
-				const waypoints = []
-				for (let j = 0; j < waypointNodes.length; j++) {
-					const waypointNode = waypointNodes[j]
-					waypoints.push({
-						x: parseFloat(waypointNode.getAttribute('x')),
-						y: parseFloat(waypointNode.getAttribute('y')),
-					})
-				}
-
-				result.diagram.plane.elements.push({
-					id: edgeId,
-					ref: bpmnElement,
-					type: 'edge',
-					waypoints: waypoints,
-				})
-			}
-		}
-	}
-
-	return result
 }
 
 // json转xml
@@ -364,6 +221,11 @@ function jsonToXml(json) {
 
 onMounted(() => {
 	init()
+})
+
+
+onUnmounted(()=>{
+	clearInterval(timerUpdateTask.value)
 })
 
 </script>

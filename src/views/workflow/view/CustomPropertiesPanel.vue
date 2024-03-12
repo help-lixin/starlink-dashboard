@@ -5,6 +5,7 @@ import { ref } from 'vue'
 
 const props = defineProps({
 	modeler: Object,
+	processInstanceId: undefined
 })
 
 const isShowProperties = ref(false)
@@ -29,8 +30,14 @@ function init() {
 			isShowProperties.value=true;
 		}
 
+		const nodeId = element.value.id
+		const nodeName = element.value.businessObject?.name
+		const processInstanceId = props.processInstanceId
+
 		console.log("============================================")
-		console.log(element.value)
+		console.log(processInstanceId)
+		console.log(nodeId)
+		console.log(nodeName)
 		console.log("============================================")
 	}) // end  selection.changed
 
