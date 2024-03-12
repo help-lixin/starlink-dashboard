@@ -58,6 +58,7 @@ import {
 import request from '@/utils/request';
 
 import { useActionMetasStore } from "@/stores/plugin";
+import { formItemProps } from 'element-plus';
 const actionMetasStore = useActionMetasStore();
 
 
@@ -147,14 +148,17 @@ const formProperties = {
 	// 当表单被更改时,序列化表单的内容为json,并base64给bpmnjs进行保存好
     onFormValuesChange((form)=>{
 		if(element.value){
-			// const formJsonString = JSON.stringify(form.values)
-			// const encodeFormValues = encode(formJsonString)
 			changeForm(form)
 		}
 	})
 
 	// * : 监听所有的属性
 	onFieldMount('*',(field,form)=>{
+		console.log("************************onFieldMount*****************************")
+		console.log(field)
+		console.log(form)
+		console.log("************************onFieldMount*****************************")
+
 		if(field.data?.onInitCallback){
 			const ctx = {
 				field,
@@ -172,6 +176,12 @@ const formProperties = {
 
 	// 监听组件变化
 	onFieldChange('*',['value'],(field,form)=>{
+		console.log("************************onFieldChange*****************************")
+		console.log(field)
+		console.log(form)
+		console.log("************************onFieldChange*****************************")
+
+
 		const dependenciesArray = [];
 		// 排除掉哪些不需要进行监听
 		if(!exclusionField.has(field?.props?.name)){
@@ -216,6 +226,11 @@ const formProperties = {
 
 	// * : 监听所有的属性
 	onFieldValueChange('*',(field,form)=>{
+		console.log("************************onFieldValueChange*****************************")
+		console.log(field)
+		console.log(form)
+		console.log("************************onFieldValueChange*****************************")
+
 		if(field.data?.onChangeCallback){
 			const ctx = {
 				field,
@@ -226,7 +241,6 @@ const formProperties = {
 			}
 			const callbackArray = field.data?.onChangeCallback
 			callbackArray.forEach(callback => {
-
               callback(ctx)
             });
 		}
@@ -362,7 +376,9 @@ function init() {
 		// 重点,要重新为schema赋值
 		schema.value = tempScehma;
 		// 先清空表单里的内容
-		form.setValues({});
+		form.setValues({})
+		form.onUnmount()
+		
 		// 重点,重新生成表单.
 		form = createForm(formProperties)
 
@@ -403,7 +419,7 @@ function init() {
 		//  为节点配置默认属性
 		setDefaultProperties()
 		// 为表单赋值
-		form.setValues(params);
+		form.setValues(params)
 	}) // end  selection.changed
 
 	props.modeler.on('element.changed', e => {
