@@ -44,11 +44,8 @@ declare module 'vue' {
     ElSwitch: typeof import('element-plus/es')['ElSwitch']
     ElTable: typeof import('element-plus/es')['ElTable']
     ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
-    ElTabPane: typeof import('element-plus/es')['ElTabPane']
-    ElTabs: typeof import('element-plus/es')['ElTabs']
     ElTag: typeof import('element-plus/es')['ElTag']
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
-    ElTransfer: typeof import('element-plus/es')['ElTransfer']
     ElTree: typeof import('element-plus/es')['ElTree']
     ElTreeSelect: typeof import('element-plus/es')['ElTreeSelect']
     IconCommunity: typeof import('./components/icons/IconCommunity.vue')['default']
@@ -63,6 +60,7 @@ declare module 'vue' {
     SvgIcon: typeof import('./components/SvgIcon.vue')['default']
     YtBottomOperate: typeof import('./components/YtBottomOperate.vue')['default']
     YtCard: typeof import('./components/YtCard.vue')['default']
+    YtPage: typeof import('./components/YtPage.vue')['default']
     YtTextList: typeof import('./components/YtTextList.vue')['default']
   }
   export interface ComponentCustomProperties {

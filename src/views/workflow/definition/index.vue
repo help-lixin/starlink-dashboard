@@ -155,7 +155,7 @@ const handleRunning = function (row) {
   const startWorkFlowData = {
     processDefinitionId
   }
-  
+
   // 启动流水线
   startWorkFlowById(startWorkFlowData)
     .then((startWorkflowRes) => {
@@ -163,7 +163,7 @@ const handleRunning = function (row) {
         const processInstnaceId = startWorkflowRes?.data?.id;
         router.push({
             name: "workflow-definition-view",
-            params: { 
+            params: {
               processInstnaceId
              }
           })
@@ -248,7 +248,7 @@ getList()
                 <el-button size="small" @click="handleRunning(scope.row)"
                             icon="VideoPlay"
                            v-hasPerms="['/workflow/instance/startById']">运行</el-button>
-                
+
                 <el-button size="small" @click="handleUpdate(scope.row)"
                             icon="Edit"
                            v-hasPerms="['/workflow/definition/operate']">修改</el-button>
@@ -265,8 +265,7 @@ getList()
         </el-table>
       </div>
       <div class="page-wrap">
-        <el-pagination v-show="total > 0" :total="total" background layout="prev, pager, next"
-                       v-model:current-page="queryParams.pageNum" v-model:page-size="queryParams.pageSize" @current-change="getList" />
+        <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>
       </div>
     </yt-card>
 

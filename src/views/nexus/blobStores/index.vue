@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// @ts-nocheck  
+// @ts-nocheck
 import { Plus,Search,RefreshRight } from '@element-plus/icons-vue'
 import { queryInstanceInfoByPluginCode } from "@/api/common-api"
 import { dayjs } from "@/utils/common-dayjs"
@@ -111,7 +111,7 @@ const submitForm = async () => {
         type: 'success',
       });
       open.value = false;
-      
+
       getList();
     } else {
       ElMessage.error('操作失败');
@@ -159,12 +159,12 @@ const handleUpdate = (row)=>{
     if(response.code == 200){
       open.value = true;
       title.value = "修改存储库";
-      nameDisabled.value = true;      
+      nameDisabled.value = true;
 
       form.value = response?.data
-    
+
       handleSoftQuotaShow(form.value.softQuota.enabled);
-     
+
       if (form.value.type == "File") {
         fileIsShow.value = true
       }
@@ -175,7 +175,7 @@ const handleUpdate = (row)=>{
         type: 'fail',
       });
     }
-    
+
   });
 }
 
@@ -256,7 +256,7 @@ const handleStatusChange = (row)=>{
                   message: '操作成功',
                 })
             }
-        })    
+        })
     })
     .catch(() => { })
   }
@@ -327,7 +327,7 @@ selectFirstInstanceQuery();
               @keyup.enter.native="handleQuery"
             />
           </el-form-item>
-        </el-col> 
+        </el-col>
       </el-row>
       <el-row :gutter="20">
         <el-col :span="8">
@@ -340,7 +340,7 @@ selectFirstInstanceQuery();
               @keyup.enter.native="handleQuery"
             />
           </el-form-item>
-        </el-col> 
+        </el-col>
         <el-col :span="8">
           <el-form-item label="创建时间">
             <el-date-picker
@@ -415,15 +415,7 @@ selectFirstInstanceQuery();
       </el-table>
     </div>
     <div class="page-wrap">
-      <el-pagination
-      v-show="total>0"
-      :total="total"
-      :page-sizes=[10,20]
-      background layout="prev, pager, next" 
-      v-model:current-page="queryParams.pageNum"
-      v-model:page-size="queryParams.pageSize"
-      @current-change="getList"
-    />
+      <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>
     </div>
   </div>
 
@@ -433,7 +425,7 @@ selectFirstInstanceQuery();
       <el-form ref="formRef" :model="form" :rules="rules" label-width="200px" :validate-on-rule-change="false">
         <el-form-item label="插件实例" prop="instanceCode" label-width="150px">
             <el-select
-              class="search-select2" 
+              class="search-select2"
               v-model="form.instanceCode"
               placeholder="请选择插件实例"
               clearable

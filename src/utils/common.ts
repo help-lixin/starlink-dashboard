@@ -1,4 +1,4 @@
-// @ts-nocheck  
+// @ts-nocheck
 // ts不检查该文件,否则,打包都不能通过
 
 export function handleTree(data, id, parentId, children) {
@@ -208,6 +208,7 @@ export function addDateRangeRuoyi(params, dateRange, propName) {
 
 export function addDateRange(params, dateRange, propName) {
   const search = params;
+  console.log(params, 'params111')
   dateRange = Array.isArray(dateRange) ? dateRange : [];
   if (typeof (propName) === 'undefined') {
     search['beginTime'] = dateRange[0];

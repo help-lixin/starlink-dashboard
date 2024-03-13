@@ -167,7 +167,7 @@
             users.value = response?.data
           }
         })
-        
+
         open.value = true;
         title.value = "新增项目成员";
       }
@@ -219,7 +219,7 @@
                 message: '新增成功',
                 type: 'success',
             });
-            
+
           }else{
             ElMessage({
                 showClose: true,
@@ -419,15 +419,7 @@
     </el-table>
     </div>
     <div class="page-wrap">
-      <el-pagination
-      v-show="total>0"
-      :total="total"
-      :page-sizes=[10,20]
-      background layout="prev, pager, next"
-      v-model:current-page="queryParams.pageNum"
-      v-model:page-size="queryParams.pageSize"
-      @current-change="getList"
-    />
+      <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>
     </div>
 
 

@@ -269,7 +269,7 @@
             queryParams.groups = response?.data
             // queryParams.groupId = response?.data[0]?.id
             // 触发查询
-            
+
           })
           getList();
         }
@@ -407,15 +407,7 @@
     </el-table>
     </div>
     <div class="page-wrap">
-      <el-pagination
-      v-show="total>0"
-      :total="total"
-      :page-sizes=[10,20]
-      background layout="prev, pager, next"
-      v-model:current-page="queryParams.pageNum"
-      v-model:page-size="queryParams.pageSize"
-      @current-change="getList"
-    />
+      <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>
     </div>
 
 

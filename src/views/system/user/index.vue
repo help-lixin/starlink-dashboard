@@ -201,7 +201,7 @@ const submitForm = async ()=>{
                     message: '修改成功',
                     type: 'success',
                 });
-                
+
             }else{
               ElMessage({
                     showClose: true,
@@ -220,7 +220,7 @@ const submitForm = async ()=>{
                     message: '新增成功',
                     type: 'success',
                 });
-                
+
             }else{
               ElMessage({
                     showClose: true,
@@ -459,16 +459,7 @@ getList()
           </el-table>
         </div>
         <div class="page-wrap">
-          <el-pagination
-            v-show="total>0"
-            :total="total"
-            :page-sizes=[10,20]
-            background layout="prev, pager, next"
-            v-model:current-page="queryParams.pageNum"
-            v-model:page-size="queryParams.pageSize"
-            @current-change="getList"
-          />
-        </div>
+          <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>        </div>
       </yt-card>
 
 
