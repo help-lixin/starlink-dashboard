@@ -18,7 +18,7 @@ function init() {
 		selectedElements.value = e.newSelection
 		// 被选中的节点
 		element.value = e.newSelection[0]
-		
+
 		if(undefined == element.value ||
 			element.value?.type=="bpmn:SequenceFlow" ||
 			element.value?.type=="bpmn:StartEvent" ||
@@ -61,7 +61,7 @@ init()
     <div v-if="isShowProperties" class="custom-properties-panel">
       <yt-card style="height: 100%;" :content-style="{height: '100%'}">
         <el-scrollbar :height="'calc(100vh - var(--el-header-height) - 88px)'">
-          
+
         </el-scrollbar>
       </yt-card>
     </div>

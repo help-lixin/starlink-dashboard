@@ -1,7 +1,7 @@
 <template>
 	<div class="bpmn">
 		<div ref="canvasRef" class="canvas"></div>
-		<CustomPropertiesPanel v-if="bpmnModeler" :modeler="bpmnModeler" 
+		<CustomPropertiesPanel v-if="bpmnModeler" :modeler="bpmnModeler"
 		:processInstanceId="processInstanceId"/>
 	</div>
 </template>
@@ -96,18 +96,15 @@ function init() {
 					setDiagram(processDefinitionXml)
 					// 定时任务获取状态
 					timerUpdateTask.value = setInterval(function(){
-						// TODO 朱捷
-						const elementRegistry = bpmnModeler.value.get('elementRegistry');
-						const elementToSelect = elementRegistry.get('Activity_0pb7r4o');
-						const modeling = bpmnModeler.value.get('modeling');
-						modeling.setColor(elementToSelect, {
-							stroke: 'red'
-						});
-						
-						// canvas.addMarker(elementToSelect, 'selected');
-						// console.log(bpmnModeler.value)
-						// console.log(processInstanceId.value)
-						console.log(elementToSelect)
+            try {
+              const elementRegistry = bpmnModeler.value.get('elementRegistry');
+              const elementToSelect = elementRegistry.get('Activity_0pb7r4o');
+              // 添加高亮样式
+              bpmnModeler.value.get('canvas').addMarker(elementToSelect.id, 'highlight');
+            } catch (e) {
+              console.log(e, 'err')
+            }
+
 					},10000);
 				}
 			}
@@ -229,7 +226,16 @@ onUnmounted(()=>{
 })
 
 </script>
-
+<style lang="scss">
+//高亮节点
+.highlight {
+  .djs-visual {
+    text {
+      fill: #1fbe07 !important;
+    }
+  }
+}
+</style>
 <style scoped lang="scss">
 .bpmn {
 	width: 100%;
