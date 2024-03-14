@@ -58,7 +58,6 @@ import {
 import request from '@/utils/request';
 
 import { useActionMetasStore } from "@/stores/plugin";
-import { formItemProps } from 'element-plus';
 const actionMetasStore = useActionMetasStore();
 
 
@@ -148,17 +147,14 @@ const formProperties = {
 	// 当表单被更改时,序列化表单的内容为json,并base64给bpmnjs进行保存好
     onFormValuesChange((form)=>{
 		if(element.value){
-			changeForm(form)
+			const formJsonString = JSON.stringify(form.values)
+			const encodeFormValues = encode(formJsonString)
+			changeForm(encodeFormValues)
 		}
 	})
 
 	// * : 监听所有的属性
 	onFieldMount('*',(field,form)=>{
-		console.log("************************onFieldMount*****************************")
-		console.log(field)
-		console.log(form)
-		console.log("************************onFieldMount*****************************")
-
 		if(field.data?.onInitCallback){
 			const ctx = {
 				field,
@@ -176,12 +172,6 @@ const formProperties = {
 
 	// 监听组件变化
 	onFieldChange('*',['value'],(field,form)=>{
-		console.log("************************onFieldChange*****************************")
-		console.log(field)
-		console.log(form)
-		console.log("************************onFieldChange*****************************")
-
-
 		const dependenciesArray = [];
 		// 排除掉哪些不需要进行监听
 		if(!exclusionField.has(field?.props?.name)){
@@ -226,11 +216,6 @@ const formProperties = {
 
 	// * : 监听所有的属性
 	onFieldValueChange('*',(field,form)=>{
-		console.log("************************onFieldValueChange*****************************")
-		console.log(field)
-		console.log(form)
-		console.log("************************onFieldValueChange*****************************")
-
 		if(field.data?.onChangeCallback){
 			const ctx = {
 				field,
@@ -241,6 +226,7 @@ const formProperties = {
 			}
 			const callbackArray = field.data?.onChangeCallback
 			callbackArray.forEach(callback => {
+
               callback(ctx)
             });
 		}
@@ -376,9 +362,7 @@ function init() {
 		// 重点,要重新为schema赋值
 		schema.value = tempScehma;
 		// 先清空表单里的内容
-		form.setValues({})
-		form.onUnmount()
-		
+		form.setValues({});
 		// 重点,重新生成表单.
 		form = createForm(formProperties)
 
@@ -419,7 +403,7 @@ function init() {
 		//  为节点配置默认属性
 		setDefaultProperties()
 		// 为表单赋值
-		form.setValues(params)
+		form.setValues(params);
 	}) // end  selection.changed
 
 	props.modeler.on('element.changed', e => {
@@ -444,26 +428,12 @@ function setDefaultProperties() {
 /**
  * 改变控件触发的事件
  */
-function changeForm(form) {
-	// 当前表单的最新内容
-	const formObject = form.values
-
-	// 读取xml中的_params进行,此时xml中的信息是需要解码的
-	const oldParamsBase64String = element?.value?.businessObject?.$attrs?._params
-	// base64解码
-	const oldParamsString = decode(oldParamsBase64String)
-	// 解码后转换成json对象
-	const oldParams = JSON.parse(oldParamsString)
-	// 在xml的基础上,把"表单"中的最新内容进行应用,这样,就不存在丢失内容了
-	Object.assign(oldParams,formObject);
-	
-	const formJsonString = JSON.stringify(oldParams)
-	const encodeFormValues = encode(formJsonString)
-
+function changeForm(value) {
 	const propertyName = "_params"
-	element.value[propertyName] = encodeFormValues
+	element.value[propertyName] = value
+
 	const properties = {}
-	properties[propertyName] = encodeFormValues
+	properties[propertyName] = value
 	updateProperties(properties)
 }
 
