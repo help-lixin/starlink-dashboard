@@ -50,6 +50,10 @@ function setDiagram(bpmn: any) {
 		if (err) {
 			console.error(err)
 		} else {
+			// 去掉左侧Palette
+			const palette = bpmnModeler.value.get('palette')
+			palette._container.style.display = 'none'
+
 			bpmnModeler.value.on('commandStack.changed', function () {
 				getXml((_err, xml) => console.log(xml))
 			})
@@ -95,20 +99,22 @@ function init() {
 					const processDefinitionXml = jsonToXml(processDefinitionJson)
 					setDiagram(processDefinitionXml)
 					// 定时任务获取状态
-					timerUpdateTask.value = setInterval(function(){
-            try {
-              const elementRegistry = bpmnModeler.value.get('elementRegistry');
-              const elementToSelect = elementRegistry.get('Activity_0pb7r4o');
-              // 添加高亮样式
-              bpmnModeler.value.get('canvas').addMarker(elementToSelect.id, 'highlight');
-            } catch (e) {
-              console.log(e, 'err')
-            }
-
-					},10000);
+					timerUpdateTask.value = setInterval(timerUpdateTaskFunction,10000);
 				}
 			}
 		  })
+	}
+}
+
+function timerUpdateTaskFunction(){
+	try {
+		const elementRegistry = bpmnModeler.value.get('elementRegistry');
+		const elementToSelect = elementRegistry.get('Activity_0pb7r4o');
+		// 添加高亮样式
+		bpmnModeler.value.get('canvas').addMarker(elementToSelect.id, 'highlight');
+		console.log(bpmnModeler.value)
+	} catch (e) {
+		console.log(e, 'err')
 	}
 }
 
