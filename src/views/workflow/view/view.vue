@@ -233,11 +233,31 @@ onUnmounted(()=>{
 
 </script>
 <style lang="scss">
+/* 定义动画 */
+@keyframes taskAnimation {
+  0% {
+    stroke-opacity: 0;
+  }
+  50% {
+    stroke-opacity: 1;
+  }
+  100% {
+    stroke-opacity: 0;
+  }
+}
 //高亮节点
 .highlight {
+  .djs-hit {
+    stroke: #f65d68 !important;
+    stroke-width: 4px !important;
+    animation: taskAnimation 2s infinite;
+    stroke-dasharray: 5,5;
+    rx: 10;
+    ry: 10;
+  }
   .djs-visual {
     text {
-      fill: #1fbe07 !important;
+      //fill: #1fbe07 !important;
     }
   }
 }
