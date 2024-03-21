@@ -4,7 +4,7 @@
   import { dayjs } from "@/utils/common-dayjs"
   import {  Edit } from '@element-plus/icons-vue'
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
-  import { changeStatus, pageList,  addHost, queryDetail, checkServerName, checkInstanceCode} from "@/api/ansible/host"
+  import { changeStatus, pageList,  addHost, queryDetail, checkServerName, checkInstanceCode, removeServer} from "@/api/ansible/host"
 
   const queryFormRef = ref(null);
   const sshInstanceCodes = reactive([])
@@ -230,6 +230,39 @@
       
   }
 
+  const handleDelete = function(row){
+    const serverName = row.serverName
+    let msg = ""
+    msg = '是否删除主机名为【"' + serverName + '"】的数据项？'
+
+    ElMessageBox.confirm(
+      msg,
+      'Warning',
+      {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    ).then(() => {
+      removeServer(row.id).then((res)=>{
+        if(res.code == 200){
+          getList();
+          ElMessage({
+              showClose: true,
+              message: '删除成功',
+              type: 'success',
+          });
+        }else{
+          ElMessage({
+              showClose: true,
+              message: '删除出现异常,请联系管理员',
+              type: 'error',
+          });
+        }
+      })
+    })
+  }
+
   // 处理修改按钮
   const handleUpdate = function(row){
     reset()
@@ -375,6 +408,12 @@
                   @click="handleUpdate(scope.row)"
                   v-hasPerms="['/ansible/host/add']"
                 >修改</el-button>
+                <el-button
+                  size="small"
+                  :icon="Delete"
+                  @click="handleDelete(scope.row)"
+                  v-hasPerms="['/ansible/host/del/*']"
+                >删除</el-button>
               </div>
             </template>
           </el-table-column>

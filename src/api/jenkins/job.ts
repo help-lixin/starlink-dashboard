@@ -135,3 +135,13 @@ export function jobNameIsExist(jobName:string,instanceCode:string) {
     });
 }
 
+// 查询任务名称是否可用
+export function removeJob(jobId:number) {
+    return request({
+      url: STARLINK_SERVICE + '/jenkins/job/del/' + jobId,
+      method: 'delete'
+    }).then((res)=>{
+        return res?.data;
+    });
+}
+

@@ -7,7 +7,7 @@
   import {  Edit, List, CopyDocument, Unlock, Lock } from '@element-plus/icons-vue'
   import { handleTree } from "@/utils/common"
   import { changeStatus, pageList, queryNodeList, addProject, projectNameIsExist, 
-    units, pullCommand, pushCommand, showIsPublicFun, changeAccessLevel, showAccessLevelOperateFun, isPublic} from "@/api/harbor/project"
+    units, pullCommand, pushCommand, showIsPublicFun, changeAccessLevel, showAccessLevelOperateFun, isPublic, removeProject} from "@/api/harbor/project"
 
   const queryFormRef = ref(null);
   const refreshTable = ref(true);
@@ -164,15 +164,78 @@
     handleQuery();
   }
 
+  // 处理删除按钮
+  const handleDelete = function(row){
+    const projectName = row.projectName
+    let msg = ""
+    msg = '是否删除项目【"' + projectName + '"】的数据项？'
+
+    ElMessageBox.confirm(
+      msg,
+      'Warning',
+      {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    ).then(() => {
+      removeProject(row.id).then((res)=>{
+          if(res.code == 200){
+              // 重置查询表单,并进行查询
+              queryParams.pageNum=1
+              getList()
+              ElMessage({
+                type: 'success',
+                message: '删除成功',
+              })
+          }else{
+              getList()
+              ElMessage({
+                type: 'error',
+                message: '删除失败',
+              })
+          }
+      })
+    })
+  }
 
   // 多选框选中数据
   const handleSelectionChange = function(selection){
 
   }
 
+  // 修改访问级别
   const handleChangeAccessLevel = (row)=>{
-    changeAccessLevel(row.id,queryParams.instanceCode);
-    getList();
+    const projectName = row.projectName
+    const isPublic = row.isPublic
+    const accessLevel = showAccessLevelOperateFun(row.isPublic)
+    let msg = ""
+    msg = '是否修改项目【"' + projectName + '"】的访问级别为'+ accessLevel +'？'
+
+    ElMessageBox.confirm(
+      msg,
+      'Warning',
+      {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    ).then(() => {
+      changeAccessLevel(isPublic,row.instanceCode).then((res)=>{
+          if(res.code == 200){
+              ElMessage({
+                type: 'success',
+                message: '修改成功',
+              })
+          }else{
+              ElMessage({
+                type: 'error',
+                message: '修改失败',
+              })
+          }
+          getList()
+      })
+    })
   }
 
   const handleStatusChange = (row)=>{
@@ -421,8 +484,8 @@
           </el-table-column>
           <el-table-column
             label="操作"
-            align="center"
-            width="350"
+            align="left"
+            width="420"
             flixed="right"
           >
             <template #default="scope">
@@ -446,6 +509,12 @@
                   {{ showAccessLevelOperateFun(scope.row.isPublic)  }}
                 </el-button>
                 <el-button size="small" icon="CopyDocument" @click="copyPushCommand(scope.row)">复制push</el-button>
+                <el-button size="small"
+                icon="Delete" 
+                @click="handleDelete(scope.row)" 
+                  v-hasPerms="['/harbor/project/del/*']">
+                  删除
+                </el-button>
               </div>
             </template>
           </el-table-column>

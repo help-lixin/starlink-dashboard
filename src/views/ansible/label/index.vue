@@ -4,7 +4,7 @@
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import {  Edit } from '@element-plus/icons-vue'
   import { dayjs } from "@/utils/common-dayjs"
-  import { changeStatus, pageList, addLabel, updateLabel, checkLabelKey, queryLabelDetail} from "@/api/ansible/label"
+  import { changeStatus, pageList, addLabel, updateLabel, checkLabelKey, queryLabelDetail, removeLabel} from "@/api/ansible/label"
 
   const queryFormRef = ref(null);
   const pluginCode = "jsch";
@@ -220,6 +220,8 @@
           throw response?.msg;
         }
         
+        addDialog.value = false;
+        getList();
       });
     }else{
       updateLabel(form).then(res =>{
@@ -235,12 +237,46 @@
           throw response?.msg;
         }
 
+        addDialog.value = false;
+        getList();
       })
     }
 
-    addDialog.value = false;
-    getList();
+    
       
+  }
+
+  const handleDelete = function(row){
+    const labelName = row.labelName
+    let msg = ""
+    msg = '是否删除标签名为【"' + labelName + '"】的数据项？'
+
+    ElMessageBox.confirm(
+      msg,
+      'Warning',
+      {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    ).then(() => {
+      removeLabel(row.id).then((res)=>{
+        if(res.code == 200){
+          getList();
+          ElMessage({
+              showClose: true,
+              message: '删除成功',
+              type: 'success',
+          });
+        }else{
+          ElMessage({
+              showClose: true,
+              message: '删除出现异常,请联系管理员',
+              type: 'error',
+          });
+        }
+      })
+    })
   }
 
   // 处理更新按钮
@@ -407,6 +443,12 @@
                   @click="handleUpdate(scope.row)"
                   v-hasPerms="['/ansible/label/queryLabelDetail/*']"
                 >修改</el-button>
+                <el-button
+                  size="small"
+                  icon="Delete"
+                  @click="handleDelete(scope.row)"
+                  v-hasPerms="['/ansible/label/del/*']"
+                >删除</el-button>
               </div>
             </template>
           </el-table-column>

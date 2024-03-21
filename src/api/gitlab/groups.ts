@@ -122,3 +122,13 @@ export function queryGitlabAddr(instanceCode:string) {
       return res?.data;
   });
 }
+
+// 删除组
+export function removeGroup(groupId:number) {
+  return request({
+    url: STARLINK_SERVICE + '/gitlab/group/del/'+groupId,
+    method: 'delete'
+  }).then((res)=>{
+      return res?.data;
+  });
+}

@@ -4,10 +4,10 @@
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import {  Edit } from '@element-plus/icons-vue'
   import { dayjs } from "@/utils/common-dayjs"
-  import { changeStatus, pageList, addLabel, checkLabelKey, queryLabelDetail} from "@/api/ssh/label"
+  import { changeStatus, pageList, addLabel, checkLabelKey, queryLabelDetail, removeLabel} from "@/api/ssh/label"
 
   const queryFormRef = ref(null);
-  const pluginCode = "ssh";
+  const pluginCode = "jsch";
   const labelKey = ref(null)
 
   //查询列表信息
@@ -240,9 +240,40 @@
         getList();
       })
     }
+  }
 
-    
-      
+// 处理删除按钮
+const handleDelete = function(row){
+    const labelKey = row.labelKey
+    let msg = ""
+    msg = '是否删除标签【"' + labelKey + '"】的数据项？'
+
+    ElMessageBox.confirm(
+      msg,
+      'Warning',
+      {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    ).then(() => {
+      removeLabel(row.id).then((res)=>{
+          if(res.code == 200){
+              // 重置查询表单,并进行查询
+              queryParams.pageNum=1
+              getList()
+              ElMessage({
+                type: 'success',
+                message: '删除成功',
+              })
+          }else{
+              ElMessage({
+                type: 'error',
+                message: '删除失败:'+res.msg,
+              })
+          }
+      })
+    })
   }
 
   // 处理更新按钮
@@ -410,6 +441,12 @@
                   @click="handleUpdate(scope.row)"
                   v-hasPerms="['/ssh/label/add']"
                 >修改</el-button>
+                <el-button
+                  size="small"
+                  icon="Delete"
+                  @click="handleDelete(scope.row)"
+                  v-hasPerms="['/ssh/label/del/*']"
+                >删除</el-button>
               </div>
             </template>
           </el-table-column>

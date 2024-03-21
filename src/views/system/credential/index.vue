@@ -3,7 +3,8 @@
   import { showStatusOperateFun , status , showStatusFun , addDateRange, getStatusIcon } from "@/utils/common"
   import { queryInstanceInfoByPluginCode,pluginOptionSelect } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
-  import {sysCredentialList, addCredential, queryCredentialInfoById, checkKey , changeStatus ,credentialTypes} from "@/api/sys_credential/credential"
+  import {sysCredentialList, addCredential, queryCredentialInfoById, checkKey , 
+    removeCredential,changeStatus ,credentialTypes,syncAllCredential} from "@/api/sys_credential/credential"
 
   const queryFormRef = ref(null);
   //查询列表信息
@@ -18,7 +19,17 @@
     credentialName: undefined
   })
 
-
+  const handleSyncAllCredential = () =>{
+      syncAllCredential().then((res)=>{
+          if(res.code == 200){
+            ElMessage({
+                  showClose: true,
+                  message: '同步消息已成功发送',
+                  type: 'success',
+            });
+          }
+      })
+  }
 
   const loading = ref(false)
 
@@ -248,8 +259,39 @@
           getList();
         });
       }
+  }
 
+  // 处理删除按钮
+  const handleDelete = function(row){
+    const credentialKey = row.credentialKey
+    let msg = ""
+    msg = '是否删除凭证【"' + credentialKey + '"】的数据项？'
 
+    ElMessageBox.confirm(
+      msg,
+      'Warning',
+      {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    ).then(() => {
+      removeCredential(row.id).then((res)=>{
+          if(res.code == 200){
+              // 重置查询表单,并进行查询
+              getList()
+              ElMessage({
+                type: 'success',
+                message: '删除成功',
+              })
+          }else{
+              ElMessage({
+                type: 'error',
+                message: '删除失败:'+res.msg,
+              })
+          }
+      })
+    })
   }
 
   const handleStatusChange = (row)=>{
@@ -415,7 +457,12 @@
           type="primary"
           plain
           size="default"
-          @click="handleAdd" v-hasPerms="['/jenkins/systemConfig/add']" ><el-icon><Plus /></el-icon>新增</el-button>
+          @click="handleAdd" v-hasPerms="['/credential/add']" ><el-icon><Plus /></el-icon>新增</el-button>
+        <el-button
+          type="primary"
+          plain
+          size="default"
+          @click="handleSyncAllCredential" v-hasPerms="['/credential/syncAllCredential']" ><el-icon><Switch/></el-icon>同步凭证信息</el-button>
       </div>
 
       <!--table  -->
@@ -440,7 +487,7 @@
           <el-table-column
             label="操作"
             align="left"
-            width="220"
+            width="250"
           >
             <template #default="scope">
               <div class="action-btn">
@@ -456,6 +503,12 @@
                   @click="handleStatusChange(scope.row)"
                   v-hasPerms="['/credential/changeStatus/**']"
                 >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
+                <el-button
+                  size="small"
+                  icon="Delete"
+                  @click="handleDelete(scope.row)"
+                  v-hasPerms="['/credential/del/*']"
+                >删除</el-button>
               </div>
             </template>
           </el-table-column>
@@ -518,7 +571,7 @@
               <el-form-item label="凭证key" prop="credentialKey" :rules="[
                   { required: true, message: '凭证key不能为空', trigger: 'blur' },
                   { min: 2, max: 50, message: '凭证key长度必须介于 2 和 50 之间', trigger: 'blur' } ]">
-                <el-input v-model="form.credentialKey" placeholder="请输入凭证唯一名称" maxlength="50" />
+                <el-input v-model="form.credentialKey" :disabled="form.id != undefined" placeholder="请输入凭证唯一名称" maxlength="50" />
               </el-form-item>
             </el-col>
 
@@ -585,21 +638,19 @@
               <el-form-item label="公钥" prop="publicKey" :rules="[
                   { required: true, message: '公钥不能为空', trigger: 'blur' },
                   { min: 2, max: 2000, message: '公钥长度必须介于 2 和 2000 之间', trigger: 'blur' } ]">
-                <el-input v-model="form.publicKey" placeholder="请输入公钥"  maxlength="2000"/>
+                <el-input v-model="form.publicKey" placeholder="请输入公钥" type="textarea" maxlength="2000"/>
               </el-form-item>
             </el-col>
             <el-col :span="12">
               <el-form-item label="私钥" prop="privateKey" :rules="[
                   { required: true, message: '私钥不能为空', trigger: 'blur' },
                   { min: 2, max: 2000, message: '私钥长度必须介于 2 和 2000 之间', trigger: 'blur' } ]">
-                <el-input v-model="form.privateKey" placeholder="请输入私钥"  maxlength="2000"/>
+                <el-input v-model="form.privateKey" placeholder="请输入私钥" type="textarea" maxlength="2000"/>
               </el-form-item>
             </el-col>
 
             <el-col :span="12">
-              <el-form-item label="密钥" prop="passphrase" :rules="[
-                  { required: true, message: '密钥不能为空', trigger: 'blur' },
-                  { min: 2, max: 2000, message: '密钥长度必须介于 2 和 2000 之间', trigger: 'blur' } ]">
+              <el-form-item label="密钥" prop="passphrase" >
                 <el-input v-model="form.passphrase" placeholder="请输入密钥" maxlength="2000" />
               </el-form-item>
             </el-col>

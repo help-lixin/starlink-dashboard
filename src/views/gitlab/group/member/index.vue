@@ -1,11 +1,11 @@
 <script setup lang="ts">
   // @ts-nocheck
   import { Plus , Search , RefreshRight , Sort } from '@element-plus/icons-vue'
-  import {  status , showStatusFun , addDateRange } from "@/utils/common"
+  import {  status , showStatusFun , addDateRange ,showStatusOperateFun, getStatusIcon} from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
   import {  Delete } from '@element-plus/icons-vue'
-  import { memberList , addGroupMember , updateGroupMember  , removeMember} from "@/api/gitlab/members"
+  import { memberList , addGroupMember , updateGroupMember  , removeMember ,changeStatus} from "@/api/gitlab/members"
   import { selectOption} from "@/api/gitlab/users"
   import { selectGitlabIdOptions,accessLevels,selectIdOptions } from "@/api/gitlab/groups"
 
@@ -21,7 +21,7 @@
     userName: undefined,
     groupId: undefined,
     instanceCode: undefined,
-    groups:[]
+    groups:undefined
   })
 
   const loading = ref(false)
@@ -33,6 +33,7 @@
   const total= ref(0)
   // 列表信息
   const dataList = reactive([])
+  const groups = reactive([])
 
   // 表单
   const open = ref(false);
@@ -74,6 +75,8 @@
       // form.userIds.splice(form.userIds.length)
       Object.assign(form,{
         id: undefined,
+        userIds: undefined,
+        groupId: undefined,
         accessLevel: undefined,
         projectId: undefined,
         instanceCode: queryParams.instanceCode
@@ -128,13 +131,9 @@
 
     selectIdOptions(queryParams.instanceCode).then((response)=>{
       form.groups = response?.data
-      console.log("group->")
-      console.log(form.groups)
     })
 
     selectOption(queryParams.instanceCode).then((response)=>{
-      console.log("user->")
-      console.log(response)
       form.users = response?.data
     })
     form.instanceCode = queryParams.instanceCode;
@@ -189,37 +188,64 @@
       }
   }
 
-  // 修改处理
-  const handleEdit = (row)=>{
+  // 处理修改状态
+  const handleChangeStatus = (row)=>{
+    const id = row.id
+    const status = row.status
+    let msg = ""
+    if(status == 1){
+      msg = '是否禁用编号为"' + id + '"的数据项？'
+    }else{
+      msg = '是否启用编号为"' + id + '"的数据项？'
+    }
 
+    ElMessageBox.confirm(
+      msg,
+      'Warning',
+      {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    ).then(() => {
+        let tmpStatus;
+        if(status == 0){
+          tmpStatus = 1
+        }else{
+          tmpStatus = 0
+        }
+        changeStatus(id,tmpStatus).then((res)=>{
+          if(res.code == 200){
+          ElMessage({ showClose: true, message: '修改成功', type: 'success', });
+          getList()
+        }else{
+          ElMessage({ showClose: true, message: res?.msg, type: 'error', });
+        }
+        })
+    })
+    .catch(() => { })
   }
 
   // 删除处理
   const handleDelete = (row)=>{
     const memberName = row.userName
-    const curStatus = row.status
     let msg = ""
     msg = '是否删除组成员【"' + memberName + '"】的数据项？'
-
-    const deleteParams = {
-      userId: row.userId,
-      groupId: row.groupId,
-      instanceCode: row.instanceCode
-    };
 
     ElMessageBox.confirm(
       msg, 'Warning', { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning', }
     ).then(() => {
-      removeMember(deleteParams)
+      removeMember(row.id)
       .then((res)=>{
           if(res.code == 200){
-              getList()
               ElMessage({ type: 'success', message: '操作成功', })
+          }else{
+              ElMessage({type: 'warning',message: '删除失败',})
           }
+          getList()
         })
     }).catch(() => {
-      getList()
-      ElMessage({type: 'warning',message: '删除失败',})
+     
     })
   }
 
@@ -247,11 +273,11 @@
     const instanceCode = queryParams?.instanceCode;
     if(instanceCode && instanceCode.length > 0 ){
        // 根据instanceCode重新加载用户组
-        selectGitlabIdOptions(instanceCode).then(response => {
-            queryParams.groups = response?.data
-        })
+      selectIdOptions(instanceCode).then(response => {
+          Object.assign(groups,response?.data)
+      })
     }else{
-      queryParams.groups=[];
+      groups.splice(0,groups.length);
     }
   }
 
@@ -265,8 +291,8 @@
             queryParams.instanceCode = res?.data[0].instanceCode
           }
 
-          selectGitlabIdOptions(queryParams.instanceCode).then((response)=>{
-            queryParams.groups = response?.data
+          selectIdOptions(queryParams.instanceCode).then((response)=>{
+            groups = response?.data
             // queryParams.groupId = response?.data[0]?.id
             // 触发查询
             
@@ -306,7 +332,7 @@
               clearable
               style="width: 240px"
             >
-            <el-option v-for="dict in queryParams.groups"
+            <el-option v-for="dict in groups"
               :key="dict.id"
               :label="dict.gitlabGroupName"
               :value="dict.id"/>
@@ -389,12 +415,18 @@
           >
             <template #default="scope">
              <div class="action-btn">
-              <el-button
-                size="small"
-                icon="Delete"
-                @click="handleDelete(scope.row)"
-                v-hasPerms="['/gitlab/group/member/del']"
-              >删除</el-button>
+               <el-button
+               size="small"
+               :icon="getStatusIcon(scope.row)"
+               @click="handleChangeStatus(scope.row)"
+               v-hasPerms="['/gitlab/group/member/changeStatus/**']"
+               >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
+               <el-button
+                 size="small"
+                 icon="Delete"
+                 @click="handleDelete(scope.row)"
+                 v-hasPerms="['/gitlab/group/member/del']"
+               >删除</el-button>
               <!-- <el-button
                 size="small"
                 icon="Edit"

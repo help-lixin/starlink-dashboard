@@ -49,12 +49,21 @@ export function queryLabelDetail(id:number) {
     });
 }
 
-
 // 查询任务名称是否可用
 export function checkLabelKey(labelKey:string) {
     return request({
       url: STARLINK_SERVICE + '/ssh/label/checkLabelKey/' + labelKey,
       method: 'get'
+    }).then((res)=>{
+        return res?.data;
+    });
+}
+
+// 删除ssh标签
+export function removeLabel(labelId:number) {
+    return request({
+      url: STARLINK_SERVICE + '/ssh/label/del/' + labelId,
+      method: 'delete'
     }).then((res)=>{
         return res?.data;
     });

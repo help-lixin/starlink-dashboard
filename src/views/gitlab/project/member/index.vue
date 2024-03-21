@@ -1,12 +1,12 @@
 <script setup lang="ts">
   // @ts-nocheck
   import { Delete } from '@element-plus/icons-vue'
-  import { addDateRange } from "@/utils/common"
-  import { queryInstanceInfoByPluginCode } from "@/api/common-api"
+  import { addDateRange , showStatusOperateFun, status ,getStatusIcon ,showStatusFun} from "@/utils/common"
+  import { queryInstanceInfoByPluginCode} from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
-  import { memberList , addProjectMember , updateProjectMember , projectList , removeMember, showMemberProject} from "@/api/gitlab/project-member"
+  import { memberList , addProjectMember , updateProjectMember , projectList , removeMember, showMemberProject, changeStatus} from "@/api/gitlab/project-member"
   import { selectOption} from "@/api/gitlab/users"
-  import { groupList,accessLevels } from "@/api/gitlab/groups"
+  import { accessLevels } from "@/api/gitlab/groups"
 
   const queryForm = ref(null);
 
@@ -30,13 +30,6 @@
     endTime: undefined,
     status: 1,
     projectName: undefined,
-    instanceCode: undefined
-  })
-
-  //删除成员参数
-  const deleteParams = reactive({
-    userId: undefined,
-    projectId: undefined,
     instanceCode: undefined
   })
 
@@ -76,7 +69,6 @@
   const form = reactive({})
   const title = ref("")
   const pluginInstance = reactive([]);
-  const groups = reactive([]);
   const projects = reactive([]);
   const pluginCode = "gitlab"
 
@@ -107,6 +99,8 @@
         path: undefined,
         remark: undefined,
         status: undefined,
+        accessLevel: undefined,
+        projectId: undefined,
         instanceCode: queryParams.instanceCode
       })
   }
@@ -241,7 +235,43 @@
     })
   }
 
+// 处理修改状态
+const handleChangeStatus = (row)=>{
+    const id = row.id
+    const status = row.status
+    let msg = ""
+    if(status == 1){
+      msg = '是否禁用编号为"' + id + '"的数据项？'
+    }else{
+      msg = '是否启用编号为"' + id + '"的数据项？'
+    }
 
+    ElMessageBox.confirm(
+      msg,
+      'Warning',
+      {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    ).then(() => {
+        let tmpStatus;
+        if(status == 0){
+          tmpStatus = 1
+        }else{
+          tmpStatus = 0
+        }
+        changeStatus(id,tmpStatus).then((res)=>{
+          if(res.code == 200){
+          ElMessage({ showClose: true, message: '修改成功', type: 'success', });
+          getList()
+        }else{
+          ElMessage({ showClose: true, message: res?.msg, type: 'error', });
+        }
+        })
+    })
+    .catch(() => { })
+  }
 
   // 删除处理
   const handleDelete = (row)=>{
@@ -258,10 +288,7 @@
         type: 'warning',
       }
     ).then(() => {
-      deleteParams.projectId = row.projectId
-      deleteParams.instanceCode = row.instanceCode
-      deleteParams.userId = row.id
-      removeMember(deleteParams).then((res)=>{
+      removeMember(row.id).then((res)=>{
           if(res.code == 200){
               // 重置查询表单,并进行查询
               queryParams.pageNum=1
@@ -272,12 +299,6 @@
               })
           }
       })
-    }).catch(() => {
-      getList()
-      ElMessage({
-                  type: 'warning',
-                  message: '删除失败',
-        })
     })
   }
 
@@ -296,8 +317,8 @@
         groupParams.instanceCode = pluginInstance[0].instanceCode
         queryParams.instanceCode = pluginInstance[0].instanceCode
         projectParams.instanceCode = pluginInstance[0].instanceCode
-        groupList(groupParams).then((response) =>{
-          Object.assign(groups,response?.data?.records)
+        projectList(groupParams).then((response) =>{
+          Object.assign(projects,response?.data?.records)
         })
         projectList(projectParams).then((response)=>{
           if(response.code == 200){
@@ -337,6 +358,20 @@
               style="width: 240px"
               @keyup.enter.native="handleQuery"
             />
+          </el-form-item>
+          <el-form-item label="状态" prop="status">
+            <el-select
+            class="search-select"
+              v-model="queryParams.status"
+              placeholder="项目状态"
+              clearable
+              style="width: 240px"
+            >
+            <el-option v-for="dict in status"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"/>
+            </el-select>
           </el-form-item>
           <el-form-item label="项目" prop="projectId">
             <el-select
@@ -390,11 +425,11 @@
           <el-table-column label="成员昵称" align="left" key="nickName" prop="nickName"  :show-overflow-tooltip="true"  />
           <el-table-column label="邮箱" align="left" key="email" prop="email"  :show-overflow-tooltip="true"  />
           <el-table-column label="项目" align="left" key="projectName" prop="projectName"/>
-          <!-- <el-table-column label="状态" align="center" key="status">
+          <el-table-column label="状态" align="center" key="status">
             <template #default="scope">
               {{  showStatusFun(scope.row.status) }}
             </template>
-          </el-table-column> -->
+          </el-table-column>
           <el-table-column label="创建时间" align="left" prop="createTime" width="180">
             <template #default="scope">
               {{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}
@@ -407,12 +442,18 @@
           >
             <template #default="scope">
              <div class="action-btn">
-              <el-button
-                size="small"
-                icon="Delete"
-                @click="handleDelete(scope.row)"
-                v-hasPerms="['/gitlab/project/member/del']"
-              >删除</el-button>
+               <el-button
+               size="small"
+               :icon="getStatusIcon(scope.row)"
+               @click="handleChangeStatus(scope.row)"
+               v-hasPerms="['/gitlab/project/member/changeStatus/**']"
+               >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
+               <el-button
+                 size="small"
+                 icon="Delete"
+                 @click="handleDelete(scope.row)"
+                 v-hasPerms="['/gitlab/project/member/del/*']"
+               >删除</el-button>
              </div>
             </template>
           </el-table-column>

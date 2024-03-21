@@ -47,11 +47,10 @@ return request({
 }
 
 // 删除组成员
-export function removeMember(data:any) {
+export function removeMember(id:number) {
     return request({
-        url: STARLINK_SERVICE + '/gitlab/group/member/del',
-        method: 'delete',
-        data: data
+        url: STARLINK_SERVICE + '/gitlab/group/member/del/'+id,
+        method: 'delete'
     }).then((res)=>{
         return res?.data;
     });
@@ -63,4 +62,14 @@ export  function showMemberGroup(groupId:number,groups:any) {
             return group.gitlabGroupName
         }
     }
+  }
+
+// 修改组成员状态
+export function changeStatus(groupId:number,status:number) {
+    return request({
+      url: STARLINK_SERVICE + '/gitlab/group/member/changeStatus/'+groupId +"/" + status,
+      method: 'get'
+    }).then((res)=>{
+        return res?.data;
+    });
   }

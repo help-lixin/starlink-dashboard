@@ -144,3 +144,13 @@ export function jdkSelectOption(instanceCode:string) {
         return res?.data;
     });
 }
+
+// 同步所有系统配置
+export function syncAllSysConfig(){
+    return request({
+        url: STARLINK_SERVICE + '/jenkins/systemConfig/syncAllSysConfig',
+        method: 'get'
+      }).then((res)=>{
+          return res?.data;
+    });
+}

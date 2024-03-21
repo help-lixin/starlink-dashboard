@@ -121,6 +121,14 @@ export const dynamicRoutes = [
     }
   },
   {
+    path: '/jenkins/build/index',
+    name: 'jenkins-build',
+    component: () => import('../views/jenkins/build/index.vue'),
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
     path: '/jenkins/sys_config/index',
     name: 'jenkins-sysConfig',
     component: () => import('../views/jenkins/sys_config/index.vue'),

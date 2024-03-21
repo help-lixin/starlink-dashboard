@@ -83,3 +83,21 @@ return request({
       return res?.data;
   });
 }
+
+export function syncAllCredential(){
+    return request({
+      url: STARLINK_SERVICE + '/credential/syncAllCredential' ,
+      method: 'get'
+    }).then((res)=>{
+        return res?.data;
+    });
+}
+
+export function removeCredential(id:number){
+    return request({
+      url: STARLINK_SERVICE + '/credential/del/' + id ,
+      method: 'delete'
+    }).then((res)=>{
+        return res?.data;
+    });
+}

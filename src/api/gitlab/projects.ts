@@ -78,3 +78,13 @@ export function projectOptionSelects(instanceCode:string) {
     });
 }
 
+// 项目下拉列表查询
+export function removeProject(id:number) {
+    return request({
+        url: STARLINK_SERVICE + '/gitlab/project/del/' + id,
+        method: 'delete'
+    }).then((res)=>{
+        return res?.data;
+    });
+}
+

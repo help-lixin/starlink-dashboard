@@ -59,11 +59,10 @@ return request({
 }
 
 // 删除组成员
-export function removeMember(data:any) {
+export function removeMember(id:number) {
     return request({
-        url: STARLINK_SERVICE + '/gitlab/project/member/del',
-        method: 'delete',
-        data: data
+        url: STARLINK_SERVICE + '/gitlab/project/member/del/'+id,
+        method: 'delete'
     }).then((res)=>{
         return res?.data;
     });
@@ -76,3 +75,12 @@ export  function showMemberProject(projectId:number,projects:any) {
         }
     }
   }
+
+export function changeStatus(id:number,status:number){
+    return request({
+        url: STARLINK_SERVICE + '/gitlab/project/member/changeStatus/'+id+"/"+status,
+        method: 'put'
+    }).then((res)=>{
+        return res?.data;
+    });
+}

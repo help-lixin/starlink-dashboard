@@ -109,6 +109,7 @@ const getList = ()=>{
         ],
         instanceCode :[
           { required: true, message: "实例编码不能为空", trigger: "blur" },
+          { pattern: /^[-a-zA-Z0-9]*$/, message: '只可以输入字母、数字、下划线', trigger: 'blur' }
         ],
         instanceName: [
           { required: true, message: "实例名称不能为空", trigger: "blur" },

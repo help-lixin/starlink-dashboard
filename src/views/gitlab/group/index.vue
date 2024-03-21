@@ -3,8 +3,8 @@
   import { showStatusOperateFun , status , showStatusFun , addDateRange , getStatusIcon } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
-  import {  Edit } from '@element-plus/icons-vue'
-  import {addGroup , updateGroup , queryGroupInfoById, changeGroupStatus, groupList, queryGitlabAddr} from "@/api/gitlab/groups"
+  import {  Edit,Delete } from '@element-plus/icons-vue'
+  import {addGroup , updateGroup , queryGroupInfoById, changeGroupStatus, groupList, queryGitlabAddr,removeGroup} from "@/api/gitlab/groups"
 
   const queryFormRef = ref(null);
   //查询列表信息
@@ -132,6 +132,7 @@
         Object.assign(form,response?.data)
         form.groupName = response?.data.gitlabGroupName
         form.groupId = response?.data.id
+        queryGitlabAddrFun()
         open.value = true;
         title.value = "修改组";
       }
@@ -142,6 +143,42 @@
   // 多选框选中数据
   const handleSelectionChange = function(selection){
 
+  }
+
+  // 删除组
+  const handleDelete = function(row){
+
+    const groupName = row.gitlabGroupName
+    let msg = ""
+    msg = '是否删除组名为【"' + groupName + '"】的数据项？'
+
+    ElMessageBox.confirm(
+      msg,
+      'Warning',
+      {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    ).then(() => {
+      removeGroup(row.id).then((res)=>{
+        if(res.code == 200){
+          getList();
+          ElMessage({
+              showClose: true,
+              message: '删除成功',
+              type: 'success',
+          });
+        }else{
+          ElMessage({
+              showClose: true,
+              message: '删除出现异常,请联系管理员',
+              type: 'error',
+          });
+        }
+      })
+    })
+    
   }
 
   // 表单提交处理
@@ -349,6 +386,7 @@
           <el-table-column type="selection" width="60" align="center" />
           <el-table-column label="组编号" align="left" key="id" prop="id" v-if="false"/>
           <el-table-column label="组名称" align="left" key="gitlabGroupName" prop="gitlabGroupName"  :show-overflow-tooltip="true" />
+          <el-table-column label="可见性级别" align="left" key="visibility" prop="visibility"  :show-overflow-tooltip="true" />
           <el-table-column label="群组URL" align="left" key="path" prop="path"  :show-overflow-tooltip="true" />
           <el-table-column label="备注" align="left" key="remark" prop="remark" :show-overflow-tooltip="true"  />
           <el-table-column label="状态" align="center" key="status" >
@@ -363,8 +401,8 @@
           </el-table-column>
           <el-table-column
             label="操作"
-            align="center"
-            width="220"
+            align="left"
+            width="240"
           >
             <template #default="scope">
               <div class="action-btn">
@@ -380,6 +418,12 @@
                   @click="handleStatusChange(scope.row)"
                   v-hasPerms="['/gitlab/group/changeStatus/**']"
                 >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
+                <el-button
+                  size="small"
+                  icon="Delete"
+                  @click="handleDelete(scope.row)"
+                  v-hasPerms="['/gitlab/group/del/*']"
+                >删除</el-button>
               </div>
             </template>
           </el-table-column>

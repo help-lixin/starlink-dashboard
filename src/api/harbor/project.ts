@@ -127,3 +127,13 @@ export function projectNameIsExist(projectName:string,instanceCode:string) {
     });
 }
 
+// 删除
+export function removeProject(projectId:number) {
+    return request({
+      url: STARLINK_SERVICE + '/harbor/project/del/' + projectId,
+      method: 'delete'
+    }).then((res)=>{
+        return res?.data;
+    });
+}
+

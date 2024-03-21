@@ -5,7 +5,7 @@
   import {  Edit } from '@element-plus/icons-vue'
   import { dayjs } from "@/utils/common-dayjs"
   import {sysConfigList,addConfig,queryConfigInfoById,changeConfigStatus,sysConfigSelectOption,
-    checkHome,checkName,toolsSelectOption,tools,pluginTypeSelectOption} from "@/api/jenkins/sys_config"
+    checkHome,checkName,toolsSelectOption,tools,pluginTypeSelectOption,syncAllSysConfig} from "@/api/jenkins/sys_config"
 
   const queryFormRef = ref(null);
   //查询列表信息
@@ -128,6 +128,19 @@
     queryFormRef.value.resetFields();
     queryParams.instanceCode = pluginInstance[0].instanceCode
     handleQuery();
+  }
+
+  // 同步所有系统配置
+  const handleSyncAllSysConfig = function(){
+    syncAllSysConfig().then((res) =>{
+        if(res.code == 200){
+          ElMessage({
+              showClose: true,
+              message: '已完成同步系统配置',
+              type: 'success',
+          });
+        }
+    })
   }
 
   // 处理新增按钮
@@ -352,6 +365,11 @@
           plain
           size="default"
           @click="handleAdd" v-hasPerms="['/jenkins/systemConfig/add']" ><el-icon><Plus /></el-icon>新增</el-button>
+        <el-button
+          type="primary"
+          plain
+          size="default"
+          @click="handleSyncAllSysConfig" v-hasPerms="['/jenkins/systemConfig/syncAllSysConfig']" ><el-icon><Switch /></el-icon>同步系统配置</el-button>
       </div>
 
       <!--table  -->

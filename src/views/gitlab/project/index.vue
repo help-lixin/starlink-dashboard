@@ -3,8 +3,8 @@
   import { showStatusOperateFun , status , showStatusFun , addDateRange , enable, getStatusIcon } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
-  import {  Edit } from '@element-plus/icons-vue'
-  import { pageList , addProject , queryProjectInfoById , changeProjectStatus} from "@/api/gitlab/projects"
+  import {  Edit ,Delete} from '@element-plus/icons-vue'
+  import { pageList , addProject , queryProjectInfoById , changeProjectStatus, removeProject} from "@/api/gitlab/projects"
   import {selectGitlabIdOptions, queryGitlabAddr} from "@/api/gitlab/groups"
 
   const queryForm = ref(null);
@@ -138,6 +138,40 @@
         title.value = "修改项目";
       }
     });
+  }
+
+  // 处理删除按钮
+  const handleDelete = function(row){
+    const projectName = row.projectName
+    let msg = ""
+    msg = '是否删除项目【"' + projectName + '"】的数据项？'
+
+    ElMessageBox.confirm(
+      msg,
+      'Warning',
+      {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    ).then(() => {
+      removeProject(row.id).then((res)=>{
+          if(res.code == 200){
+              // 重置查询表单,并进行查询
+              queryParams.pageNum=1
+              getList()
+              ElMessage({
+                type: 'success',
+                message: '删除成功',
+              })
+          }else{
+              ElMessage({
+                type: 'success',
+                message: '删除失败：'+res.msg,
+              })
+          }
+      })
+    })
   }
 
 
@@ -371,7 +405,7 @@
           <el-table-column
             label="操作"
             align="left"
-            width="220"
+            width="240"
           >
             <template #default="scope">
              <div class="action-btn">
@@ -387,6 +421,12 @@
                 @click="handleStatusChange(scope.row)"
                 v-hasPerms="['/gitlab/project/changeStatus']"
               >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
+              <el-button
+                size="small"
+                icon="Delete"
+                @click="handleDelete(scope.row)"
+                v-hasPerms="['/gitlab/project/changeStatus']"
+              >删除</el-button>
              </div>
             </template>
           </el-table-column>

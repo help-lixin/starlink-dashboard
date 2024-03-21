@@ -6,7 +6,8 @@
   import {  Edit ,SwitchButton} from '@element-plus/icons-vue'
   import { credentialOption } from "@/api/sys_credential/credential"
   import {toolsSelectOption , jdkSelectOption} from "@/api/jenkins/sys_config"
-  import {addJob, changeStatus, pageList, tools ,scmType, queryJobDetail, paramTypes, jobSelectOption,  buildJob , jobNameIsExist} from "@/api/jenkins/job"
+  import {addJob, changeStatus, pageList, tools ,scmType, queryJobDetail, paramTypes, jobSelectOption,  buildJob , jobNameIsExist, removeJob} from "@/api/jenkins/job"
+  import {queryLogInfoByJobId} from "@/api/jenkins/logs"
   import type { pushScopeId } from "vue"
 
   const queryFormRef = ref(null);
@@ -90,6 +91,9 @@
 
   // 表单
   const open = ref(false);
+  // 日志窗口
+  const logs = ref(false);
+  const logInfo = ref("");
   const formRef = ref<FormInstance>();
 
   const formDefault = reactive({
@@ -241,6 +245,42 @@
   // 构建依赖任务下拉列表
   const jobs = reactive([])
   const jdkList = reactive([])
+
+  // 处理删除按钮
+  const handleDelete = function(row){
+    const jobName = row.jobName
+    let msg = ""
+    msg = '是否删除任务【"' + jobName + '"】的数据项？'
+
+    ElMessageBox.confirm(
+      msg,
+      'Warning',
+      {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    ).then(() => {
+      removeJob(row.id).then((res)=>{
+          if(res.code == 200){
+              // 重置查询表单,并进行查询
+              queryParams.pageNum=1
+              getList()
+              ElMessage({
+                type: 'success',
+                message: '删除成功',
+              })
+          }else{
+              ElMessage({
+                type: 'error',
+                message: '删除失败:'+res.msg,
+              })
+          }
+      })
+    })
+  }
+
+
   // 处理新增按钮
   const handleAdd = function(){
     reset()
@@ -613,7 +653,7 @@
           <el-table-column
             label="操作"
             align="left"
-            width="280"
+            width="320"
             flxed="right"
           >
             <template #default="scope">
@@ -636,6 +676,12 @@
                   @click="handleStatusChange(scope.row)"
                   v-hasPerms="['/jenkins/job/changeStatus/**']"
                 >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
+                <el-button
+                  size="small"
+                  icon="Delete"
+                  @click="handleDelete(scope.row)"
+                  v-hasPerms="['/jenkins/job/del/*']"
+                >删除</el-button>
               </div>
             </template>
           </el-table-column>
@@ -654,6 +700,13 @@
       </div>
     </yt-card>
 
+    <el-dialog :title="title" v-model="logs" width="600px" append-to-body>
+      <yt-card>
+        <el-form-item label="构建日志">
+            <el-input v-model="logInfo" type="textarea" ></el-input>
+        </el-form-item>
+      </yt-card>
+    </el-dialog>
 
 
     <!-- 添加或修改组配置对话框 -->

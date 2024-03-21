@@ -70,3 +70,12 @@ export function checkLabelKey(labelKey:string) {
     });
 }
 
+
+export function removeLabel(labelId:number){
+    return request({
+        url: STARLINK_SERVICE + '/ansible/label/del/' + labelId,
+        method: 'delete'
+    }).then((res)=>{
+        return res?.data;
+    });
+}

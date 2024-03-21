@@ -66,3 +66,13 @@ export function checkInstanceCode(instanceCode:string) {
     });
 }
 
+// 删除主机服务
+export function removeServer(id:number) {
+    return request({
+      url: STARLINK_SERVICE + '/ansible/host/del/'+ id,
+      method: 'delete'
+    }).then((res)=>{
+        return res?.data;
+    });
+}
+
