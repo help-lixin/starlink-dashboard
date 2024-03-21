@@ -470,8 +470,15 @@ async function saveAndRun(isRunning: boolean) {
 											message: '保存并运行流水线:"' + pipelineForm.value.name + '"成功',
 											type: 'success',
 										})
-										//跳转到流水管理界面
-										router.push("/workflow/definition/index");
+
+										//跳转到流水查看界面
+										const processInstnaceId = startWorkflowRes?.data?.id;
+										router.push({
+											name: "workflow-definition-view",
+											params: { 
+												processInstnaceId
+											}
+										})
 									}
 								});
 						}

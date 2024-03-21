@@ -201,6 +201,14 @@ export const dynamicRoutes = [
     }
   },
   {
+    path: '/workflow/definition/view/:processInstnaceId',
+    name: 'workflow-definition-view',
+    component: () => import('../views/workflow/view/view.vue'),
+    meta: {
+      requiresAuth: false
+    }
+  },
+  {
     path: '/nexus/respository/index',
     name: 'nexus-browes',
     component: () => import('../views/nexus/respository/index.vue'),

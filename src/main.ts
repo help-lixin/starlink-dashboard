@@ -13,10 +13,12 @@ import "virtual:svg-icons-register";
 import 'element-plus/theme-chalk/src/base.scss'
 import '@/styles/index.scss'
 import YtTextList from '@/components/YtTextList.vue'
+import ytPage from "@/components/YtPage.vue";
 const app = createApp(App)
 app.component('YtCard', YtCard)
 app.component('YtBottomOperate', YtBottomOperate)
 app.component('YtTextList', YtTextList)
+app.component('YtPage', ytPage)
 app.use(ElementPlus)
 // 注册所有图标
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {

@@ -3,7 +3,7 @@
 // 流水线定义管理
 import { Plus, Delete, Edit, EditPen, Search, RefreshRight, Sort, QuestionFilled } from '@element-plus/icons-vue'
 import { parseTime, status, addDateRange, showStatusFun, showStatusOperateFun, getStatusIcon } from "@/utils/common"
-import { list, get, changeStatus } from "@/api/workflowDefinition"
+import { list, get, changeStatus , startWorkFlowById } from "@/api/workflowDefinition"
 import { useRouter, useRoute } from "vue-router";
 const router = useRouter();
 
@@ -150,6 +150,29 @@ const handleDelete = function (row) {
   }).catch(() => { });
 }
 
+const handleRunning = function (row) {
+  const processDefinitionId = row.processDefinitionId
+  const startWorkFlowData = {
+    processDefinitionId
+  }
+
+  // 启动流水线
+  startWorkFlowById(startWorkFlowData)
+    .then((startWorkflowRes) => {
+      if (startWorkflowRes?.code == 200) {
+        const processInstnaceId = startWorkflowRes?.data?.id;
+        router.push({
+            name: "workflow-definition-view",
+            params: {
+              processInstnaceId
+             }
+          })
+      }else{
+        ElMessage.error('运行流水线:"' + row.processDefinitionName + '"失败')
+      }
+    });
+}
+
 
 // 触发查询
 getList()
@@ -219,9 +242,13 @@ getList()
               <span>{{ parseTime(scope.row.createdTime) }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="操作" align="center" width="220">
+          <el-table-column label="操作" align="center" width="280">
             <template v-slot="scope">
               <div class="action-btn">
+                <el-button size="small" @click="handleRunning(scope.row)"
+                            icon="VideoPlay"
+                           v-hasPerms="['/workflow/instance/startById']">运行</el-button>
+
                 <el-button size="small" @click="handleUpdate(scope.row)"
                             icon="Edit"
                            v-hasPerms="['/workflow/definition/operate']">修改</el-button>
@@ -238,8 +265,7 @@ getList()
         </el-table>
       </div>
       <div class="page-wrap">
-        <el-pagination v-show="total > 0" :total="total" background layout="prev, pager, next"
-                       v-model:current-page="queryParams.pageNum" v-model:page-size="queryParams.pageSize" @current-change="getList" />
+        <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>
       </div>
     </yt-card>
 
