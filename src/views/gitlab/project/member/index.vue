@@ -502,7 +502,7 @@ const handleChangeStatus = (row)=>{
           </el-col>
         </el-row>
         <el-row>
-          <el-col :span="12">
+          <!-- <el-col :span="12">
             <el-form-item label="成员" prop="userIds">
               <el-tree-select
                     v-model="form.userIds"
@@ -512,7 +512,7 @@ const handleChangeStatus = (row)=>{
                     style="width: 190px"
               />
             </el-form-item>
-          </el-col>
+          </el-col> -->
           <el-col :span="12">
             <el-form-item label="角色" prop="accessLevel">
               <el-select
@@ -528,6 +528,12 @@ const handleChangeStatus = (row)=>{
               </el-select>
             </el-form-item>
           </el-col>
+        </el-row>
+        <el-row>
+            <el-col>
+              <el-transfer v-model="form.userIds" :data="users" 
+              :titles="[ '未关联用户' , '已关联用户']"/>
+            </el-col>
         </el-row>
       </el-form>
       <template #footer>

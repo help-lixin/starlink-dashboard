@@ -7,7 +7,8 @@
   import {  Delete } from '@element-plus/icons-vue'
   import { memberList , addGroupMember , updateGroupMember  , removeMember ,changeStatus} from "@/api/gitlab/members"
   import { selectOption} from "@/api/gitlab/users"
-  import { selectGitlabIdOptions,accessLevels,selectIdOptions } from "@/api/gitlab/groups"
+  import { selectGitlabIdOptions,accessLevels,selectIdOptions, selectUsersOptions } from "@/api/gitlab/groups"
+import { assign } from 'lodash'
 
 
   const queryFormRef = ref(null);
@@ -35,6 +36,7 @@
   const dataList = reactive([])
   const groups = reactive([])
 
+  const users = reactive([])
   // 表单
   const open = ref(false);
   const formRef = ref<FormInstance>();
@@ -43,9 +45,7 @@
         accessLevel: undefined,
         projectId: undefined,
         userIds: [],
-        instanceCode: queryParams.instanceCode,
-        users:[],
-        groups:[]
+        instanceCode: queryParams.instanceCode
   })
   const title = ref("")
   const pluginInstance = reactive([]);
@@ -70,12 +70,11 @@
   // 重置表单
   const resetForm = ()=> {
       formRef.value?.clearValidate()
-      form.groups.splice(0,form.groups.length)
-      form.users.splice(form.users.length)
-      // form.userIds.splice(form.userIds.length)
+      groups.splice(0,groups.length)
+      users.splice(0,users.length)
       Object.assign(form,{
         id: undefined,
-        userIds: undefined,
+        userIds: [],
         groupId: undefined,
         accessLevel: undefined,
         projectId: undefined,
@@ -121,7 +120,6 @@
   }
 
 
-
   // 处理新增按钮
   const handleAdd = ()=>{
     resetForm();
@@ -130,12 +128,20 @@
 
 
     selectIdOptions(queryParams.instanceCode).then((response)=>{
-      form.groups = response?.data
+      Object.assign(groups , response?.data)
     })
 
+    // 查询未选用户列表
     selectOption(queryParams.instanceCode).then((response)=>{
-      form.users = response?.data
+      const data = response?.data;
+      data.forEach((v) =>{
+          users.push({
+            label:v.label,
+            key:v.value
+          })
+      })
     })
+
     form.instanceCode = queryParams.instanceCode;
   }
 
@@ -159,8 +165,6 @@
     // 临时拷贝一份,清除:groups/users属性和数据
     const requestForm = {};
     Object.assign(requestForm,form)
-    delete requestForm.groups
-    delete requestForm.users
 
     if (requestForm.id != undefined) {
         updateGroupMember(requestForm)
@@ -261,11 +265,30 @@
     if(instanceCode && instanceCode.length > 0 ){
       // 根据instanceCode重新加载用户组
       selectIdOptions(instanceCode).then(response => {
-          form.groups = response?.data
+          Object.assign(groups , response?.data)
       })
     }else{
-      form.groups = []
+      groups = []
     }
+  }
+
+  // form表单切换组,修改成员下拉列表
+  const formSwitchGroup = ()=>{
+
+    console.log("========")
+      const queryMember = reactive({
+          pageNum: 1,
+          pageSize: 100,
+          groupId: form.groupId,
+          instanceCode: form.instanceCode,
+      })
+
+      selectUsersOptions(queryMember).then((res)=>{
+        res?.data.records.forEach((v)=>{
+          form.userIds.push(0, v.userId)
+        })
+          // Object.assign(form.userIds,res?.data.records)
+      })
   }
 
   // 列表页面,切换实例操作.
@@ -453,7 +476,7 @@
                 <el-select
                 class="search-select2"
                   v-model="form.instanceCode"
-                  :change="formSwitchInstance"
+                  @change="formSwitchInstance"
                   placeholder="请选择实例"
                   style="width: 240px"
                 >
@@ -470,11 +493,11 @@
                   class="search-select"
                   v-model="form.groupId"
                   placeholder="请选择成员组"
-                  clearable
+                  @change="formSwitchGroup"
                   style="width: 240px"
                 >
-                <el-option v-for="dict in form.groups"
-                  :key="dict.gitlabGroupName"
+                <el-option v-for="dict in groups"
+                  :key="dict.id"
                   :label="dict.gitlabGroupName"
                   :value="dict.id"/>
                 </el-select>
@@ -485,17 +508,6 @@
 
 
           <el-row>
-            <el-col :span="12">
-              <el-form-item label="成员" prop="userIds">
-                  <el-tree-select
-                    v-model="form.userIds"
-                    :data="form.users"
-                    :multiple="true"
-                    show-checkbox
-                    style="width: 240px"
-                  />
-              </el-form-item>
-            </el-col>
             <el-col :span="12">
               <el-form-item label="角色" prop="accessLevel">
                 <el-select
@@ -511,6 +523,13 @@
                   :value="accessLevel.value"/>
                 </el-select>
               </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row>
+            <el-col>
+              <el-transfer v-model="form.userIds" :data="users"
+              :titles="[ '未关联' , '已关联']"/>
             </el-col>
           </el-row>
 

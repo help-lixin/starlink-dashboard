@@ -112,6 +112,17 @@ export function selectIdOptions(instanceCode:string) {
     });
 }
 
+// 查询组id下拉列表
+export function selectUsersOptions(memberData:any) {
+    return request({
+      url: STARLINK_SERVICE + '/gitlab/group/member/list',
+      method: 'get',
+      params: memberData
+    }).then((res)=>{
+        return res?.data;
+    });
+}
+
 
 // 查询实例当前ip端口地址
 export function queryGitlabAddr(instanceCode:string) {
