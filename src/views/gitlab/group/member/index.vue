@@ -268,7 +268,7 @@ import { assign } from 'lodash'
           Object.assign(groups , response?.data)
       })
     }else{
-      groups = []
+      groups.splice(0,groups.length)
     }
   }
 
@@ -315,7 +315,7 @@ import { assign } from 'lodash'
           }
 
           selectIdOptions(queryParams.instanceCode).then((response)=>{
-            groups = response?.data
+            Object.assign(groups ,response?.data)
             // queryParams.groupId = response?.data[0]?.id
             // 触发查询
 
