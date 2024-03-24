@@ -62,3 +62,13 @@ export function add(data:any) {
         return res.data;
     })
 }
+
+// 检查插件编码引用
+export function checkPluginCode(pluginCode:string) {
+    return request({
+        url: GATEWAY_BASE_URL + '/system-service/system/plugin/instance/optionSelects/'+pluginCode,
+        method: 'get'
+    }).then(res=>{
+        return res.data;
+    })
+}

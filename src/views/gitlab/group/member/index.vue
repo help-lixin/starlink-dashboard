@@ -44,7 +44,7 @@ import { assign } from 'lodash'
         id: undefined,
         accessLevel: undefined,
         projectId: undefined,
-        userIds: [],
+        userId: undefined,
         instanceCode: queryParams.instanceCode
   })
   const title = ref("")
@@ -74,7 +74,7 @@ import { assign } from 'lodash'
       users.splice(0,users.length)
       Object.assign(form,{
         id: undefined,
-        userIds: [],
+        userId: undefined,
         groupId: undefined,
         accessLevel: undefined,
         projectId: undefined,
@@ -129,17 +129,6 @@ import { assign } from 'lodash'
 
     selectIdOptions(queryParams.instanceCode).then((response)=>{
       Object.assign(groups , response?.data)
-    })
-
-    // 查询未选用户列表
-    selectOption(queryParams.instanceCode).then((response)=>{
-      const data = response?.data;
-      data.forEach((v) =>{
-          users.push({
-            label:v.label,
-            key:v.value
-          })
-      })
     })
 
     form.instanceCode = queryParams.instanceCode;
@@ -220,14 +209,25 @@ import { assign } from 'lodash'
         }
         changeStatus(id,tmpStatus).then((res)=>{
           if(res.code == 200){
-          ElMessage({ showClose: true, message: '修改成功', type: 'success', });
-          getList()
-        }else{
-          ElMessage({ showClose: true, message: res?.msg, type: 'error', });
-        }
+            ElMessage({ showClose: true, message: '修改成功', type: 'success', });
+            getList()
+          }else{
+            ElMessage({ showClose: true, message: res?.msg, type: 'error', });
+          }
         })
     })
-    .catch(() => { })
+  }
+
+  // 查询未选用户列表
+  const queryMemberList = (value) =>{
+    selectUsersOptions(form.groupId,"test").then((response)=>{
+        if(response.code == 200){
+          console.log(response.data)
+          console.log(users)
+          Object.assign(users, response?.data)
+          console.log(users)
+        }
+    })
   }
 
   // 删除处理
@@ -270,25 +270,6 @@ import { assign } from 'lodash'
     }else{
       groups.splice(0,groups.length)
     }
-  }
-
-  // form表单切换组,修改成员下拉列表
-  const formSwitchGroup = ()=>{
-
-    console.log("========")
-      const queryMember = reactive({
-          pageNum: 1,
-          pageSize: 100,
-          groupId: form.groupId,
-          instanceCode: form.instanceCode,
-      })
-
-      selectUsersOptions(queryMember).then((res)=>{
-        res?.data.records.forEach((v)=>{
-          form.userIds.push(0, v.userId)
-        })
-          // Object.assign(form.userIds,res?.data.records)
-      })
   }
 
   // 列表页面,切换实例操作.
@@ -493,7 +474,7 @@ import { assign } from 'lodash'
                   class="search-select"
                   v-model="form.groupId"
                   placeholder="请选择成员组"
-                  @change="formSwitchGroup"
+                  @change="queryMemberList"
                   style="width: 240px"
                 >
                 <el-option v-for="dict in groups"
@@ -508,6 +489,20 @@ import { assign } from 'lodash'
 
 
           <el-row>
+            <el-col :span="12">
+              <el-form-item label="成员" prop="userIds">
+                  <el-select
+                        v-model="form.userId"
+                        filterable
+                        @input="queryMemberList"
+                        style="width: 190px"
+                  />
+                  <el-option v-for="item in users"
+                  :key="item.label"
+                  :label="item.label"
+                  :value="item.value"/>
+              </el-form-item>
+            </el-col>
             <el-col :span="12">
               <el-form-item label="角色" prop="accessLevel">
                 <el-select
@@ -525,14 +520,6 @@ import { assign } from 'lodash'
               </el-form-item>
             </el-col>
           </el-row>
-
-          <el-row>
-            <el-col>
-              <el-transfer v-model="form.userIds" :data="users"
-              :titles="[ '未关联' , '已关联']"/>
-            </el-col>
-          </el-row>
-
         </el-form>
       </yt-card>
       <template #footer>

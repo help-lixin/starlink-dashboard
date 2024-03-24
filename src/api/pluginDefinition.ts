@@ -73,3 +73,13 @@ export const getPluginMeta = (pluginCode:any)=>{
         return res.data;
     })
 }
+
+// 删除插件定义管理
+export const removePluginDefinition = (id:number)=>{
+    return request({
+		url: GATEWAY_BASE_URL + '/system-service/system/plugin/definition/del/' + id,
+		method: 'DELETE'
+	}).then((res)=>{
+        return res.data;
+    })
+}

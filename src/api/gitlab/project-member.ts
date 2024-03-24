@@ -84,3 +84,14 @@ export function changeStatus(id:number,status:number){
         return res?.data;
     });
 }
+
+
+// 查询用户下拉列表
+export function selectUsersOptions(projectId:number,userName:string) {
+    return request({
+      url: STARLINK_SERVICE + '/gitlab/project/member/option/list/'+ projectId + "/" + userName,
+      method: 'get'
+    }).then((res)=>{
+        return res?.data;
+    });
+}

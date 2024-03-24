@@ -4,7 +4,7 @@
   import { addDateRange , showStatusOperateFun, status ,getStatusIcon ,showStatusFun} from "@/utils/common"
   import { queryInstanceInfoByPluginCode} from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
-  import { memberList , addProjectMember , updateProjectMember , projectList , removeMember, showMemberProject, changeStatus} from "@/api/gitlab/project-member"
+  import { memberList , addProjectMember , updateProjectMember , projectList , removeMember, selectUsersOptions, changeStatus} from "@/api/gitlab/project-member"
   import { selectOption} from "@/api/gitlab/users"
   import { accessLevels } from "@/api/gitlab/groups"
 
@@ -80,7 +80,7 @@
         projectId: [
           { required: true, message: "项目不能为空", trigger: "blur" }
         ],
-        userIds: [
+        userId: [
           { required: true, message: "成员不能为空", trigger: "blur" }
         ],
         accessLevel: [
@@ -93,7 +93,7 @@
       formRef.value?.clearValidate()
       Object.assign(form,{
         id: undefined,
-        userIds:[],
+        userId:undefined,
         userName: undefined,
         visibility: undefined,
         path: undefined,
@@ -147,7 +147,7 @@
         Object.assign(pluginInstance,res?.data)
         const instanceCode = pluginInstance[0].instanceCode
 
-        const projectListQueryParam = reactive({instanceCode:instanceCode})
+        const projectListQueryParam = reactive({instanceCode:instanceCode,status:1})
         // 项目下拉列表
         projectList(projectListQueryParam).then((response)=>{
           if(response.code = 200){
@@ -157,7 +157,6 @@
         // 查询用户下拉列表
         selectOption(instanceCode).then(response =>{
           if(response.code == 200){
-            console.log(response)
             users.value = response?.data
           }
         })
@@ -271,6 +270,15 @@ const handleChangeStatus = (row)=>{
         })
     })
     .catch(() => { })
+  }
+
+  // 查询未选用户列表
+  const queryMemberList = (value) =>{
+    selectUsersOptions(form.projectId,"test").then((response)=>{
+        if(response.code == 200){
+          Object.assign(users, response?.data)
+        }
+    })
   }
 
   // 删除处理
@@ -502,17 +510,20 @@ const handleChangeStatus = (row)=>{
           </el-col>
         </el-row>
         <el-row>
-          <!-- <el-col :span="12">
-            <el-form-item label="成员" prop="userIds">
-              <el-tree-select
-                    v-model="form.userIds"
-                    :data="users"
-                    :multiple="true"
-                    show-checkbox
-                    style="width: 190px"
-              />
-            </el-form-item>
-          </el-col> -->
+          <el-col :span="12">
+            <el-form-item label="成员" prop="userId">
+                  <el-select
+                        v-model="form.userId"
+                        filterable
+                        @input="queryMemberList"
+                        style="width: 190px"
+                  />
+                  <el-option v-for="user in users"
+                  :key="user.label"
+                  :label="user.label"
+                  :value="user.value"/>
+              </el-form-item>
+          </el-col>
           <el-col :span="12">
             <el-form-item label="角色" prop="accessLevel">
               <el-select
@@ -528,12 +539,6 @@ const handleChangeStatus = (row)=>{
               </el-select>
             </el-form-item>
           </el-col>
-        </el-row>
-        <el-row>
-            <el-col>
-              <el-transfer v-model="form.userIds" :data="users" 
-              :titles="[ '未关联用户' , '已关联用户']"/>
-            </el-col>
         </el-row>
       </el-form>
       <template #footer>

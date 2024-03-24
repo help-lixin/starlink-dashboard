@@ -112,12 +112,11 @@ export function selectIdOptions(instanceCode:string) {
     });
 }
 
-// 查询组id下拉列表
-export function selectUsersOptions(memberData:any) {
+// 查询用户下拉列表
+export function selectUsersOptions(groupId:number,userName:string) {
     return request({
-      url: STARLINK_SERVICE + '/gitlab/group/member/list',
-      method: 'get',
-      params: memberData
+      url: STARLINK_SERVICE + '/gitlab/group/member/option/list/'+groupId + "/" + userName,
+      method: 'get'
     }).then((res)=>{
         return res?.data;
     });

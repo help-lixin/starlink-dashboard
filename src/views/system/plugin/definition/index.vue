@@ -2,7 +2,8 @@
   // @ts-nocheck
   import { Plus ,Delete, Edit, EditPen, Search , RefreshRight , Sort , QuestionFilled} from '@element-plus/icons-vue'
   import { parseTime , status ,addDateRange , showStatusFun , showStatusOperateFun, getStatusIcon  } from "@/utils/common"
-  import { list , get , update , add , changeStatus } from "@/api/pluginDefinition"
+  import { list , get , update , add , changeStatus, removePluginDefinition } from "@/api/pluginDefinition"
+  import { checkPluginCode} from "@/api/pluginInstance"
 
   // 查询的表单引用
   const queryFormRef = ref({});
@@ -122,6 +123,51 @@
   }
 
   const handleDelete = function(row){
+    const pluginName = row.pluginName
+    let msg = ""
+    msg = '是否删除插件管理【"' + pluginName + '"】的数据项？'
+
+    ElMessageBox.confirm(
+      msg,
+      'Warning',
+      {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    ).then(() => {
+      checkPluginCode(row.pluginCode).then((res)=>{
+        if(res.code == 200){
+          if(res?.data?.length > 0){
+            ElMessage({
+                type: 'error',
+                message: '存在【 '+res.data.length+' 】处引用，不能删除',
+            })
+          }else{
+            removePluginDefinition(row.id).then((res)=>{
+                if(res.code == 200){
+                    // 重置查询表单,并进行查询
+                    queryParams.pageNum=1
+                    getList()
+                    ElMessage({
+                      type: 'success',
+                      message: '删除成功',
+                    })
+                }else{
+                    ElMessage({
+                      type: 'error',
+                      message: '删除失败:'+res.msg,
+                    })
+                }
+            })
+          }
+        }
+      })
+      
+    })
+  }
+
+  const handleChangeStatus = function(row){
     const tmpId = row.id || ids.value;
     const status = row.status
     let msg = ""
@@ -311,7 +357,7 @@
           <el-table-column
             label="操作"
             align="left"
-            width="220"
+            width="250"
           >
             <template v-slot="scope">
               <div class="action-btn">
@@ -321,15 +367,21 @@
                   @click="handleUpdate(scope.row)"
                   v-hasPerms="['/system/plugin/definition/edit']"
                 >修改</el-button>
-
+                
                 <el-button
-                  size="small"
-                  :icon="getStatusIcon(scope.row)"
-                  @click="handleDelete(scope.row)"
-                  v-hasPerms="['/system/plugin/definition/changeStatus/**']"
+                size="small"
+                :icon="getStatusIcon(scope.row)"
+                @click="handleChangeStatus(scope.row)"
+                v-hasPerms="['/system/plugin/definition/changeStatus/**']"
                 >
-                  {{ showStatusOperateFun(scope.row.status)  }}
-                </el-button>
+                {{ showStatusOperateFun(scope.row.status)  }}
+              </el-button>
+              <el-button
+                size="small"
+                icon="Delete"
+                @click="handleDelete(scope.row)"
+                v-hasPerms="['/system/plugin/definition/del/*']"
+              >删除</el-button>
 
               </div>
             </template>
