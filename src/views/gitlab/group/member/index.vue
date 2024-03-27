@@ -249,7 +249,7 @@ import { assign } from 'lodash'
           getList()
         })
     }).catch(() => {
-     
+
     })
   }
 
@@ -496,11 +496,12 @@ import { assign } from 'lodash'
                         filterable
                         @input="queryMemberList"
                         style="width: 190px"
-                  />
+                  >
                   <el-option v-for="item in users"
                   :key="item.label"
                   :label="item.label"
                   :value="item.value"/>
+                  </el-select>
               </el-form-item>
             </el-col>
             <el-col :span="12">
