@@ -220,6 +220,7 @@ import { assign } from 'lodash'
 
   // 查询未选用户列表
   const queryMemberList = (value) =>{
+    console.log(value, 'value')
     selectUsersOptions(form.groupId,"test").then((response)=>{
         if(response.code == 200){
           console.log(response.data)
@@ -493,8 +494,11 @@ import { assign } from 'lodash'
               <el-form-item label="成员" prop="userIds">
                   <el-select
                         v-model="form.userId"
+                        multiple
                         filterable
-                        @input="queryMemberList"
+                        remote
+                        reserve-keyword
+                        :remote-method="queryMemberList"
                         style="width: 190px"
                   >
                   <el-option v-for="item in users"
