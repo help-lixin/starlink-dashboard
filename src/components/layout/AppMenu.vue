@@ -69,9 +69,6 @@ const processUrl = (component: string) => {
             <template v-if="menu.children?.length > 0">
               <template v-for="(childMenu,index) in menu.children" :key="index">
                 <el-menu-item :index="processUrl(childMenu.component)">
-                  <el-icon v-if="menu.icon && menu.icon !== '#'">
-                    <component :is="menu.icon"></component>
-                  </el-icon>
                   <span>{{ childMenu.menuName }}</span>
                 </el-menu-item>
               </template>

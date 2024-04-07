@@ -31,12 +31,10 @@ class WsEventBus {
             'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3R5cGUiOiIwMCIsInVzZXJfaWQiOjIsInVzZXJfbmFtZSI6InRlc3QiLCJzY29wZSI6WyJhbGwiXSwibmlja19uYW1lIjoi6Iul5L6dMiIsImF2YXRhciI6IiIsImV4cCI6MTc1NDgxNzU3MCwiZGVwdF9pZCI6MTA1LCJhdXRob3JpdGllcyI6WyJjb21tb24iXSwianRpIjoiYWUwb0FxMEQ3cEpWb3hfeHFCRk11VVZmUHZZIiwiY2xpZW50X2lkIjoiY2xpZW50MSIsImVtYWlsIjoidGVzdEBxcS5jb20ifQ.coVDIC0wC5MwLsFOhSl1ngmxkvzTc9aiaH1215frR0bN4qVC26nhdnsf7h-LtuEOMaiXTmqkIkFdXhJDMXyAreeRO5GjLDUdhHiVVzAtEV_I6XOFSuGnD9WF6GjjJhnUFX48032SK_egd9NxXhndLY74N0e9iJo8V_6mLMokvkrP75jjajAa_syMuk2Gax1dynw0wX4VrJuMlrXKoNw2pSvcbWIqjWKY64fnZC_OSjXgnKBhpy4Cxr-gqvfIJRJybLxoqvVZtFJmqu7U5hBRus0xtZhTdFnLKJ2vmZzriQajsQA7a8IcKpvUU4ykwH26K2m5spQTQgrGM0WDYAjTjQ'
         },
         (frame: any) => {
-          //    stompClient.connect({ "token" : "admin" }, function (frame) {
           console.log('frame: ' + frame)
 
           // 广播
           this.stompClient.subscribe('/topic',  (response: any) => {
-            // showMsg(response.body)
             // 向所有监听者发送消息
             this.watcher.forEach(row => row.callBack?.(response))
           })

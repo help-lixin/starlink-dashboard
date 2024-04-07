@@ -7,6 +7,8 @@ import { processRoutes } from "@/api/router";
 import { usePermsStore } from "@/stores/perms";
 import { useActionMetasStore } from "@/stores/plugin";
 
+import StompClient from "@/utils/StompClient.ts";
+
 const tokenStore = useTokenStore();
 const permsStore = usePermsStore();
 const router = useRouter();
@@ -77,6 +79,10 @@ async function onSubmit() {
                 actionMetasStore.initActions();
                 // 跳转到首页
                 router.push((route.query.redirect as string) || "/");
+
+                // 建立连接
+                const client = new StompClient("http://starlink.lixin.help/message/websocket" , authorizeRes.data.accessToken);
+                client.connect();
             }
         } else {
             let msg = loginRes.msg;
