@@ -84,8 +84,10 @@ async function onSubmit() {
                 router.push((route.query.redirect as string) || "/");
 
                 // 建立连接
-                const stompClient = StompClient.getInstance();
-                stompClient.connect();
+                const stompClient = StompClient.getInstance()
+                stompClient.connect()
+                stompClient.subscribe()
+                
             }
         } else {
             let msg = loginRes.msg;
