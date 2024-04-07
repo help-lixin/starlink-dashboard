@@ -6,6 +6,7 @@ import { type MenuList} from "@/api/menus";
 const localStorageMenuKey = "_menus";
 export const useMenuStore = defineStore('menu', () => {
     const menuJson = ref("");
+    const menuSelectPath = ref('');
     const menus = computed<MenuList>(() => {
         try{
             return JSON.parse(menuJson.value || window.localStorage.getItem(localStorageMenuKey)  || "[]");
@@ -29,7 +30,12 @@ export const useMenuStore = defineStore('menu', () => {
         window.localStorage.removeItem(localStorageMenuKey);
     }
 
+    function setSelectMenuPath(path: string) {
+        menuSelectPath.value = path
+    }
     return {
+        setSelectMenuPath,
+        menuSelectPath,
         menus,
         saveMenus,
         removeMenus
