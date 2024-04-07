@@ -6,8 +6,26 @@ import * as stomp from 'stompjs'
 import * as decode from 'jwt-decode';
 
 class StompClient {
-
-  constructor(url : String , token : String , reConnectCount : number = 3){
+  // 唯一实例
+  private static instance: StompClient;
+  public static getInstance(url?: string = '"http://starlink.lixin.help/message/websocket"' , token?: string = window.localStorage.getItem("_token") , reConnectCount?: number = 3): StompClient {
+    if (!StompClient.instance) {
+      // 代理实例
+      StompClient.instance = new Proxy(new StompClient(url, token, reConnectCount), {
+        construct: function(target, args) {
+          if (!this.instance) {
+            // 手动触发构造函数
+            return Reflect.construct(target, args);
+          } else {
+            throw new Error('Instance already exists');
+          }
+        }
+      });
+    }
+    return StompClient.instance;
+  }
+  private constructor(url : String , token : String , reConnectCount : number = 3){
+    if (this.stompClient) return this.stompClient
     this.url = url
     this.token = token
     this.reConnectCount = reConnectCount
@@ -77,9 +95,9 @@ class StompClient {
                   (error: any) => reject(error)
                 )
               })
-        } 
+        }
       }
-    
+
       // 销毁
       destroy() {
         return new Promise((resolve, reject) => {
@@ -88,7 +106,7 @@ class StompClient {
             `/queue/${this.userName}/disconnect`,
             () => {
               // 删除订阅
-              
+
               // TODO lixin
               resolve(true)
             },
@@ -97,7 +115,7 @@ class StompClient {
         })
       }
 
-    
+
       destroyAll() {
         // 断开所有
         this.stompClient.subscribe(`/queue/disconnectAll`)

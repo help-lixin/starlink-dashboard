@@ -81,8 +81,8 @@ async function onSubmit() {
                 router.push((route.query.redirect as string) || "/");
 
                 // 建立连接
-                const client = new StompClient("http://starlink.lixin.help/message/websocket" , authorizeRes.data.accessToken);
-                client.connect();
+                const stompClient = StompClient.getInstance();
+                stompClient.connect();
             }
         } else {
             let msg = loginRes.msg;
