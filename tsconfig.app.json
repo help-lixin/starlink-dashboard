@@ -5,12 +5,14 @@
     "auto-imports.d.ts",
     "components.d.ts",
     "src/**/*",
+    "src/**/*.ts",
     "src/**/*.vue"
   ],
   "exclude": [
     "src/**/__tests__/*"
   ],
   "compilerOptions": {
+    "allowImportingTsExtensions": true,
     "allowJs":true,
     "moduleResolution" : "node",
     "composite": true,

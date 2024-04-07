@@ -14,19 +14,19 @@ import 'element-plus/theme-chalk/src/base.scss'
 import '@/styles/index.scss'
 import YtTextList from '@/components/YtTextList.vue'
 import ytPage from "@/components/YtPage.vue";
-import WsEventBus from "@/utils/WsEventBus.ts";
+import wsEventBus from "@/utils/wsEventBus.ts";
 const startWsEvent = async () => {
     // 注册一个监听者
-    const watcher1 = await WsEventBus.addWatcher('1')
+    const watcher1 = await wsEventBus.addWatcher('1', msg => console.log(msg, 'onMsg'))
     // 再注册一个
-    const watcher2 = await WsEventBus.addWatcher('2')
+    const watcher2 = await wsEventBus.addWatcher('2')
     // 发送消息
-    const result = await WsEventBus.sendMsg(watcher1, 'hello')
+    const result = await wsEventBus.sendMsg(watcher1, 'hello')
     console.log(result, 'result')
     // 销毁，断开
-    await WsEventBus.destroy(watcher2)
+    await wsEventBus.destroy(watcher2)
     // 销毁全部
-    WsEventBus.destroyAll()
+    wsEventBus.destroyAll()
 }
 
 startWsEvent()
