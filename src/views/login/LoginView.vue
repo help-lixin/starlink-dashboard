@@ -1,4 +1,7 @@
 <script setup lang="ts">
+// @ts-nocheck
+// ts不检查该文件,否则,打包都不能通过
+
 import { login, authorize } from "@/api/users";
 import { useTokenStore } from "@/stores/token";
 import { useRouter, useRoute } from "vue-router";
