@@ -47,8 +47,8 @@ class StompClient {
           debug: (msg: string) => {
             console.log(msg, 'debug') // 输出日志信息到控制台
           }
-        }) 
-        
+        })
+
         // 覆盖sockjs使用stomp客户端
         this.stompClient.connect({token:this.token},
           (frame: any) => {
@@ -91,6 +91,7 @@ class StompClient {
       destroy() {
         // 断开某个链接
         this.stompClient.disconnect(() => {
+          StompClient.instance = undefined
             // 删除订阅
             // TODO lixin
           }
