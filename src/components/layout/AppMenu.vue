@@ -14,6 +14,7 @@ const menus = reactive<MenuList>([])
 if (menuStore.menus.length == 0) {
   console.log('pinina中没有菜单数据,正准备通过网络请求,获得菜单数据')
   getMenuTree().then((res) => {
+    console.log(res, 'menuRes')
     if (res.length > 0) {
       // 深拷贝
       Object.assign(menus, res)
@@ -33,7 +34,10 @@ const menuSelect = (path: string) => {
     navStore.saveNavigation(navArrayJson)
   }
 }
-
+const menuSelectPath = computed(() => {
+  console.log('run111', menuStore.menuSelectPath)
+  return menuStore.menuSelectPath
+})
 // 处理url
 const processUrl = (component: string) => {
   if (!component?.startsWith('/')) {
@@ -49,7 +53,7 @@ const processUrl = (component: string) => {
       <el-menu
         router
         unique-opened
-        :default-active="0+''"
+        :default-active="menuSelectPath"
         :default-openeds="['0']"
         background-color="var(--menu-bg-color)"
         text-color="var(--menu-text-color)"
@@ -58,26 +62,19 @@ const processUrl = (component: string) => {
         :collapse="isCollapse"
         @select="menuSelect"
       >
-        <template v-for="(menu,index) in menus" :key="index">
-          <el-sub-menu :index="index+''">
-            <template #title>
-              <el-icon v-if="menu.icon && menu.icon !== '#'">
-                <component :is="menu.icon"></component>
-              </el-icon>
-              <span>{{ menu.menuName }}</span>
-            </template>
-            <template v-if="menu.children?.length > 0">
-              <template v-for="(childMenu,index) in menu.children" :key="index">
-                <el-menu-item :index="processUrl(childMenu.component)">
-                  <el-icon v-if="menu.icon && menu.icon !== '#'">
-                    <component :is="menu.icon"></component>
-                  </el-icon>
-                  <span>{{ childMenu.menuName }}</span>
-                </el-menu-item>
-              </template>
-            </template>
-          </el-sub-menu>
-        </template>
+        <el-sub-menu v-for="(menu,index) in menus" :index="index+''" :key="menu.menuId + ''">
+          <template #title>
+            <el-icon v-if="menu.icon && menu.icon !== '#'">
+              <component :is="menu.icon"></component>
+            </el-icon>
+            <span>{{ menu.menuName }}</span>
+          </template>
+          <template v-if="menu.children?.length > 0">
+            <el-menu-item v-for="(childMenu) in menu.children" :key="childMenu.menuId + ''" :index="processUrl(childMenu.component)">
+              <span>{{ childMenu.menuName }}</span>
+            </el-menu-item>
+          </template>
+        </el-sub-menu>
       </el-menu>
     </el-scrollbar>
   </el-aside>

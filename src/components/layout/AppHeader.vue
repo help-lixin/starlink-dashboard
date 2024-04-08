@@ -18,6 +18,8 @@ const permsStore = usePermsStore()
 const navStore = useNavStore()
 const actionMetasStore = useActionMetasStore()
 
+import StompClient from "@/utils/StompClient.ts";
+
 // 手工触发一次解析
 navStore.triggerParse()
 const isDark = ref(useDark())
@@ -50,8 +52,15 @@ getProfile().then((userProfile) => {
 const handlerLogout = () => {
   const tokenStore = useTokenStore()
 
+  // 退出时,消毁连接
+  const stompClient = StompClient.getInstance()
+  stompClient.destroy()
+
   // 调用后端退出
   logout()
+
+  
+              
 
   // 清除store数据
   tokenStore.removeToken()

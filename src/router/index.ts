@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import AppLayoutVue from '@/components/layout/AppLayout.vue'
 import IndexView from '@/views/IndexView.vue'
 import { useTokenStore } from '@/stores/token'
-
+import { useMenuStore } from "@/stores/menu.ts";
 const publicRoutes = [
   {
     path: '',
@@ -273,4 +273,33 @@ router.beforeEach((to, from, next) => {
   next()
 })
 
+
+router.afterEach(to => {
+  const menuStore = useMenuStore()
+  // console.log(to.path, 'to to', to, JSON.parse(window.localStorage.getItem('_menus') || "[]"))
+  // const menuData = menuStore.menus
+  const {path} = to
+  menuStore.setSelectMenuPath(path)
+  // 去掉/ 然后去路由里面匹配，找到它选中的路由数据，根据索引来选中就好了
+  // if (path.startsWith('/')) {
+  //   path = path.substring(1)
+  // }
+  // const findSelectMenuId = (arr: Array<any>): number | undefined => {
+  //   for(const i in arr) {
+  //     if (arr[i].component === path) {
+  //       return arr[i].menuId as number
+  //     }
+  //     if (arr[i].children?.length) {
+  //       return findSelectMenuId(arr[i].children) as number
+  //     }
+  //   }
+  //   return undefined
+  // }
+  // const menuId = findSelectMenuId(menuData)
+  //
+  // console.log(menuId, 'menuId1')
+  // if (menuId) {
+  //   menuStore.setSelectMenuId(menuId)
+  // }
+})
 export default router

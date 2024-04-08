@@ -4,6 +4,8 @@ import { Plus ,Delete, Edit, Link, More, EditPen, Search , RefreshRight , Sort ,
 import { parseTime , statusDicts , sexDicts , addDateRangeRuoyi } from "@/utils/common"
 import { listUser , getUser , addUser , updateUser , delUser , changeUserStatus , resetUserPwd } from "@/api/users"
 import { getRoles } from "@/api/roles"
+import StompClient from "@/utils/StompClient.ts";
+import { useTokenStore } from "@/stores/token.ts";
 const queryForm = ref(null);
 const contractAddress = (row => {
   selectRow.value = row
@@ -42,6 +44,10 @@ const initPassword = "123456"
 const title = ref("")
 const roleOptions = reactive([]);
 const selectRow = ref({})
+// 跟登录后同一个实例
+const stompClient = StompClient.getInstance();
+stompClient.connect()
+console.log(stompClient, 'stompClient', '同一个实例')
 // 表单规则
 const rules = reactive<FormRules>({
     userName: [

@@ -14,6 +14,7 @@ import 'element-plus/theme-chalk/src/base.scss'
 import '@/styles/index.scss'
 import YtTextList from '@/components/YtTextList.vue'
 import ytPage from "@/components/YtPage.vue";
+
 const app = createApp(App)
 app.component('YtCard', YtCard)
 app.component('YtBottomOperate', YtBottomOperate)

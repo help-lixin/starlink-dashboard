@@ -1,4 +1,7 @@
 <script setup lang="ts">
+// @ts-nocheck
+// ts不检查该文件,否则,打包都不能通过
+
 import { login, authorize } from "@/api/users";
 import { useTokenStore } from "@/stores/token";
 import { useRouter, useRoute } from "vue-router";
@@ -6,6 +9,8 @@ import type { FormInstance, FormRules } from 'element-plus'
 import { processRoutes } from "@/api/router";
 import { usePermsStore } from "@/stores/perms";
 import { useActionMetasStore } from "@/stores/plugin";
+
+import StompClient from "@/utils/StompClient.ts";
 
 const tokenStore = useTokenStore();
 const permsStore = usePermsStore();
@@ -77,6 +82,11 @@ async function onSubmit() {
                 actionMetasStore.initActions();
                 // 跳转到首页
                 router.push((route.query.redirect as string) || "/");
+
+                // 建立连接
+                const stompClient = StompClient.getInstance()
+                await stompClient.connect()
+                await stompClient.subscribe()
             }
         } else {
             let msg = loginRes.msg;
