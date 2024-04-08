@@ -4,6 +4,7 @@
 import SockJs from 'sockjs-client/dist/sockjs.min.js'
 import * as stomp from 'stompjs'
 import * as decode from 'jwt-decode';
+import { reject } from "lodash";
 
 class StompClient {
   // 唯一实例
@@ -28,7 +29,6 @@ class StompClient {
     return StompClient.instance;
   }
   private constructor(url : String , token : String , reConnectCount : number = 3){
-    if (this.stompClient) return this.stompClient
     this.url = url
     this.token = token
     this.reConnectCount = reConnectCount
@@ -42,55 +42,63 @@ class StompClient {
 
   // 连接
   connect() {
-        const socket = new SockJs(this.url)
-        this.stompClient = stomp.over(socket, {
-          debug: (msg: string) => {
-            console.log(msg, 'debug') // 输出日志信息到控制台
-          }
-        })
+    return new Promise((resolve, reject) => {
+      if (this.stompClient) return resolve()
+      const socket = new SockJs(this.url)
+      this.stompClient = stomp.over(socket, {
+        debug: (msg: string) => {
+          console.log(msg, 'debug') // 输出日志信息到控制台
+        }
+      })
 
-        // 覆盖sockjs使用stomp客户端
-        this.stompClient.connect({token:this.token},
-          (frame: any) => {
-            // resolve()
-          },
-          (error: any) => {
-            // 异常时进行重连
-            console.log('connect error: ' + error)
-            if (this.reConnectCount > 3) {
-              console.log('温馨提示：您的连接已断开，请退出后重新进入。')
-              this.reConnectCount = 0
-            } else {
-              this.wsReconnect && clearTimeout(this.wsReconnect)
-              this.wsReconnect = setTimeout(() => {
-                console.log('开始重连...')
-                this.connect()
-                console.log('重连完毕...')
-                this.reConnectCount++
-              }, 1000)
-            }
-            reject(error)
+      // 覆盖sockjs使用stomp客户端
+      this.stompClient.connect({token:this.token},
+        (frame: any) => {
+          resolve()
+        },
+        (error: any) => {
+          // 异常时进行重连
+          console.log('connect error: ' + error)
+          if (this.reConnectCount > 3) {
+            console.log('温馨提示：您的连接已断开，请退出后重新进入。')
+            this.reConnectCount = 0
+          } else {
+            this.wsReconnect && clearTimeout(this.wsReconnect)
+            this.wsReconnect = setTimeout(() => {
+              console.log('开始重连...')
+              this.connect()
+              console.log('重连完毕...')
+              this.reConnectCount++
+            }, 1000)
           }
-        )
-    }
+          reject(error)
+        }
+      )
+    })
+  }
 
       // 订阅
       subscribe(onMsgCallBack){
-        this.stompClient.subscribe(
-          `/queue/${this.userName}/message`,
-          (response: any) => {
+        return new Promise((resolve, reject) => {
+          this.stompClient.subscribe(
+            `/queue/${this.userName}/message`,
+            (response: any) => {
               console.log("========================================");
               console.log(response);
               console.log("========================================");
               // TODO lixin
-          }
-        );
+              resolve(response)
+            }
+          );
+        }, error => reject((error)))
+
       }
 
       // 销毁
       destroy() {
         // 断开某个链接
         this.stompClient.disconnect(() => {
+          this.stompClient = undefined
           StompClient.instance = undefined
             // 删除订阅
             // TODO lixin

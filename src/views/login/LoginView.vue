@@ -85,9 +85,8 @@ async function onSubmit() {
 
                 // 建立连接
                 const stompClient = StompClient.getInstance()
-                stompClient.connect()
-                stompClient.subscribe()
-                
+                await stompClient.connect()
+                await stompClient.subscribe()
             }
         } else {
             let msg = loginRes.msg;
