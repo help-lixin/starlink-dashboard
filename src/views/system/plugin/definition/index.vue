@@ -415,7 +415,7 @@
           <el-row>
             <el-col :span="24">
               <el-form-item label="插件元数据" prop="pluginMeta" label-width="100px">
-                <el-input v-model="form.pluginMeta" placeholder="请输入插件元数据" type="textarea" maxlength="5000" autosize/>
+                <el-input v-model="form.pluginMeta" placeholder="请输入插件元数据" type="textarea" maxlength="50000" autosize/>
               </el-form-item>
             </el-col>
           </el-row>

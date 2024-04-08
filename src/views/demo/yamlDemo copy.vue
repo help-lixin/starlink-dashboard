@@ -4,7 +4,7 @@
 import YamlEditor from '@/views/demo/utils/yamlEditor.vue'
 import type { FormInstance } from 'element-plus'
 const ruleFormRef = ref<FormInstance>()
-// 通用标签 start
+// 通用标签
 const port = ref({
                 'name': '',
                 'expose': 'true',
@@ -23,77 +23,6 @@ const addRow = (index) =>{
   initData.value.spec.template.spec.containers[index].ports.push(port.value)
 }
 const services = ref([{label:"不创建服务",value:""},{label:"Cluster IP",value:"Cluster IP"}])
-// 通用标签 end
-
-const location = ref(
-  [
-    {
-      label:'Deployment',
-      value:{
-        标签注释: {
-          'matching': '/api2',
-          'proxy_pass': 'http://175.178.238.212:3002',
-          'rewrite': '^/api(.*)$ $1 break'
-        },
-        扩缩容和升级策略: {
-          'position': 'c盘'
-        }
-      }
-    },
-    {
-      label:'pod',
-      value:{
-        标签注释: {
-          'matching': '/api2',
-          'proxy_pass': 'http://175.178.238.212:3002',
-          'rewrite': '^/api(.*)$ $1 break'
-        },
-        网络: {
-          'position': 'c盘'
-        },
-        节点调度: {
-          'position': 'c盘'
-        },
-        pod调度: {
-          'position': 'c盘'
-        },
-        资源: {
-          'position': 'c盘'
-        },
-        扩缩容和升级策略: {
-          'position': 'c盘'
-        },
-        安全性上下文: {
-          'position': 'c盘'
-        },
-        存储: {
-          'position': 'c盘'
-        }
-      }
-    },
-    {
-      label:'container_0',
-      value:{
-        通用: {
-          'name': '/api1',
-          'image': 'nginx:1.17.2',
-          'imagePullPolicy': 'Always'
-        },
-        健康检查: {
-          'position': 'c盘'
-        },
-        资源: {
-          'position': 'c盘'
-        },
-        安全性上下文: {
-          'position': 'c盘'
-        },
-        存储: {
-          'position': 'c盘'
-        }
-      }
-    }
-  ])
 const initData = ref({
   "apiVersion": "apps/v1",
   "kind": "Deployment",
@@ -187,7 +116,66 @@ const initData = ref({
       "type": "RollingUpdate"
     }
   },
-  "__clone": true
+  "__clone": true,
+  'location': [
+    {
+      通用: {
+        'matching': '/api1',
+        'proxy_pass': 'http://175.178.238.212:3002',
+        'rewrite': '^/api(.*)$ $1 break'
+      },
+      健康检查: {
+        'position': 'c盘'
+      },
+      资源: {
+        'position': 'c盘'
+      },
+      安全性上下文: {
+        'position': 'c盘'
+      },
+      存储: {
+        'position': 'c盘'
+      }
+    },
+    {
+      通用: {
+        'matching': '/api2',
+        'proxy_pass': 'http://175.178.238.212:3002',
+        'rewrite': '^/api(.*)$ $1 break'
+      },
+      健康检查: {
+        'position': 'c盘'
+      },
+      资源: {
+        'position': 'c盘'
+      },
+      安全性上下文: {
+        'position': 'c盘'
+      },
+      存储: {
+        'position': 'c盘'
+      }
+    },
+    {
+      通用: {
+        'matching': '/api2',
+        'proxy_pass': 'http://175.178.238.212:3002',
+        'rewrite': '^/api(.*)$ $1 break'
+      },
+      健康检查: {
+        'position': 'c盘'
+      },
+      资源: {
+        'position': 'c盘'
+      },
+      安全性上下文: {
+        'position': 'c盘'
+      },
+      存储: {
+        'position': 'c盘'
+      }
+    }
+  ]
 })
 
 import { Select } from '@element-plus/icons-vue'
@@ -196,16 +184,16 @@ import yaml from 'js-yaml'
 const selectTabIndex = ref(0)
 const selectTabIndexObj = ref({
   0: '通用',
-  1: '健康检查',
+  1: 'storage',
   2: 'resource1'
 })
 const locationItem = ref({
-  通用: {
+  resource: {
     'matching': undefined,
     'proxy_pass': undefined,
     'rewrite': undefined
   },
-  健康检查: {
+  storage: {
     'position': undefined
   }
 })
@@ -214,6 +202,8 @@ const handleTabsEdit = (
   targetName: string | number,
   action: 'remove' | 'add'
 ) => {
+  console.log(targetName, 'targetName')
+  console.log(action, 'action')
   if (initData.value.location.length === 1) {
     ElMessage.warning('请至少保留一个tab页')
     return
@@ -294,24 +284,24 @@ const saveData = () => {
                 <el-icon><Select /></el-icon>
               </template>
               <el-tab-pane
-                v-for="(item, index) in location"
+                v-for="(item, index) in initData.location"
                 :key="index"
-                :label="`${item.label}`"
+                :label="`container_${index}`"
                 :name="index"
               >
                 <el-scrollbar>
                   <div class="tab-content">
                     <div class="left">
                       <el-tabs :tab-position="'left'" v-model="selectTabIndexObj[selectTabIndex]">
-                        <el-tab-pane :label="item1" v-for="(item1, index1) in Object.keys(item[index].value)" :key="index1" :name="item1"></el-tab-pane>
+                        <el-tab-pane :label="item1" v-for="(item1, index1) in Object.keys(item)" :key="index1" :name="item1"></el-tab-pane>
                       </el-tabs>
                     </div>
                     <div class="right">
                       <template v-if="selectTabIndexObj[selectTabIndex] === '通用'">
                         <el-row :gutter="24">
                           <el-col :span="8">
-                            <el-form-item label="匹配规则" :prop="`location[${index}][${selectTabIndexObj[selectTabIndex]}].name`" >
-                              <el-input v-model="item[selectTabIndexObj[selectTabIndex]].name" placeholder="请输入内容"></el-input>
+                            <el-form-item label="匹配规则" :prop="`location[${index}][${selectTabIndexObj[selectTabIndex]}]`" >
+                              <el-input v-model="item[selectTabIndexObj[selectTabIndex]]" placeholder="请输入内容"></el-input>
                             </el-form-item>
                           </el-col>
                           <el-col :span="8">
