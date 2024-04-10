@@ -191,6 +191,18 @@ export const showStatus = [
 ];
 
 
+export const debounce = (fn, delay = 300) => {
+  let time = null;
+  return function () {
+    if (time !== null) {
+      clearTimeout(time);
+    }
+    time = setTimeout((...args) => {
+      fn.call(this, args);
+    }, delay);
+  };
+};
+
 export function addDateRangeRuoyi(params, dateRange, propName) {
   const search = params;
   search.params = typeof (search.params) === 'object' && search.params !== null && !Array.isArray(search.params) ? search.params : {};
