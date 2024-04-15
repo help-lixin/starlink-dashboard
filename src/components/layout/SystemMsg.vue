@@ -40,6 +40,8 @@
     console.log(obj, 'obj')
   }
 
+  const clickHandel = (item, index) => dataList.value[index].state = 1
+
 </script>
 
 <template>
@@ -53,7 +55,7 @@
         </div>
         <div class="msg-body">
         <load-more height="calc(100vh - 78px)" :has-more="hasMore" :loading="isLoading" @loadMore="loadMoreHandel">
-            <div class="msg-item" v-for="item in dataList" :key="item.id">
+            <div class="msg-item" :class="item.state === 1 && 'is-reader'" v-for="(item, index) in dataList" :key="item.id" @click="clickHandel(item, index)">
               <div class="body">
                 <div class="content" :title="item.content">{{item.content}}</div>
               </div>
@@ -111,6 +113,13 @@
       .msg-item {
         padding: 8px 20px;
         border-bottom: 1px solid #e7eaec;
+        cursor: pointer;
+        &.is-reader {
+          cursor: auto;
+          .content {
+            color: #676a6c;
+          }
+        }
         .content {
           font-size: 14px;
           overflow: hidden;
