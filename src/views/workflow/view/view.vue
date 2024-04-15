@@ -25,12 +25,14 @@ import camundaModdleDescriptor from 'camunda-bpmn-moddle/resources/camunda'
 import CustomPropertiesPanel from './CustomPropertiesPanel.vue'
 import workflowXml from './xmlStr'
 import customTranslate from './customTranslate'
-
-
+import { emitter } from "@/utils/mitt";
 import { encode, decode } from 'js-base64';
-
 import {  useRoute } from "vue-router";
+
 import { getProcessDefinition } from '@/api/workflow/workflowInstance'
+// 当前活跃的节点
+const activeElementId = ref(undefined)
+
 const route = useRoute();
 
 const bpmnModeler = ref()
@@ -98,21 +100,23 @@ function init() {
 					const processDefinitionJson = JSON.parse(processDefinitionBody)
 					const processDefinitionXml = jsonToXml(processDefinitionJson)
 					setDiagram(processDefinitionXml)
-					// 定时任务获取状态
-					timerUpdateTask.value = setInterval(timerUpdateTaskFunction,10000);
 				}
 			}
 		  })
 	}
 }
 
-function timerUpdateTaskFunction(){
+function updateHighlightFunction(){
 	try {
-		const elementRegistry = bpmnModeler.value.get('elementRegistry');
-		const elementToSelect = elementRegistry.get('Activity_0pb7r4o');
-		// 添加高亮样式
-		bpmnModeler.value.get('canvas').addMarker(elementToSelect.id, 'highlight');
-		console.log(bpmnModeler.value)
+		if(activeElementId.value){
+			const elementRegistry = bpmnModeler.value.get('elementRegistry');
+			const elementToSelect = elementRegistry.get(activeElementId.value);
+			// TODO 朱捷
+			// 处理一下,同一时间只有一个节点是高亮.
+			// 添加高亮样式
+			bpmnModeler.value.get('canvas').addMarker(elementToSelect.id, 'highlight');
+			console.log(bpmnModeler.value)
+		}
 	} catch (e) {
 		console.log(e, 'err')
 	}
@@ -223,11 +227,29 @@ function jsonToXml(json) {
 
 
 onMounted(() => {
+	emitter.on("pipeline-active-node",(data)=>{
+		console.log("=======================*****==========================");
+		console.log(data?.body)
+		if(data?.body){
+			const bodyObject = JSON.parse(data.body)
+			const businessId = bodyObject?.businessId
+			const nodeId = bodyObject?.nodeId
+
+			if(nodeId && businessId && ( processInstanceId.value == businessId ) ){
+				activeElementId.value = nodeId;
+				// 高亮展示
+				updateHighlightFunction();
+			}
+		}
+		console.log("=======================*****==========================");
+	});
 	init()
 })
 
 
 onUnmounted(()=>{
+	// pipeline-active-node
+	emitter.off("pipeline-active-node");
 	clearInterval(timerUpdateTask.value)
 })
 

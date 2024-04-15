@@ -11,7 +11,7 @@
     {
       type: 'system',
       content: '流程审批通知',
-      state: 0,
+      state: 1,
       id: 2,
       time: '2024年4月10日'
     },

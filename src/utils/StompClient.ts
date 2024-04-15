@@ -5,6 +5,7 @@ import SockJs from 'sockjs-client/dist/sockjs.min.js'
 import * as stomp from 'stompjs'
 import * as decode from 'jwt-decode';
 import { reject } from "lodash";
+import { emitter } from "@/utils/mitt";
 
 class StompClient {
   // 唯一实例
@@ -78,15 +79,16 @@ class StompClient {
   }
 
       // 订阅
-      subscribe(onMsgCallBack){
+      subscribe(){
         return new Promise((resolve, reject) => {
           this.stompClient.subscribe(
             `/queue/${this.userName}/message`,
             (response: any) => {
-              console.log("========================================");
-              console.log(response);
-              console.log("========================================");
-              // TODO lixin
+              if(response?.body){
+                const data = JSON.parse(response.body);
+                const businessModule = data?.businessModule
+                emitter.emit(businessModule,data);
+              }
               resolve(response)
             }
           );
@@ -96,14 +98,16 @@ class StompClient {
 
       // 销毁
       destroy() {
-        // 断开某个链接
-        this.stompClient.disconnect(() => {
-          this.stompClient = undefined
-          StompClient.instance = undefined
-            // 删除订阅
-            // TODO lixin
-          }
-        )
+        if(this.stompClient){
+          // 断开某个链接
+          this.stompClient.disconnect(() => {
+              this.stompClient = undefined
+              StompClient.instance = undefined
+              // 删除订阅
+              // TODO lixin
+            }
+          )
+        }
       }
 
 }

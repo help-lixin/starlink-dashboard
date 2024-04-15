@@ -12,6 +12,7 @@ import { useActionMetasStore } from "@/stores/plugin";
 
 import StompClient from "@/utils/StompClient.ts";
 
+
 const tokenStore = useTokenStore();
 const permsStore = usePermsStore();
 const router = useRouter();
@@ -82,7 +83,7 @@ async function onSubmit() {
                 actionMetasStore.initActions();
                 // 跳转到首页
                 router.push((route.query.redirect as string) || "/");
-
+                
                 // 建立连接
                 const stompClient = StompClient.getInstance()
                 await stompClient.connect()
