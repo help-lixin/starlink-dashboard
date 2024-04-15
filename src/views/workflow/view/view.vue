@@ -114,7 +114,9 @@ function updateHighlightFunction(){
 			// TODO 朱捷
 			// 处理一下,同一时间只有一个节点是高亮.
 			// 添加高亮样式
-			bpmnModeler.value.get('canvas').addMarker(elementToSelect.id, 'highlight');
+			if(elementToSelect?.id){
+				bpmnModeler.value.get('canvas').addMarker(elementToSelect.id, 'highlight');
+			}
 			console.log(bpmnModeler.value)
 		}
 	} catch (e) {
