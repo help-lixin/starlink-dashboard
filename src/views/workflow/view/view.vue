@@ -38,6 +38,7 @@ const route = useRoute();
 const bpmnModeler = ref()
 const canvasRef = ref()
 const processInstanceId = ref()
+const workFlowInstanceId = ref()
 const timerUpdateTask = ref()
 
 // 获取xml
@@ -94,6 +95,9 @@ function init() {
 		getProcessDefinition(processInstanceId.value)
 		  .then((res)=>{
 			if(res?.code == 200){
+				// 工作流实例id
+				workFlowInstanceId.value = res?.data?.processInstanceId
+				
 				const processDefinitionBody = res?.data?.processDefinitionBody
 				// 把json转换成xml进行展示
 				if (processInstanceId.value) {
