@@ -84,7 +84,14 @@ const formSchema = {
 			layout: 'vertical',
 		},
 		properties: {
-
+			name: {
+				type: "string",
+				title: "任务名称",
+				required: false,
+				'x-decorator': "FormItem",
+				'x-component': "PreviewText.Input",
+				default: ""
+			}
 		},
 		},
 	},

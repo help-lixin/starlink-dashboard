@@ -2,7 +2,7 @@
 	<div class="bpmn">
 		<div ref="canvasRef" class="canvas"></div>
 		<CustomPropertiesPanel v-if="bpmnModeler" :modeler="bpmnModeler"
-		:processInstanceId="processInstanceId"/>
+		:processInstanceId="processInstanceId" :workFlowInstanceLogs="workFlowInstanceLogs"/>
 	</div>
 </template>
 
@@ -17,7 +17,7 @@ import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css'
 // 左边工具栏以及编辑节点的样式
 import 'bpmn-js-properties-panel/dist/assets/bpmn-js-properties-panel.css'
 
-import { ref, onMounted , onUnmounted } from 'vue'
+import { ref, onMounted , onUnmounted  } from 'vue'
 import CustomModeler from './customModeler'
 import propertiesPanelModule from 'bpmn-js-properties-panel'
 import propertiesProviderModule from 'bpmn-js-properties-panel/lib/provider/camunda'
@@ -29,7 +29,7 @@ import { emitter } from "@/utils/mitt";
 import { encode, decode } from 'js-base64';
 import {  useRoute } from "vue-router";
 
-import { getProcessDefinition } from '@/api/workflow/workflowInstance'
+import { getProcessDefinition , getProcessInstanceLogs } from '@/api/workflow/workflowInstance'
 // 当前活跃的节点
 const activeElementId = ref(undefined)
 
@@ -39,7 +39,9 @@ const bpmnModeler = ref()
 const canvasRef = ref()
 const processInstanceId = ref()
 const workFlowInstanceId = ref()
-const timerUpdateTask = ref()
+const timerPullInstanceLog = ref()
+const workFlowInstanceLogs = ref({})
+
 
 // 获取xml
 function getXml(cb: any) {
@@ -63,6 +65,8 @@ function setDiagram(bpmn: any) {
 		}
 	})
 }
+
+
 
 // 初始化
 function init() {
@@ -97,6 +101,11 @@ function init() {
 			if(res?.code == 200){
 				// 工作流实例id
 				workFlowInstanceId.value = res?.data?.processInstanceId
+
+
+				// 定时任务获取状态
+				timerPullInstanceLog.value = setInterval(timerPullInstanceLogFunction,2000);
+
 				
 				const processDefinitionBody = res?.data?.processDefinitionBody
 				// 把json转换成xml进行展示
@@ -104,7 +113,7 @@ function init() {
 					const processDefinitionJson = JSON.parse(processDefinitionBody)
 					const processDefinitionXml = jsonToXml(processDefinitionJson)
 					setDiagram(processDefinitionXml)
-				}
+				}// end if
 			}
 		  })
 	}
@@ -121,7 +130,6 @@ function updateHighlightFunction(){
 			if(elementToSelect?.id){
 				bpmnModeler.value.get('canvas').addMarker(elementToSelect.id, 'highlight');
 			}
-			console.log(bpmnModeler.value)
 		}
 	} catch (e) {
 		console.log(e, 'err')
@@ -231,11 +239,28 @@ function jsonToXml(json) {
 	return xml
 }
 
+// 定时拉取实例日志
+function timerPullInstanceLogFunction() {
+	if(workFlowInstanceId.value){
+		// 获取流程实例的日志信息
+		getProcessInstanceLogs(workFlowInstanceId.value)
+		.then((res)=>{
+			if(res?.code == 200 && res.data){
+				const logs = res.data;
+				for(var i=0;i<logs.length;i++){
+					const nodeId = logs[i].nodeId
+					const nodeLog = logs[i].nodeLog
+					workFlowInstanceLogs.value[nodeId] = nodeLog
+				}
+			}
+		})
+	}
+}
+
 
 onMounted(() => {
+	// 1. 订阅事件
 	emitter.on("pipeline-active-node",(data)=>{
-		console.log("=======================*****==========================");
-		console.log(data?.body)
 		if(data?.body){
 			const bodyObject = JSON.parse(data.body)
 			const businessId = bodyObject?.businessId
@@ -247,8 +272,9 @@ onMounted(() => {
 				updateHighlightFunction();
 			}
 		}
-		console.log("=======================*****==========================");
 	});
+
+	// 2. 初始化BPMNJS
 	init()
 })
 
@@ -256,7 +282,7 @@ onMounted(() => {
 onUnmounted(()=>{
 	// pipeline-active-node
 	emitter.off("pipeline-active-node");
-	clearInterval(timerUpdateTask.value)
+	clearInterval(timerPullInstanceLog.value)
 })
 
 </script>

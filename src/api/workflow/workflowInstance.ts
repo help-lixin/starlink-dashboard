@@ -13,3 +13,18 @@ export const getProcessDefinition = (id:any)=>{
         return res.data;
     })
 }
+
+// 获取流程实例日志
+export const getProcessInstanceLogs = (instanceId:string)=>{
+    const data = { "instanceId" : instanceId }
+    return request({
+		url: STARLINK_SERVICE + '/workflow/instance/logs',
+		method: 'POST',
+        headers: {
+            'content-type': 'application/json'
+        },
+        data: data
+	}).then((res)=>{
+        return res.data;
+    })
+}

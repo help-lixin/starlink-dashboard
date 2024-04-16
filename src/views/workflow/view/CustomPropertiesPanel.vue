@@ -3,14 +3,69 @@
 
 import { ref } from 'vue'
 
+import { createForm } from '@formily/core'
+import { createSchemaField, FormProvider } from '@formily/vue'
+import { FormItem, FormLayout, Input, PreviewText } from '@formily/element-plus'
+
+
 const props = defineProps({
 	modeler: Object,
-	processInstanceId: undefined
+	processInstanceId: undefined,
+	workFlowInstanceLogs: undefined
 })
 
 const isShowProperties = ref(false)
 const selectedElements = ref([])
 const element = ref(null)
+
+// 表单schema
+const formSchema = {
+	type: 'object',
+	properties: {
+		layout: {
+		type: 'void',
+		'x-component': 'FormLayout',
+		'x-component-props': {
+			labelAlign: "left",
+			wrapperAlign: "left",
+			labelCol: 24,
+			wrapperCol: 24,
+			layout: 'vertical',
+		},
+		properties: {
+			name: {
+				type: "string",
+				title: "节点",
+				'x-decorator': "FormItem",
+				'x-component': "PreviewText.Input"
+			},
+			log: {
+				type: "string",
+				title: "日志",
+				'x-decorator': "FormItem",
+				'x-component': "PreviewText.Input",
+				"x-component-props": {
+					"autosize": true,
+					"readonly": true,
+				}
+			}
+		},
+		},
+	},
+};
+
+
+const schema = ref({});
+var form = createForm({})
+var { SchemaField } = createSchemaField({
+	components: {
+		FormLayout,
+		FormItem,
+		Input,
+		PreviewText,
+	},
+});
+
 
 function init() {
 	props.modeler.on('selection.changed', async e => {
@@ -33,12 +88,19 @@ function init() {
 		const nodeId = element.value.id
 		const nodeName = element.value.businessObject?.name
 		const processInstanceId = props.processInstanceId
+		const workFlowInstanceLogs = props.workFlowInstanceLogs;
 
-		console.log("============================================")
-		console.log(processInstanceId)
-		console.log(nodeId)
-		console.log(nodeName)
-		console.log("============================================")
+		if(workFlowInstanceLogs){
+			const log = workFlowInstanceLogs[nodeId]
+			if(log){
+				schema.value = formSchema;
+				// 先清空表单里的内容
+				form.setValues({});
+				form = createForm({})
+				form.setValues({ name : nodeName , log:log })
+				console.log(log)
+			}
+		}
 	}) // end  selection.changed
 
 	props.modeler.on('element.changed', e => {
@@ -61,7 +123,9 @@ init()
     <div v-if="isShowProperties" class="custom-properties-panel">
       <yt-card style="height: 100%;" :content-style="{height: '100%'}">
         <el-scrollbar :height="'calc(100vh - var(--el-header-height) - 88px)'">
-
+			<FormProvider :form="form">
+				<SchemaField :schema="schema" />
+			</FormProvider>
         </el-scrollbar>
       </yt-card>
     </div>
