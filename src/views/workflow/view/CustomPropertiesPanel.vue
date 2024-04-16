@@ -43,7 +43,7 @@ const formSchema = {
 				type: "string",
 				title: "日志",
 				'x-decorator': "FormItem",
-				'x-component': "PreviewText.Input",
+				'x-component': "Input.TextArea",
 				"x-component-props": {
 					"autosize": true,
 					"readonly": true,
