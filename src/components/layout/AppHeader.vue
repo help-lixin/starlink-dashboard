@@ -9,15 +9,15 @@ import { useRouteStore } from '@/stores/route'
 import { useNavStore } from '@/stores/nav'
 import { useActionMetasStore } from '@/stores/plugin'
 import { useDark, useToggle } from '@vueuse/core'
-import { Moon, Sunny } from '@element-plus/icons-vue'
-
+import { Message, Moon, Sunny } from "@element-plus/icons-vue";
+import SystemMsg from "@/components/layout/SystemMsg.vue";
 const router = useRouter()
 const routeStore = useRouteStore()
 const menuStore = useMenuStore()
 const permsStore = usePermsStore()
 const navStore = useNavStore()
 const actionMetasStore = useActionMetasStore()
-
+const isShowMessage = ref(false)
 import StompClient from "@/utils/StompClient.ts";
 
 // 手工触发一次解析
@@ -59,8 +59,6 @@ const handlerLogout = () => {
   // 调用后端退出
   logout()
 
-  
-              
 
   // 清除store数据
   tokenStore.removeToken()
@@ -95,7 +93,12 @@ const handlerLogout = () => {
       </el-breadcrumb>
     </div>
     <div class="layout-right">
-      <div class="theme-model" @click="toggleDark()">
+      <div class="theme-model">
+        <div class="msg" @click="isShowMessage=true">
+          <el-badge :value="12" class="item">
+            <el-icon><Message /></el-icon>
+          </el-badge>
+        </div>
 <!--        <el-icon>-->
 <!--          <Moon v-if="!isDark" />-->
 <!--          <Sunny v-else />-->
@@ -118,6 +121,7 @@ const handlerLogout = () => {
       </el-dropdown>
     </div>
   </el-header>
+  <SystemMsg v-model:is-show="isShowMessage"></SystemMsg>
 </template>
 
 <style lang="scss" scoped>
@@ -135,6 +139,15 @@ const handlerLogout = () => {
     overflow: hidden;
     &.is-collapse {
       width: 0;
+    }
+  }
+}
+.msg {
+  padding-right: 20px;
+  ::v-deep(.el-icon) {
+    color: var(--menu-text-color);
+    &:hover {
+      color: white;
     }
   }
 }
