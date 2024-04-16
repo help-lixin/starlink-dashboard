@@ -2,7 +2,7 @@
 	<div class="bpmn">
 		<div ref="canvasRef" class="canvas"></div>
 		<CustomPropertiesPanel v-if="bpmnModeler" :modeler="bpmnModeler"
-		:processInstanceId="processInstanceId" :workFlowInstanceLogs="workFlowInstanceLogs"/>
+		:processInstanceId="processInstanceId" :workFlowInstanceLogs="workFlowInstanceLogs" :show-position="showPanelPosition"/>
 	</div>
 </template>
 
@@ -41,7 +41,9 @@ const processInstanceId = ref()
 const workFlowInstanceId = ref()
 const timerPullInstanceLog = ref()
 const workFlowInstanceLogs = ref({})
-
+const showPanelPosition = computed(() => {
+  return workFlowInstanceLogs.value ? 'bottom' : 'right'
+})
 
 // 获取xml
 function getXml(cb: any) {
@@ -101,12 +103,10 @@ function init() {
 			if(res?.code == 200){
 				// 工作流实例id
 				workFlowInstanceId.value = res?.data?.processInstanceId
-
-
-				// 定时任务获取状态
+// 定时任务获取状态
 				timerPullInstanceLog.value = setInterval(timerPullInstanceLogFunction,2000);
 
-				
+
 				const processDefinitionBody = res?.data?.processDefinitionBody
 				// 把json转换成xml进行展示
 				if (processInstanceId.value) {
@@ -126,10 +126,13 @@ function updateHighlightFunction(){
 			const elementToSelect = elementRegistry.get(activeElementId.value);
 			// TODO 朱捷
 			// 处理一下,同一时间只有一个节点是高亮.
+      const canvas = bpmnModeler.value.get('canvas')
 			// 添加高亮样式
 			if(elementToSelect?.id){
-				bpmnModeler.value.get('canvas').addMarker(elementToSelect.id, 'highlight');
+        canvas.removeMarker(activeElementId.value, 'highlight')
+        canvas.addMarker(elementToSelect.id, 'highlight');
 			}
+			console.log(bpmnModeler.value, bpmnModeler.value.get('canvas'))
 		}
 	} catch (e) {
 		console.log(e, 'err')
@@ -321,6 +324,7 @@ onUnmounted(()=>{
 	width: 100%;
 	display: flex;
   height: 100%;
+  position: relative;
 	.canvas {
 		height: 100%;
 		flex: 1;

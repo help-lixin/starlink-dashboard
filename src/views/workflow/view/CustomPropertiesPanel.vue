@@ -10,6 +10,7 @@ import { FormItem, FormLayout, Input, PreviewText } from '@formily/element-plus'
 
 const props = defineProps({
 	modeler: Object,
+  showPosition: 'left' | 'bottom',
 	processInstanceId: undefined,
 	workFlowInstanceLogs: undefined
 })
@@ -113,19 +114,21 @@ function init() {
 		}
 	}) // end element.changed
 }
-
+const scrollbarHeight = computed(() => {
+  return props.showPosition === 'bottom' ? '300px' : 'calc(100vh - var(--el-header-height) - 88px)'
+})
 // 初始化
 init()
 </script>
 
 
 <template>
-    <div v-if="isShowProperties" class="custom-properties-panel">
-      <yt-card style="height: 100%;" :content-style="{height: '100%'}">
-        <el-scrollbar :height="'calc(100vh - var(--el-header-height) - 88px)'">
-			<FormProvider :form="form">
-				<SchemaField :schema="schema" />
-			</FormProvider>
+    <div v-if="isShowProperties" class="custom-properties-panel" :class="[showPosition]">
+      <yt-card style="height: 100%;">
+        <el-scrollbar :height="scrollbarHeight">
+          <FormProvider :form="form">
+            <SchemaField :schema="schema" />
+          </FormProvider>
         </el-scrollbar>
       </yt-card>
     </div>
@@ -140,7 +143,18 @@ init()
 	height: calc(100vh - var(--el-header-height));
   padding-bottom: 58px;
 	background-color: #f8f8f8;
-
+  &.bottom {
+    width: 100%;
+    bottom: 0;
+    height: 300px;
+    padding-bottom: 24px;
+    top: auto;
+  }
+  ::v-deep(.yt-card) {
+    .content {
+      height: 100%;
+    }
+  }
 	.element-item {
 		padding: 9px 15px;
 
