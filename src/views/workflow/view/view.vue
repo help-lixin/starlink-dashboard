@@ -277,6 +277,19 @@ onMounted(() => {
 		}
 	});
 
+	// pipeline-complete
+	emitter.on("pipeline-complete",(data)=>{
+		if(data?.body){
+			const bodyObject = JSON.parse(data.body)
+			const businessId = bodyObject?.businessId
+			
+			if(businessId && ( processInstanceId.value == businessId ) ){
+				// 流水线完成之后,取消定时任务
+				clearInterval(timerPullInstanceLog.value)
+			}
+		}
+	});
+
 	// 2. 初始化BPMNJS
 	init()
 })
