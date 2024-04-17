@@ -10,7 +10,7 @@ import { FormItem, FormLayout, Input, PreviewText } from '@formily/element-plus'
 
 const props = defineProps({
 	modeler: Object,
-  showPosition: 'left' | 'bottom',
+  	showPosition: 'left' | 'bottom',
 	processInstanceId: undefined,
 	workFlowInstanceLogs: undefined
 })
@@ -34,15 +34,15 @@ const formSchema = {
 			layout: 'vertical',
 		},
 		properties: {
-			name: {
-				type: "string",
-				title: "节点",
-				'x-decorator': "FormItem",
-				'x-component': "PreviewText.Input"
-			},
+			// name: {
+			// 	type: "string",
+			// 	title: "节点",
+			// 	'x-decorator': "FormItem",
+			// 	'x-component': "PreviewText.Input"
+			// },
 			log: {
 				type: "string",
-				title: "日志",
+				title: "",
 				'x-decorator': "FormItem",
 				'x-component': "Input.TextArea",
 				"x-component-props": {
@@ -98,7 +98,8 @@ function init() {
 				// 先清空表单里的内容
 				form.setValues({});
 				form = createForm({})
-				form.setValues({ name : nodeName , log:log })
+				// form.setValues({ name : nodeName , log:log })
+				form.setValues({log:log })
 				console.log(log)
 			}
 		}
@@ -115,7 +116,7 @@ function init() {
 	}) // end element.changed
 }
 const scrollbarHeight = computed(() => {
-  return props.showPosition === 'bottom' ? '300px' : 'calc(100vh - var(--el-header-height) - 88px)'
+  return props.showPosition === 'bottom' ? '100px' : 'calc(100vh - var(--el-header-height) - 88px)'
 })
 // 初始化
 init()
@@ -139,14 +140,14 @@ init()
 	position: absolute;
 	top: 0;
 	right: 0;
-	width: 300px;
+	width: 100px;
 	height: calc(100vh - var(--el-header-height));
   padding-bottom: 58px;
 	background-color: #f8f8f8;
   &.bottom {
     width: 100%;
     bottom: 0;
-    height: 300px;
+    height: 100px;
     padding-bottom: 24px;
     top: auto;
   }

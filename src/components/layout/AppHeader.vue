@@ -57,7 +57,8 @@ const handlerLogout = () => {
   stompClient.destroy()
 
   // 调用后端退出
-  logout()
+  // TODO lixin
+  // logout()
 
 
   // 清除store数据
