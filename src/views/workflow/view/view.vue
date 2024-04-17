@@ -29,7 +29,7 @@ import { emitter } from "@/utils/mitt";
 import { encode, decode } from 'js-base64';
 import {  useRoute } from "vue-router";
 
-import { getProcessDefinition , getProcessInstanceLogs } from '@/api/workflow/workflowInstance'
+import { getProcessInstance , getProcessInstanceLogs } from '@/api/workflow/workflowInstance'
 // 当前活跃的节点
 const activeElementId = ref(undefined)
 
@@ -98,14 +98,14 @@ function init() {
 	// 流程定义内容
 	processInstanceId.value = route.params?.processInstnaceId;
 	if(processInstanceId.value){
-		getProcessDefinition(processInstanceId.value)
+		getProcessInstance(processInstanceId.value)
 		  .then((res)=>{
 			if(res?.code == 200){
 				// 工作流实例id
 				workFlowInstanceId.value = res?.data?.processInstanceId
-// 定时任务获取状态
+				// 定时任务获取状态
 				timerPullInstanceLog.value = setInterval(timerPullInstanceLogFunction,2000);
-
+				
 
 				const processDefinitionBody = res?.data?.processDefinitionBody
 				// 把json转换成xml进行展示
@@ -126,11 +126,11 @@ function updateHighlightFunction(){
 			const elementToSelect = elementRegistry.get(activeElementId.value);
 			// TODO 朱捷
 			// 处理一下,同一时间只有一个节点是高亮.
-      const canvas = bpmnModeler.value.get('canvas')
+      		const canvas = bpmnModeler.value.get('canvas')
 			// 添加高亮样式
 			if(elementToSelect?.id){
-        canvas.removeMarker(activeElementId.value, 'highlight')
-        canvas.addMarker(elementToSelect.id, 'highlight');
+				canvas.removeMarker(activeElementId.value, 'highlight')
+				canvas.addMarker(elementToSelect.id, 'highlight');
 			}
 			console.log(bpmnModeler.value, bpmnModeler.value.get('canvas'))
 		}
