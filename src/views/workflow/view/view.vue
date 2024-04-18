@@ -103,9 +103,16 @@ function init() {
 			if(res?.code == 200){
 				// 工作流实例id
 				workFlowInstanceId.value = res?.data?.processInstanceId
-				// 定时任务获取状态
-				timerPullInstanceLog.value = setInterval(timerPullInstanceLogFunction,2000);
-				
+				const processStatus = res?.data?.processStatus
+
+				// 只有当实例状态为:0时,才会开启定时拉取日志
+				if(processStatus == 0){
+					// 定时任务获取状态
+					timerPullInstanceLog.value = setInterval(timerPullInstanceLogFunction,2000);
+				}else{
+					// 手动拉取一次日志回来
+					timerPullInstanceLogFunction()
+				}
 
 				const processDefinitionBody = res?.data?.processDefinitionBody
 				// 把json转换成xml进行展示
@@ -260,6 +267,11 @@ function timerPullInstanceLogFunction() {
 	}
 }
 
+function cancelPullLog(){
+	// 流水线完成之后,取消定时任务
+	clearInterval(timerPullInstanceLog.value)
+}
+
 
 onMounted(() => {
 	// 1. 订阅事件
@@ -284,8 +296,8 @@ onMounted(() => {
 			const businessId = bodyObject?.businessId
 			
 			if(businessId && ( processInstanceId.value == businessId ) ){
-				// 流水线完成之后,取消定时任务
-				clearInterval(timerPullInstanceLog.value)
+				// 延迟10秒后,关闭定时任务
+				setTimeout(cancelPullLog,1000 * 10)
 			}
 		}
 	});
