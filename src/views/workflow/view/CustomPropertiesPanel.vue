@@ -100,7 +100,7 @@ function init() {
 				form = createForm({})
 				// form.setValues({ name : nodeName , log:log })
 				form.setValues({log:log })
-				console.log(log)
+				// console.log(log)
 			}
 		}
 	}) // end  selection.changed
@@ -116,7 +116,7 @@ function init() {
 	}) // end element.changed
 }
 const scrollbarHeight = computed(() => {
-  return props.showPosition === 'bottom' ? '100px' : 'calc(100vh - var(--el-header-height) - 88px)'
+  return props.showPosition === 'bottom' ? '220px' : 'calc(100vh - var(--el-header-height) - 88px)'
 })
 // 初始化
 init()
@@ -140,14 +140,14 @@ init()
 	position: absolute;
 	top: 0;
 	right: 0;
-	width: 100px;
+	width: 220px;
 	height: calc(100vh - var(--el-header-height));
   padding-bottom: 58px;
 	background-color: #f8f8f8;
   &.bottom {
     width: 100%;
     bottom: 0;
-    height: 100px;
+    height: 220px;
     padding-bottom: 24px;
     top: auto;
   }
