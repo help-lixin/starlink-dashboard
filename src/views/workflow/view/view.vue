@@ -297,7 +297,7 @@ onMounted(() => {
 			
 			if(businessId && ( processInstanceId.value == businessId ) ){
 				// 延迟10秒后,关闭定时任务
-				setTimeout(cancelPullLog,1000 * 10)
+				setTimeout(cancelPullLog,1000 * 30)
 			}
 		}
 	});
