@@ -94,30 +94,38 @@ function init() {
     }
   })
 
-  // 先进行一次初始化
-  setDiagram(workflowXml)
-  // 流程定义内容
-  processInstanceId.value = route.params?.processInstnaceId
-  if (processInstanceId.value) {
-    getProcessInstance(processInstanceId.value).then((res) => {
-      if (res?.code == 200) {
-        // 工作流实例id
-        workFlowInstanceId.value = res?.data?.processInstanceId
-        // 定时任务获取状态
-        timerPullInstanceLog.value = setInterval(timerPullInstanceLogFunction, 2000)
-        // 立即执行一次
-        timerPullInstanceLogFunction()
-        const processDefinitionBody = res?.data?.processDefinitionBody
-        // 把json转换成xml进行展示
-        if (processInstanceId.value) {
-          const processDefinitionJson = JSON.parse(processDefinitionBody)
-          console.log(processDefinitionJson, 'processDefinitionJson')
-          const processDefinitionXml = jsonToXml(processDefinitionJson)
-          setDiagram(processDefinitionXml)
-        } // end if
-      }
-    })
-  }
+	// 先进行一次初始化
+	setDiagram(workflowXml)
+
+	// 流程定义内容
+	processInstanceId.value = route.params?.processInstnaceId;
+	if(processInstanceId.value){
+		getProcessInstance(processInstanceId.value)
+		  .then((res)=>{
+			if(res?.code == 200){
+				// 工作流实例id
+				workFlowInstanceId.value = res?.data?.processInstanceId
+				const processStatus = res?.data?.processStatus
+
+				// 只有当实例状态为:0时,才会开启定时拉取日志
+				if(processStatus == 0){
+					// 定时任务获取状态
+					timerPullInstanceLog.value = setInterval(timerPullInstanceLogFunction,2000);
+				}else{
+					// 手动拉取一次日志回来
+					timerPullInstanceLogFunction()
+				}
+
+				const processDefinitionBody = res?.data?.processDefinitionBody
+				// 把json转换成xml进行展示
+				if (processInstanceId.value) {
+					const processDefinitionJson = JSON.parse(processDefinitionBody)
+					const processDefinitionXml = jsonToXml(processDefinitionJson)
+					setDiagram(processDefinitionXml)
+				}// end if
+			}
+		  })
+	}
 }
 
 function isNode(element) {
@@ -272,6 +280,12 @@ function timerPullInstanceLogFunction() {
   }
 }
 
+function cancelPullLog(){
+	// 流水线完成之后,取消定时任务
+	clearInterval(timerPullInstanceLog.value)
+}
+
+
 onMounted(() => {
   // 1. 订阅事件
   emitter.on('pipeline-active-node', (data) => {
@@ -288,18 +302,18 @@ onMounted(() => {
     }
   })
 
-  // pipeline-complete
-  emitter.on('pipeline-complete', (data) => {
-    if (data?.body) {
-      const bodyObject = JSON.parse(data.body)
-      const businessId = bodyObject?.businessId
+	// pipeline-complete
+	emitter.on("pipeline-complete",(data)=>{
+		if(data?.body){
+			const bodyObject = JSON.parse(data.body)
+			const businessId = bodyObject?.businessId
 
-      if (businessId && processInstanceId.value == businessId) {
-        // 流水线完成之后,取消定时任务
-        clearInterval(timerPullInstanceLog.value)
-      }
-    }
-  })
+			if(businessId && ( processInstanceId.value == businessId ) ){
+				// 延迟10秒后,关闭定时任务
+				setTimeout(cancelPullLog,1000 * 30)
+			}
+		}
+	});
 
   // 2. 初始化BPMNJS
   init()
