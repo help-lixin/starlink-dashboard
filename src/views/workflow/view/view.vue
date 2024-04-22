@@ -148,14 +148,13 @@ function updateHighlightFunction() {
       const canvas = bpmnModeler.value.get('canvas')
       const rootElement = canvas.getRootElement()
       const bpmnElements = rootElement.children
-      const nodes = bpmnElements.filter((element) => isNode(element))
       // 添加高亮样式
       if (elementToSelect?.id) {
         // 先取消所有的高亮
-        nodes.forEach((row) => canvas.removeMarker(row.id, 'highlight'))
+        unAllHighlight()
+        
         canvas.addMarker(elementToSelect.id, 'highlight')
       }
-      console.log(bpmnModeler.value, bpmnModeler.value.get('canvas'))
     }
   } catch (e) {
     console.log(e, 'err')
@@ -309,8 +308,11 @@ onMounted(() => {
 			const businessId = bodyObject?.businessId
 
 			if(businessId && ( processInstanceId.value == businessId ) ){
-				// 延迟10秒后,关闭定时任务
+				// 1.延迟10秒后,关闭定时任务
 				setTimeout(cancelPullLog,1000 * 30)
+        
+        // 2. 取消所有的高亮
+        unAllHighlight()
 			}
 		}
 	});
@@ -318,6 +320,19 @@ onMounted(() => {
   // 2. 初始化BPMNJS
   init()
 })
+
+function unAllHighlight(){
+  try {
+    const canvas = bpmnModeler.value.get('canvas')
+    const rootElement = canvas.getRootElement()
+    const bpmnElements = rootElement.children
+    const nodes = bpmnElements.filter((element) => isNode(element))
+    // 先取消所有的高亮
+    nodes.forEach((row) => canvas.removeMarker(row.id, 'highlight'))
+  } catch (e) {
+    console.log(e, 'err')
+  } // end catch
+}
 
 onUnmounted(() => {
   // pipeline-active-node
