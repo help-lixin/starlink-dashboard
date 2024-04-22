@@ -93,16 +93,14 @@ function init() {
 
 		if(workFlowInstanceLogs){
 			const log = workFlowInstanceLogs[nodeId]
-      console.log(log, 'log11')
 			if(log){
 				schema.value = formSchema;
 				// 先清空表单里的内容
 				form.setValues({ log })
 				console.log(log, 'run123')
 			} else {
-        // schema.value = undefined
-        form.setValues({ log: '暂无日志！' })
-      }
+				form.setValues({ log: '暂无日志！' })
+			}
 		}
 	}) // end  selection.changed
 
