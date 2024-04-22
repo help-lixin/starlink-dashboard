@@ -320,22 +320,22 @@ var { SchemaField } = createSchemaField({
 
 function init() {
 	props.modeler.on('selection.changed', async e => {
+    console.log('changed111')
 		// 所有的节点
 		selectedElements.value = e.newSelection
 		// 被选中的节点
 		element.value = e.newSelection[0]
-		
+
 		if(undefined == element.value ||
 			element.value?.type=="bpmn:SequenceFlow" ||
 			element.value?.type=="bpmn:StartEvent" ||
 			element.value?.type=="bpmn:EndEvent" ){
 				isShowProperties.value=false;
 				return;
-		}else{
-			// 展示右侧属性面板
-			isShowProperties.value=true;
 		}
-
+    isShowProperties.value = false
+    await nextTick()
+    isShowProperties.value=true;
 		// 先置空
 		delete schema.value?.properties?.layout?.properties
 		//拷贝出一份新的schema
@@ -348,7 +348,7 @@ function init() {
 		if (element.value?.businessObject?.$attrs?.plugin) {
 			// TODO lixin
 			// const pluginInfoStr = mockFile
-			
+
 			// 从store里拿数据
 			const plugins = actionMetasStore.getActions
 			const pluginInfoStr = plugins.get(element.value.businessObject.$attrs.plugin)
@@ -379,7 +379,7 @@ function init() {
 			const decodeParams = JSON.parse(decodeParamsString);
 			Object.assign(params,decodeParams)
 		}
-		
+
 		// 节点名称
 		if (element.value?.businessObject?.$attrs?._name) {
 			element.value['name'] = element.value?.businessObject?.$attrs?._name
