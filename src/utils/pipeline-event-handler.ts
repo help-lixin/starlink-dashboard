@@ -13,9 +13,6 @@ export function registerPipelineEventHandler(){
             const businessId = bodyObject?.businessId
             const nodeId = bodyObject?.nodeId
             if(businessId && nodeId){
-                console.log("&&&&&&&&&&&&&&&&&store&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
-                console.log(businessId + "-->" + nodeId)
-                console.log("&&&&&&&&&&&&&&&&&store&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
                 localStore.set(businessId , nodeId , "1h")
             }
         }
