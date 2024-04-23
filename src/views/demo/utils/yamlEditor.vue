@@ -3,7 +3,7 @@
 
 import { MonacoEditor } from './MonacoEditor'
 import { onMounted, ref, nextTick, defineEmits } from 'vue'
-const props = defineProps<{visible: boolean, initData: string}>()
+const props = defineProps<{visible: boolean, copyData: string}>()
 const editor = new MonacoEditor('container')
 import yaml from "js-yaml"
 import { Message } from '@element-plus/icons-vue'
@@ -15,10 +15,10 @@ const closeDialog = () => {
 
 watch(() => props.visible, async (newValue) => {
   if (newValue) {
-    console.log(yaml.dump(props.initData), '111')
+    // console.log(yaml.dump(props.copyData), '111')
     await nextTick()
     editor.initEditor({
-      value: yaml.dump(props.initData),
+      value: yaml.dump(props.copyData),
       language: 'yaml'
     })
   }

@@ -1,193 +1,100 @@
 <script setup lang="ts">
 // @ts-nocheck
 
-import YamlEditor from '@/views/demo/utils/yamlEditor.vue'
+import YamlEditor from '@/views/demo/utils/yamlEditor2.vue'
 import type { FormInstance } from 'element-plus'
+import _ from 'lodash';
 const ruleFormRef = ref<FormInstance>()
-// 通用标签 start
-const port = ref({
-                'name': '',
-                'expose': 'true',
-                'protocol': 'TCP',
-                'containerPort': '1111',
-                '_serviceType': [],
-                '_ipam': '',
-                '_name': 'nulltcp'
-              })
-const ports = ref([port])
-const removeRow = (index,portIndex) =>{
-  initData.value.spec.template.spec.containers[index].ports.splice(portIndex, 1);
-}
-
-const addRow = (index) =>{
-  initData.value.spec.template.spec.containers[index].ports.push(port.value)
-}
-const services = ref([{label:"不创建服务",value:""},{label:"Cluster IP",value:"Cluster IP"}])
-// 通用标签 end
-
-const location = ref(
-  [
-    {
-      label:'Deployment',
-      value:{
-        标签注释: {
-          'matching': '/api2',
-          'proxy_pass': 'http://175.178.238.212:3002',
-          'rewrite': '^/api(.*)$ $1 break'
-        },
-        扩缩容和升级策略: {
-          'position': 'c盘'
-        }
-      }
-    },
-    {
-      label:'pod',
-      value:{
-        标签注释: {
-          'matching': '/api2',
-          'proxy_pass': 'http://175.178.238.212:3002',
-          'rewrite': '^/api(.*)$ $1 break'
-        },
-        网络: {
-          'position': 'c盘'
-        },
-        节点调度: {
-          'position': 'c盘'
-        },
-        pod调度: {
-          'position': 'c盘'
-        },
-        资源: {
-          'position': 'c盘'
-        },
-        扩缩容和升级策略: {
-          'position': 'c盘'
-        },
-        安全性上下文: {
-          'position': 'c盘'
-        },
-        存储: {
-          'position': 'c盘'
-        }
-      }
-    },
-    {
-      label:'container_0',
-      value:{
-        通用: {
-          'name': '/api1',
-          'image': 'nginx:1.17.2',
-          'imagePullPolicy': 'Always'
-        },
-        健康检查: {
-          'position': 'c盘'
-        },
-        资源: {
-          'position': 'c盘'
-        },
-        安全性上下文: {
-          'position': 'c盘'
-        },
-        存储: {
-          'position': 'c盘'
-        }
-      }
-    }
-  ])
+const copyData = ref({})
 const initData = ref({
-  "apiVersion": "apps/v1",
-  "kind": "Deployment",
-  "metadata": {
-    "name": "spring-web-demo",
-    "annotations": {
-      "deployment.kubernetes.io/revision": "2"
-    },
-    "creationTimestamp": "2024-03-22T04:57:23Z",
-    "generation": 2,
-    "labels": {
-      "workload.user.cattle.io/workloadselector": "apps.deployment-default-spring-web-demo"
-    },
-    "namespace": "default",
-    "resourceVersion": "19131771",
-    "uid": "5b6f9662-4809-409c-9b63-dd633d1410eb",
-    "fields": [
-      "spring-web-demo",
-      "2/2",
-      2,
-      2,
-      "17d",
-      "container-0",
-      "nginx:1.17.2",
-      "workload.user.cattle.io/workloadselector=apps.deployment-default-spring-web-demo"
-    ]
-  },
-  "spec": {
-    "selector": {
-      "matchLabels": {
-        "workload.user.cattle.io/workloadselector": "apps.deployment-default-spring-web-demo"
-      }
-    },
-    "template": {
-      "metadata": {
-        "labels": {
-          "workload.user.cattle.io/workloadselector": "apps.deployment-default-spring-web-demo"
-        },
-        "creationTimestamp": null,
-        "namespace": "default"
-      },
-      "spec": {
-        "containers": [
-          {
-            "image": "nginx:1.17.2",
-            "imagePullPolicy": "Always",
-            "name": "container-0",
-            "securityContext": {
-              "allowPrivilegeEscalation": false,
-              "privileged": false,
-              "readOnlyRootFilesystem": false,
-              "runAsNonRoot": false
-            },
-            "terminationMessagePath": "/dev/termination-log",
-            "terminationMessagePolicy": "File",
-            "_init": false,
-            "__active": true,
-            "stdin": false,
-            "stdinOnce": false,
-            "command": [
-              "/bin/sh"
-            ],
-            "tty": false,
-            "args": [
-              "/user/sbin"
-            ],
-            "workingDir": "/myapp",
-            "resources": {}
-          }
-        ],
-        "dnsPolicy": "ClusterFirst",
-        "imagePullSecrets": [
-          {
-            "name": "harbor-login"
-          }
-        ],
-        "restartPolicy": "Always",
-        "schedulerName": "default-scheduler",
-        "terminationGracePeriodSeconds": 30,
-        "volumes": null
-      }
-    },
-    "progressDeadlineSeconds": 600,
-    "replicas": 2,
-    "revisionHistoryLimit": 10,
-    "strategy": {
-      "rollingUpdate": {
-        "maxSurge": "25%",
-        "maxUnavailable": "25%"
-      },
-      "type": "RollingUpdate"
+  'apiVersion': 'apps/v1',
+  'kind': 'Deployment',
+  'metadata': {
+    'name': 'nginx-deploy',
+    'namespace': 'default',
+    'labels': {
+      'controller': 'deploy'
     }
   },
-  "__clone": true
+  'spec': {
+    'replicas': 3,
+    'revisionHistoryLimit': 3,
+    'paused': false,
+    'progressDeadlineSeconds': 600,
+    'strategy': {
+      'type': 'RollingUpdate',
+      'rollingUpdate': {
+        'maxSurge': '30%',
+        'maxUnavailable': '30%'
+      }
+    },
+    'selector': {
+      'matchLabels': {
+        'app': 'nginx-pod'
+      },
+      'matchExpressions': [
+        {
+          'key': 'app',
+          'operator': 'In',
+          'values': [
+            'nginx-pod'
+          ]
+        }
+      ]
+    },
+    'template': {
+      'metadata': {
+        'labels': {
+          'app': 'nginx-pod'
+        }
+      },
+      'spec': {
+        'containers': [
+          {
+            'name': 'nginx',
+            'image': 'nginx:1.17.1',
+            'ports': [
+              {
+                'containerPort': 80
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  'location': [
+    {
+      resource: {
+        'matching': '/api',
+        'proxy_pass': 'http://175.178.238.212:3002',
+        'rewrite': '^/api(.*)$ $1 break'
+      },
+      storage: {
+        'position': 'c盘'
+      }
+    },
+    {
+      resource: {
+        'matching': '/api',
+        'proxy_pass': 'http://175.178.238.212:3002',
+        'rewrite': '^/api(.*)$ $1 break'
+      },
+      storage: {
+        'position': 'c盘'
+      }
+    },
+    {
+      resource: {
+        'matching': '/api',
+        'proxy_pass': 'http://175.178.238.212:3002',
+        'rewrite': '^/api(.*)$ $1 break'
+      },
+      storage: {
+        'position': 'c盘'
+      }
+    }
+  ]
 })
 
 import { Select } from '@element-plus/icons-vue'
@@ -195,17 +102,17 @@ import type { FormRules } from 'element-plus'
 import yaml from 'js-yaml'
 const selectTabIndex = ref(0)
 const selectTabIndexObj = ref({
-  0: '通用',
-  1: '健康检查',
-  2: 'resource1'
+  0: 'resource',
+  1: 'storage',
+  2: 'resource'
 })
 const locationItem = ref({
-  通用: {
+  resource: {
     'matching': undefined,
     'proxy_pass': undefined,
     'rewrite': undefined
   },
-  健康检查: {
+  storage: {
     'position': undefined
   }
 })
@@ -214,13 +121,14 @@ const handleTabsEdit = (
   targetName: string | number,
   action: 'remove' | 'add'
 ) => {
+  console.log(targetName, 'targetName')
   if (initData.value.location.length === 1) {
     ElMessage.warning('请至少保留一个tab页')
     return
   }
   if (action === 'add') {
     initData.value.location.push(locationItem.value)
-    selectTabIndexObj.value[initData.value.location.length - 1] = '通用'
+    selectTabIndexObj.value[initData.value.location.length - 1] = 'resource'
   } else if (action === 'remove') {
     initData.value.location.splice(targetName, 1)
     delete selectTabIndexObj.value[targetName]
@@ -229,9 +137,27 @@ const handleTabsEdit = (
 const isShowYamlEditor = ref(false)
 const editYaml = () => {
   isShowYamlEditor.value = true
+
+  // copyData.value = _.cloneDeep(initData.value) 
+  const yamlData = yaml.dump(initData.value);
+  const json = yaml.load(yamlData);
+  const yamlData2 = yaml.dump(json);
+  const json2 = yaml.load(yamlData2);
+  console.log(json2)
 }
 const setValue = (data) => {
   initData.value = data
+  const container = {
+    'name': 'nginx2',
+    'image': 'nginx:1.17.2',
+    'ports': [
+      {
+        'containerPort': 8080
+      }
+    ]
+  }
+
+  initData.value.spec.template.spec.containers.push(container)
 }
 const rules = reactive<FormRules>({
   matching: [
@@ -243,14 +169,12 @@ const rules = reactive<FormRules>({
 const saveData = () => {
   ruleFormRef.value.validate((valid) => {
     if (valid) {
-      console.log(yaml.safeLoad(initData.value))
+      console.log(yaml.dump(initData.value))
     } else {
       ElMessage.error('请填写完整')
     }
   })
 }
-
-
 </script>
 <template>
   <div class="yamlDemo">
@@ -272,12 +196,6 @@ const saveData = () => {
               </el-form-item>
             </el-col>
             <el-col :span="8">
-              <el-form-item label="命名空间">
-                <el-select v-model="initData.namespace" style="width: 100%;" placeholder="请选择">
-                  <el-option label="default" value="default"></el-option>
-                  <el-option label="my-project" value="my-project"></el-option>
-                </el-select>
-              </el-form-item>
             </el-col>
           </el-row>
         </yt-card>
@@ -294,24 +212,24 @@ const saveData = () => {
                 <el-icon><Select /></el-icon>
               </template>
               <el-tab-pane
-                v-for="(item, index) in location"
+                v-for="(item, index) in initData.location"
                 :key="index"
-                :label="`${item.label}`"
+                :label="`location_${index}`"
                 :name="index"
               >
                 <el-scrollbar>
                   <div class="tab-content">
                     <div class="left">
                       <el-tabs :tab-position="'left'" v-model="selectTabIndexObj[selectTabIndex]">
-                        <el-tab-pane :label="item1" v-for="(item1, index1) in Object.keys(item[index].value)" :key="index1" :name="item1"></el-tab-pane>
+                        <el-tab-pane :label="item1" v-for="(item1, index1) in Object.keys(item)" :key="index1" :name="item1"></el-tab-pane>
                       </el-tabs>
                     </div>
                     <div class="right">
-                      <template v-if="selectTabIndexObj[selectTabIndex] === '通用'">
+                      <template v-if="selectTabIndexObj[selectTabIndex] === 'resource'">
                         <el-row :gutter="24">
                           <el-col :span="8">
-                            <el-form-item label="匹配规则" :prop="`location[${index}][${selectTabIndexObj[selectTabIndex]}].name`" >
-                              <el-input v-model="item[selectTabIndexObj[selectTabIndex]].name" placeholder="请输入内容"></el-input>
+                            <el-form-item label="匹配规则" :prop="`location[${index}][${selectTabIndexObj[selectTabIndex]}].matching`" :rules="rules.matching">
+                              <el-input v-model="item[selectTabIndexObj[selectTabIndex]].matching" placeholder="请输入内容"></el-input>
                             </el-form-item>
                           </el-col>
                           <el-col :span="8">
@@ -325,29 +243,8 @@ const saveData = () => {
                             </el-form-item>
                           </el-col>
                         </el-row>
-                        <el-row :gutter="24" v-for="(port, portIndex) in ports" :key="portIndex">
-                            <el-col :span="8">
-                              <el-select
-                                class="search-select"
-                                v-model="port._serviceType"
-                                placeholder="Service类型"
-                                clearable
-                              >
-                                <el-option v-for="service in services"
-                                          :key="service.value"
-                                          :label="service.label"
-                                          :value="service.value"/>
-                              </el-select>
-                              <el-col :span="8">
-                                <el-input v-model="port._name" placeholder="请输入名称"></el-input>
-                              </el-col>
-                            </el-col>
-                            <el-button @click="removeRow(index,portIndex)" type="primary">删除</el-button>
-                        </el-row>
-                        <el-button @click="addRow(index)" type="primary">添加</el-button>
-                        
                       </template>
-                      <template v-else-if="selectTabIndexObj[selectTabIndex] === '健康检查'">
+                      <template v-else-if="selectTabIndexObj[selectTabIndex] === 'storage'">
                         <el-row :gutter="24">
                           <el-col :span="8">
                             <el-form-item label="位置">
