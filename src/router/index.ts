@@ -176,14 +176,14 @@ export const dynamicRoutes = [
       requiresAuth: true
     }
   },
-  {
-    path: '/kubernetes/index',
-    name: 'kubernetes-manage',
-    component: () => import('../views/kubernetes/index.vue'),
-    meta: {
-      requiresAuth: true
-    }
-  },
+  // {
+  //   path: '/kubernetes/index',
+  //   name: 'kubernetes-manage',
+  //   component: () => import('../views/kubernetes/index.vue'),
+  //   meta: {
+  //     requiresAuth: true
+  //   }
+  // },
   {
     path: '/system/credential/index',
     name: 'sys-credential',
