@@ -1,1494 +1,1494 @@
 <script setup lang="ts">
-// @ts-nocheck
+  // @ts-nocheck
 
-import YamlEditor from '@/views/demo/utils/yamlEditor.vue'
-import type { FormInstance } from 'element-plus'
-import _ from 'lodash';
-const ruleFormRef = ref<FormInstance>()
-// 通用标签 start
-const envSecrets = ref([
-  {
-    "label":"app-service",
-    "value":"app-service"
+  import YamlEditor from '@/views/demo/utils/yamlEditor.vue'
+  import type { FormInstance } from 'element-plus'
+  import _ from 'lodash';
+  const ruleFormRef = ref<FormInstance>()
+  // 通用标签 start
+  const envSecrets = ref([
+    {
+      "label":"app-service",
+      "value":"app-service"
+    }
+  ])
+  const envSecretKeys = ref([
+    {
+      "label":"ssh-privatekey",
+      "value":"ssh-privatekey"
+    }
+  ])
+  const protocols = ref([{
+    "label":"TCP",
+    "value":"TCP"
+  },
+    {
+      "label":"UDP",
+      "value":"UDP"
+    }])
+  const removePort = (index,portIndex) =>{
+    initData.value.spec.template.spec.containers[index].ports.splice(portIndex, 1);
   }
-])
-const envSecretKeys = ref([
-  {
-    "label":"ssh-privatekey",
-    "value":"ssh-privatekey"
+  const addPort = (index) =>{
+    const port = {
+      'name': undefined,
+      'expose': undefined,
+      'protocol': 'TCP',
+      'containerPort': 80,
+      'hostPort': undefined,
+      'hostIP': undefined,
+      '_serviceType': [],
+    }
+    initData.value.spec.template.spec.containers[index].ports.push(port)
   }
-])
-const protocols = ref([{
-  "label":"TCP",
-  "value":"TCP"
-},
-{
-  "label":"UDP",
-  "value":"UDP"
-}])
-const removePort = (index,portIndex) =>{
-  initData.value.spec.template.spec.containers[index].ports.splice(portIndex, 1);
-}
-const addPort = (index) =>{
-  const port = {
-                'name': undefined,
-                'expose': undefined,
-                'protocol': 'TCP',
-                'containerPort': 80,
-                'hostPort': undefined,
-                'hostIP': undefined,
-                '_serviceType': [],
+
+  // deployment标签增删
+  const removeDeployLabel = (index) =>{
+    initData.value.option.labelAnnotation.deployment.labels.splice(index, 1);
+  }
+  const addDeployLabel = () =>{
+    initData.value.option.labelAnnotation.deployment.labels.push({key:"", value:""})
+  }
+  // deployment注解增删
+  const removeDeployAnnotation = (labelIndex) =>{
+    initData.value.option.labelAnnotation.deployment.annotations.splice(labelIndex, 1);
+  }
+  const addDeployAnnotation = () =>{
+    initData.value.option.labelAnnotation.deployment.annotations.push({key:"", value:""})
+  }
+
+  // pod标签增删
+  const removePodLabel = (index) =>{
+    initData.value.option.labelAnnotation.pod.labels.splice(index, 1);
+  }
+  const addPodLabel = () =>{
+    initData.value.option.labelAnnotation.pod.labels.push({key:"", value:""})
+  }
+  // pod注解增删
+  const removePodAnnotation = (labelIndex) =>{
+    initData.value.option.labelAnnotation.pod.annotations.splice(labelIndex, 1);
+  }
+  const addPodAnnotation = () =>{
+    initData.value.option.labelAnnotation.pod.annotations.push({key:"", value:""})
+  }
+
+
+  // 解析器选项增删
+  const addOption = () =>{
+    if(initData.value.spec.template.spec?.dnsConfig == undefined){
+      Object.assign(initData.value.spec.template.spec.dnsConfig,{"dnsConfig":""})
+    }
+    if(initData.value.spec.template.spec.dnsConfig.searches == undefined){
+      Object.assign(initData.value.spec.template.spec.dnsConfig,{"options":[]})
+    }
+    initData.value.spec.template.spec.dnsConfig.options.push({"name":"","value":""})
+  }
+  const removeOption = (optionIndex) =>{
+    initData.value.spec.template.spec.dnsConfig.options.splice(optionIndex, 1);
+  }
+
+  // 搜索域增删
+  const addSearch = () =>{
+    if(initData.value.spec.template.spec?.dnsConfig == undefined){
+      Object.assign(initData.value.spec.template.spec.dnsConfig,{"dnsConfig":""})
+    }
+    if(initData.value.spec.template.spec.dnsConfig.searches == undefined){
+      Object.assign(initData.value.spec.template.spec.dnsConfig,{"searches":[{value:""}]})
+    }
+    initData.value.spec.template.spec.dnsConfig.searches.push({value:""})
+  }
+  const removeSearch = (searchIndex) =>{
+    initData.value.spec.template.spec.dnsConfig.searches.splice(searchIndex, 1);
+  }
+
+  // 域名服务器增删
+  const addNameServer = () =>{
+    if(initData.value.spec.template.spec?.dnsConfig == undefined){
+      Object.assign(initData.value.spec.template.spec.dnsConfig,{"dnsConfig":""})
+    }
+    if(initData.value.spec.template.spec?.dnsConfig?.nameservers == undefined){
+      Object.assign(initData.value.spec.template.spec,{"nameservers":[{value:""}]})
+    }
+    initData.value.spec.template.spec.dnsConfig.nameservers.push({value:""})
+  }
+  const removeNameServer = (searchIndex) =>{
+    initData.value.spec.template.spec.dnsConfig.nameservers.splice(searchIndex, 1);
+  }
+
+  // 主机别名增删
+  const addHostAlias = () =>{
+    if(initData.value.spec.template.spec?.hostAliases == undefined){
+      Object.assign(initData.value.spec.template.spec,{"hostAliases":""})
+    }
+    initData.value.spec.template.spec.hostAliases.push({"ip":"","hostnames":[]})
+  }
+  const removeHostAlias = (searchIndex) =>{
+    initData.value.spec.template.spec.hostAliases.splice(searchIndex, 1);
+  }
+
+  // 环境变量增删
+  const removeEnv = (index,envIndex) =>{
+    initData.value.spec.template.spec.containers[index].env.splice(envIndex, 1);
+  }
+  const addEnv = (container) =>{
+    const env = {
+      "item":"Key/Value",
+      "name": undefined,
+      "value": undefined
+    }
+    container.env.push(env)
+  }
+
+  const namespaces = [{label:"default",value:"default"},{label:"my-project",value:"my-project"}]
+  // 添加pod调度
+  const addPod = ()=>{
+    initData.value.option.freePod.push(
+            {
+              "podAffinity":true,
+              "namespaces":[],
+              "weight":1,
+              "nodeLevel":"0",
+              "curNameSpace":true,
+              "topologyKey":"",
+              "labelSelector": {
+                "matchExpressions": [
+                  {
+                    "key": "",
+                    "operator": "In",
+                    "values": [""]
+                  }
+                ]
               }
-  initData.value.spec.template.spec.containers[index].ports.push(port)
-}
-
-// deployment标签增删
-const removeDeployLabel = (index) =>{
-  initData.value.option.labelAnnotation.deployment.labels.splice(index, 1);
-}
-const addDeployLabel = () =>{
-  initData.value.option.labelAnnotation.deployment.labels.push({key:"", value:""})
-}
-// deployment注解增删
-const removeDeployAnnotation = (labelIndex) =>{
-  initData.value.option.labelAnnotation.deployment.annotations.splice(labelIndex, 1);
-}
-const addDeployAnnotation = () =>{
-  initData.value.option.labelAnnotation.deployment.annotations.push({key:"", value:""})
-}
-
-// pod标签增删
-const removePodLabel = (index) =>{
-  initData.value.option.labelAnnotation.pod.labels.splice(index, 1);
-}
-const addPodLabel = () =>{
-  initData.value.option.labelAnnotation.pod.labels.push({key:"", value:""})
-}
-// pod注解增删
-const removePodAnnotation = (labelIndex) =>{
-  initData.value.option.labelAnnotation.pod.annotations.splice(labelIndex, 1);
-}
-const addPodAnnotation = () =>{
-  initData.value.option.labelAnnotation.pod.annotations.push({key:"", value:""})
-}
-
-
-// 解析器选项增删
-const addOption = () =>{
-  if(initData.value.spec.template.spec?.dnsConfig == undefined){
-    Object.assign(initData.value.spec.template.spec.dnsConfig,{"dnsConfig":""})
+            }
+    )
   }
-  if(initData.value.spec.template.spec.dnsConfig.searches == undefined){
-    Object.assign(initData.value.spec.template.spec.dnsConfig,{"options":[]})
+  // 删除节点调度
+  const removePod = (index)=>{
+    initData.value.option.freePod.splice(index, 1);
   }
-  initData.value.spec.template.spec.dnsConfig.options.push({"name":"","value":""})
-}
-const removeOption = (optionIndex) =>{
-  initData.value.spec.template.spec.dnsConfig.options.splice(optionIndex, 1);
-}
-
-// 搜索域增删
-const addSearch = () =>{
-  if(initData.value.spec.template.spec?.dnsConfig == undefined){
-    Object.assign(initData.value.spec.template.spec.dnsConfig,{"dnsConfig":""})
-  }
-  if(initData.value.spec.template.spec.dnsConfig.searches == undefined){
-    Object.assign(initData.value.spec.template.spec.dnsConfig,{"searches":[{value:""}]})
-  }
-  initData.value.spec.template.spec.dnsConfig.searches.push({value:""})
-}
-const removeSearch = (searchIndex) =>{
-  initData.value.spec.template.spec.dnsConfig.searches.splice(searchIndex, 1);
-}
-
-// 域名服务器增删
-const addNameServer = () =>{
-  if(initData.value.spec.template.spec?.dnsConfig == undefined){
-    Object.assign(initData.value.spec.template.spec.dnsConfig,{"dnsConfig":""})
-  }
-  if(initData.value.spec.template.spec?.dnsConfig?.nameservers == undefined){
-    Object.assign(initData.value.spec.template.spec,{"nameservers":[{value:""}]})
-  }
-  initData.value.spec.template.spec.dnsConfig.nameservers.push({value:""})
-}
-const removeNameServer = (searchIndex) =>{
-  initData.value.spec.template.spec.dnsConfig.nameservers.splice(searchIndex, 1);
-}
-
-// 主机别名增删
-const addHostAlias = () =>{
-  if(initData.value.spec.template.spec?.hostAliases == undefined){
-    Object.assign(initData.value.spec.template.spec,{"hostAliases":""})
-  }
-  initData.value.spec.template.spec.hostAliases.push({"ip":"","hostnames":[]})
-}
-const removeHostAlias = (searchIndex) =>{
-  initData.value.spec.template.spec.hostAliases.splice(searchIndex, 1);
-}
-
-// 环境变量增删
-const removeEnv = (index,envIndex) =>{
-  initData.value.spec.template.spec.containers[index].env.splice(envIndex, 1);
-}
-const addEnv = (container) =>{
-  const env = {
-    "item":"Key/Value",
-    "name": undefined,
-    "value": undefined
-  }
-  container.env.push(env)
-}
-
-const namespaces = [{label:"default",value:"default"},{label:"my-project",value:"my-project"}]
-// 添加pod调度
-const addPod = ()=>{
-  initData.value.option.freePod.push(
-    {
-      "podAffinity":true,
-      "namespaces":[],
-      "weight":1,
-      "nodeLevel":"0",
-      "curNameSpace":true,
-      "topologyKey":"",
-      "labelSelector": {
-        "matchExpressions": [
-          {
-            "key": "",
-            "operator": "In",
-            "values": [""]
-          }
-        ]
-      }
-    }
-  )
-}
-// 删除节点调度
-const removePod = (index)=>{
-  initData.value.option.freePod.splice(index, 1);
-}
-// 添加规则
-const addPodRule = (pod)=>{
-  pod.labelSelector.matchExpressions.push(
-      {
-          "key": "",
-          "operator": "In",
-          "values": [
-            ""
-          ]
-      }
-  );
-}
-// 删除规则
-const removePodRule = (pod,index)=>{
-  pod.labelSelector.matchExpressions.splice(index, 1);
-}
-
-
-// 节点调度
-const nodeSelector=[{label:"默认规则",value:"none"},{label:"集中调度",value:"nodeName"},{label:"自定义规则",value:"affinity"}]
-const nodeData=[{label:"node-default",value:"node-default"},{label:"my-project",value:"my-project"},{label:"slave-node",value:"slave-node"}]
-// 自定义规则节点对象（*）
-// 添加节点调度
-const addNode = ()=>{
-  initData.value.option.freeNode.push(
-    {
-      "nodeLevel": "0",
-      "weight": 1,
-      "preference": {
-        "matchExpressions": [
-          {
-            "key": "",
-            "operator": "In",
-            "values": [
-              ""
-            ]
-          }
-        ]
-      }
-    }
-  )
-}
-// 删除节点调度
-const removeNode = (index)=>{
-  initData.value.option.freeNode.splice(index, 1);
-}
-// 添加规则
-const addRule = (node)=>{
-    node.preference.matchExpressions.push(
-        {
-            "key": "",
-            "operator": "In",
-            "values": [
-              ""
-            ]
-        }
+  // 添加规则
+  const addPodRule = (pod)=>{
+    pod.labelSelector.matchExpressions.push(
+            {
+              "key": "",
+              "operator": "In",
+              "values": [
+                ""
+              ]
+            }
     );
-}
-// 删除规则
-const removeRule = (node,index)=>{
-  node.preference.matchExpressions.splice(index, 1);
-}
-// 修改节点亲和度方式
-const nodeChange = (selectItem)=>{
-  initData.value.option.nodeAffinity = selectItem
-  delete initData.value.spec.template.spec?.nodeName
+  }
+  // 删除规则
+  const removePodRule = (pod,index)=>{
+    pod.labelSelector.matchExpressions.splice(index, 1);
+  }
 
-  if(selectItem == "nodeName"){
-    Object.assign(initData.value.spec.template.spec,{"nodeName":""})
-  }else if(selectItem == "affinity"){
-    if(initData.value.option.freeNode.length == 0){
-      addNode()
+
+  // 节点调度
+  const nodeSelector=[{label:"默认规则",value:"none"},{label:"集中调度",value:"nodeName"},{label:"自定义规则",value:"affinity"}]
+  const nodeData=[{label:"node-default",value:"node-default"},{label:"my-project",value:"my-project"},{label:"slave-node",value:"slave-node"}]
+  // 自定义规则节点对象（*）
+  // 添加节点调度
+  const addNode = ()=>{
+    initData.value.option.freeNode.push(
+            {
+              "nodeLevel": "0",
+              "weight": 1,
+              "preference": {
+                "matchExpressions": [
+                  {
+                    "key": "",
+                    "operator": "In",
+                    "values": [
+                      ""
+                    ]
+                  }
+                ]
+              }
+            }
+    )
+  }
+  // 删除节点调度
+  const removeNode = (index)=>{
+    initData.value.option.freeNode.splice(index, 1);
+  }
+  // 添加规则
+  const addRule = (node)=>{
+    node.preference.matchExpressions.push(
+            {
+              "key": "",
+              "operator": "In",
+              "values": [
+                ""
+              ]
+            }
+    );
+  }
+  // 删除规则
+  const removeRule = (node,index)=>{
+    node.preference.matchExpressions.splice(index, 1);
+  }
+  // 修改节点亲和度方式
+  const nodeChange = (selectItem)=>{
+    initData.value.option.nodeAffinity = selectItem
+    delete initData.value.spec.template.spec?.nodeName
+
+    if(selectItem == "nodeName"){
+      Object.assign(initData.value.spec.template.spec,{"nodeName":""})
+    }else if(selectItem == "affinity"){
+      if(initData.value.option.freeNode.length == 0){
+        addNode()
+      }
     }
   }
-}
 
-const status = [{label:"初始化容器",value:true},{label:"标准容器",value:false}]
+  const status = [{label:"初始化容器",value:true},{label:"标准容器",value:false}]
 
-const changeLifeCycle = (lifecycle)=>{
-  const value = lifecycle?.item
-  delete lifecycle?.httpGet
-  delete lifecycle?.exec
-  delete lifecycle?.tcpScoket
+  const changeLifeCycle = (lifecycle)=>{
+    const value = lifecycle?.item
+    delete lifecycle?.httpGet
+    delete lifecycle?.exec
+    delete lifecycle?.tcpScoket
 
-  if(value == "exec"){
-    const exec = {
-      "item":"exec",
-      "exec": { "command": undefined }
-    }
-    Object.assign(lifecycle,exec)
-  }else if(value == "httpGet"){
-    const httpGet = {
-      "item":"httpGet",
-      "httpGet": {
-                  "host": undefined,
-                  "path": undefined,
-                  "port": undefined
-                }
-    }
-    Object.assign(lifecycle,httpGet)
+    if(value == "exec"){
+      const exec = {
+        "item":"exec",
+        "exec": { "command": undefined }
+      }
+      Object.assign(lifecycle,exec)
+    }else if(value == "httpGet"){
+      const httpGet = {
+        "item":"httpGet",
+        "httpGet": {
+          "host": undefined,
+          "path": undefined,
+          "port": undefined
+        }
+      }
+      Object.assign(lifecycle,httpGet)
 
-  }else if(value == "tcpScoket"){
-    const tcpScoket = {
+    }else if(value == "tcpScoket"){
+      const tcpScoket = {
         "item":"tcpScoket",
         "tcpScoket": {
           "port": undefined
         }
-    }
-    Object.assign(lifecycle,tcpScoket)
-  }
-}
-const lifeCycles = [
-  {label:"无",value:""},
-  {label:"命令",value:"exec"},
-  {label:"HTTP",value:"httpGet"},
-  {label:"TCP",value:"tcpScoket"}
-]
-const services = [{label:"不创建服务",value:""},{label:"Cluster IP",value:"ClusterIP"},{label:"Node Port",value:"NodePort"}]
-const serviceAccountNames = [{label:"default",value:"default"},{label:"Ken",value:"Ken"}]
-const checkHealthTypes = [
-  {label:"无",value:""},
-  {label:"HTTP请求返回成功的状态",value:"HTTP"},
-  {label:"HTTPS请求返回成功的状态",value:"HTTPS"},
-  {label:"命令",value:"exec"},
-  {label:"成功启动TCP连接",value:"tcpSocket"}
-]
-const capabilities = [
-  {label:"ALL",value:"ALL"},
-  {label:"AUDIT_CONTROL",value:"AUDIT_CONTROL"},
-  {label:"AUDIT_WRITE",value:"AUDIT_WRITE"},
-  {label:"BLOCK_SUSPEND",value:"BLOCK_SUSPEND"},
-  {label:"CHOWN",value:"CHOWN"},
-  {label:"DAC_OVERRIDE",value:"DAC_OVERRIDE"},
-  {label:"DAC_READ_SEARCH",value:"DAC_READ_SEARCH"},
-  {label:"FOWNER",value:"FOWNER"},
-  {label:"FSETID",value:"FSETID"},
-  {label:"IPC_LOCK",value:"IPC_LOCK"},
-  {label:"IPC_OWNER",value:"IPC_OWNER"},
-  {label:"KILL",value:"KILL"},
-  {label:"LEASE",value:"LEASE"},
-  {label:"LINUX_IMMUTABLE",value:"LINUX_IMMUTABLE"},
-  {label:"MAC_ADMIN",value:"MAC_ADMIN"},
-  {label:"MAC_OVERRIDE",value:"MAC_OVERRIDE"},
-  {label:"MKNOD",value:"MKNOD"},
-]
-const envTypes = [
-  {label:"Key/Value Pair",value:"Key/Value"},
-  {label:"Resource",value:"Resource"},
-  {label:"ConfigMap Key",value:"ConfigMapKey"},
-  {label:"Secret Key",value:"SecretKey"},
-  {label:"Pod Field",value:"PodField"}
-]
-
-const envSelectHandle = (env) =>{
-  const envObjes= [{
-                "item":"Key/Value",
-                "name": undefined,
-                "value": undefined
-              },
-              {
-                "item":"SecretKey",
-                "name": undefined,
-                "valueFrom": {
-                  "secretKeyRef": {
-                    "key": undefined,
-                    "name": undefined,
-                    "optional": false
-                  }
-                }
-              },
-              {
-                "item":"Resource",
-                "name": undefined,
-                "valueFrom": {
-                  "resourceFieldRef": {
-                    "containerName": undefined,
-                    "divisor": undefined,
-                    "resource": undefined
-                  }
-                }
-              },
-              {
-                "item":"ConfigMapKey",
-                "name": undefined,
-                "valueFrom": {
-                  "configMapKeyRef": {
-                    "key": undefined,
-                    "name": undefined,
-                    "optional": false
-                  }
-                }
-              },
-              {
-                "item":"PodField",
-                "name": undefined,
-                "valueFrom": {
-                  "fieldRef": {
-                    "apiVersion": "v1",
-                    "fieldPath": undefined
-                  }
-                }
-  }]
-  for(const index in envObjes){
-    if(env.item == envObjes[index].item){
-      delete env?.value
-      delete env?.valueFrom
-      Object.assign(env,envObjes[index])
-    }
-  }
-
-}
-// 修改就绪检查下拉框
-const changeReadinessProbe = (container) =>{
-  if(container._checkHealthItem.readinessProbe == "HTTP" ){
-    const http = {
-              "failureThreshold": 3,
-              "successThreshold": 1,
-              "initialDelaySeconds": 0,
-              "timeoutSeconds": 1,
-              "periodSeconds": 10,
-              "httpGet": {
-                "scheme": "HTTP",
-                "port": undefined
-              }
-            }
-    Object.assign(container,{"readinessProbe":http})
-    return
-  }
-  
-  if(container._checkHealthItem.readinessProbe == "HTTPS" ){
-    const https = {
-                "failureThreshold": 3,
-                "successThreshold": 1,
-                "initialDelaySeconds": 0,
-                "timeoutSeconds": 1,
-                "periodSeconds": 10,
-                "httpGet": {
-                  "scheme": "HTTPS",
-                  "port": undefined
-                }
-              }
-    Object.assign(container,{"readinessProbe":https})
-    return
-  }
-
-  if(container._checkHealthItem.readinessProbe == "exec" ){
-    const exec = {
-                "failureThreshold": 3,
-                "successThreshold": 1,
-                "initialDelaySeconds": 0,
-                "timeoutSeconds": 1,
-                "periodSeconds": 10,
-                "exec":{
-                  "command": ""
-                }
-              }
-    Object.assign(container,{"readinessProbe":exec})
-    return
-  }
-
-
-  if(container._checkHealthItem.readinessProbe == "tcpSocket" ){
-    const tcpSocket = {
-              "failureThreshold": 3,
-              "successThreshold": 1,
-              "initialDelaySeconds": 0,
-              "timeoutSeconds": 1,
-              "periodSeconds": 10,
-              "tcpSocket": {
-                "port": 8080
-              }
-            }
-    Object.assign(container,{"readinessProbe":tcpSocket})
-    return
-  }
-    
-}
-
-// // 修改存活检查下拉框
-const changeLivenessProbe = (container) =>{
-  
-  if(container._checkHealthItem.livenessProbe == "HTTP" ){
-    const http = {
-            "failureThreshold": 3,
-            "successThreshold": 1,
-            "initialDelaySeconds": 0,
-            "timeoutSeconds": 1,
-            "periodSeconds": 10,
-            "httpGet": {
-              "scheme": "HTTP",
-              "port": undefined
-            }
-          }
-    Object.assign(container,{"livenessProbe":http})
-    return
-  }
-    
-  
-  if(container._checkHealthItem.livenessProbe == "HTTPS" ){
-    const https = {
-              "failureThreshold": 3,
-              "successThreshold": 1,
-              "initialDelaySeconds": 0,
-              "timeoutSeconds": 1,
-              "periodSeconds": 10,
-              "httpGet": {
-                "scheme": "HTTPS",
-                "port": undefined
-              }
-            }
-    Object.assign(container,{"livenessProbe":https})
-    return
-  }
-
-  if(container._checkHealthItem.livenessProbe == "exec" ){
-    const exec = {
-                "failureThreshold": 3,
-                "successThreshold": 1,
-                "initialDelaySeconds": 0,
-                "timeoutSeconds": 1,
-                "periodSeconds": 10,
-                "exec":{
-                  "command": ""
-                }
-              }
-    Object.assign(container,{"livenessProbe":exec})
-    return
-  }
-
-  if(container._checkHealthItem.livenessProbe == "tcpSocket" ){
-    const tcpSocket = {
-              "failureThreshold": 3,
-              "successThreshold": 1,
-              "initialDelaySeconds": 0,
-              "timeoutSeconds": 1,
-              "periodSeconds": 10,
-              "tcpSocket": {
-                "port": 8080
-              }
-            }
-    Object.assign(container,{"livenessProbe":tcpSocket})
-    return
-  }
-
-}
-
-// 修改启动检查下拉框
-const changeStartupProbe = (container) =>{
-  
-  if(container._checkHealthItem.startupProbe == "HTTP" ){
-    const http = {
-            "failureThreshold": 3,
-            "successThreshold": 1,
-            "initialDelaySeconds": 0,
-            "timeoutSeconds": 1,
-            "periodSeconds": 10,
-            "httpGet": {
-              "scheme": "HTTP",
-              "port": undefined
-            }
-          }
-    Object.assign(container,{"startupProbe":http})
-    return
-  }
-    
-  
-  if(container._checkHealthItem.startupProbe == "HTTPS" ){
-    const https = {
-              "failureThreshold": 3,
-              "successThreshold": 1,
-              "initialDelaySeconds": 0,
-              "timeoutSeconds": 1,
-              "periodSeconds": 10,
-              "httpGet": {
-                "scheme": "HTTPS",
-                "port": undefined
-              }
-            }
-    Object.assign(container,{"startupProbe":https})
-    return 
-  }
-
-  if(container._checkHealthItem.startupProbe == "exec" ){
-    const exec = {
-                "failureThreshold": 3,
-                "successThreshold": 1,
-                "initialDelaySeconds": 0,
-                "timeoutSeconds": 1,
-                "periodSeconds": 10,
-                "exec":{
-                  "command": ""
-                }
-              }
-    Object.assign(container,{"startupProbe":exec})
-    return
-  }
-
-  if(container._checkHealthItem.startupProbe == "tcpSocket" ){
-    const tcpSocket = {
-              "failureThreshold": 3,
-              "successThreshold": 1,
-              "initialDelaySeconds": 0,
-              "timeoutSeconds": 1,
-              "periodSeconds": 10,
-              "tcpSocket": {
-                "port": 8080
-              }
-            }
-    Object.assign(container,{"startupProbe":tcpSocket})
-    return
-  }
-
-}
-// 通用标签 end
-const copyData = ref({})
-const initData = ref({
-  "apiVersion": "apps/v1",
-  "kind": "Deployment",
-  "metadata": {
-    "name": undefined,
-    "annotations": {},
-    "labels": {},
-    "namespace": "default",
-  },
-  "spec": {
-    "selector": {
-      "matchLabels": {}
-    },
-    "template": {
-      "metadata": {
-        "labels": {},
-        "annotations": {},
-        "namespace": "default"
-      },
-      "spec": {
-        "serviceAccountName":"default",
-        "securityContext":{
-          "fsGroup":undefined
-        },
-        "initContainers":[],
-        "containers": [
-          {
-            "image": undefined,
-            "imagePullPolicy": "Always",
-            "name": "container-0",
-            "terminationMessagePath": undefined,
-            "terminationMessagePolicy": undefined,
-            "_init": false,
-            "ports":[],
-            "env": [],
-            "stdin": false,
-            "stdinOnce": false,
-            "_commandIO":"NO",
-            "command": undefined,
-            "tty": true,
-            "args": undefined,
-            "workingDir": undefined,
-            "lifecycle": {
-              "postStart": {},
-              "preStop": {}
-            },
-            "_checkHealthItem":{
-              "readinessProbe":"",
-              "livenessProbe":"",
-              "startupProbe":""
-            },
-            "securityContext": {
-              "capabilities": {
-                "add": [],
-                "drop": []
-              },
-              "runAsNonRoot": false,
-              "readOnlyRootFilesystem": false,
-              "privileged": false,
-              "allowPrivilegeEscalation": false,
-              "runAsUser": undefined
-            },
-            "resources": {
-              "requests": {
-                "cpu": undefined,
-                "memory": undefined,
-                "nvidia.com/gpu": undefined
-              },
-              "limits": {
-                "cpu": undefined,
-                "memory": undefined,
-                "nvidia.com/gpu": undefined
-              }
-            }
-          }
-        ],
-        
-        "dnsConfig": {
-          "nameservers": [],
-          "options": [],
-          "searches": []
-        },
-        "hostAliases": [
-          {"hostnames":[]}
-        ],
-        "dnsPolicy": undefined,
-        "hostNetwork":undefined,
-        "hostname": undefined,
-        "subdomain": undefined,
-        "imagePullSecrets": [{name:"default"}]
       }
-    },
-    "minReadySeconds":3,
-    "progressDeadlineSeconds": 600,
-    "replicas": 2,
-    "revisionHistoryLimit": 10,
-    "strategy": {
-      "rollingUpdate": {
-        "maxSurge": "25%",
-        "maxUnavailable": "25%"
-      },
-      "type": "RollingUpdate"
+      Object.assign(lifecycle,tcpScoket)
     }
-  },
-  //外部操作参数
-  "option":{
-    // 标签 & 注解统一设置对象
-    "labelAnnotation":{
-      "deployment":{
-        "labels":[
-          {
-            "key":"",
-            "value":""
-          }
-        ],
-        "annotations":[
-          {
-            "key":"",
-            "value":""
-          }
-        ]
-      },
-      "pod":{
-        "labels":[
-          {
-            "key":"",
-            "value":""
-          }
-        ],
-        "annotations":[
-          {
-            "key":"",
-            "value":""
-          }
-        ]
-      }
-    },
-    // 记录当前容器点击的左侧标签位置
-    "containerIndex":"",
-    // 记录当前pod点击的左侧标签位置
-    "selectPod":"",
-    // 记录当前depolyment点击的左侧标签位置
-    "selectDepolyment":"",
-    // pod亲和度存储对象
-    "freePod":[],
-    // node亲和度存储对象
-    "freeNode":[],
-    // 节点调度方式
-    "nodeAffinity":"none",
-    // 是否显示yaml弹窗
-    "isShowYamlEditor":false
-
   }
-})
+  const lifeCycles = [
+    {label:"无",value:""},
+    {label:"命令",value:"exec"},
+    {label:"HTTP",value:"httpGet"},
+    {label:"TCP",value:"tcpScoket"}
+  ]
+  const services = [{label:"不创建服务",value:""},{label:"Cluster IP",value:"ClusterIP"},{label:"Node Port",value:"NodePort"}]
+  const serviceAccountNames = [{label:"default",value:"default"},{label:"Ken",value:"Ken"}]
+  const checkHealthTypes = [
+    {label:"无",value:""},
+    {label:"HTTP请求返回成功的状态",value:"HTTP"},
+    {label:"HTTPS请求返回成功的状态",value:"HTTPS"},
+    {label:"命令",value:"exec"},
+    {label:"成功启动TCP连接",value:"tcpSocket"}
+  ]
+  const capabilities = [
+    {label:"ALL",value:"ALL"},
+    {label:"AUDIT_CONTROL",value:"AUDIT_CONTROL"},
+    {label:"AUDIT_WRITE",value:"AUDIT_WRITE"},
+    {label:"BLOCK_SUSPEND",value:"BLOCK_SUSPEND"},
+    {label:"CHOWN",value:"CHOWN"},
+    {label:"DAC_OVERRIDE",value:"DAC_OVERRIDE"},
+    {label:"DAC_READ_SEARCH",value:"DAC_READ_SEARCH"},
+    {label:"FOWNER",value:"FOWNER"},
+    {label:"FSETID",value:"FSETID"},
+    {label:"IPC_LOCK",value:"IPC_LOCK"},
+    {label:"IPC_OWNER",value:"IPC_OWNER"},
+    {label:"KILL",value:"KILL"},
+    {label:"LEASE",value:"LEASE"},
+    {label:"LINUX_IMMUTABLE",value:"LINUX_IMMUTABLE"},
+    {label:"MAC_ADMIN",value:"MAC_ADMIN"},
+    {label:"MAC_OVERRIDE",value:"MAC_OVERRIDE"},
+    {label:"MKNOD",value:"MKNOD"},
+  ]
+  const envTypes = [
+    {label:"Key/Value Pair",value:"Key/Value"},
+    {label:"Resource",value:"Resource"},
+    {label:"ConfigMap Key",value:"ConfigMapKey"},
+    {label:"Secret Key",value:"SecretKey"},
+    {label:"Pod Field",value:"PodField"}
+  ]
 
-import { Select } from '@element-plus/icons-vue'
-import type { FormRules } from 'element-plus'
-import yaml from 'js-yaml'
-
-const handleTabsEdit = (
-  targetName: string | number,
-  action: 'remove' | 'add'
-) => {
-  const container = 
-          {
-            "image": undefined,
-            "imagePullPolicy": "Always",
+  const envSelectHandle = (env) =>{
+    const envObjes= [{
+      "item":"Key/Value",
+      "name": undefined,
+      "value": undefined
+    },
+      {
+        "item":"SecretKey",
+        "name": undefined,
+        "valueFrom": {
+          "secretKeyRef": {
+            "key": undefined,
             "name": undefined,
-            "terminationMessagePath": undefined,
-            "terminationMessagePolicy": undefined,
-            "_init": false,
-            "ports":[],
-            "env": [],
-            "stdin": false,
-            "stdinOnce": false,
-            "_commandIO":"NO",
-            "command": undefined,
-            "tty": true,
-            "args": undefined,
-            "workingDir": undefined,
-            "lifecycle": {
-              "postStart": {},
-              "preStop": {}
-            },
-            "_checkHealthItem":{
-              "readinessProbe":"",
-              "livenessProbe":"",
-              "startupProbe":""
-            },
-            "securityContext": {
-              "capabilities": {
-                "add": [],
-                "drop": []
-              },
-              "runAsNonRoot": false,
-              "readOnlyRootFilesystem": false,
-              "privileged": false,
-              "allowPrivilegeEscalation": false,
-              "runAsUser": undefined
-            },
-            "resources": {
-              "requests": {
-                "cpu": undefined,
-                "memory": undefined,
-                "nvidia.com/gpu": undefined
-              },
-              "limits": {
-                "cpu": undefined,
-                "memory": undefined,
-                "nvidia.com/gpu": undefined
-              }
-            }
+            "optional": false
           }
-  const containers = initData.value.spec.template.spec.containers
-  const size = containers.length
-  if (action === 'add') {
-    container.name = "container_"+size
-    containers.push(container)
-    initData.value.spec.template.spec.imagePullSecrets.push({name:""})
-  } else if (action === 'remove') {
-    if (size === 1) {
-      ElMessage.warning('请至少保留一个tab页')
+        }
+      },
+      {
+        "item":"Resource",
+        "name": undefined,
+        "valueFrom": {
+          "resourceFieldRef": {
+            "containerName": undefined,
+            "divisor": undefined,
+            "resource": undefined
+          }
+        }
+      },
+      {
+        "item":"ConfigMapKey",
+        "name": undefined,
+        "valueFrom": {
+          "configMapKeyRef": {
+            "key": undefined,
+            "name": undefined,
+            "optional": false
+          }
+        }
+      },
+      {
+        "item":"PodField",
+        "name": undefined,
+        "valueFrom": {
+          "fieldRef": {
+            "apiVersion": "v1",
+            "fieldPath": undefined
+          }
+        }
+      }]
+    for(const index in envObjes){
+      if(env.item == envObjes[index].item){
+        delete env?.value
+        delete env?.valueFrom
+        Object.assign(env,envObjes[index])
+      }
+    }
+
+  }
+  // 修改就绪检查下拉框
+  const changeReadinessProbe = (container) =>{
+    if(container._checkHealthItem.readinessProbe == "HTTP" ){
+      const http = {
+        "failureThreshold": 3,
+        "successThreshold": 1,
+        "initialDelaySeconds": 0,
+        "timeoutSeconds": 1,
+        "periodSeconds": 10,
+        "httpGet": {
+          "scheme": "HTTP",
+          "port": undefined
+        }
+      }
+      Object.assign(container,{"readinessProbe":http})
       return
     }
 
-    for(const index in containers){
-        if(containers[index].name == targetName){
-            containers.splice(index,1);
-            initData.value.spec.template.spec.imagePullSecrets.splice(index,1)
+    if(container._checkHealthItem.readinessProbe == "HTTPS" ){
+      const https = {
+        "failureThreshold": 3,
+        "successThreshold": 1,
+        "initialDelaySeconds": 0,
+        "timeoutSeconds": 1,
+        "periodSeconds": 10,
+        "httpGet": {
+          "scheme": "HTTPS",
+          "port": undefined
         }
+      }
+      Object.assign(container,{"readinessProbe":https})
+      return
     }
+
+    if(container._checkHealthItem.readinessProbe == "exec" ){
+      const exec = {
+        "failureThreshold": 3,
+        "successThreshold": 1,
+        "initialDelaySeconds": 0,
+        "timeoutSeconds": 1,
+        "periodSeconds": 10,
+        "exec":{
+          "command": ""
+        }
+      }
+      Object.assign(container,{"readinessProbe":exec})
+      return
+    }
+
+
+    if(container._checkHealthItem.readinessProbe == "tcpSocket" ){
+      const tcpSocket = {
+        "failureThreshold": 3,
+        "successThreshold": 1,
+        "initialDelaySeconds": 0,
+        "timeoutSeconds": 1,
+        "periodSeconds": 10,
+        "tcpSocket": {
+          "port": 8080
+        }
+      }
+      Object.assign(container,{"readinessProbe":tcpSocket})
+      return
+    }
+
   }
-}
 
-const isShowYamlEditor = ref(false)
-const editYaml = () => {
-  isShowYamlEditor.value = true
-  // 处理标签 & 注解
-  labelAnnotationHandle()
-  initData.value.spec.template.metadata.namespace = initData.value.metadata.namespace
+  // // 修改存活检查下拉框
+  const changeLivenessProbe = (container) =>{
 
-  copyData.value = _.cloneDeep(initData.value) 
-  delete copyData.value.option
-  
-  // 容器处理
-  containerHandle();
-  // 网络设置
-  netSetting();
-  // 镜像拉取密文
-  imageSecret();
-  //亲和度处理
-  affinityHandle()
+    if(container._checkHealthItem.livenessProbe == "HTTP" ){
+      const http = {
+        "failureThreshold": 3,
+        "successThreshold": 1,
+        "initialDelaySeconds": 0,
+        "timeoutSeconds": 1,
+        "periodSeconds": 10,
+        "httpGet": {
+          "scheme": "HTTP",
+          "port": undefined
+        }
+      }
+      Object.assign(container,{"livenessProbe":http})
+      return
+    }
 
-}
 
-// 镜像拉取密文
-const imageSecret = ()=>{
-  const specConfig = copyData.value.spec.template.spec
-  const switchArr = []
-  
-  specConfig.imagePullSecrets.forEach(function(secret){
-    if(secret.name != "default"){
-      switchArr.push(secret)
+    if(container._checkHealthItem.livenessProbe == "HTTPS" ){
+      const https = {
+        "failureThreshold": 3,
+        "successThreshold": 1,
+        "initialDelaySeconds": 0,
+        "timeoutSeconds": 1,
+        "periodSeconds": 10,
+        "httpGet": {
+          "scheme": "HTTPS",
+          "port": undefined
+        }
+      }
+      Object.assign(container,{"livenessProbe":https})
+      return
+    }
+
+    if(container._checkHealthItem.livenessProbe == "exec" ){
+      const exec = {
+        "failureThreshold": 3,
+        "successThreshold": 1,
+        "initialDelaySeconds": 0,
+        "timeoutSeconds": 1,
+        "periodSeconds": 10,
+        "exec":{
+          "command": ""
+        }
+      }
+      Object.assign(container,{"livenessProbe":exec})
+      return
+    }
+
+    if(container._checkHealthItem.livenessProbe == "tcpSocket" ){
+      const tcpSocket = {
+        "failureThreshold": 3,
+        "successThreshold": 1,
+        "initialDelaySeconds": 0,
+        "timeoutSeconds": 1,
+        "periodSeconds": 10,
+        "tcpSocket": {
+          "port": 8080
+        }
+      }
+      Object.assign(container,{"livenessProbe":tcpSocket})
+      return
+    }
+
+  }
+
+  // 修改启动检查下拉框
+  const changeStartupProbe = (container) =>{
+
+    if(container._checkHealthItem.startupProbe == "HTTP" ){
+      const http = {
+        "failureThreshold": 3,
+        "successThreshold": 1,
+        "initialDelaySeconds": 0,
+        "timeoutSeconds": 1,
+        "periodSeconds": 10,
+        "httpGet": {
+          "scheme": "HTTP",
+          "port": undefined
+        }
+      }
+      Object.assign(container,{"startupProbe":http})
+      return
+    }
+
+
+    if(container._checkHealthItem.startupProbe == "HTTPS" ){
+      const https = {
+        "failureThreshold": 3,
+        "successThreshold": 1,
+        "initialDelaySeconds": 0,
+        "timeoutSeconds": 1,
+        "periodSeconds": 10,
+        "httpGet": {
+          "scheme": "HTTPS",
+          "port": undefined
+        }
+      }
+      Object.assign(container,{"startupProbe":https})
+      return
+    }
+
+    if(container._checkHealthItem.startupProbe == "exec" ){
+      const exec = {
+        "failureThreshold": 3,
+        "successThreshold": 1,
+        "initialDelaySeconds": 0,
+        "timeoutSeconds": 1,
+        "periodSeconds": 10,
+        "exec":{
+          "command": ""
+        }
+      }
+      Object.assign(container,{"startupProbe":exec})
+      return
+    }
+
+    if(container._checkHealthItem.startupProbe == "tcpSocket" ){
+      const tcpSocket = {
+        "failureThreshold": 3,
+        "successThreshold": 1,
+        "initialDelaySeconds": 0,
+        "timeoutSeconds": 1,
+        "periodSeconds": 10,
+        "tcpSocket": {
+          "port": 8080
+        }
+      }
+      Object.assign(container,{"startupProbe":tcpSocket})
+      return
+    }
+
+  }
+  // 通用标签 end
+  const copyData = ref({})
+  const initData = ref({
+    "apiVersion": "apps/v1",
+    "kind": "Deployment",
+    "metadata": {
+      "name": undefined,
+      "annotations": {},
+      "labels": {},
+      "namespace": "default",
+    },
+    "spec": {
+      "selector": {
+        "matchLabels": {}
+      },
+      "template": {
+        "metadata": {
+          "labels": {},
+          "annotations": {},
+          "namespace": "default"
+        },
+        "spec": {
+          "serviceAccountName":"default",
+          "securityContext":{
+            "fsGroup":undefined
+          },
+          "initContainers":[],
+          "containers": [
+            {
+              "image": undefined,
+              "imagePullPolicy": "Always",
+              "name": "container-0",
+              "terminationMessagePath": undefined,
+              "terminationMessagePolicy": undefined,
+              "_init": false,
+              "ports":[],
+              "env": [],
+              "stdin": false,
+              "stdinOnce": false,
+              "_commandIO":"NO",
+              "command": undefined,
+              "tty": true,
+              "args": undefined,
+              "workingDir": undefined,
+              "lifecycle": {
+                "postStart": {},
+                "preStop": {}
+              },
+              "_checkHealthItem":{
+                "readinessProbe":"",
+                "livenessProbe":"",
+                "startupProbe":""
+              },
+              "securityContext": {
+                "capabilities": {
+                  "add": [],
+                  "drop": []
+                },
+                "runAsNonRoot": false,
+                "readOnlyRootFilesystem": false,
+                "privileged": false,
+                "allowPrivilegeEscalation": false,
+                "runAsUser": undefined
+              },
+              "resources": {
+                "requests": {
+                  "cpu": undefined,
+                  "memory": undefined,
+                  "nvidia.com/gpu": undefined
+                },
+                "limits": {
+                  "cpu": undefined,
+                  "memory": undefined,
+                  "nvidia.com/gpu": undefined
+                }
+              }
+            }
+          ],
+
+          "dnsConfig": {
+            "nameservers": [],
+            "options": [],
+            "searches": []
+          },
+          "hostAliases": [
+            {"hostnames":[]}
+          ],
+          "dnsPolicy": undefined,
+          "hostNetwork":undefined,
+          "hostname": undefined,
+          "subdomain": undefined,
+          "imagePullSecrets": [{name:"default"}]
+        }
+      },
+      "minReadySeconds":3,
+      "progressDeadlineSeconds": 600,
+      "replicas": 2,
+      "revisionHistoryLimit": 10,
+      "strategy": {
+        "rollingUpdate": {
+          "maxSurge": "25%",
+          "maxUnavailable": "25%"
+        },
+        "type": "RollingUpdate"
+      }
+    },
+    //外部操作参数
+    "option":{
+      // 标签 & 注解统一设置对象
+      "labelAnnotation":{
+        "deployment":{
+          "labels":[
+            {
+              "key":"",
+              "value":""
+            }
+          ],
+          "annotations":[
+            {
+              "key":"",
+              "value":""
+            }
+          ]
+        },
+        "pod":{
+          "labels":[
+            {
+              "key":"",
+              "value":""
+            }
+          ],
+          "annotations":[
+            {
+              "key":"",
+              "value":""
+            }
+          ]
+        }
+      },
+      // 记录当前容器点击的左侧标签位置
+      "containerIndex":"",
+      // 记录当前pod点击的左侧标签位置
+      "selectPod":"",
+      // 记录当前depolyment点击的左侧标签位置
+      "selectDepolyment":"",
+      // pod亲和度存储对象
+      "freePod":[],
+      // node亲和度存储对象
+      "freeNode":[],
+      // 节点调度方式
+      "nodeAffinity":"none",
+      // 是否显示yaml弹窗
+      "isShowYamlEditor":false
+
     }
   })
-  specConfig.imagePullSecrets = switchArr
-}
 
-// 网络设置
-const netSetting = ()=>{
-  const specConfig = copyData.value.spec.template.spec
+  import { Select } from '@element-plus/icons-vue'
+  import type { FormRules } from 'element-plus'
+  import yaml from 'js-yaml'
 
-  console.log(specConfig)
-  // 域名服务器、解析器、搜索域为空时删除dnsConfig
-  if(specConfig.dnsConfig.nameservers.length == 0 && specConfig.dnsConfig.options.length == 0 && specConfig.dnsConfig.searches.length == 0 ){
+  const handleTabsEdit = (
+          targetName: string | number,
+          action: 'remove' | 'add'
+  ) => {
+    const container =
+            {
+              "image": undefined,
+              "imagePullPolicy": "Always",
+              "name": undefined,
+              "terminationMessagePath": undefined,
+              "terminationMessagePolicy": undefined,
+              "_init": false,
+              "ports":[],
+              "env": [],
+              "stdin": false,
+              "stdinOnce": false,
+              "_commandIO":"NO",
+              "command": undefined,
+              "tty": true,
+              "args": undefined,
+              "workingDir": undefined,
+              "lifecycle": {
+                "postStart": {},
+                "preStop": {}
+              },
+              "_checkHealthItem":{
+                "readinessProbe":"",
+                "livenessProbe":"",
+                "startupProbe":""
+              },
+              "securityContext": {
+                "capabilities": {
+                  "add": [],
+                  "drop": []
+                },
+                "runAsNonRoot": false,
+                "readOnlyRootFilesystem": false,
+                "privileged": false,
+                "allowPrivilegeEscalation": false,
+                "runAsUser": undefined
+              },
+              "resources": {
+                "requests": {
+                  "cpu": undefined,
+                  "memory": undefined,
+                  "nvidia.com/gpu": undefined
+                },
+                "limits": {
+                  "cpu": undefined,
+                  "memory": undefined,
+                  "nvidia.com/gpu": undefined
+                }
+              }
+            }
+    const containers = initData.value.spec.template.spec.containers
+    const size = containers.length
+    if (action === 'add') {
+      container.name = "container_"+size
+      containers.push(container)
+      initData.value.spec.template.spec.imagePullSecrets.push({name:""})
+    } else if (action === 'remove') {
+      if (size === 1) {
+        ElMessage.warning('请至少保留一个tab页')
+        return
+      }
+
+      for(const index in containers){
+        if(containers[index].name == targetName){
+          containers.splice(index,1);
+          initData.value.spec.template.spec.imagePullSecrets.splice(index,1)
+        }
+      }
+    }
+  }
+
+  const isShowYamlEditor = ref(false)
+  const editYaml = () => {
+    isShowYamlEditor.value = true
+    // 处理标签 & 注解
+    labelAnnotationHandle()
+    initData.value.spec.template.metadata.namespace = initData.value.metadata.namespace
+
+    copyData.value = _.cloneDeep(initData.value)
+    delete copyData.value.option
+
+    // 容器处理
+    containerHandle();
+    // 网络设置
+    netSetting();
+    // 镜像拉取密文
+    imageSecret();
+    //亲和度处理
+    affinityHandle()
+
+  }
+
+  // 镜像拉取密文
+  const imageSecret = ()=>{
+    const specConfig = copyData.value.spec.template.spec
+    const switchArr = []
+
+    specConfig.imagePullSecrets.forEach(function(secret){
+      if(secret.name != "default"){
+        switchArr.push(secret)
+      }
+    })
+    specConfig.imagePullSecrets = switchArr
+  }
+
+  // 网络设置
+  const netSetting = ()=>{
+    const specConfig = copyData.value.spec.template.spec
+
+    console.log(specConfig)
+    // 域名服务器、解析器、搜索域为空时删除dnsConfig
+    if(specConfig.dnsConfig.nameservers.length == 0 && specConfig.dnsConfig.options.length == 0 && specConfig.dnsConfig.searches.length == 0 ){
       delete specConfig.dnsConfig
-  }else{
-    if(specConfig.dnsConfig.nameservers.length == 0){
-      delete specConfig.dnsConfig.nameservers
     }else{
-      const nameservers = _.cloneDeep(specConfig.dnsConfig.nameservers)
-      specConfig.dnsConfig.nameservers.length = 0
-      nameservers.forEach(function(nameserver){
-        specConfig.dnsConfig.nameservers.push(nameserver.value)
-      })
-    }
-
-    if(specConfig.dnsConfig.options.length == 0){
-      delete specConfig.dnsConfig.options
-    }
-
-    if(specConfig.dnsConfig.searches.length == 0){
-      delete specConfig.dnsConfig.searches
-    }else{
-      const searches = _.cloneDeep(specConfig.dnsConfig.searches)
-      specConfig.dnsConfig.searches.length = 0
-      searches.forEach(function(searche){
-        specConfig.dnsConfig.searches.push(searche.value)
-      })
-    }
-  }
-
-  // 主机别名
-  if(specConfig.hostAliases == undefined || specConfig.hostAliases.length == 0){
-    delete specConfig.hostAliases
-  }
-
-}
-
-// 容器处理
-const containerHandle = ()=>{
-  for(const index in copyData.value.spec.template.spec.containers){
-    const container = copyData.value.spec.template.spec.containers[index]
-    // 容器命令：标准输入选项
-    stdinInit(container)
-    resourceHandle(container)
-
-    // 生命周期相关
-    if(container.lifecycle.postStart?.item == undefined && container.lifecycle.preStop?.item == undefined ){
-      delete container.lifecycle
-    }else{
-      if(container.lifecycle.postStart?.item == undefined ){
-        delete container.lifecycle.postStart
+      if(specConfig.dnsConfig.nameservers.length == 0){
+        delete specConfig.dnsConfig.nameservers
+      }else{
+        const nameservers = _.cloneDeep(specConfig.dnsConfig.nameservers)
+        specConfig.dnsConfig.nameservers.length = 0
+        nameservers.forEach(function(nameserver){
+          specConfig.dnsConfig.nameservers.push(nameserver.value)
+        })
       }
-      if(container.lifecycle.preStop?.item == undefined ){
-        delete container.lifecycle.preStop
+
+      if(specConfig.dnsConfig.options.length == 0){
+        delete specConfig.dnsConfig.options
+      }
+
+      if(specConfig.dnsConfig.searches.length == 0){
+        delete specConfig.dnsConfig.searches
+      }else{
+        const searches = _.cloneDeep(specConfig.dnsConfig.searches)
+        specConfig.dnsConfig.searches.length = 0
+        searches.forEach(function(searche){
+          specConfig.dnsConfig.searches.push(searche.value)
+        })
       }
     }
 
-    if(container.ports.length == 0){
-      delete container.ports
-    }else{
-      container.ports.forEach(function(port){
-        delete port._serviceType
-      })
+    // 主机别名
+    if(specConfig.hostAliases == undefined || specConfig.hostAliases.length == 0){
+      delete specConfig.hostAliases
     }
 
-    // 命令相关
-    if(container.args == undefined && container.command == undefined){
-      delete container.stdin
-      delete container.stdinOnce
-    }
-    // 命令相关
-    if(container.args == undefined){
-      delete container.args
-    }
-    if(container.command == undefined){
-      delete container.command
-    }
+  }
 
-    // 环境变量
-    if(container.env.length == 0){
-      delete container.env
-    }
+  // 容器处理
+  const containerHandle = ()=>{
+    for(const index in copyData.value.spec.template.spec.containers){
+      const container = copyData.value.spec.template.spec.containers[index]
+      // 容器命令：标准输入选项
+      stdinInit(container)
+      resourceHandle(container)
 
-    // 安全性上下文
-    if(!(container.securityContext.runAsNonRoot && container.securityContext.readOnlyRootFilesystem 
-      && container.securityContext.privileged && container.securityContext.allowPrivilegeEscalation) ){
+      // 生命周期相关
+      if(container.lifecycle.postStart?.item == undefined && container.lifecycle.preStop?.item == undefined ){
+        delete container.lifecycle
+      }else{
+        if(container.lifecycle.postStart?.item == undefined ){
+          delete container.lifecycle.postStart
+        }
+        if(container.lifecycle.preStop?.item == undefined ){
+          delete container.lifecycle.preStop
+        }
+      }
+
+      if(container.ports.length == 0){
+        delete container.ports
+      }else{
+        container.ports.forEach(function(port){
+          delete port._serviceType
+        })
+      }
+
+      // 命令相关
+      if(container.args == undefined && container.command == undefined){
+        delete container.stdin
+        delete container.stdinOnce
+      }
+      // 命令相关
+      if(container.args == undefined){
+        delete container.args
+      }
+      if(container.command == undefined){
+        delete container.command
+      }
+
+      // 环境变量
+      if(container.env.length == 0){
+        delete container.env
+      }
+
+      // 安全性上下文
+      if(!(container.securityContext.runAsNonRoot && container.securityContext.readOnlyRootFilesystem
+              && container.securityContext.privileged && container.securityContext.allowPrivilegeEscalation) ){
         delete container.securityContext
-    }
+      }
 
-    // 通用：标准容器&初始化容器选择
-    if(container._init == true){
-      copyData.value.spec.template.spec.initContainers.push(_.cloneDeep(container))
-      copyData.value.spec.template.spec.containers[index].splice(index,1)
-      delete container._checkHealthItem
-      delete container._init
-    }else{
-      delete container._checkHealthItem
-      delete container._init
+      // 通用：标准容器&初始化容器选择
+      if(container._init == true){
+        copyData.value.spec.template.spec.initContainers.push(_.cloneDeep(container))
+        copyData.value.spec.template.spec.containers[index].splice(index,1)
+        delete container._checkHealthItem
+        delete container._init
+      }else{
+        delete container._checkHealthItem
+        delete container._init
+      }
     }
   }
-}
 
-const affinityHandle = ()=>{
-  delete copyData.value.spec.template.spec?.affinity
-  if(initData.value.option.freeNode.length > 0){
-    Object.assign(copyData.value.spec.template.spec,{
-      "affinity": {
-        "nodeAffinity": {"preferredDuringSchedulingIgnoredDuringExecution":[],"requiredDuringSchedulingIgnoredDuringExecution":[]}
-      }
-    })
-    initData.value.option.freeNode.forEach(function(node){
-      // 首选
-      if(node.nodeLevel == "0"){
-        copyData.value.spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution.push({
-          "weight":node.weight,
-          "preference":node.preference
-        })
-        
-      // 必须
-      }else if(node?.nodeLevel == "1"){ 
-        copyData.value.spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.push({
-          "nodeSelectorTerms":node.preference
-        })
-      }
-    })
-  }
-  if(initData.value.option.freePod.length > 0){
-    if(copyData.value.spec.template.spec?.affinity == undefined){
+  const affinityHandle = ()=>{
+    delete copyData.value.spec.template.spec?.affinity
+    if(initData.value.option.freeNode.length > 0){
+      Object.assign(copyData.value.spec.template.spec,{
+        "affinity": {
+          "nodeAffinity": {"preferredDuringSchedulingIgnoredDuringExecution":[],"requiredDuringSchedulingIgnoredDuringExecution":[]}
+        }
+      })
+      initData.value.option.freeNode.forEach(function(node){
+        // 首选
+        if(node.nodeLevel == "0"){
+          copyData.value.spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution.push({
+            "weight":node.weight,
+            "preference":node.preference
+          })
+
+          // 必须
+        }else if(node?.nodeLevel == "1"){
+          copyData.value.spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.push({
+            "nodeSelectorTerms":node.preference
+          })
+        }
+      })
+    }
+    if(initData.value.option.freePod.length > 0){
+      if(copyData.value.spec.template.spec?.affinity == undefined){
         Object.assign(copyData.value.spec.template.spec,{  "affinity": {}  })
-    }
+      }
 
-    initData.value.option.freePod.forEach(function(pod){
-      if(pod.podAffinity){
+      initData.value.option.freePod.forEach(function(pod){
+        if(pod.podAffinity){
 
-        if(copyData.value.spec.template.spec?.affinity?.podAffinity == undefined){
+          if(copyData.value.spec.template.spec?.affinity?.podAffinity == undefined){
             Object.assign(copyData.value.spec.template.spec.affinity,{
               "podAffinity":{
                 "preferredDuringSchedulingIgnoredDuringExecution":[],
                 "requiredDuringSchedulingIgnoredDuringExecution":[]
               }
             })
-        }
+          }
 
-        // 首选
-        if(pod.nodeLevel == "0"){
-          copyData.value.spec.template.spec.affinity.podAffinity.preferredDuringSchedulingIgnoredDuringExecution.push({
-            "podAffinityTerm":{
+          // 首选
+          if(pod.nodeLevel == "0"){
+            copyData.value.spec.template.spec.affinity.podAffinity.preferredDuringSchedulingIgnoredDuringExecution.push({
+              "podAffinityTerm":{
+                "namespaces": pod.namespaces,
+                "labelSelector": pod.labelSelector,
+                "topologyKey": pod.topologyKey
+              },
+              "weight": pod.weight
+            })
+
+            // 必须
+          }else if(pod?.nodeLevel == "1"){
+            copyData.value.spec.template.spec.affinity.podAffinity.requiredDuringSchedulingIgnoredDuringExecution.push({
               "namespaces": pod.namespaces,
-              "labelSelector": pod.labelSelector,
+              "labelSelector":pod.labelSelector,
               "topologyKey": pod.topologyKey
-            },
-            "weight": pod.weight
-          })
-          
-        // 必须
-        }else if(pod?.nodeLevel == "1"){ 
-          copyData.value.spec.template.spec.affinity.podAffinity.requiredDuringSchedulingIgnoredDuringExecution.push({
-            "namespaces": pod.namespaces,
-            "labelSelector":pod.labelSelector,
-            "topologyKey": pod.topologyKey
-          })
-        }
-      }else if(!pod.podAffinity){
+            })
+          }
+        }else if(!pod.podAffinity){
 
-        if(copyData.value.spec.template.spec?.affinity?.podAntiAffinity == undefined){
+          if(copyData.value.spec.template.spec?.affinity?.podAntiAffinity == undefined){
             Object.assign(copyData.value.spec.template.spec.affinity,{
               "podAntiAffinity":{
                 "preferredDuringSchedulingIgnoredDuringExecution":[],
                 "requiredDuringSchedulingIgnoredDuringExecution":[]
               }
             })
-        }
+          }
 
-        // 首选
-        if(pod.nodeLevel == "0"){
-          copyData.value.spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution.push({
-            "podAffinityTerm":{
+          // 首选
+          if(pod.nodeLevel == "0"){
+            copyData.value.spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution.push({
+              "podAffinityTerm":{
+                "namespaces": pod.namespaces,
+                "labelSelector": pod.labelSelector,
+                "topologyKey": pod.topologyKey
+              },
+              "weight": pod.weight
+            })
+
+            // 必须
+          }else if(pod?.nodeLevel == "1"){
+            copyData.value.spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution.push({
               "namespaces": pod.namespaces,
-              "labelSelector": pod.labelSelector,
+              "labelSelector":pod.labelSelector,
               "topologyKey": pod.topologyKey
-            },
-            "weight": pod.weight
-          })
-          
-        // 必须
-        }else if(pod?.nodeLevel == "1"){ 
-          copyData.value.spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution.push({
-            "namespaces": pod.namespaces,
-            "labelSelector":pod.labelSelector,
-            "topologyKey": pod.topologyKey
-          })
+            })
+          }
         }
-      }
-    })
-  }
-}
-
-// 处理标签 & 注解
-const labelAnnotationHandle = ()=>{
-  labelAnnotation2Json(initData.value.option.labelAnnotation.deployment.labels , initData.value.metadata.labels)
-  labelAnnotation2Json(initData.value.option.labelAnnotation.pod.labels , initData.value.spec.template.metadata.labels)
-  labelAnnotation2Json(initData.value.option.labelAnnotation.deployment.annotations , initData.value.metadata.annotations)
-  labelAnnotation2Json(initData.value.option.labelAnnotation.pod.annotations , initData.value.spec.template.metadata.annotations)
-
-  if(initData.value.spec.template.metadata.labels.length == 0){
-    Object.assign(initData.value.spec.template.metadata.labels,initData.value.metadata.labels)
-  }
-  
-  Object.assign(initData.value.spec.selector.matchLabels,initData.value.spec.template.metadata.labels)
-}
-
-// 内存&CPU限制处理
-const resourceHandle = (container) =>{
-  if(container.resources.requests.memory != undefined){
-    container.resources.requests.memory = container.resources.requests.memory+"Mi"
-  }
-  if(container.resources.limits.memory != undefined){
-    container.resources.limits.memory = container.resources.limits.memory+"Mi"
-  }
-}
-// 容器命令：标准输入选项
-const stdinInit = (container)=>{
-  container.stdin = false
-  container.stdinOnce = false
-
-  if(container._commandIO == "ONCE"){
-    container.stdin = true
-    container.stdinOnce = true
-  }else if(container._commandIO == "YES"){
-    container.stdin = true
-  }else{
-    delete container?.tty
-  }
-
-  delete container._commandIO
-}
-// 标签 & 注解
-const labelAnnotation2Json = (formValue,yamlValue)=>{
-  if(formValue == undefined || yamlValue == undefined){
-    return
-  }
-  const mapObject=new Map()
-  for(const index in formValue){
-    if((formValue[index].key != undefined && formValue[index].key != '') 
-        &&
-        (formValue[index].value != undefined && formValue[index].value != '')){
-      
-      mapObject.set(formValue[index].key,formValue[index].value)
-    }
-  }
-  const entries = Object.fromEntries(mapObject.entries())
-  for(const index in yamlValue){
-    delete yamlValue[index]
-  }
-  Object.assign(yamlValue,entries)
-}
-
-const setValue = (data) => {
-  const optionValues = _.cloneDeep(initData.value.option)
-  Object.assign(data,{option:optionValues})
-  initData.value = _.cloneDeep(data)
-  copyData.value = {}
-  
-  // 设置标签 & 注解
-  reverseLabelAnnotationHandle()
-  if(initData.value.spec.template.spec?.imagePullSecrets == undefined || initData.value.spec.template.spec?.imagePullSecrets.length == 0){
-    Object.assign(initData.value.spec.template.spec,{"imagePullSecrets":[{name:""}]})
-  }
-
-  // 设置容器处理
-  reverseContainerHandle()
-  // 设置网络处理
-  reverseDnsConfigHandle()
-  // 设置亲和度处理
-  reverseAffinityHandle()
-
-  if(initData.value.spec?.strategy == undefined){
-
-    Object.assign(initData.value.spec,{"strategy": {
-          "rollingUpdate": {
-            "maxSurge": "25%",
-            "maxUnavailable": "25%"
-          },
-          "type": "RollingUpdate"
-        }
-      }
-    )
-  }
-  
-}
-
-// 逆转 设置网络处理
-const reverseDnsConfigHandle = ()=>{
-  if(initData.value.spec.template.spec?.dnsConfig == undefined){
-    Object.assign(initData.value.spec.template.spec,{
-      "dnsConfig": {
-        "nameservers": [],
-        "options": [],
-        "searches": []
-      }
-    })
-  }else{
-    // 域名服务
-    if(initData.value.spec.template.spec.dnsConfig?.nameservers == undefined){
-      Object.assign(initData.value.spec.template.spec.dnsConfig,{nameservers:[]})
-    }else{
-      const nameServers = _.cloneDeep(initData.value.spec.template.spec.dnsConfig.nameservers)
-      initData.value.spec.template.spec.dnsConfig.nameservers.length = 0
-      nameServers.forEach(function(nameserver){
-        initData.value.spec.template.spec.dnsConfig.nameservers.push({value:nameserver})
-      })
-    }
-
-    // 解析器
-    if(initData.value.spec.template.spec.dnsConfig?.options == undefined){
-      Object.assign(initData.value.spec.template.spec.dnsConfig,{options:[]})
-    }
-
-    // 搜索域
-    if(initData.value.spec.template.spec.dnsConfig?.searches == undefined){
-      Object.assign(initData.value.spec.template.spec.dnsConfig,{searches:[]})
-    }else{
-      const searches = _.cloneDeep(initData.value.spec.template.spec.dnsConfig.searches)
-      initData.value.spec.template.spec.dnsConfig.searches.length = 0
-      searches.forEach(function(searche){
-        initData.value.spec.template.spec.dnsConfig.searches.push({value:searche})
       })
     }
   }
 
-  if(initData.value.spec.template.spec?.hostAliases == undefined){
-    Object.assign(initData.value.spec.template.spec,{
+  // 处理标签 & 注解
+  const labelAnnotationHandle = ()=>{
+    labelAnnotation2Json(initData.value.option.labelAnnotation.deployment.labels , initData.value.metadata.labels)
+    labelAnnotation2Json(initData.value.option.labelAnnotation.pod.labels , initData.value.spec.template.metadata.labels)
+    labelAnnotation2Json(initData.value.option.labelAnnotation.deployment.annotations , initData.value.metadata.annotations)
+    labelAnnotation2Json(initData.value.option.labelAnnotation.pod.annotations , initData.value.spec.template.metadata.annotations)
+
+    if(initData.value.spec.template.metadata.labels.length == 0){
+      Object.assign(initData.value.spec.template.metadata.labels,initData.value.metadata.labels)
+    }
+
+    Object.assign(initData.value.spec.selector.matchLabels,initData.value.spec.template.metadata.labels)
+  }
+
+  // 内存&CPU限制处理
+  const resourceHandle = (container) =>{
+    if(container.resources.requests.memory != undefined){
+      container.resources.requests.memory = container.resources.requests.memory+"Mi"
+    }
+    if(container.resources.limits.memory != undefined){
+      container.resources.limits.memory = container.resources.limits.memory+"Mi"
+    }
+  }
+  // 容器命令：标准输入选项
+  const stdinInit = (container)=>{
+    container.stdin = false
+    container.stdinOnce = false
+
+    if(container._commandIO == "ONCE"){
+      container.stdin = true
+      container.stdinOnce = true
+    }else if(container._commandIO == "YES"){
+      container.stdin = true
+    }else{
+      delete container?.tty
+    }
+
+    delete container._commandIO
+  }
+  // 标签 & 注解
+  const labelAnnotation2Json = (formValue,yamlValue)=>{
+    if(formValue == undefined || yamlValue == undefined){
+      return
+    }
+    const mapObject=new Map()
+    for(const index in formValue){
+      if((formValue[index].key != undefined && formValue[index].key != '')
+              &&
+              (formValue[index].value != undefined && formValue[index].value != '')){
+
+        mapObject.set(formValue[index].key,formValue[index].value)
+      }
+    }
+    const entries = Object.fromEntries(mapObject.entries())
+    for(const index in yamlValue){
+      delete yamlValue[index]
+    }
+    Object.assign(yamlValue,entries)
+  }
+
+  const setValue = (data) => {
+    const optionValues = _.cloneDeep(initData.value.option)
+    Object.assign(data,{option:optionValues})
+    initData.value = _.cloneDeep(data)
+    copyData.value = {}
+
+    // 设置标签 & 注解
+    reverseLabelAnnotationHandle()
+    if(initData.value.spec.template.spec?.imagePullSecrets == undefined || initData.value.spec.template.spec?.imagePullSecrets.length == 0){
+      Object.assign(initData.value.spec.template.spec,{"imagePullSecrets":[{name:""}]})
+    }
+
+    // 设置容器处理
+    reverseContainerHandle()
+    // 设置网络处理
+    reverseDnsConfigHandle()
+    // 设置亲和度处理
+    reverseAffinityHandle()
+
+    if(initData.value.spec?.strategy == undefined){
+
+      Object.assign(initData.value.spec,{"strategy": {
+                  "rollingUpdate": {
+                    "maxSurge": "25%",
+                    "maxUnavailable": "25%"
+                  },
+                  "type": "RollingUpdate"
+                }
+              }
+      )
+    }
+
+  }
+
+  // 逆转 设置网络处理
+  const reverseDnsConfigHandle = ()=>{
+    if(initData.value.spec.template.spec?.dnsConfig == undefined){
+      Object.assign(initData.value.spec.template.spec,{
+        "dnsConfig": {
+          "nameservers": [],
+          "options": [],
+          "searches": []
+        }
+      })
+    }else{
+      // 域名服务
+      if(initData.value.spec.template.spec.dnsConfig?.nameservers == undefined){
+        Object.assign(initData.value.spec.template.spec.dnsConfig,{nameservers:[]})
+      }else{
+        const nameServers = _.cloneDeep(initData.value.spec.template.spec.dnsConfig.nameservers)
+        initData.value.spec.template.spec.dnsConfig.nameservers.length = 0
+        nameServers.forEach(function(nameserver){
+          initData.value.spec.template.spec.dnsConfig.nameservers.push({value:nameserver})
+        })
+      }
+
+      // 解析器
+      if(initData.value.spec.template.spec.dnsConfig?.options == undefined){
+        Object.assign(initData.value.spec.template.spec.dnsConfig,{options:[]})
+      }
+
+      // 搜索域
+      if(initData.value.spec.template.spec.dnsConfig?.searches == undefined){
+        Object.assign(initData.value.spec.template.spec.dnsConfig,{searches:[]})
+      }else{
+        const searches = _.cloneDeep(initData.value.spec.template.spec.dnsConfig.searches)
+        initData.value.spec.template.spec.dnsConfig.searches.length = 0
+        searches.forEach(function(searche){
+          initData.value.spec.template.spec.dnsConfig.searches.push({value:searche})
+        })
+      }
+    }
+
+    if(initData.value.spec.template.spec?.hostAliases == undefined){
+      Object.assign(initData.value.spec.template.spec,{
         "hostAliases": [
           {"hostnames":[]}
         ]
-    })
+      })
+    }
+
+    if(initData.value.spec.template.spec?.dnsPolicy == undefined){
+      Object.assign(initData.value.spec.template.spec,{"dnsPolicy": undefined})
+    }
+    if(initData.value.spec.template.spec?.hostNetwork == undefined){
+      Object.assign(initData.value.spec.template.spec,{"hostNetwork": undefined})
+    }
+    if(initData.value.spec.template.spec?.hostname == undefined){
+      Object.assign(initData.value.spec.template.spec,{"hostname": undefined})
+    }
+    if(initData.value.spec.template.spec?.subdomain == undefined){
+      Object.assign(initData.value.spec.template.spec,{"subdomain": undefined})
+    }
+
   }
 
-  if(initData.value.spec.template.spec?.dnsPolicy == undefined){
-    Object.assign(initData.value.spec.template.spec,{"dnsPolicy": undefined})
-  }
-  if(initData.value.spec.template.spec?.hostNetwork == undefined){
-    Object.assign(initData.value.spec.template.spec,{"hostNetwork": undefined})
-  }
-  if(initData.value.spec.template.spec?.hostname == undefined){
-    Object.assign(initData.value.spec.template.spec,{"hostname": undefined})
-  }
-  if(initData.value.spec.template.spec?.subdomain == undefined){
-    Object.assign(initData.value.spec.template.spec,{"subdomain": undefined})
+  // 逆转 容器处理
+  const reverseContainerHandle = ()=>{
+    if(initData.value.spec.template.spec?.containers != undefined){
+      initData.value.spec.template.spec.containers.forEach(function(container){
+        Object.assign(container,{_init : false})
+
+        // 资源分配
+        reverseResourceHandle(container)
+        // 生命周期处理
+        reverseLifecycleHandle(container)
+        // 健康检查
+        reverseCheckHealthHandle(container)
+        // 安全上下文
+        reverseSecurityContextHandle(container)
+        // 端口设置
+        reversePortsHandle(container)
+        // 命令配置
+        reverseCommandHandle(container)
+        // 环境变量配置
+        reverseEnvHandle(container)
+
+        initData.value.spec.template.spec.initContainers = undefined
+      })
+    }else if(initData.value.spec.template.spec?.initContainers != undefined){
+      for( const index in initData.value.spec.template.spec.initContainers){
+        const container = initData.value.spec.template.spec.initContainers[index]
+        Object.assign(container,{_init : true})
+        // 资源分配
+        reverseResourceHandle(container)
+        // 生命周期处理
+        reverseLifecycleHandle(container)
+        // 健康检查
+        reverseCheckHealthHandle(container)
+        // 安全上下文
+        reverseSecurityContextHandle(container)
+        // 端口设置
+        reversePortsHandle(container)
+        // 命令配置
+        reverseCommandHandle(container)
+        // 环境变量配置
+        reverseEnvHandle(container)
+
+        initData.value.spec.template.spec.containers = []
+        initData.value.spec.template.spec.containers.push(_.cloneDeep(container))
+        initData.value.spec.template.spec.initContainers.splice(index, 1)
+      }
+    }
+
   }
 
-}
-
-// 逆转 容器处理
-const reverseContainerHandle = ()=>{
-  if(initData.value.spec.template.spec?.containers != undefined){
-    initData.value.spec.template.spec.containers.forEach(function(container){
-      Object.assign(container,{_init : false})
-      
-      // 资源分配
-      reverseResourceHandle(container)
-      // 生命周期处理
-      reverseLifecycleHandle(container)
-      // 健康检查
-      reverseCheckHealthHandle(container)
-      // 安全上下文
-      reverseSecurityContextHandle(container)
-      // 端口设置
-      reversePortsHandle(container)
-      // 命令配置
-      reverseCommandHandle(container)
-      // 环境变量配置
-      reverseEnvHandle(container)
-
-      initData.value.spec.template.spec.initContainers = undefined
-    })
-  }else if(initData.value.spec.template.spec?.initContainers != undefined){
-    for( const index in initData.value.spec.template.spec.initContainers){
-      const container = initData.value.spec.template.spec.initContainers[index]
-      Object.assign(container,{_init : true})
-      // 资源分配
-      reverseResourceHandle(container)
-      // 生命周期处理
-      reverseLifecycleHandle(container)
-      // 健康检查
-      reverseCheckHealthHandle(container)
-      // 安全上下文
-      reverseSecurityContextHandle(container)
-      // 端口设置
-      reversePortsHandle(container)
-      // 命令配置
-      reverseCommandHandle(container)
-      // 环境变量配置
-      reverseEnvHandle(container)
-
-      initData.value.spec.template.spec.containers = []
-      initData.value.spec.template.spec.containers.push(_.cloneDeep(container))
-      initData.value.spec.template.spec.initContainers.splice(index, 1)
+  // 逆转 环境变量配置
+  const reverseEnvHandle = (container)=>{
+    if(container?.env == undefined){
+      Object.assign(container,{"env":[]})
+    }else{
+      container.env.forEach(function(envItem){
+        if(envItem?.value != undefined){
+          Object.assign(envItem,{"item":envTypes[0].value})
+        }else if(envItem?.valueFrom?.resourceFieldRef != undefined){
+          Object.assign(envItem,{"item":envTypes[1].value})
+        }else if(envItem?.valueFrom?.configMapKeyRef != undefined){
+          Object.assign(envItem,{"item":envTypes[2].value})
+        }else if(envItem?.valueFrom?.secretKeyRef != undefined){
+          Object.assign(envItem,{"item":envTypes[3].value})
+        }else if(envItem?.valueFrom?.fieldRef != undefined){
+          Object.assign(envItem,{"item":envTypes[4].value})
+        }
+      })
     }
   }
-  
-}
 
-// 逆转 环境变量配置
-const reverseEnvHandle = (container)=>{
-  if(container?.env == undefined){
-    Object.assign(container,{"env":[]})
-  }else{
-    container.env.forEach(function(envItem){
-      if(envItem?.value != undefined){
-        Object.assign(envItem,{"item":envTypes[0].value})
-      }else if(envItem?.valueFrom?.resourceFieldRef != undefined){
-        Object.assign(envItem,{"item":envTypes[1].value})
-      }else if(envItem?.valueFrom?.configMapKeyRef != undefined){
-        Object.assign(envItem,{"item":envTypes[2].value})
-      }else if(envItem?.valueFrom?.secretKeyRef != undefined){
-        Object.assign(envItem,{"item":envTypes[3].value})
-      }else if(envItem?.valueFrom?.fieldRef != undefined){
-        Object.assign(envItem,{"item":envTypes[4].value})
-      }
+  // 逆转 命令配置
+  const reverseCommandHandle = (container)=>{
+    if(container?.args == undefined){
+      Object.assign(container,{"args":undefined})
+    }
+    if(container?.command == undefined){
+      Object.assign(container,{"command":undefined})
+    }
+    if(container?.workingDir == undefined){
+      Object.assign(container,{"workingDir":undefined})
+    }
+    // 标准输入处理
+    reverseCommonIOHandle(container)
+  }
+
+  // 逆转 端口设置
+  const reversePortsHandle = (container)=>{
+    if(container?.ports == undefined){
+      Object.assign(container,{"ports":[]})
+    }else{
+      container.ports.forEach(function(port){
+        if(port.hostPort == undefined){
+          Object.assign(port,{"_serviceType":"ClusterIP"})
+        }else{
+          Object.assign(port,{"_serviceType":"NodePort"})
+        }
+      })
+    }
+  }
+
+  // 逆转 安全上下文
+  const reverseSecurityContextHandle = (container)=>{
+    if(container?.securityContext == undefined){
+      Object.assign(container,{
+        "securityContext": {
+          "capabilities": {
+            "add": [],
+            "drop": []
+          },
+          "runAsNonRoot": false,
+          "readOnlyRootFilesystem": false,
+          "privileged": false,
+          "allowPrivilegeEscalation": false,
+          "runAsUser": undefined
+        }
+      })
+    }
+  }
+
+  // 逆转 健康检查
+  const reverseCheckHealthHandle = (container)=>{
+    Object.assign(container,{
+      "_checkHealthItem":{
+        "readinessProbe":"",
+        "livenessProbe":"",
+        "startupProbe":""
+      },
     })
-  }
-}
 
-// 逆转 命令配置
-const reverseCommandHandle = (container)=>{
-  if(container?.args == undefined){
-    Object.assign(container,{"args":undefined})
-  }
-  if(container?.command == undefined){
-    Object.assign(container,{"command":undefined})
-  }
-  if(container?.workingDir == undefined){
-    Object.assign(container,{"workingDir":undefined})
-  }
-  // 标准输入处理
-  reverseCommonIOHandle(container)
-}
+    // 就绪检查
+    if(container?.readinessProbe != undefined){
+      if(container.readinessProbe?.httpGet?.scheme == "HTTP"){
+        container._checkHealthItem.readinessProbe = "HTTP"
 
-// 逆转 端口设置
-const reversePortsHandle = (container)=>{
-  if(container?.ports == undefined){
-    Object.assign(container,{"ports":[]})
-  }else{
-    container.ports.forEach(function(port){
-      if(port.hostPort == undefined){
-        Object.assign(port,{"_serviceType":"ClusterIP"})
+      }else if(container.readinessProbe?.httpGet?.scheme == "HTTPS"){
+        container._checkHealthItem.readinessProbe = "HTTPS"
+
+      }else if(container.readinessProbe?.exec != undefined){
+        container._checkHealthItem.readinessProbe = "exec"
+
+      }else if(container.readinessProbe?.tcpSocket != undefined){
+        container._checkHealthItem.readinessProbe = "tcpSocket"
+
+      }
+    }
+    // 存活检查
+    if(container?.livenessProbe != undefined){
+      if(container.livenessProbe?.httpGet?.scheme == "HTTP"){
+        container._checkHealthItem.livenessProbe = "HTTP"
+
+      }else if(container.livenessProbe?.httpGet?.scheme == "HTTPS"){
+        container._checkHealthItem.livenessProbe = "HTTPS"
+
+      }else if(container.livenessProbe?.exec != undefined){
+        container._checkHealthItem.livenessProbe = "exec"
+
+      }else if(container.livenessProbe?.tcpSocket != undefined){
+        container._checkHealthItem.livenessProbe = "tcpSocket"
+
+      }
+
+    }
+    // 启动检查
+    if(container?.startupProbe != undefined){
+      if(container.startupProbe?.httpGet?.scheme == "HTTP"){
+        container._checkHealthItem.startupProbe = "HTTP"
+
+      }else if(container.startupProbe?.httpGet?.scheme == "HTTPS"){
+        container._checkHealthItem.startupProbe = "HTTPS"
+
+      }else if(container.startupProbe?.exec != undefined){
+        container._checkHealthItem.startupProbe = "exec"
+
+      }else if(container.startupProbe?.tcpSocket != undefined){
+        container._checkHealthItem.startupProbe = "tcpSocket"
+
+      }
+    }
+
+
+  }
+
+  // 逆转 生命周期处理
+  const reverseLifecycleHandle = (container)=>{
+    // 都为空的情况初始化生命周期对象
+    if(container?.lifecycle == undefined ){
+      Object.assign(container,{
+        "lifecycle": {
+          "postStart": {
+            "item":""
+          },
+          "preStop": {
+            "item":""
+          }
+        }
+      })
+    }else{
+      if(container?.lifecycle?.postStart != undefined){
+        if(container.lifecycle.postStart?.httpGet?.scheme != undefined){
+          Object.assign(container.lifecycle.postStart,{"item":"httpGet"})
+
+        }else if(container.lifecycle.postStart?.exec != undefined){
+          Object.assign(container.lifecycle.postStart,{"item":"exec"})
+
+        }else if(container.lifecycle.postStart?.tcpSocket != undefined){
+          Object.assign(container.lifecycle.postStart,{"item":"tcpSocket"})
+
+        }
       }else{
-        Object.assign(port,{"_serviceType":"NodePort"})
+        Object.assign(container.lifecycle,{"postStart": {
+            "item":""
+          }
+        })
       }
-    })
-  }
-}
+      if(container?.lifecycle?.preStop != undefined){
+        if(container.lifecycle.preStop?.httpGet?.scheme != undefined){
+          Object.assign(container.lifecycle.preStop,{"item":"httpGet"})
 
-// 逆转 安全上下文
-const reverseSecurityContextHandle = (container)=>{
-  if(container?.securityContext == undefined){
-    Object.assign(container,{
-      "securityContext": {
-        "capabilities": {
-          "add": [],
-          "drop": []
-        },
-        "runAsNonRoot": false,
-        "readOnlyRootFilesystem": false,
-        "privileged": false,
-        "allowPrivilegeEscalation": false,
-        "runAsUser": undefined
-      }
-    })
-  }
-}
+        }else if(container.lifecycle.preStop?.exec != undefined){
+          Object.assign(container.lifecycle.preStop,{"item":"exec"})
 
-// 逆转 健康检查
-const reverseCheckHealthHandle = (container)=>{
-  Object.assign(container,{
-    "_checkHealthItem":{
-      "readinessProbe":"",
-      "livenessProbe":"",
-      "startupProbe":""
-    },
-  })
+        }else if(container.lifecycle.preStop?.tcpSocket != undefined){
+          Object.assign(container.lifecycle.preStop,{"item":"tcpSocket"})
 
-  // 就绪检查
-  if(container?.readinessProbe != undefined){
-    if(container.readinessProbe?.httpGet?.scheme == "HTTP"){
-      container._checkHealthItem.readinessProbe = "HTTP"
-
-    }else if(container.readinessProbe?.httpGet?.scheme == "HTTPS"){
-      container._checkHealthItem.readinessProbe = "HTTPS"
-      
-    }else if(container.readinessProbe?.exec != undefined){
-      container._checkHealthItem.readinessProbe = "exec"
-
-    }else if(container.readinessProbe?.tcpSocket != undefined){
-      container._checkHealthItem.readinessProbe = "tcpSocket"
-
-    }
-  }
-  // 存活检查
-  if(container?.livenessProbe != undefined){
-    if(container.livenessProbe?.httpGet?.scheme == "HTTP"){
-      container._checkHealthItem.livenessProbe = "HTTP"
-      
-    }else if(container.livenessProbe?.httpGet?.scheme == "HTTPS"){
-      container._checkHealthItem.livenessProbe = "HTTPS"
-      
-    }else if(container.livenessProbe?.exec != undefined){
-      container._checkHealthItem.livenessProbe = "exec"
-
-    }else if(container.livenessProbe?.tcpSocket != undefined){
-      container._checkHealthItem.livenessProbe = "tcpSocket"
-
-    }
-    
-  }
-  // 启动检查
-  if(container?.startupProbe != undefined){
-    if(container.startupProbe?.httpGet?.scheme == "HTTP"){
-      container._checkHealthItem.startupProbe = "HTTP"
-      
-    }else if(container.startupProbe?.httpGet?.scheme == "HTTPS"){
-      container._checkHealthItem.startupProbe = "HTTPS"
-      
-    }else if(container.startupProbe?.exec != undefined){
-      container._checkHealthItem.startupProbe = "exec"
-
-    }else if(container.startupProbe?.tcpSocket != undefined){
-      container._checkHealthItem.startupProbe = "tcpSocket"
-
-    }
-  }
-            
-    
-}
-
-// 逆转 生命周期处理
-const reverseLifecycleHandle = (container)=>{
-  // 都为空的情况初始化生命周期对象
-  if(container?.lifecycle == undefined ){
-    Object.assign(container,{
-      "lifecycle": {
-        "postStart": {
-          "item":""
-        },
-        "preStop": {
-          "item":""
         }
-      }
-    })
-  }else{
-    if(container?.lifecycle?.postStart != undefined){
-      if(container.lifecycle.postStart?.httpGet?.scheme != undefined){
-        Object.assign(container.lifecycle.postStart,{"item":"httpGet"})
-        
-      }else if(container.lifecycle.postStart?.exec != undefined){
-        Object.assign(container.lifecycle.postStart,{"item":"exec"})
-        
-      }else if(container.lifecycle.postStart?.tcpSocket != undefined){
-        Object.assign(container.lifecycle.postStart,{"item":"tcpSocket"})
 
+      }else{
+        Object.assign(container.lifecycle,{"preStop": {
+            "item":""
+          }
+        })
       }
-    }else{
-      Object.assign(container.lifecycle,{"postStart": {
-          "item":""
-        }
-      })
-    }
-    if(container?.lifecycle?.preStop != undefined){
-      if(container.lifecycle.preStop?.httpGet?.scheme != undefined){
-        Object.assign(container.lifecycle.preStop,{"item":"httpGet"})
-        
-      }else if(container.lifecycle.preStop?.exec != undefined){
-        Object.assign(container.lifecycle.preStop,{"item":"exec"})
-        
-      }else if(container.lifecycle.preStop?.tcpSocket != undefined){
-        Object.assign(container.lifecycle.preStop,{"item":"tcpSocket"})
-
-      }
-      
-    }else{
-      Object.assign(container.lifecycle,{"preStop": {
-          "item":""
-        }
-      })
     }
   }
-}
 
-// 逆转 容器命令：标准输入选项设置
-const reverseCommonIOHandle = (container)=>{
-   if(container.stdin && container.stdinOnce){
+  // 逆转 容器命令：标准输入选项设置
+  const reverseCommonIOHandle = (container)=>{
+    if(container.stdin && container.stdinOnce){
       container._commandIO = "ONCE"
     }else if(container.stdin && !container.stdinOnce){
       container._commandIO = "YES"
     }else{
       container._commandIO = "NO"
     }
-}
-
-// 逆转 亲和性处理
-const reverseAffinityHandle = ()=>{
-  initData.value.option.freeNode.length = 0
-  initData.value.option.freePod.length = 0
-  // 节点亲和性
-  if(initData.value.spec.template.spec?.affinity?.nodeAffinity != undefined){
-    
-    // 必须
-    if(initData.value.spec.template.spec?.affinity?.nodeAffinity?.requiredDuringSchedulingIgnoredDuringExecution.length > 0){
-      initData.value.spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.forEach(function(required){
-        const node = {
-          "nodeLevel": "1",
-          "weight": undefined,
-          "preference": _.cloneDeep(required.nodeSelectorTerms)
-        }
-        initData.value.option.freeNode.push(node)
-      })
-    }
-    // 首选
-    if(initData.value.spec.template.spec?.affinity?.nodeAffinity?.preferredDuringSchedulingIgnoredDuringExecution.length > 0){
-      initData.value.spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution.forEach(function(preferred){
-        const node = {
-          "nodeLevel": "0",
-          "weight": preferred.weight,
-          "preference": _.cloneDeep(preferred.preference)
-        }
-        initData.value.option.freeNode.push(node)
-      })
-    }
-    
   }
-  // pod亲和性
-  if(initData.value.spec.template.spec?.affinity?.podAffinity != undefined){
-    // 必须
-    if(initData.value.spec.template.spec?.affinity?.podAffinity?.requiredDuringSchedulingIgnoredDuringExecution?.length > 0){
-      initData.value.spec.template.spec.affinity.podAffinity.requiredDuringSchedulingIgnoredDuringExecution.forEach(function(requireds){
+
+  // 逆转 亲和性处理
+  const reverseAffinityHandle = ()=>{
+    initData.value.option.freeNode.length = 0
+    initData.value.option.freePod.length = 0
+    // 节点亲和性
+    if(initData.value.spec.template.spec?.affinity?.nodeAffinity != undefined){
+
+      // 必须
+      if(initData.value.spec.template.spec?.affinity?.nodeAffinity?.requiredDuringSchedulingIgnoredDuringExecution.length > 0){
+        initData.value.spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.forEach(function(required){
+          const node = {
+            "nodeLevel": "1",
+            "weight": undefined,
+            "preference": _.cloneDeep(required.nodeSelectorTerms)
+          }
+          initData.value.option.freeNode.push(node)
+        })
+      }
+      // 首选
+      if(initData.value.spec.template.spec?.affinity?.nodeAffinity?.preferredDuringSchedulingIgnoredDuringExecution.length > 0){
+        initData.value.spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution.forEach(function(preferred){
+          const node = {
+            "nodeLevel": "0",
+            "weight": preferred.weight,
+            "preference": _.cloneDeep(preferred.preference)
+          }
+          initData.value.option.freeNode.push(node)
+        })
+      }
+
+    }
+    // pod亲和性
+    if(initData.value.spec.template.spec?.affinity?.podAffinity != undefined){
+      // 必须
+      if(initData.value.spec.template.spec?.affinity?.podAffinity?.requiredDuringSchedulingIgnoredDuringExecution?.length > 0){
+        initData.value.spec.template.spec.affinity.podAffinity.requiredDuringSchedulingIgnoredDuringExecution.forEach(function(requireds){
           const pod = {
             "podAffinity":true,
             "namespaces":requireds.nodeSelectorTerms?.namespaces,
@@ -1500,13 +1500,13 @@ const reverseAffinityHandle = ()=>{
           }
 
           initData.value.option.freePod.push(pod)
-      })
-    }
+        })
+      }
 
-    // 首选
-    if(initData.value.spec.template.spec?.affinity?.podAffinity?.preferredDuringSchedulingIgnoredDuringExecution?.length > 0){
-      initData.value.spec.template.spec.affinity.podAffinity.preferredDuringSchedulingIgnoredDuringExecution.forEach(function(preferred){
-        const pod = {
+      // 首选
+      if(initData.value.spec.template.spec?.affinity?.podAffinity?.preferredDuringSchedulingIgnoredDuringExecution?.length > 0){
+        initData.value.spec.template.spec.affinity.podAffinity.preferredDuringSchedulingIgnoredDuringExecution.forEach(function(preferred){
+          const pod = {
             "podAffinity":true,
             "namespaces":preferred.nodeSelectorTerms?.namespaces,
             "weight":preferred.weight,
@@ -1514,140 +1514,140 @@ const reverseAffinityHandle = ()=>{
             "curNameSpace":preferred?.nodeSelectorTerms?.namespaces == undefined || preferred.nodeSelectorTerms?.namespaces.length == 0,
             "topologyKey":preferred.podAffinityTerm.topologyKey,
             "labelSelector": _.cloneDeep(preferred.podAffinityTerm.labelSelector)
+          }
+          initData.value.option.freePod.push(pod)
+        })
+
+      }
+
+      // pod反亲和性
+      if(initData.value.spec.template.spec?.affinity?.podAntiAffinity != undefined){
+        // 必须
+        if(initData.value.spec.template.spec?.affinity?.podAntiAffinity?.requiredDuringSchedulingIgnoredDuringExecution != undefined){
+          if(initData.value.spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution?.length > 0){
+            initData.value.spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution.forEach(function(required){
+              const podAnti = {
+                "podAffinity":false,
+                "namespaces":required.namespaces,
+                "weight":required.weight,
+                "nodeLevel":"1",
+                "curNameSpace":required?.namespaces == undefined || required?.namespaces.length == 0,
+                "topologyKey":required.podAffinityTerm.topologyKey,
+                "labelSelector": _.cloneDeep(required.podAffinityTerm.labelSelector)
+              }
+
+              initData.value.option.freePod.push(podAnti)
+            })
+          }
+
         }
-        initData.value.option.freePod.push(pod)
+
+        // 首选
+        if(initData.value.spec.template.spec?.affinity?.podAntiAffinity?.preferredDuringSchedulingIgnoredDuringExecution != undefined){
+          if(initData.value.spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution?.length > 0){
+            initData.value.spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution.forEach(function(preferred){
+              const podAnti = {
+                "podAffinity":false,
+                "namespaces":preferred.namespaces,
+                "weight":preferred.weight,
+                "nodeLevel":"0",
+                "curNameSpace": preferred?.namespaces == undefined || preferred?.namespaces.length == 0,
+                "topologyKey":preferred.podAffinityTerm.topologyKey,
+                "labelSelector": _.cloneDeep(preferred.podAffinityTerm.labelSelector)
+              }
+
+              initData.value.option.freePod.push(podAnti)
+            })
+          }
+
+        }
+      }
+
+    }
+  }
+
+  // 内存&CPU限制处理
+  const reverseResourceHandle = (container) =>{
+    if(container?.resources == undefined ){
+      Object.assign(container,{
+        "resources": {
+          "requests": {
+            "cpu": undefined,
+            "memory": undefined,
+            "nvidia.com/gpu": undefined
+          },
+          "limits": {
+            "cpu": undefined,
+            "memory": undefined,
+            "nvidia.com/gpu": undefined
+          }
+        }
       })
-
     }
-    
-    // pod反亲和性
-    if(initData.value.spec.template.spec?.affinity?.podAntiAffinity != undefined){
-      // 必须
-      if(initData.value.spec.template.spec?.affinity?.podAntiAffinity?.requiredDuringSchedulingIgnoredDuringExecution != undefined){
-        if(initData.value.spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution?.length > 0){
-          initData.value.spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution.forEach(function(required){
-            const podAnti = {
-              "podAffinity":false,
-              "namespaces":required.namespaces,
-              "weight":required.weight,
-              "nodeLevel":"1",
-              "curNameSpace":required?.namespaces == undefined || required?.namespaces.length == 0,
-              "topologyKey":required.podAffinityTerm.topologyKey,
-              "labelSelector": _.cloneDeep(required.podAffinityTerm.labelSelector)
-            }
 
-            initData.value.option.freePod.push(podAnti)
-          })
-        }
+    if(container?.resources?.requests?.memory != undefined){
+      container.resources.requests.memory = container.resources.requests.memory.match(/\d+/)[0];
+    }
+    if(container?.resources?.limits?.memory != undefined){
+      container.resources.limits.memory = container.resources.limits.memory.match(/\d+/)[0];
+    }
+  }
 
-      }
-
-      // 首选
-      if(initData.value.spec.template.spec?.affinity?.podAntiAffinity?.preferredDuringSchedulingIgnoredDuringExecution != undefined){
-        if(initData.value.spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution?.length > 0){
-          initData.value.spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution.forEach(function(preferred){
-            const podAnti = {
-              "podAffinity":false,
-              "namespaces":preferred.namespaces,
-              "weight":preferred.weight,
-              "nodeLevel":"0",
-              "curNameSpace": preferred?.namespaces == undefined || preferred?.namespaces.length == 0,
-              "topologyKey":preferred.podAffinityTerm.topologyKey,
-              "labelSelector": _.cloneDeep(preferred.podAffinityTerm.labelSelector)
-            }
-
-            initData.value.option.freePod.push(podAnti)
-          })
-        }
-
+  // 标签 & 注解从yaml逆向回来
+  const reverseLabelAnnotationHandle = ()=>{
+    delete initData.value.option.labelAnnotation
+    const cleanObj = {
+      deployment:{
+        labels:[],
+        annotations:[]
+      },
+      pod:{
+        labels:[],
+        annotations:[]
       }
     }
+    Object.assign(initData.value.option,{labelAnnotation:cleanObj})
+    json2labelAnnotation(initData.value.option.labelAnnotation.deployment.labels , initData.value.metadata.labels)
+    json2labelAnnotation(initData.value.option.labelAnnotation.pod.labels , initData.value.spec.template.metadata.labels)
+    json2labelAnnotation(initData.value.option.labelAnnotation.deployment.annotations , initData.value.metadata.annotations)
+    json2labelAnnotation(initData.value.option.labelAnnotation.pod.annotations , initData.value.spec.template.metadata.annotations)
 
   }
-}
 
-// 内存&CPU限制处理
-const reverseResourceHandle = (container) =>{
-  if(container?.resources == undefined ){
-    Object.assign(container,{
-      "resources": {
-        "requests": {
-          "cpu": undefined,
-          "memory": undefined,
-          "nvidia.com/gpu": undefined
-        },
-        "limits": {
-          "cpu": undefined,
-          "memory": undefined,
-          "nvidia.com/gpu": undefined
-        }
+  // 标签 & 注解
+  const json2labelAnnotation = (values,yamlValues)=>{
+    if(values == undefined || yamlValues == undefined){
+      return
+    }
+
+    const mapObject=new Map(Object.entries(yamlValues))
+    for (const k of mapObject.keys()){
+      values.push({
+        key:k,
+        value:mapObject.get(k)
+      })
+    }
+  }
+
+  const saveData = () => {
+    ruleFormRef.value.validate((valid) => {
+      if (valid) {
+        console.log(yaml.safeLoad(initData.value))
+      } else {
+        ElMessage.error('请填写完整')
       }
     })
   }
 
-  if(container?.resources?.requests?.memory != undefined){
-    container.resources.requests.memory = container.resources.requests.memory.match(/\d+/)[0];
+  const changeSelectTab = (item) =>{
+    initData.value.option.containerIndex = item
   }
-  if(container?.resources?.limits?.memory != undefined){
-    container.resources.limits.memory = container.resources.limits.memory.match(/\d+/)[0];
+  const changePodSelectTab = (item) =>{
+    initData.value.option.selectPod = item
   }
-}
-
-// 标签 & 注解从yaml逆向回来
-const reverseLabelAnnotationHandle = ()=>{
-  delete initData.value.option.labelAnnotation
-  const cleanObj = {
-    deployment:{
-      labels:[],
-      annotations:[]
-    },
-    pod:{
-      labels:[],
-      annotations:[]
-    }
+  const changeDeploymentSelectTab = (item) =>{
+    initData.value.option.selectDepolyment = item
   }
-  Object.assign(initData.value.option,{labelAnnotation:cleanObj})
-  json2labelAnnotation(initData.value.option.labelAnnotation.deployment.labels , initData.value.metadata.labels)
-  json2labelAnnotation(initData.value.option.labelAnnotation.pod.labels , initData.value.spec.template.metadata.labels)
-  json2labelAnnotation(initData.value.option.labelAnnotation.deployment.annotations , initData.value.metadata.annotations)
-  json2labelAnnotation(initData.value.option.labelAnnotation.pod.annotations , initData.value.spec.template.metadata.annotations)
-
-}
-
-// 标签 & 注解
-const json2labelAnnotation = (values,yamlValues)=>{
-  if(values == undefined || yamlValues == undefined){
-    return
-  }
-
-  const mapObject=new Map(Object.entries(yamlValues))
-  for (const k of mapObject.keys()){
-    values.push({
-      key:k,
-      value:mapObject.get(k)
-    })
-  }
-}
-
-const saveData = () => {
-  ruleFormRef.value.validate((valid) => {
-    if (valid) {
-      console.log(yaml.safeLoad(initData.value))
-    } else {
-      ElMessage.error('请填写完整')
-    }
-  })
-}
-
-const changeSelectTab = (item) =>{
-  initData.value.option.containerIndex = item
-}
-const changePodSelectTab = (item) =>{
-  initData.value.option.selectPod = item
-}
-const changeDeploymentSelectTab = (item) =>{
-  initData.value.option.selectDepolyment = item
-}
 
 
 </script>
@@ -1688,11 +1688,11 @@ const changeDeploymentSelectTab = (item) =>{
         <yt-card :title="'详细配置'">
           <div class="detail-content">
             <el-tabs
-              v-model="selectTabIndex"
-              class="top-tabs"
-              editable
-              type="card"
-              @edit="handleTabsEdit"
+                    v-model="selectTabIndex"
+                    class="top-tabs"
+                    editable
+                    type="card"
+                    @edit="handleTabsEdit"
             >
               <template #add-icon>
                 <el-icon><Select /></el-icon>
@@ -1710,12 +1710,12 @@ const changeDeploymentSelectTab = (item) =>{
                       <div v-show="initData.option.selectDepolyment === 'deploymentLabel'  ? true : false ">
                         <H1>Deployment标签</H1>
                         <el-row :gutter="24" v-for="(label,index) in initData.option.labelAnnotation.deployment.labels" :key="index" style="margin-top:30px">
-                            <el-col :span="6" >
-                              <el-input label="键" placeholder="请输入键" v-model="label.key"></el-input>
-                            </el-col>
-                            <el-col :span="6" >
-                              <el-input label="值" placeholder="请输入值" v-model="label.value" ></el-input>
-                            </el-col>
+                          <el-col :span="6" >
+                            <el-input label="键" placeholder="请输入键" v-model="label.key"></el-input>
+                          </el-col>
+                          <el-col :span="6" >
+                            <el-input label="值" placeholder="请输入值" v-model="label.value" ></el-input>
+                          </el-col>
                           <el-button @click="removeDeployLabel(index)" type="danger" >删除标签</el-button>
                         </el-row>
                         <el-row :gutter="24" style="margin-top:10px;margin-left:2px">
@@ -1724,10 +1724,10 @@ const changeDeploymentSelectTab = (item) =>{
                         <H1>注解</H1>
                         <el-row :gutter="24" v-for="(annotation,index) in initData.option.labelAnnotation.deployment.annotations" :key="index" style="margin-top:30px">
                           <el-col :span="6" >
-                              <el-input label="键" placeholder="请输入键" v-model="annotation.key"></el-input>
+                            <el-input label="键" placeholder="请输入键" v-model="annotation.key"></el-input>
                           </el-col>
                           <el-col :span="6" >
-                              <el-input label="值" placeholder="请输入值" v-model="annotation.value" ></el-input>
+                            <el-input label="值" placeholder="请输入值" v-model="annotation.value" ></el-input>
                           </el-col>
                           <el-button @click="removeDeployAnnotation(index)"  type="danger">删除注解</el-button>
                         </el-row>
@@ -1739,8 +1739,8 @@ const changeDeploymentSelectTab = (item) =>{
                         <el-row :gutter="24" style="margin-top:10px;margin-left:2px">
                           <el-col :span="12">
                             <el-radio-group v-model="initData.spec.strategy.type" >
-                                    <el-radio-button label="RollingUpdate">滚动升级</el-radio-button>
-                                    <el-radio-button label="Recreate">重新创建</el-radio-button>
+                              <el-radio-button label="RollingUpdate">滚动升级</el-radio-button>
+                              <el-radio-button label="Recreate">重新创建</el-radio-button>
                             </el-radio-group>
                           </el-col>
                         </el-row>
@@ -1803,12 +1803,12 @@ const changeDeploymentSelectTab = (item) =>{
                       <div v-show="initData.option.selectPod === 'podLabel'  ? true : false ">
                         <H1>Pod标签</H1>
                         <el-row :gutter="24" v-for="(label,index) in initData.option.labelAnnotation.pod.labels" :key="index" style="margin-top:30px">
-                            <el-col :span="6" >
-                              <el-input label="键" placeholder="请输入键" v-model="label.key"></el-input>
-                            </el-col>
-                            <el-col :span="6" >
-                              <el-input label="值" placeholder="请输入值" v-model="label.value" ></el-input>
-                            </el-col>
+                          <el-col :span="6" >
+                            <el-input label="键" placeholder="请输入键" v-model="label.key"></el-input>
+                          </el-col>
+                          <el-col :span="6" >
+                            <el-input label="值" placeholder="请输入值" v-model="label.value" ></el-input>
+                          </el-col>
                           <el-button @click="removePodLabel(index)" type="danger" >删除标签</el-button>
                         </el-row>
                         <el-row :gutter="24" style="margin-top:10px;margin-left:2px">
@@ -1817,10 +1817,10 @@ const changeDeploymentSelectTab = (item) =>{
                         <H1>注解</H1>
                         <el-row :gutter="24" v-for="(annotation,index) in initData.option.labelAnnotation.pod.annotations" :key="index" style="margin-top:30px">
                           <el-col :span="6" >
-                              <el-input label="键" placeholder="请输入键" v-model="annotation.key"></el-input>
+                            <el-input label="键" placeholder="请输入键" v-model="annotation.key"></el-input>
                           </el-col>
                           <el-col :span="6" >
-                              <el-input label="值" placeholder="请输入值" v-model="annotation.value" ></el-input>
+                            <el-input label="值" placeholder="请输入值" v-model="annotation.value" ></el-input>
                           </el-col>
                           <el-button @click="removePodAnnotation(index)"  type="danger">删除注解</el-button>
                         </el-row>
@@ -1865,26 +1865,26 @@ const changeDeploymentSelectTab = (item) =>{
                         </el-row>
 
                         <H1>DNS</H1>
-                          <H1>域名服务器</H1>
-                          <el-row :gutter="8" v-for="(nameServers,index) in initData.spec.template.spec.dnsConfig.nameservers" :key="nameServers" style="margin-top:15px">
-                            <el-col :span="8">
-                                <el-input   placeholder="请输入内容" v-model="initData.spec.template.spec.dnsConfig.nameservers[index].value"></el-input>
-                            </el-col>
-                            <el-button type="danger" @click="removeNameServer(index)">删除</el-button>
-                          </el-row>
-                          <el-row :gutter="8">
-                              <el-button type="primary" style="margin-top:15px" @click="addNameServer" plain>添加域名服务器</el-button>
-                          </el-row>
-                          <H1>搜索域</H1>
-                          <el-row :gutter="8" v-for="(search,index) in initData.spec.template.spec.dnsConfig.searches" :key="search" style="margin-top:15px">
-                            <el-col :span="8">
-                                <el-input  placeholder="请输入内容" v-model="initData.spec.template.spec.dnsConfig.searches[index].value"></el-input>
-                            </el-col>
-                            <el-button type="danger" @click="removeSearch(index)">删除</el-button>
-                          </el-row>
-                          <el-row :gutter="8">
-                              <el-button type="primary" style="margin-top:15px" @click="addSearch" plain>添加搜索域</el-button>
-                          </el-row>
+                        <H1>域名服务器</H1>
+                        <el-row :gutter="8" v-for="(nameServers,index) in initData.spec.template.spec.dnsConfig.nameservers" :key="nameServers" style="margin-top:15px">
+                          <el-col :span="8">
+                            <el-input   placeholder="请输入内容" v-model="initData.spec.template.spec.dnsConfig.nameservers[index].value"></el-input>
+                          </el-col>
+                          <el-button type="danger" @click="removeNameServer(index)">删除</el-button>
+                        </el-row>
+                        <el-row :gutter="8">
+                          <el-button type="primary" style="margin-top:15px" @click="addNameServer" plain>添加域名服务器</el-button>
+                        </el-row>
+                        <H1>搜索域</H1>
+                        <el-row :gutter="8" v-for="(search,index) in initData.spec.template.spec.dnsConfig.searches" :key="search" style="margin-top:15px">
+                          <el-col :span="8">
+                            <el-input  placeholder="请输入内容" v-model="initData.spec.template.spec.dnsConfig.searches[index].value"></el-input>
+                          </el-col>
+                          <el-button type="danger" @click="removeSearch(index)">删除</el-button>
+                        </el-row>
+                        <el-row :gutter="8">
+                          <el-button type="primary" style="margin-top:15px" @click="addSearch" plain>添加搜索域</el-button>
+                        </el-row>
 
                         <div :span="8">
                           <H1>解析器选项</H1>
@@ -1902,7 +1902,7 @@ const changeDeploymentSelectTab = (item) =>{
                             <el-button type="danger" @click="removeOption(index)" style="margin-top:30px">删除</el-button>
                           </el-row>
                           <el-row :gutter="8">
-                              <el-button type="primary" @click="addOption" plain>添加解析器选项</el-button>
+                            <el-button type="primary" @click="addOption" plain>添加解析器选项</el-button>
                           </el-row>
                         </div>
                         <div :span="8">
@@ -1921,7 +1921,7 @@ const changeDeploymentSelectTab = (item) =>{
                             <el-button type="danger" @click="removeHostAlias(index)" style="margin-top:30px">删除</el-button>
                           </el-row>
                           <el-row :gutter="8">
-                              <el-button type="primary" @click="addHostAlias" plain>添加选项</el-button>
+                            <el-button type="primary" @click="addHostAlias" plain>添加选项</el-button>
                           </el-row>
                         </div>
                       </div>
@@ -1930,13 +1930,13 @@ const changeDeploymentSelectTab = (item) =>{
                         <H1>节点调度</H1>
                         <el-row :gutter="24" >
                           <el-col :span="12">
-                              <el-radio-group v-model="initData.option.nodeAffinity" @change="nodeChange">
-                                <el-radio-button
-                                  v-for="item in nodeSelector"
-                                  :key="item.value"
-                                  :label="item.value"
-                                >{{item.label}}</el-radio-button>
-                              </el-radio-group>
+                            <el-radio-group v-model="initData.option.nodeAffinity" @change="nodeChange">
+                              <el-radio-button
+                                      v-for="item in nodeSelector"
+                                      :key="item.value"
+                                      :label="item.value"
+                              >{{item.label}}</el-radio-button>
+                            </el-radio-group>
                           </el-col>
                         </el-row>
                         <template v-if="initData.option.nodeAffinity == 'none'">
@@ -1946,9 +1946,9 @@ const changeDeploymentSelectTab = (item) =>{
                             <el-col>
                               <el-select v-model="initData.spec.template.spec.nodeName" placeholder="请选择">
                                 <el-option v-for="node in nodeData"
-                                            :key="node.value"
-                                            :label="node.label"
-                                            :value="node.value"/>
+                                           :key="node.value"
+                                           :label="node.label"
+                                           :value="node.value"/>
                               </el-select>
                             </el-col>
                           </el-row>
@@ -1966,8 +1966,8 @@ const changeDeploymentSelectTab = (item) =>{
                               </el-col>
                               <el-col :span="6" v-if="node.nodeLevel == '0'">
                                 <el-form-item label="权重">
-                                  <el-input type="number" 
-                                  v-model="node.weight"/>
+                                  <el-input type="number"
+                                            v-model="node.weight"/>
                                 </el-form-item>
                               </el-col>
                             </el-row>
@@ -1980,12 +1980,12 @@ const changeDeploymentSelectTab = (item) =>{
                               <el-col :span="2">
                                 <el-form-item label="运算符">
                                   <el-select style="width: 100%;" v-model="item.operator" placeholder="请选择">
-                                      <el-option label="包含" value="In"></el-option>
-                                      <el-option label="不包含" value="NotIn"></el-option>
-                                      <el-option label="等于" value="Exists"></el-option>
-                                      <el-option label="不等于" value="DoesNotExist"></el-option>
-                                      <el-option label="小于" value="Gt"></el-option>
-                                      <el-option label="大于" value="Lt"></el-option>
+                                    <el-option label="包含" value="In"></el-option>
+                                    <el-option label="不包含" value="NotIn"></el-option>
+                                    <el-option label="等于" value="Exists"></el-option>
+                                    <el-option label="不等于" value="DoesNotExist"></el-option>
+                                    <el-option label="小于" value="Gt"></el-option>
+                                    <el-option label="大于" value="Lt"></el-option>
                                   </el-select>
                                 </el-form-item>
                               </el-col>
@@ -2019,16 +2019,16 @@ const changeDeploymentSelectTab = (item) =>{
                         <template v-for="(pod,podIndex) in initData.option.freePod" :key="podIndex" >
                           <el-row :gutter="24" style="margin-top:30px">
                             <el-col :span="8">
-                                <el-radio-group v-model="pod.podAffinity" >
-                                  <el-radio-button :label=true>亲和性</el-radio-button>
-                                  <el-radio-button :label=false>反亲和性</el-radio-button>
-                                </el-radio-group>
+                              <el-radio-group v-model="pod.podAffinity" >
+                                <el-radio-button :label=true>亲和性</el-radio-button>
+                                <el-radio-button :label=false>反亲和性</el-radio-button>
+                              </el-radio-group>
                             </el-col>
                             <el-col :span="12">
-                                <el-radio-group v-model="pod.curNameSpace" >
-                                  <el-radio-button :label=true>当前pod命名空间</el-radio-button>
-                                  <el-radio-button :label=false>特定命名空间</el-radio-button>
-                                </el-radio-group>
+                              <el-radio-group v-model="pod.curNameSpace" >
+                                <el-radio-button :label=true>当前pod命名空间</el-radio-button>
+                                <el-radio-button :label=false>特定命名空间</el-radio-button>
+                              </el-radio-group>
                             </el-col>
                           </el-row>
                           <el-row :gutter="24" style="margin-top:30px">
@@ -2051,23 +2051,23 @@ const changeDeploymentSelectTab = (item) =>{
                             </el-col>
                             <el-col :span="3" v-if="pod.nodeLevel == '0'">
                               <el-form-item label="权重">
-                                <el-input type="number" 
-                                v-model="pod.weight"/>
+                                <el-input type="number"
+                                          v-model="pod.weight"/>
                               </el-form-item>
                             </el-col>
                             <el-col :span="6" v-if="pod.curNameSpace == false">
                               <el-form-item label="特定命名空间">
                                 <el-select
-                                    class="search-select"
-                                    v-model="pod.namespaces"
-                                    placeholder="请选择"
-                                    multiple
-                                    clearable
+                                        class="search-select"
+                                        v-model="pod.namespaces"
+                                        placeholder="请选择"
+                                        multiple
+                                        clearable
                                 >
                                   <el-option v-for="namespace in namespaces"
-                                              :key="namespace.value"
-                                              :label="namespace.label"
-                                              :value="namespace.value"/>
+                                             :key="namespace.value"
+                                             :label="namespace.label"
+                                             :value="namespace.value"/>
                                 </el-select>
                               </el-form-item>
                             </el-col>
@@ -2081,12 +2081,12 @@ const changeDeploymentSelectTab = (item) =>{
                             <el-col :span="2">
                               <el-form-item label="运算符">
                                 <el-select style="width: 100%;" v-model="item.operator" placeholder="请选择">
-                                    <el-option label="包含" value="In"></el-option>
-                                    <el-option label="不包含" value="NotIn"></el-option>
-                                    <el-option label="等于" value="Exists"></el-option>
-                                    <el-option label="不等于" value="DoesNotExist"></el-option>
-                                    <el-option label="小于" value="Gt"></el-option>
-                                    <el-option label="大于" value="Lt"></el-option>
+                                  <el-option label="包含" value="In"></el-option>
+                                  <el-option label="不包含" value="NotIn"></el-option>
+                                  <el-option label="等于" value="Exists"></el-option>
+                                  <el-option label="不等于" value="DoesNotExist"></el-option>
+                                  <el-option label="小于" value="Gt"></el-option>
+                                  <el-option label="大于" value="Lt"></el-option>
                                 </el-select>
                               </el-form-item>
                             </el-col>
@@ -2113,14 +2113,14 @@ const changeDeploymentSelectTab = (item) =>{
                         </template>
                         <el-button @click="addPod" type="primary" plain>添加节点调度</el-button>
                       </div>
-              
+
                       <div v-show="initData.option.selectPod === 'podStrategy'  ? true : false ">
                         <H1>扩缩容和升级策略</H1>
                         <el-row :gutter="24" >
                           <el-col :span="8">
                             <el-form-item label="终止宽限期"  >
                               <el-input placeholder="请输入内容" type="number" v-model="initData.spec.template.spec.terminationGracePeriodSeconds" >
-                              <template #append>秒</template>
+                                <template #append>秒</template>
                               </el-input>
                             </el-form-item>
                           </el-col>
@@ -2143,7 +2143,7 @@ const changeDeploymentSelectTab = (item) =>{
                 </el-scrollbar>
               </el-tab-pane>
               <el-tab-pane v-for="(container, index) in initData.spec.template.spec.containers"
-               :key="index" :label="container.name" >
+                           :key="index" :label="container.name" >
                 <el-scrollbar>
                   <div class="tab-content">
                     <div class="left">
@@ -2166,8 +2166,8 @@ const changeDeploymentSelectTab = (item) =>{
                           </el-col>
                           <el-col :span="2">
                             <el-radio-group v-model="container._init">
-                                <el-radio :label=true>初始化容器</el-radio>
-                                <el-radio :label=false>标准容器</el-radio>
+                              <el-radio :label=true>初始化容器</el-radio>
+                              <el-radio :label=false>标准容器</el-radio>
                             </el-radio-group>
                           </el-col>
                         </el-row>
@@ -2200,59 +2200,59 @@ const changeDeploymentSelectTab = (item) =>{
                         <el-row :gutter="24" v-for="(port, portIndex) in container?.ports" :key="portIndex">
                           <el-col :span="3">
                             <el-form-item label="Service类型">
-                                <el-select
-                                  class="search-select"
-                                  v-model="port._serviceType"
-                                  placeholder="Service类型"
-                                  clearable
-                                >
-                                  <el-option v-for="service in services"
-                                            :key="service.value"
-                                            :label="service.label"
-                                            :value="service.value"/>
-                                </el-select>
-                              </el-form-item>
-                            </el-col>
-                            <el-col :span="5">
-                              <el-form-item label="名称">
-                                <el-input v-model="port.name" placeholder="请输入名称"></el-input>
-                              </el-form-item>
-                            </el-col>
-                            <el-col :span="3">
-                              <el-form-item label="私有容器端口">
-                                <el-input type="number" v-model="port.containerPort" placeholder="如：8080"></el-input>
-                              </el-form-item>
-                            </el-col>
-                            <el-col :span="2">
-                              <el-form-item label="协议" >
-                                <el-select
-                                  class="search-select"
-                                  v-model="port.protocol"
-                                  placeholder="协议"
-                                  clearable
-                                >
-                                  <el-option v-for="protocol in protocols"
-                                            :key="protocol.value"
-                                            :label="protocol.label"
-                                            :value="protocol.value"/>
-                                </el-select>
-                              </el-form-item>
-                            </el-col>
-                            <el-col :span="3">
-                              <el-form-item label="公共主机端口">
-                                <el-input type="number" v-model="port.hostPort" placeholder="如：80"></el-input>
-                              </el-form-item>
-                            </el-col>
-                            <el-col :span="3">
-                              <el-form-item label="主机ip">
-                                <el-input v-model="port.hostIP" placeholder="如：1.1.1.1"></el-input>
-                              </el-form-item>
-                            </el-col>
-                            <el-col :span="3">
-                              <el-form-item label="操作" >
+                              <el-select
+                                      class="search-select"
+                                      v-model="port._serviceType"
+                                      placeholder="Service类型"
+                                      clearable
+                              >
+                                <el-option v-for="service in services"
+                                           :key="service.value"
+                                           :label="service.label"
+                                           :value="service.value"/>
+                              </el-select>
+                            </el-form-item>
+                          </el-col>
+                          <el-col :span="5">
+                            <el-form-item label="名称">
+                              <el-input v-model="port.name" placeholder="请输入名称"></el-input>
+                            </el-form-item>
+                          </el-col>
+                          <el-col :span="3">
+                            <el-form-item label="私有容器端口">
+                              <el-input type="number" v-model="port.containerPort" placeholder="如：8080"></el-input>
+                            </el-form-item>
+                          </el-col>
+                          <el-col :span="2">
+                            <el-form-item label="协议" >
+                              <el-select
+                                      class="search-select"
+                                      v-model="port.protocol"
+                                      placeholder="协议"
+                                      clearable
+                              >
+                                <el-option v-for="protocol in protocols"
+                                           :key="protocol.value"
+                                           :label="protocol.label"
+                                           :value="protocol.value"/>
+                              </el-select>
+                            </el-form-item>
+                          </el-col>
+                          <el-col :span="3">
+                            <el-form-item label="公共主机端口">
+                              <el-input type="number" v-model="port.hostPort" placeholder="如：80"></el-input>
+                            </el-form-item>
+                          </el-col>
+                          <el-col :span="3">
+                            <el-form-item label="主机ip">
+                              <el-input v-model="port.hostIP" placeholder="如：1.1.1.1"></el-input>
+                            </el-form-item>
+                          </el-col>
+                          <el-col :span="3">
+                            <el-form-item label="操作" >
                               <el-button @click="removePort(index,portIndex)" type="danger">删除</el-button>
-                              </el-form-item>
-                            </el-col>
+                            </el-form-item>
+                          </el-col>
                         </el-row>
                         <el-button @click="addPort(index)" type="primary" plain>添加端口或service</el-button>
                         <H1>命令</H1>
@@ -2294,174 +2294,174 @@ const changeDeploymentSelectTab = (item) =>{
                         <el-row :gutter="24" v-for="(env, envIndex) in container?.env" :key="envIndex">
                           <el-col :span="3">
                             <el-form-item label="类型" >
+                              <el-select
+                                      class="search-select"
+                                      placeholder="类型"
+                                      v-model="env.item"
+                                      @change="envSelectHandle(env)"
+                                      clearable
+                              >
+                                <el-option v-for="envType in envTypes"
+                                           :key="envType.value"
+                                           :label="envType.label"
+                                           :value="envType.value"/>
+                              </el-select>
+                            </el-form-item>
+                          </el-col>
+                          <template v-if="env.item == 'Key/Value'">
+                            <el-col :span="5">
+                              <el-form-item label="名称">
+                                <el-input v-model="env.name" placeholder="请输入名称"></el-input>
+                              </el-form-item>
+                            </el-col>
+                            <el-col :span="3">
+                              <el-form-item label="值">
+                                <el-input v-model="env.value" placeholder="value"></el-input>
+                              </el-form-item>
+                            </el-col>
+                            <el-col :span="3">
+                              <el-form-item style="padding-top:30px" >
+                                <el-button @click="removeEnv(index,envIndex)" type="danger">删除</el-button>
+                              </el-form-item>
+                            </el-col>
+                          </template>
+
+                          <template v-if="env.item == 'SecretKey'">
+                            <el-col :span="5">
+                              <el-form-item label="变量名">
+                                <el-input v-model="env.name" placeholder="例如：FOO"></el-input>
+                              </el-form-item>
+                            </el-col>
+                            <el-col :span="3">
+                              <el-form-item label="密文">
                                 <el-select
-                                  class="search-select"
-                                  placeholder="类型"
-                                  v-model="env.item"
-                                  @change="envSelectHandle(env)"
-                                  clearable
+                                        class="search-select"
+                                        v-model="env.valueFrom.secretKeyRef.name"
+                                        placeholder="请选择密文"
+                                        clearable
                                 >
-                                  <el-option v-for="envType in envTypes"
-                                            :key="envType.value"
-                                            :label="envType.label"
-                                            :value="envType.value"/>
+                                  <el-option v-for="envSecret in envSecrets"
+                                             :key="envSecret.value"
+                                             :label="envSecret.label"
+                                             :value="envSecret.value"/>
                                 </el-select>
                               </el-form-item>
                             </el-col>
-                            <template v-if="env.item == 'Key/Value'">
-                              <el-col :span="5">
-                                <el-form-item label="名称">
-                                  <el-input v-model="env.name" placeholder="请输入名称"></el-input>
-                                </el-form-item>
-                              </el-col>
-                              <el-col :span="3">
-                                <el-form-item label="值">
-                                  <el-input v-model="env.value" placeholder="value"></el-input>
-                                </el-form-item>
-                              </el-col>
-                              <el-col :span="3">
-                                <el-form-item style="padding-top:30px" >
-                                  <el-button @click="removeEnv(index,envIndex)" type="danger">删除</el-button>
-                                </el-form-item>
-                              </el-col>
-                            </template>
-                            
-                            <template v-if="env.item == 'SecretKey'">
-                              <el-col :span="5">
-                                <el-form-item label="变量名">
-                                  <el-input v-model="env.name" placeholder="例如：FOO"></el-input>
-                                </el-form-item>
-                              </el-col>
-                              <el-col :span="3">
-                                <el-form-item label="密文">
-                                  <el-select
-                                    class="search-select"
-                                    v-model="env.valueFrom.secretKeyRef.name"
-                                    placeholder="请选择密文"
-                                    clearable
-                                  >
-                                    <el-option v-for="envSecret in envSecrets"
-                                              :key="envSecret.value"
-                                              :label="envSecret.label"
-                                              :value="envSecret.value"/>
-                                  </el-select>
-                                </el-form-item>
-                              </el-col>
-                              <el-col :span="3">
-                                <el-form-item label="键">
-                                  <el-select
-                                    class="search-select"
-                                    v-model="env.valueFrom.secretKeyRef.key"
-                                    placeholder="请选择键名"
-                                    clearable
-                                  >
-                                    <el-option v-for="envSecretKey in envSecretKeys"
-                                              :key="envSecretKey.value"
-                                              :label="envSecretKey.label"
-                                              :value="envSecretKey.value"/>
-                                  </el-select>
-                                </el-form-item>
-                              </el-col>
-                              <el-col :span="3">
-                                <el-form-item style="padding-top:30px" >
+                            <el-col :span="3">
+                              <el-form-item label="键">
+                                <el-select
+                                        class="search-select"
+                                        v-model="env.valueFrom.secretKeyRef.key"
+                                        placeholder="请选择键名"
+                                        clearable
+                                >
+                                  <el-option v-for="envSecretKey in envSecretKeys"
+                                             :key="envSecretKey.value"
+                                             :label="envSecretKey.label"
+                                             :value="envSecretKey.value"/>
+                                </el-select>
+                              </el-form-item>
+                            </el-col>
+                            <el-col :span="3">
+                              <el-form-item style="padding-top:30px" >
                                 <el-button @click="removeEnv(index,envIndex)" type="danger">删除</el-button>
-                                </el-form-item>
-                              </el-col>
-                            </template>
+                              </el-form-item>
+                            </el-col>
+                          </template>
 
-                            <template v-if="env.item == 'Resource'">
-                              <el-col :span="5">
-                                <el-form-item label="变量名">
-                                  <el-input v-model="env.name" placeholder="例如：FOO"></el-input>
-                                </el-form-item>
-                              </el-col>
-                              <el-col :span="3">
-                                <el-form-item label="容器名称">
-                                  <el-input v-model="env.valueFrom.resourceFieldRef.containerName" placeholder="例如：my-container"></el-input>
-                                </el-form-item>
-                              </el-col>
-                              <el-col :span="3">
-                                <el-form-item label="键">
-                                  <el-select
-                                    class="search-select"
-                                    v-model="env.valueFrom.resourceFieldRef.resource"
-                                    placeholder="请选择键名"
-                                    clearable
-                                  >
-                                    <el-option v-for="envSecretKey in envSecretKeys"
-                                              :key="envSecretKey.value"
-                                              :label="envSecretKey.label"
-                                              :value="envSecretKey.value"/>
-                                  </el-select>
-                                </el-form-item>
-                              </el-col>
-                              <el-col :span="3">
-                                <el-form-item style="padding-top:30px" >
+                          <template v-if="env.item == 'Resource'">
+                            <el-col :span="5">
+                              <el-form-item label="变量名">
+                                <el-input v-model="env.name" placeholder="例如：FOO"></el-input>
+                              </el-form-item>
+                            </el-col>
+                            <el-col :span="3">
+                              <el-form-item label="容器名称">
+                                <el-input v-model="env.valueFrom.resourceFieldRef.containerName" placeholder="例如：my-container"></el-input>
+                              </el-form-item>
+                            </el-col>
+                            <el-col :span="3">
+                              <el-form-item label="键">
+                                <el-select
+                                        class="search-select"
+                                        v-model="env.valueFrom.resourceFieldRef.resource"
+                                        placeholder="请选择键名"
+                                        clearable
+                                >
+                                  <el-option v-for="envSecretKey in envSecretKeys"
+                                             :key="envSecretKey.value"
+                                             :label="envSecretKey.label"
+                                             :value="envSecretKey.value"/>
+                                </el-select>
+                              </el-form-item>
+                            </el-col>
+                            <el-col :span="3">
+                              <el-form-item style="padding-top:30px" >
                                 <el-button @click="removeEnv(index,envIndex)" type="danger">删除</el-button>
-                                </el-form-item>
-                              </el-col>
-                            </template>
+                              </el-form-item>
+                            </el-col>
+                          </template>
 
-                            <template v-if="env.item == 'ConfigMapKey'">
-                              <el-col :span="5">
-                                <el-form-item label="变量名">
-                                  <el-input v-model="env.name" placeholder="例如：FOO"></el-input>
-                                </el-form-item>
-                              </el-col>
-                              <el-col :span="3">
-                                <el-form-item label="ConfigMap">
-                                  <el-select
-                                    class="search-select"
-                                    v-model="env.valueFrom.configMapKeyRef.name"
-                                    placeholder="请选择ConfigMap"
-                                    clearable
-                                  >
-                                    <el-option v-for="envSecret in envSecrets"
-                                              :key="envSecret.value"
-                                              :label="envSecret.label"
-                                              :value="envSecret.value"/>
-                                  </el-select>
-                                </el-form-item>
-                              </el-col>
-                              <el-col :span="3">
-                                <el-form-item label="键">
-                                  <el-select
-                                    class="search-select"
-                                    v-model="env.valueFrom.configMapKeyRef.key"
-                                    placeholder="请选择键名"
-                                    clearable
-                                  >
-                                    <el-option v-for="envSecretKey in envSecretKeys"
-                                              :key="envSecretKey.value"
-                                              :label="envSecretKey.label"
-                                              :value="envSecretKey.value"/>
-                                  </el-select>
-                                </el-form-item>
-                              </el-col>
-                              <el-col :span="3">
-                                <el-form-item style="padding-top:30px" >
+                          <template v-if="env.item == 'ConfigMapKey'">
+                            <el-col :span="5">
+                              <el-form-item label="变量名">
+                                <el-input v-model="env.name" placeholder="例如：FOO"></el-input>
+                              </el-form-item>
+                            </el-col>
+                            <el-col :span="3">
+                              <el-form-item label="ConfigMap">
+                                <el-select
+                                        class="search-select"
+                                        v-model="env.valueFrom.configMapKeyRef.name"
+                                        placeholder="请选择ConfigMap"
+                                        clearable
+                                >
+                                  <el-option v-for="envSecret in envSecrets"
+                                             :key="envSecret.value"
+                                             :label="envSecret.label"
+                                             :value="envSecret.value"/>
+                                </el-select>
+                              </el-form-item>
+                            </el-col>
+                            <el-col :span="3">
+                              <el-form-item label="键">
+                                <el-select
+                                        class="search-select"
+                                        v-model="env.valueFrom.configMapKeyRef.key"
+                                        placeholder="请选择键名"
+                                        clearable
+                                >
+                                  <el-option v-for="envSecretKey in envSecretKeys"
+                                             :key="envSecretKey.value"
+                                             :label="envSecretKey.label"
+                                             :value="envSecretKey.value"/>
+                                </el-select>
+                              </el-form-item>
+                            </el-col>
+                            <el-col :span="3">
+                              <el-form-item style="padding-top:30px" >
                                 <el-button @click="removeEnv(index,envIndex)" type="danger">删除</el-button>
-                                </el-form-item>
-                              </el-col>
-                            </template>
+                              </el-form-item>
+                            </el-col>
+                          </template>
 
-                            <template v-if="env.item == 'PodField'">
-                              <el-col :span="5">
-                                <el-form-item label="变量名">
-                                  <el-input v-model="env.name" placeholder="例如：FOO"></el-input>
-                                </el-form-item>
-                              </el-col>
-                              <el-col :span="3">
-                                <el-form-item label="键">
-                                  <el-input v-model="env.valueFrom.fieldRef.fieldPath" placeholder="例如：metadata.labels[<KEY>]"></el-input>
-                                </el-form-item>
-                              </el-col>
-                              <el-col :span="3">
-                                <el-form-item style="padding-top:30px" >
+                          <template v-if="env.item == 'PodField'">
+                            <el-col :span="5">
+                              <el-form-item label="变量名">
+                                <el-input v-model="env.name" placeholder="例如：FOO"></el-input>
+                              </el-form-item>
+                            </el-col>
+                            <el-col :span="3">
+                              <el-form-item label="键">
+                                <el-input v-model="env.valueFrom.fieldRef.fieldPath" placeholder="例如：metadata.labels[<KEY>]"></el-input>
+                              </el-form-item>
+                            </el-col>
+                            <el-col :span="3">
+                              <el-form-item style="padding-top:30px" >
                                 <el-button @click="removeEnv(index,envIndex)" type="danger">删除</el-button>
-                                </el-form-item>
-                              </el-col>
-                            </template>
+                              </el-form-item>
+                            </el-col>
+                          </template>
                         </el-row>
                         <el-button @click="addEnv(container)" type="primary" plain>添加环境变量</el-button>
                         <H1>Service Account 名称</H1>
@@ -2469,15 +2469,15 @@ const changeDeploymentSelectTab = (item) =>{
                           <el-col :span="8">
                             <el-form-item label="Service Account 名称" >
                               <el-select
-                                class="search-select"
-                                v-model="initData.spec.template.spec.serviceAccountName"
-                                placeholder="请选择名称"
-                                clearable
+                                      class="search-select"
+                                      v-model="initData.spec.template.spec.serviceAccountName"
+                                      placeholder="请选择名称"
+                                      clearable
                               >
                                 <el-option v-for="serviceAccountName in serviceAccountNames"
-                                          :key="serviceAccountName.value"
-                                          :label="serviceAccountName.label"
-                                          :value="serviceAccountName.value"/>
+                                           :key="serviceAccountName.value"
+                                           :label="serviceAccountName.label"
+                                           :value="serviceAccountName.value"/>
                               </el-select>
                             </el-form-item>
                           </el-col>
@@ -2488,10 +2488,10 @@ const changeDeploymentSelectTab = (item) =>{
                             <el-form-item label="启动后动作"  >
                               <el-radio-group v-model="container.lifecycle.postStart.item">
                                 <el-radio-button
-                                  v-for="lifeCycle in lifeCycles"
-                                  :key="lifeCycle.value"
-                                  :label="lifeCycle.value"
-                                  @change="changeLifeCycle(container.lifecycle.postStart)"
+                                        v-for="lifeCycle in lifeCycles"
+                                        :key="lifeCycle.value"
+                                        :label="lifeCycle.value"
+                                        @change="changeLifeCycle(container.lifecycle.postStart)"
                                 >{{lifeCycle.label}}</el-radio-button>
                               </el-radio-group>
                             </el-form-item>
@@ -2518,9 +2518,9 @@ const changeDeploymentSelectTab = (item) =>{
                             <el-col :span="4">
                               <el-form-item label="Scheme"  >
                                 <el-select
-                                  class="search-select"
-                                  v-model="container.lifecycle.postStart.httpGet.scheme"
-                                  placeholder="请选择Scheme"
+                                        class="search-select"
+                                        v-model="container.lifecycle.postStart.httpGet.scheme"
+                                        placeholder="请选择Scheme"
                                 >
                                   <el-option label="HTTP"/>
                                   <el-option label="HTTPS"/>
@@ -2555,10 +2555,10 @@ const changeDeploymentSelectTab = (item) =>{
                             <el-form-item label="终止前动作"  >
                               <el-radio-group v-model="container.lifecycle.preStop.item">
                                 <el-radio-button
-                                  v-for="lifeCycle in lifeCycles"
-                                  :key="lifeCycle.value"
-                                  :label="lifeCycle.value"
-                                  @change="changeLifeCycle(container.lifecycle.preStop)"
+                                        v-for="lifeCycle in lifeCycles"
+                                        :key="lifeCycle.value"
+                                        :label="lifeCycle.value"
+                                        @change="changeLifeCycle(container.lifecycle.preStop)"
                                 >{{lifeCycle.label}}</el-radio-button>
                               </el-radio-group>
                             </el-form-item>
@@ -2585,9 +2585,9 @@ const changeDeploymentSelectTab = (item) =>{
                             <el-col :span="4">
                               <el-form-item label="Scheme"  >
                                 <el-select
-                                  class="search-select"
-                                  v-model="container.lifecycle.preStop.httpGet.scheme"
-                                  placeholder="请选择Scheme"
+                                        class="search-select"
+                                        v-model="container.lifecycle.preStop.httpGet.scheme"
+                                        placeholder="请选择Scheme"
                                 >
                                   <el-option label="HTTP"/>
                                   <el-option label="HTTPS"/>
@@ -2627,23 +2627,23 @@ const changeDeploymentSelectTab = (item) =>{
                             <el-form-item label="类型"  >
                               <el-radio-group v-model="container._checkHealthItem.readinessProbe">
                                 <el-radio-button
-                                  v-for="checkHealth in checkHealthTypes"
-                                  :key="checkHealth.value"
-                                  :label="checkHealth.value"
-                                  @change="changeReadinessProbe(container)"
+                                        v-for="checkHealth in checkHealthTypes"
+                                        :key="checkHealth.value"
+                                        :label="checkHealth.value"
+                                        @change="changeReadinessProbe(container)"
                                 >{{checkHealth.label}}</el-radio-button>
                               </el-radio-group>
                             </el-form-item>
                           </el-col>
                         </el-row>
-                        
+
                         <div v-if="container?._checkHealthItem.readinessProbe == 'HTTP' &&
                                 container?.readinessProbe?.httpGet != undefined">
                           <el-row :gutter="12" >
                             <el-col :span="5">
                               <el-form-item label="检查端口" >
-                                  <el-input type="number" v-model="container.readinessProbe.httpGet.port" placeholder="例如：" />
-                                  <template #append>秒</template>
+                                <el-input type="number" v-model="container.readinessProbe.httpGet.port" placeholder="例如：" />
+                                <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="5">
@@ -2690,8 +2690,8 @@ const changeDeploymentSelectTab = (item) =>{
                           <el-row :gutter="12" >
                             <el-col :span="5">
                               <el-form-item label="检查端口" >
-                                  <el-input type="number" v-model="container.readinessProbe.httpGet.port" placeholder="例如：" />
-                                  <template #append>秒</template>
+                                <el-input type="number" v-model="container.readinessProbe.httpGet.port" placeholder="例如：" />
+                                <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="5">
@@ -2738,7 +2738,7 @@ const changeDeploymentSelectTab = (item) =>{
                           <el-row :gutter="12" >
                             <el-col :span="5">
                               <el-form-item label="运行命令" >
-                                  <el-input v-model="container.readinessProbe.exec.command" placeholder="例如：cat /tmp/health" />
+                                <el-input v-model="container.readinessProbe.exec.command" placeholder="例如：cat /tmp/health" />
                               </el-form-item>
                             </el-col>
                           </el-row>
@@ -2779,8 +2779,8 @@ const changeDeploymentSelectTab = (item) =>{
                           <el-row :gutter="12" >
                             <el-col :span="5">
                               <el-form-item label="检查端口" >
-                                  <el-input type="number" v-model="container.readinessProbe.tcpSocket.port" placeholder="例如：80" />
-                                  <template #append>秒</template>
+                                <el-input type="number" v-model="container.readinessProbe.tcpSocket.port" placeholder="例如：80" />
+                                <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                           </el-row>
@@ -2821,10 +2821,10 @@ const changeDeploymentSelectTab = (item) =>{
                             <el-form-item label="类型"  >
                               <el-radio-group v-model="container._checkHealthItem.livenessProbe">
                                 <el-radio-button
-                                  v-for="checkHealth in checkHealthTypes"
-                                  :key="checkHealth.value"
-                                  :label="checkHealth.value"
-                                  @change="changeLivenessProbe(container)"
+                                        v-for="checkHealth in checkHealthTypes"
+                                        :key="checkHealth.value"
+                                        :label="checkHealth.value"
+                                        @change="changeLivenessProbe(container)"
                                 >{{checkHealth.label}}</el-radio-button>
                               </el-radio-group>
                             </el-form-item>
@@ -2835,8 +2835,8 @@ const changeDeploymentSelectTab = (item) =>{
                           <el-row :gutter="12" >
                             <el-col :span="5">
                               <el-form-item label="检查端口" >
-                                  <el-input type="number" v-model="container.livenessProbe.httpGet.port" placeholder="例如：" />
-                                  <template #append>秒</template>
+                                <el-input type="number" v-model="container.livenessProbe.httpGet.port" placeholder="例如：" />
+                                <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="5">
@@ -2883,8 +2883,8 @@ const changeDeploymentSelectTab = (item) =>{
                           <el-row :gutter="12" >
                             <el-col :span="5">
                               <el-form-item label="检查端口" >
-                                  <el-input type="number" v-model="container.livenessProbe.httpGet.port" placeholder="例如：" />
-                                  <template #append>秒</template>
+                                <el-input type="number" v-model="container.livenessProbe.httpGet.port" placeholder="例如：" />
+                                <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="5">
@@ -2931,7 +2931,7 @@ const changeDeploymentSelectTab = (item) =>{
                           <el-row :gutter="12" >
                             <el-col :span="5">
                               <el-form-item label="运行命令" >
-                                  <el-input v-model="container.livenessProbe.exec.command" placeholder="例如：cat /tmp/health" />
+                                <el-input v-model="container.livenessProbe.exec.command" placeholder="例如：cat /tmp/health" />
                               </el-form-item>
                             </el-col>
                           </el-row>
@@ -2972,8 +2972,8 @@ const changeDeploymentSelectTab = (item) =>{
                           <el-row :gutter="12" >
                             <el-col :span="5">
                               <el-form-item label="检查端口" >
-                                  <el-input type="number" v-model="container.livenessProbe.tcpSocket.port" placeholder="例如：80" />
-                                  <template #append>秒</template>
+                                <el-input type="number" v-model="container.livenessProbe.tcpSocket.port" placeholder="例如：80" />
+                                <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                           </el-row>
@@ -3015,10 +3015,10 @@ const changeDeploymentSelectTab = (item) =>{
                             <el-form-item label="类型"  >
                               <el-radio-group v-model="container._checkHealthItem.startupProbe">
                                 <el-radio-button
-                                  v-for="checkHealth in checkHealthTypes"
-                                  :key="checkHealth.value"
-                                  :label="checkHealth.value"
-                                  @change="changeStartupProbe(container)"
+                                        v-for="checkHealth in checkHealthTypes"
+                                        :key="checkHealth.value"
+                                        :label="checkHealth.value"
+                                        @change="changeStartupProbe(container)"
                                 >{{checkHealth.label}}</el-radio-button>
                               </el-radio-group>
                             </el-form-item>
@@ -3029,8 +3029,8 @@ const changeDeploymentSelectTab = (item) =>{
                           <el-row :gutter="12" >
                             <el-col :span="5">
                               <el-form-item label="检查端口" >
-                                  <el-input type="number" v-model="container.startupProbe.httpGet.port" placeholder="例如：" />
-                                  <template #append>秒</template>
+                                <el-input type="number" v-model="container.startupProbe.httpGet.port" placeholder="例如：" />
+                                <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="5">
@@ -3077,8 +3077,8 @@ const changeDeploymentSelectTab = (item) =>{
                           <el-row :gutter="12" >
                             <el-col :span="5">
                               <el-form-item label="检查端口" >
-                                  <el-input type="number" v-model="container.startupProbe.httpGet.port" placeholder="例如：" />
-                                  <template #append>秒</template>
+                                <el-input type="number" v-model="container.startupProbe.httpGet.port" placeholder="例如：" />
+                                <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="5">
@@ -3125,7 +3125,7 @@ const changeDeploymentSelectTab = (item) =>{
                           <el-row :gutter="12" >
                             <el-col :span="5">
                               <el-form-item label="运行命令" >
-                                  <el-input v-model="container.startupProbe.exec.command" placeholder="例如：cat /tmp/health" />
+                                <el-input v-model="container.startupProbe.exec.command" placeholder="例如：cat /tmp/health" />
                               </el-form-item>
                             </el-col>
                           </el-row>
@@ -3166,8 +3166,8 @@ const changeDeploymentSelectTab = (item) =>{
                           <el-row :gutter="12" >
                             <el-col :span="5">
                               <el-form-item label="检查端口" >
-                                  <el-input type="number" v-model="container.startupProbe.tcpSocket.port" placeholder="例如：80" />
-                                  <template #append>秒</template>
+                                <el-input type="number" v-model="container.startupProbe.tcpSocket.port" placeholder="例如：80" />
+                                <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                           </el-row>
@@ -3209,44 +3209,44 @@ const changeDeploymentSelectTab = (item) =>{
                         <el-row :gutter="24">
                           <el-col :span="8">
                             <el-form-item label="CPU预留" >
-                                <el-input v-model="container.resources.requests.cpu" placeholder="例如：1.5" type="number">
-                                  <template #append>CPU</template>
-                                </el-input>
+                              <el-input v-model="container.resources.requests.cpu" placeholder="例如：1.5" type="number">
+                                <template #append>CPU</template>
+                              </el-input>
                             </el-form-item>
                           </el-col>
                           <el-col :span="8">
                             <el-form-item label="内存预留" >
-                                <el-input v-model="container.resources.requests.memory" placeholder="例如：128" type="number">
-                                  <template #append>MiB</template>
-                                </el-input>
+                              <el-input v-model="container.resources.requests.memory" placeholder="例如：128" type="number">
+                                <template #append>MiB</template>
+                              </el-input>
                             </el-form-item>
                           </el-col>
                           <el-col :span="8">
                             <el-form-item label="NVIDIA GPU预留" >
-                                <el-input v-model="container.resources.requests['nvidia.com/gpu']" placeholder="例如：1" type="number">
-                                  <template #append>GPU</template>
-                                </el-input>
+                              <el-input v-model="container.resources.requests['nvidia.com/gpu']" placeholder="例如：1" type="number">
+                                <template #append>GPU</template>
+                              </el-input>
                             </el-form-item>
                           </el-col>
                           <el-col :span="8">
                             <el-form-item label="CPU限制" >
-                                <el-input v-model="container.resources.limits.cpu" placeholder="例如：1.5" type="number">
-                                  <template #append>CPU</template>
-                                </el-input>
+                              <el-input v-model="container.resources.limits.cpu" placeholder="例如：1.5" type="number">
+                                <template #append>CPU</template>
+                              </el-input>
                             </el-form-item>
                           </el-col>
                           <el-col :span="8">
                             <el-form-item label="内存限制" >
-                                <el-input v-model="container.resources.limits.memory" placeholder="例如：128" type="number">
-                                  <template #append>MiB</template>
-                                </el-input>
+                              <el-input v-model="container.resources.limits.memory" placeholder="例如：128" type="number">
+                                <template #append>MiB</template>
+                              </el-input>
                             </el-form-item>
                           </el-col>
                           <el-col :span="8">
                             <el-form-item label="NVIDIA GPU限制" >
-                                <el-input v-model="container.resources.limits['nvidia.com/gpu']" placeholder="例如：1" type="number">
-                                  <template #append>GPU</template>
-                                </el-input>
+                              <el-input v-model="container.resources.limits['nvidia.com/gpu']" placeholder="例如：1" type="number">
+                                <template #append>GPU</template>
+                              </el-input>
                             </el-form-item>
                           </el-col>
                         </el-row>
@@ -3295,39 +3295,39 @@ const changeDeploymentSelectTab = (item) =>{
                           <el-col :span="12">
                             <el-form-item label="添加Capabilities" >
                               <el-select
-                                  class="search-select"
-                                  v-model="container.securityContext.capabilities.add"
-                                  placeholder="请选择"
-                                  multiple
-                                  clearable
-                                >
+                                      class="search-select"
+                                      v-model="container.securityContext.capabilities.add"
+                                      placeholder="请选择"
+                                      multiple
+                                      clearable
+                              >
                                 <el-option v-for="capabilitie in capabilities"
-                                            :key="capabilitie.value"
-                                            :label="capabilitie.label"
-                                            :value="capabilitie.value"/>
+                                           :key="capabilitie.value"
+                                           :label="capabilitie.label"
+                                           :value="capabilitie.value"/>
                               </el-select>
                             </el-form-item>
                           </el-col>
                           <el-col :span="12">
                             <el-form-item label="移除Capabilities" >
                               <el-select
-                                  class="search-select"
-                                  v-model="container.securityContext.capabilities.drop"
-                                  placeholder="请选择"
-                                  multiple
-                                  clearable
-                                >
+                                      class="search-select"
+                                      v-model="container.securityContext.capabilities.drop"
+                                      placeholder="请选择"
+                                      multiple
+                                      clearable
+                              >
                                 <el-option v-for="capabilitie in capabilities"
-                                            :key="capabilitie.value"
-                                            :label="capabilitie.label"
-                                            :value="capabilitie.value"/>
+                                           :key="capabilitie.value"
+                                           :label="capabilitie.label"
+                                           :value="capabilitie.value"/>
                               </el-select>
                             </el-form-item>
                           </el-col>
                         </el-row>
                       </div>
                       <div v-show="initData.option.containerIndex === 'containerVolumes'  ? true : false ">
-                      
+
                       </div>
                     </div>
                   </div>

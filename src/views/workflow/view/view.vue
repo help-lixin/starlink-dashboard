@@ -35,6 +35,8 @@ import { encode } from 'js-base64'
 import { useRoute } from 'vue-router'
 
 import { getProcessInstance, getProcessInstanceLogs } from '@/api/workflow/workflowInstance'
+import { getActiveNode } from "@/utils/pipeline-event-handler"
+
 // 当前活跃的节点
 const activeElementId = ref(undefined)
 
@@ -45,6 +47,7 @@ const canvasRef = ref()
 const processInstanceId = ref()
 const workFlowInstanceId = ref()
 const timerPullInstanceLog = ref()
+const timerActiveNode = ref()
 const workFlowInstanceLogs = ref({})
 const showPanelPosition = computed(() => {
   return workFlowInstanceLogs.value ? 'bottom' : 'right'
@@ -98,32 +101,39 @@ function init() {
 	setDiagram(workflowXml)
 
 	// 流程定义内容
-	processInstanceId.value = route.params?.processInstnaceId;
+	processInstanceId.value = route.params?.processInstnaceId
 	if(processInstanceId.value){
 		getProcessInstance(processInstanceId.value)
 		  .then((res)=>{
-			if(res?.code == 200){
-				// 工作流实例id
-				workFlowInstanceId.value = res?.data?.processInstanceId
-				const processStatus = res?.data?.processStatus
-
-				// 只有当实例状态为:0时,才会开启定时拉取日志
-				if(processStatus == 0){
-					// 定时任务获取状态
-					timerPullInstanceLog.value = setInterval(timerPullInstanceLogFunction,2000);
-				}else{
-					// 手动拉取一次日志回来
-					timerPullInstanceLogFunction()
-				}
-
-				const processDefinitionBody = res?.data?.processDefinitionBody
-				// 把json转换成xml进行展示
-				if (processInstanceId.value) {
-					const processDefinitionJson = JSON.parse(processDefinitionBody)
-					const processDefinitionXml = jsonToXml(processDefinitionJson)
-					setDiagram(processDefinitionXml)
-				}// end if
-			}
+          if(res?.code == 200){
+            // 工作流实例id
+            workFlowInstanceId.value = res?.data?.processInstanceId
+            const processStatus = res?.data?.processStatus
+            
+            const processDefinitionBody = res?.data?.processDefinitionBody
+            // 把json转换成xml进行展示
+            if (processInstanceId.value) {
+              const processDefinitionJson = JSON.parse(processDefinitionBody)
+              const processDefinitionXml = jsonToXml(processDefinitionJson)
+              setDiagram(processDefinitionXml)
+            }// end if
+            
+            
+            // 只有当实例状态为:0时,才会开启定时拉取日志
+            if(processStatus == 0){              
+              // 定时任务获取状态
+              timerPullInstanceLog.value = setInterval(timerPullInstanceLogFunction, 1000 * 2);
+              
+              const storeActiveNodeId = getActiveNode(route.params?.processInstnaceId)
+              if(null != storeActiveNodeId){
+                activeElementId.value = storeActiveNodeId
+              } // end if
+              timerActiveNode.value = setInterval(updateHighlightFunction, 1000 * 2)
+            }else{
+              // 手动拉取一次日志回来
+              timerPullInstanceLogFunction()
+            }
+          }
 		  })
 	}
 }
@@ -144,15 +154,13 @@ function updateHighlightFunction() {
     if (activeElementId.value) {
       const elementRegistry = bpmnModeler.value.get('elementRegistry')
       const elementToSelect = elementRegistry.get(activeElementId.value)
-      // 处理一下,同一时间只有一个节点是高亮.
       const canvas = bpmnModeler.value.get('canvas')
-      const rootElement = canvas.getRootElement()
-      const bpmnElements = rootElement.children
+
       // 添加高亮样式
       if (elementToSelect?.id) {
         // 先取消所有的高亮
         unAllHighlight()
-        
+
         canvas.addMarker(elementToSelect.id, 'highlight')
       }
     }
@@ -293,6 +301,10 @@ onMounted(() => {
       const businessId = bodyObject?.businessId
       const nodeId = bodyObject?.nodeId
 
+      console.log(businessId)
+      console.log(nodeId)
+      console.log(processInstanceId)
+
       if (nodeId && businessId && processInstanceId.value == businessId) {
         activeElementId.value = nodeId
         // 高亮展示
@@ -313,6 +325,9 @@ onMounted(() => {
         
         // 2. 取消所有的高亮
         unAllHighlight()
+
+        // 3. 清除定时高度
+        clearInterval(timerActiveNode.value)
 			}
 		}
 	});
@@ -337,7 +352,9 @@ function unAllHighlight(){
 onUnmounted(() => {
   // pipeline-active-node
   emitter.off('pipeline-active-node')
+  emitter.off('pipeline-complete')
   clearInterval(timerPullInstanceLog.value)
+  clearInterval(timerActiveNode.value)
 })
 </script>
 <style lang="scss">

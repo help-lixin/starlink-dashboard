@@ -11,6 +11,7 @@ import { usePermsStore } from "@/stores/perms";
 import { useActionMetasStore } from "@/stores/plugin";
 
 import StompClient from "@/utils/StompClient.ts";
+import { registerPipelineEventHandler } from "@/utils/pipeline-event-handler"
 
 
 const tokenStore = useTokenStore();
@@ -84,6 +85,9 @@ async function onSubmit() {
                 // 跳转到首页
                 router.push((route.query.redirect as string) || "/");
                 
+                // 注册流水线事件监听
+                registerPipelineEventHandler()
+
                 // 建立连接
                 const stompClient = StompClient.getInstance()
                 await stompClient.connect()
