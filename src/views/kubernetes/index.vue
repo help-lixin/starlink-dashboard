@@ -42,65 +42,34 @@ const addPort = (index) =>{
   initData.value.spec.template.spec.containers[index].ports.push(port)
 }
 
-// 标签 & 注解统一设置对象
-const labelAnnotation=reactive({
-  deployment:{
-    labels:[
-      {
-        key:"",
-        value:""
-      }
-    ],
-    annotations:[
-      {
-        key:"",
-        value:""
-      }
-    ]
-  },
-  pod:{
-    labels:[
-      {
-        key:"",
-        value:""
-      }
-    ],
-    annotations:[
-      {
-        key:"",
-        value:""
-      }
-    ]
-  }
-})
 // deployment标签增删
 const removeDeployLabel = (index) =>{
-  labelAnnotation.deployment.labels.splice(index, 1);
+  initData.value.option.labelAnnotation.deployment.labels.splice(index, 1);
 }
 const addDeployLabel = () =>{
-  labelAnnotation.deployment.labels.push({key:"", value:""})
+  initData.value.option.labelAnnotation.deployment.labels.push({key:"", value:""})
 }
 // deployment注解增删
 const removeDeployAnnotation = (labelIndex) =>{
-  labelAnnotation.deployment.annotations.splice(labelIndex, 1);
+  initData.value.option.labelAnnotation.deployment.annotations.splice(labelIndex, 1);
 }
 const addDeployAnnotation = () =>{
-  labelAnnotation.deployment.annotations.push({key:"", value:""})
+  initData.value.option.labelAnnotation.deployment.annotations.push({key:"", value:""})
 }
 
 // pod标签增删
 const removePodLabel = (index) =>{
-  labelAnnotation.pod.labels.splice(index, 1);
+  initData.value.option.labelAnnotation.pod.labels.splice(index, 1);
 }
 const addPodLabel = () =>{
-  labelAnnotation.pod.labels.push({key:"", value:""})
+  initData.value.option.labelAnnotation.pod.labels.push({key:"", value:""})
 }
 // pod注解增删
 const removePodAnnotation = (labelIndex) =>{
-  labelAnnotation.pod.annotations.splice(labelIndex, 1);
+  initData.value.option.labelAnnotation.pod.annotations.splice(labelIndex, 1);
 }
 const addPodAnnotation = () =>{
-  labelAnnotation.pod.annotations.push({key:"", value:""})
+  initData.value.option.labelAnnotation.pod.annotations.push({key:"", value:""})
 }
 
 
@@ -124,9 +93,9 @@ const addSearch = () =>{
     Object.assign(initData.value.spec.template.spec.dnsConfig,{"dnsConfig":""})
   }
   if(initData.value.spec.template.spec.dnsConfig.searches == undefined){
-    Object.assign(initData.value.spec.template.spec.dnsConfig,{"searches":[]})
+    Object.assign(initData.value.spec.template.spec.dnsConfig,{"searches":[{value:""}]})
   }
-  initData.value.spec.template.spec.dnsConfig.searches.push("")
+  initData.value.spec.template.spec.dnsConfig.searches.push({value:""})
 }
 const removeSearch = (searchIndex) =>{
   initData.value.spec.template.spec.dnsConfig.searches.splice(searchIndex, 1);
@@ -138,9 +107,9 @@ const addNameServer = () =>{
     Object.assign(initData.value.spec.template.spec.dnsConfig,{"dnsConfig":""})
   }
   if(initData.value.spec.template.spec?.dnsConfig?.nameservers == undefined){
-    Object.assign(initData.value.spec.template.spec,{"nameservers":[]})
+    Object.assign(initData.value.spec.template.spec,{"nameservers":[{value:""}]})
   }
-  initData.value.spec.template.spec.dnsConfig.nameservers.push("")
+  initData.value.spec.template.spec.dnsConfig.nameservers.push({value:""})
 }
 const removeNameServer = (searchIndex) =>{
   initData.value.spec.template.spec.dnsConfig.nameservers.splice(searchIndex, 1);
@@ -170,12 +139,10 @@ const addEnv = (container) =>{
   container.env.push(env)
 }
 
-// pod调度(*)
-const freePod=ref([])
 const namespaces = [{label:"default",value:"default"},{label:"my-project",value:"my-project"}]
 // 添加pod调度
 const addPod = ()=>{
-  freePod.value.push(
+  initData.value.option.freePod.push(
     {
       "podAffinity":true,
       "namespaces":[],
@@ -197,19 +164,19 @@ const addPod = ()=>{
 }
 // 删除节点调度
 const removePod = (index)=>{
-  freePod.value.splice(index, 1);
+  initData.value.option.freePod.splice(index, 1);
 }
 // 添加规则
 const addPodRule = (pod)=>{
-    pod.labelSelector.matchExpressions.push(
-        {
-            "key": "",
-            "operator": "In",
-            "values": [
-              ""
-            ]
-        }
-    );
+  pod.labelSelector.matchExpressions.push(
+      {
+          "key": "",
+          "operator": "In",
+          "values": [
+            ""
+          ]
+      }
+  );
 }
 // 删除规则
 const removePodRule = (pod,index)=>{
@@ -218,14 +185,12 @@ const removePodRule = (pod,index)=>{
 
 
 // 节点调度
-const nodeAffinity=ref("none")
 const nodeSelector=[{label:"默认规则",value:"none"},{label:"集中调度",value:"nodeName"},{label:"自定义规则",value:"affinity"}]
 const nodeData=[{label:"node-default",value:"node-default"},{label:"my-project",value:"my-project"},{label:"slave-node",value:"slave-node"}]
 // 自定义规则节点对象（*）
-const freeNode=ref([])
 // 添加节点调度
 const addNode = ()=>{
-  freeNode.value.push(
+  initData.value.option.freeNode.push(
     {
       "nodeLevel": "0",
       "weight": 1,
@@ -245,7 +210,7 @@ const addNode = ()=>{
 }
 // 删除节点调度
 const removeNode = (index)=>{
-  freeNode.value.splice(index, 1);
+  initData.value.option.freeNode.splice(index, 1);
 }
 // 添加规则
 const addRule = (node)=>{
@@ -265,13 +230,13 @@ const removeRule = (node,index)=>{
 }
 // 修改节点亲和度方式
 const nodeChange = (selectItem)=>{
-  nodeAffinity.value = selectItem
+  initData.value.option.nodeAffinity = selectItem
   delete initData.value.spec.template.spec?.nodeName
 
   if(selectItem == "nodeName"){
     Object.assign(initData.value.spec.template.spec,{"nodeName":""})
   }else if(selectItem == "affinity"){
-    if(freeNode.value.length == 0){
+    if(initData.value.option.freeNode.length == 0){
       addNode()
     }
   }
@@ -318,15 +283,16 @@ const lifeCycles = [
   {label:"HTTP",value:"httpGet"},
   {label:"TCP",value:"tcpScoket"}
 ]
-const services = ref([{label:"不创建服务",value:""},{label:"Cluster IP",value:"Cluster IP"}])
-const serviceAccountNames = ref([{label:"default",value:"default"},{label:"Ken",value:"Ken"}])
-const checkHealthTypes = ref([
+const services = [{label:"不创建服务",value:""},{label:"Cluster IP",value:"ClusterIP"},{label:"Node Port",value:"NodePort"}]
+const serviceAccountNames = [{label:"default",value:"default"},{label:"Ken",value:"Ken"}]
+const checkHealthTypes = [
   {label:"无",value:""},
   {label:"HTTP请求返回成功的状态",value:"HTTP"},
   {label:"HTTPS请求返回成功的状态",value:"HTTPS"},
+  {label:"命令",value:"exec"},
   {label:"成功启动TCP连接",value:"tcpSocket"}
-])
-const capabilities = ref([
+]
+const capabilities = [
   {label:"ALL",value:"ALL"},
   {label:"AUDIT_CONTROL",value:"AUDIT_CONTROL"},
   {label:"AUDIT_WRITE",value:"AUDIT_WRITE"},
@@ -344,16 +310,14 @@ const capabilities = ref([
   {label:"MAC_ADMIN",value:"MAC_ADMIN"},
   {label:"MAC_OVERRIDE",value:"MAC_OVERRIDE"},
   {label:"MKNOD",value:"MKNOD"},
-])
-const envTypes = ref([
+]
+const envTypes = [
   {label:"Key/Value Pair",value:"Key/Value"},
   {label:"Resource",value:"Resource"},
   {label:"ConfigMap Key",value:"ConfigMapKey"},
   {label:"Secret Key",value:"SecretKey"},
   {label:"Pod Field",value:"PodField"}
-  // {label:"Secret",value:"Secret"},
-  // {label:"ConfigMap",value:"ConfigMap"},
-])
+]
 
 const envSelectHandle = (env) =>{
   const envObjes= [{
@@ -447,6 +411,21 @@ const changeReadinessProbe = (container) =>{
     return
   }
 
+  if(container._checkHealthItem.readinessProbe == "exec" ){
+    const exec = {
+                "failureThreshold": 3,
+                "successThreshold": 1,
+                "initialDelaySeconds": 0,
+                "timeoutSeconds": 1,
+                "periodSeconds": 10,
+                "exec":{
+                  "command": ""
+                }
+              }
+    Object.assign(container,{"readinessProbe":exec})
+    return
+  }
+
 
   if(container._checkHealthItem.readinessProbe == "tcpSocket" ){
     const tcpSocket = {
@@ -501,6 +480,20 @@ const changeLivenessProbe = (container) =>{
     return
   }
 
+  if(container._checkHealthItem.livenessProbe == "exec" ){
+    const exec = {
+                "failureThreshold": 3,
+                "successThreshold": 1,
+                "initialDelaySeconds": 0,
+                "timeoutSeconds": 1,
+                "periodSeconds": 10,
+                "exec":{
+                  "command": ""
+                }
+              }
+    Object.assign(container,{"livenessProbe":exec})
+    return
+  }
 
   if(container._checkHealthItem.livenessProbe == "tcpSocket" ){
     const tcpSocket = {
@@ -555,6 +548,20 @@ const changeStartupProbe = (container) =>{
     return 
   }
 
+  if(container._checkHealthItem.startupProbe == "exec" ){
+    const exec = {
+                "failureThreshold": 3,
+                "successThreshold": 1,
+                "initialDelaySeconds": 0,
+                "timeoutSeconds": 1,
+                "periodSeconds": 10,
+                "exec":{
+                  "command": ""
+                }
+              }
+    Object.assign(container,{"startupProbe":exec})
+    return
+  }
 
   if(container._checkHealthItem.startupProbe == "tcpSocket" ){
     const tcpSocket = {
@@ -598,6 +605,7 @@ const initData = ref({
         "securityContext":{
           "fsGroup":undefined
         },
+        "initContainers":[],
         "containers": [
           {
             "image": undefined,
@@ -676,15 +684,61 @@ const initData = ref({
       },
       "type": "RollingUpdate"
     }
+  },
+  //外部操作参数
+  "option":{
+    // 标签 & 注解统一设置对象
+    "labelAnnotation":{
+      "deployment":{
+        "labels":[
+          {
+            "key":"",
+            "value":""
+          }
+        ],
+        "annotations":[
+          {
+            "key":"",
+            "value":""
+          }
+        ]
+      },
+      "pod":{
+        "labels":[
+          {
+            "key":"",
+            "value":""
+          }
+        ],
+        "annotations":[
+          {
+            "key":"",
+            "value":""
+          }
+        ]
+      }
+    },
+    // 记录当前容器点击的左侧标签位置
+    "containerIndex":"",
+    // 记录当前pod点击的左侧标签位置
+    "selectPod":"",
+    // 记录当前depolyment点击的左侧标签位置
+    "selectDepolyment":"",
+    // pod亲和度存储对象
+    "freePod":[],
+    // node亲和度存储对象
+    "freeNode":[],
+    // 节点调度方式
+    "nodeAffinity":"none",
+    // 是否显示yaml弹窗
+    "isShowYamlEditor":false
+
   }
 })
 
 import { Select } from '@element-plus/icons-vue'
 import type { FormRules } from 'element-plus'
 import yaml from 'js-yaml'
-const selectTabName = ref('')
-
-
 
 const handleTabsEdit = (
   targetName: string | number,
@@ -760,24 +814,16 @@ const handleTabsEdit = (
     }
   }
 }
-const isShowYamlEditor = ref(false)
 
+const isShowYamlEditor = ref(false)
 const editYaml = () => {
   isShowYamlEditor.value = true
   // 处理标签 & 注解
   labelAnnotationHandle()
   initData.value.spec.template.metadata.namespace = initData.value.metadata.namespace
 
-  // const test = {obj:{
-  //   arr:[{aa:"aa"}]
-  // }}
-  console.log("=================")
-  console.log(_.cloneDeep(initData.value) )
-  console.log("=================")
-  // TODO lixin  节点亲和度 层级：initData.value.spec.template.spec.affinity 后面取决于选的是什么类型的亲和度
-  // 操作页面中点击pod的tab页，点击pod调度，添加pod亲和度
   copyData.value = _.cloneDeep(initData.value) 
-  console.log(copyData.value)
+  delete copyData.value.option
   
   // 容器处理
   containerHandle();
@@ -785,10 +831,9 @@ const editYaml = () => {
   netSetting();
   // 镜像拉取密文
   imageSecret();
-  
   //亲和度处理
   affinityHandle()
-  
+
 }
 
 // 镜像拉取密文
@@ -808,23 +853,38 @@ const imageSecret = ()=>{
 const netSetting = ()=>{
   const specConfig = copyData.value.spec.template.spec
 
+  console.log(specConfig)
   // 域名服务器、解析器、搜索域为空时删除dnsConfig
   if(specConfig.dnsConfig.nameservers.length == 0 && specConfig.dnsConfig.options.length == 0 && specConfig.dnsConfig.searches.length == 0 ){
       delete specConfig.dnsConfig
   }else{
     if(specConfig.dnsConfig.nameservers.length == 0){
       delete specConfig.dnsConfig.nameservers
+    }else{
+      const nameservers = _.cloneDeep(specConfig.dnsConfig.nameservers)
+      specConfig.dnsConfig.nameservers.length = 0
+      nameservers.forEach(function(nameserver){
+        specConfig.dnsConfig.nameservers.push(nameserver.value)
+      })
     }
+
     if(specConfig.dnsConfig.options.length == 0){
       delete specConfig.dnsConfig.options
     }
+
     if(specConfig.dnsConfig.searches.length == 0){
       delete specConfig.dnsConfig.searches
+    }else{
+      const searches = _.cloneDeep(specConfig.dnsConfig.searches)
+      specConfig.dnsConfig.searches.length = 0
+      searches.forEach(function(searche){
+        specConfig.dnsConfig.searches.push(searche.value)
+      })
     }
   }
 
   // 主机别名
-  if(specConfig.hostAliases.hostnames == undefined || specConfig.hostAliases.hostnames.length == 0){
+  if(specConfig.hostAliases == undefined || specConfig.hostAliases.length == 0){
     delete specConfig.hostAliases
   }
 
@@ -832,11 +892,8 @@ const netSetting = ()=>{
 
 // 容器处理
 const containerHandle = ()=>{
-  copyData.value.spec.template.spec.containers.forEach(function(container){
-    // 通用：标准容器&初始化容器选择
-    if(container._init == true){
-      copyData.value.spec.template.spec.initContainers = container
-    }
+  for(const index in copyData.value.spec.template.spec.containers){
+    const container = copyData.value.spec.template.spec.containers[index]
     // 容器命令：标准输入选项
     stdinInit(container)
     resourceHandle(container)
@@ -885,19 +942,28 @@ const containerHandle = ()=>{
         delete container.securityContext
     }
 
-    delete container._checkHealthItem
-    delete container._init
-  })
+    // 通用：标准容器&初始化容器选择
+    if(container._init == true){
+      copyData.value.spec.template.spec.initContainers.push(_.cloneDeep(container))
+      copyData.value.spec.template.spec.containers[index].splice(index,1)
+      delete container._checkHealthItem
+      delete container._init
+    }else{
+      delete container._checkHealthItem
+      delete container._init
+    }
+  }
 }
 
 const affinityHandle = ()=>{
-  if(freeNode.value.length > 0){
+  delete copyData.value.spec.template.spec?.affinity
+  if(initData.value.option.freeNode.length > 0){
     Object.assign(copyData.value.spec.template.spec,{
       "affinity": {
         "nodeAffinity": {"preferredDuringSchedulingIgnoredDuringExecution":[],"requiredDuringSchedulingIgnoredDuringExecution":[]}
       }
     })
-    freeNode.value.forEach(function(node){
+    initData.value.option.freeNode.forEach(function(node){
       // 首选
       if(node.nodeLevel == "0"){
         copyData.value.spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution.push({
@@ -913,13 +979,12 @@ const affinityHandle = ()=>{
       }
     })
   }
-
-  if(freePod.value.length > 0){
+  if(initData.value.option.freePod.length > 0){
     if(copyData.value.spec.template.spec?.affinity == undefined){
         Object.assign(copyData.value.spec.template.spec,{  "affinity": {}  })
     }
 
-    freePod.value.forEach(function(pod){
+    initData.value.option.freePod.forEach(function(pod){
       if(pod.podAffinity){
 
         if(copyData.value.spec.template.spec?.affinity?.podAffinity == undefined){
@@ -987,10 +1052,10 @@ const affinityHandle = ()=>{
 
 // 处理标签 & 注解
 const labelAnnotationHandle = ()=>{
-  labelAnnotation2Json(labelAnnotation.deployment.labels , initData.value.metadata.labels)
-  labelAnnotation2Json(labelAnnotation.pod.labels , initData.value.spec.template.metadata.labels)
-  labelAnnotation2Json(labelAnnotation.deployment.annotations , initData.value.metadata.annotations)
-  labelAnnotation2Json(labelAnnotation.pod.annotations , initData.value.spec.template.metadata.annotations)
+  labelAnnotation2Json(initData.value.option.labelAnnotation.deployment.labels , initData.value.metadata.labels)
+  labelAnnotation2Json(initData.value.option.labelAnnotation.pod.labels , initData.value.spec.template.metadata.labels)
+  labelAnnotation2Json(initData.value.option.labelAnnotation.deployment.annotations , initData.value.metadata.annotations)
+  labelAnnotation2Json(initData.value.option.labelAnnotation.pod.annotations , initData.value.spec.template.metadata.annotations)
 
   if(initData.value.spec.template.metadata.labels.length == 0){
     Object.assign(initData.value.spec.template.metadata.labels,initData.value.metadata.labels)
@@ -1026,6 +1091,9 @@ const stdinInit = (container)=>{
 }
 // 标签 & 注解
 const labelAnnotation2Json = (formValue,yamlValue)=>{
+  if(formValue == undefined || yamlValue == undefined){
+    return
+  }
   const mapObject=new Map()
   for(const index in formValue){
     if((formValue[index].key != undefined && formValue[index].key != '') 
@@ -1043,7 +1111,9 @@ const labelAnnotation2Json = (formValue,yamlValue)=>{
 }
 
 const setValue = (data) => {
-  initData.value = data
+  const optionValues = _.cloneDeep(initData.value.option)
+  Object.assign(data,{option:optionValues})
+  initData.value = _.cloneDeep(data)
   copyData.value = {}
   
   // 设置标签 & 注解
@@ -1051,12 +1121,27 @@ const setValue = (data) => {
   if(initData.value.spec.template.spec?.imagePullSecrets == undefined || initData.value.spec.template.spec?.imagePullSecrets.length == 0){
     Object.assign(initData.value.spec.template.spec,{"imagePullSecrets":[{name:""}]})
   }
+
   // 设置容器处理
   reverseContainerHandle()
   // 设置网络处理
   reverseDnsConfigHandle()
   // 设置亲和度处理
   reverseAffinityHandle()
+
+  if(initData.value.spec?.strategy == undefined){
+
+    Object.assign(initData.value.spec,{"strategy": {
+          "rollingUpdate": {
+            "maxSurge": "25%",
+            "maxUnavailable": "25%"
+          },
+          "type": "RollingUpdate"
+        }
+      }
+    )
+  }
+  
 }
 
 // 逆转 设置网络处理
@@ -1069,6 +1154,33 @@ const reverseDnsConfigHandle = ()=>{
         "searches": []
       }
     })
+  }else{
+    // 域名服务
+    if(initData.value.spec.template.spec.dnsConfig?.nameservers == undefined){
+      Object.assign(initData.value.spec.template.spec.dnsConfig,{nameservers:[]})
+    }else{
+      const nameServers = _.cloneDeep(initData.value.spec.template.spec.dnsConfig.nameservers)
+      initData.value.spec.template.spec.dnsConfig.nameservers.length = 0
+      nameServers.forEach(function(nameserver){
+        initData.value.spec.template.spec.dnsConfig.nameservers.push({value:nameserver})
+      })
+    }
+
+    // 解析器
+    if(initData.value.spec.template.spec.dnsConfig?.options == undefined){
+      Object.assign(initData.value.spec.template.spec.dnsConfig,{options:[]})
+    }
+
+    // 搜索域
+    if(initData.value.spec.template.spec.dnsConfig?.searches == undefined){
+      Object.assign(initData.value.spec.template.spec.dnsConfig,{searches:[]})
+    }else{
+      const searches = _.cloneDeep(initData.value.spec.template.spec.dnsConfig.searches)
+      initData.value.spec.template.spec.dnsConfig.searches.length = 0
+      searches.forEach(function(searche){
+        initData.value.spec.template.spec.dnsConfig.searches.push({value:searche})
+      })
+    }
   }
 
   if(initData.value.spec.template.spec?.hostAliases == undefined){
@@ -1098,84 +1210,120 @@ const reverseDnsConfigHandle = ()=>{
 const reverseContainerHandle = ()=>{
   if(initData.value.spec.template.spec?.containers != undefined){
     initData.value.spec.template.spec.containers.forEach(function(container){
-      delete initData.value.spec.template.spec?.initContainers
+      Object.assign(container,{_init : false})
       
-      // 标准输入处理
-      reverseCommonIOHandle(container)
-
+      // 资源分配
+      reverseResourceHandle(container)
       // 生命周期处理
       reverseLifecycleHandle(container)
-
-      //健康检查
+      // 健康检查
       reverseCheckHealthHandle(container)
-
       // 安全上下文
-      if(container?.securityContext == undefined){
-        Object.assign(container,{
-          "securityContext": {
-            "capabilities": {
-              "add": [],
-              "drop": []
-            },
-            "runAsNonRoot": false,
-            "readOnlyRootFilesystem": false,
-            "privileged": false,
-            "allowPrivilegeEscalation": false,
-            "runAsUser": undefined
-          }
-        })
-      }
+      reverseSecurityContextHandle(container)
+      // 端口设置
+      reversePortsHandle(container)
+      // 命令配置
+      reverseCommandHandle(container)
+      // 环境变量配置
+      reverseEnvHandle(container)
 
-      if(container?.ports == undefined){
-        Object.assign(container,{"ports":[]})
-      }
-
-      if(container?.args == undefined){
-        Object.assign(container,{"args":undefined})
-      }
-
-      if(container?.command == undefined){
-        Object.assign(container,{"command":undefined})
-      }
-
-      if(container?.workingDir == undefined){
-        Object.assign(container,{"workingDir":undefined})
-      }
-
-      if(container?.env == undefined){
-        Object.assign(container,{"env":[]})
-      }
+      initData.value.spec.template.spec.initContainers = undefined
     })
   }else if(initData.value.spec.template.spec?.initContainers != undefined){
-    initData.value.spec.template.spec.initContainers.forEach(function(container){
-      // 标准输入处理
-      reverseCommonIOHandle(container)
-
+    for( const index in initData.value.spec.template.spec.initContainers){
+      const container = initData.value.spec.template.spec.initContainers[index]
+      Object.assign(container,{_init : true})
+      // 资源分配
+      reverseResourceHandle(container)
       // 生命周期处理
       reverseLifecycleHandle(container)
-
-      //健康检查
+      // 健康检查
       reverseCheckHealthHandle(container)
-
       // 安全上下文
-      if(container?.securityContext == undefined){
-        Object.assign(container,{
-          "securityContext": {
-            "capabilities": {
-              "add": [],
-              "drop": []
-            },
-            "runAsNonRoot": false,
-            "readOnlyRootFilesystem": false,
-            "privileged": false,
-            "allowPrivilegeEscalation": false,
-            "runAsUser": undefined
-          },
-        })
+      reverseSecurityContextHandle(container)
+      // 端口设置
+      reversePortsHandle(container)
+      // 命令配置
+      reverseCommandHandle(container)
+      // 环境变量配置
+      reverseEnvHandle(container)
+
+      initData.value.spec.template.spec.containers = []
+      initData.value.spec.template.spec.containers.push(_.cloneDeep(container))
+      initData.value.spec.template.spec.initContainers.splice(index, 1)
+    }
+  }
+  
+}
+
+// 逆转 环境变量配置
+const reverseEnvHandle = (container)=>{
+  if(container?.env == undefined){
+    Object.assign(container,{"env":[]})
+  }else{
+    container.env.forEach(function(envItem){
+      if(envItem?.value != undefined){
+        Object.assign(envItem,{"item":envTypes[0].value})
+      }else if(envItem?.valueFrom?.resourceFieldRef != undefined){
+        Object.assign(envItem,{"item":envTypes[1].value})
+      }else if(envItem?.valueFrom?.configMapKeyRef != undefined){
+        Object.assign(envItem,{"item":envTypes[2].value})
+      }else if(envItem?.valueFrom?.secretKeyRef != undefined){
+        Object.assign(envItem,{"item":envTypes[3].value})
+      }else if(envItem?.valueFrom?.fieldRef != undefined){
+        Object.assign(envItem,{"item":envTypes[4].value})
       }
     })
   }
-  
+}
+
+// 逆转 命令配置
+const reverseCommandHandle = (container)=>{
+  if(container?.args == undefined){
+    Object.assign(container,{"args":undefined})
+  }
+  if(container?.command == undefined){
+    Object.assign(container,{"command":undefined})
+  }
+  if(container?.workingDir == undefined){
+    Object.assign(container,{"workingDir":undefined})
+  }
+  // 标准输入处理
+  reverseCommonIOHandle(container)
+}
+
+// 逆转 端口设置
+const reversePortsHandle = (container)=>{
+  if(container?.ports == undefined){
+    Object.assign(container,{"ports":[]})
+  }else{
+    container.ports.forEach(function(port){
+      if(port.hostPort == undefined){
+        Object.assign(port,{"_serviceType":"ClusterIP"})
+      }else{
+        Object.assign(port,{"_serviceType":"NodePort"})
+      }
+    })
+  }
+}
+
+// 逆转 安全上下文
+const reverseSecurityContextHandle = (container)=>{
+  if(container?.securityContext == undefined){
+    Object.assign(container,{
+      "securityContext": {
+        "capabilities": {
+          "add": [],
+          "drop": []
+        },
+        "runAsNonRoot": false,
+        "readOnlyRootFilesystem": false,
+        "privileged": false,
+        "allowPrivilegeEscalation": false,
+        "runAsUser": undefined
+      }
+    })
+  }
 }
 
 // 逆转 健康检查
@@ -1189,28 +1337,33 @@ const reverseCheckHealthHandle = (container)=>{
   })
 
   // 就绪检查
-  if(container._checkHealthItem?.readinessProbe != undefined){
-    if(container._checkHealthItem.readinessProbe?.httpGet?.scheme != undefined){
+  if(container?.readinessProbe != undefined){
+    if(container.readinessProbe?.httpGet?.scheme == "HTTP"){
       container._checkHealthItem.readinessProbe = "HTTP"
 
-    }else if(container._checkHealthItem.readinessProbe?.exec != undefined){
-      container._checkHealthItem.readinessProbe = "exec"
+    }else if(container.readinessProbe?.httpGet?.scheme == "HTTPS"){
+      container._checkHealthItem.readinessProbe = "HTTPS"
       
-    }else if(container._checkHealthItem.readinessProbe.tcpSocket != undefined){
+    }else if(container.readinessProbe?.exec != undefined){
+      container._checkHealthItem.readinessProbe = "exec"
+
+    }else if(container.readinessProbe?.tcpSocket != undefined){
       container._checkHealthItem.readinessProbe = "tcpSocket"
 
     }
-    
   }
   // 存活检查
   if(container?.livenessProbe != undefined){
-    if(container._checkHealthItem.livenessProbe?.httpGet?.scheme != undefined){
+    if(container.livenessProbe?.httpGet?.scheme == "HTTP"){
       container._checkHealthItem.livenessProbe = "HTTP"
       
-    }else if(container._checkHealthItem.livenessProbe?.exec != undefined){
-      container._checkHealthItem.livenessProbe = "exec"
+    }else if(container.livenessProbe?.httpGet?.scheme == "HTTPS"){
+      container._checkHealthItem.livenessProbe = "HTTPS"
       
-    }else if(container._checkHealthItem.livenessProbe.tcpSocket != undefined){
+    }else if(container.livenessProbe?.exec != undefined){
+      container._checkHealthItem.livenessProbe = "exec"
+
+    }else if(container.livenessProbe?.tcpSocket != undefined){
       container._checkHealthItem.livenessProbe = "tcpSocket"
 
     }
@@ -1218,13 +1371,16 @@ const reverseCheckHealthHandle = (container)=>{
   }
   // 启动检查
   if(container?.startupProbe != undefined){
-    if(container._checkHealthItem.startupProbe?.httpGet?.scheme != undefined){
+    if(container.startupProbe?.httpGet?.scheme == "HTTP"){
       container._checkHealthItem.startupProbe = "HTTP"
       
-    }else if(container._checkHealthItem.startupProbe?.exec != undefined){
-      container._checkHealthItem.startupProbe = "exec"
+    }else if(container.startupProbe?.httpGet?.scheme == "HTTPS"){
+      container._checkHealthItem.startupProbe = "HTTPS"
       
-    }else if(container._checkHealthItem.startupProbe.tcpSocket != undefined){
+    }else if(container.startupProbe?.exec != undefined){
+      container._checkHealthItem.startupProbe = "exec"
+
+    }else if(container.startupProbe?.tcpSocket != undefined){
       container._checkHealthItem.startupProbe = "tcpSocket"
 
     }
@@ -1236,62 +1392,73 @@ const reverseCheckHealthHandle = (container)=>{
 // 逆转 生命周期处理
 const reverseLifecycleHandle = (container)=>{
   // 都为空的情况初始化生命周期对象
-  if(container?.lifecycle?.postStart == undefined && container?.lifecycle?.preStop == undefined){
-        Object.assign(container,{
-          "lifecycle": {
-            "postStart": {
-              "item":""
-            },
-            "preStop": {
-              "item":""
-            }
-          }
-        })
-      }else{
-        if(container?.lifecycle?.postStart == undefined){
-          if(container.lifecycle.postStart?.httpGet?.scheme != undefined){
-            Object.assign(container.lifecycle.postStart,{"item":"HTTP"})
-            
-          }else if(container.lifecycle.postStart?.exec != undefined){
-            Object.assign(container.lifecycle.postStart,{"item":"exec"})
-            
-          }else if(container.lifecycle.postStart?.tcpSocket != undefined){
-            Object.assign(container.lifecycle.postStart,{"item":"tcpSocket"})
-
-          }
-        }else{
-          if(container.lifecycle.preStop?.httpGet?.scheme != undefined){
-            Object.assign(container.lifecycle.preStop,{"item":"HTTP"})
-            
-          }else if(container.lifecycle.preStop?.exec != undefined){
-            Object.assign(container.lifecycle.preStop,{"item":"exec"})
-            
-          }else if(container.lifecycle.preStop?.tcpSocket != undefined){
-            Object.assign(container.lifecycle.preStop,{"item":"tcpSocket"})
-
-          }
-          
+  if(container?.lifecycle == undefined ){
+    Object.assign(container,{
+      "lifecycle": {
+        "postStart": {
+          "item":""
+        },
+        "preStop": {
+          "item":""
         }
       }
+    })
+  }else{
+    if(container?.lifecycle?.postStart != undefined){
+      if(container.lifecycle.postStart?.httpGet?.scheme != undefined){
+        Object.assign(container.lifecycle.postStart,{"item":"httpGet"})
+        
+      }else if(container.lifecycle.postStart?.exec != undefined){
+        Object.assign(container.lifecycle.postStart,{"item":"exec"})
+        
+      }else if(container.lifecycle.postStart?.tcpSocket != undefined){
+        Object.assign(container.lifecycle.postStart,{"item":"tcpSocket"})
+
+      }
+    }else{
+      Object.assign(container.lifecycle,{"postStart": {
+          "item":""
+        }
+      })
+    }
+    if(container?.lifecycle?.preStop != undefined){
+      if(container.lifecycle.preStop?.httpGet?.scheme != undefined){
+        Object.assign(container.lifecycle.preStop,{"item":"httpGet"})
+        
+      }else if(container.lifecycle.preStop?.exec != undefined){
+        Object.assign(container.lifecycle.preStop,{"item":"exec"})
+        
+      }else if(container.lifecycle.preStop?.tcpSocket != undefined){
+        Object.assign(container.lifecycle.preStop,{"item":"tcpSocket"})
+
+      }
+      
+    }else{
+      Object.assign(container.lifecycle,{"preStop": {
+          "item":""
+        }
+      })
+    }
+  }
 }
 
 // 逆转 容器命令：标准输入选项设置
 const reverseCommonIOHandle = (container)=>{
    if(container.stdin && container.stdinOnce){
-        container._commandIO = "ONCE"
-      }else if(container.stdin && !container.stdinOnce){
-        container._commandIO = "YES"
-      }else{
-        container._commandIO = "NO"
-      }
-      reverseResourceHandle(container)
+      container._commandIO = "ONCE"
+    }else if(container.stdin && !container.stdinOnce){
+      container._commandIO = "YES"
+    }else{
+      container._commandIO = "NO"
+    }
 }
 
 // 逆转 亲和性处理
 const reverseAffinityHandle = ()=>{
+  initData.value.option.freeNode.length = 0
+  initData.value.option.freePod.length = 0
   // 节点亲和性
   if(initData.value.spec.template.spec?.affinity?.nodeAffinity != undefined){
-    freeNode.value.length = 0
     
     // 必须
     if(initData.value.spec.template.spec?.affinity?.nodeAffinity?.requiredDuringSchedulingIgnoredDuringExecution.length > 0){
@@ -1299,9 +1466,9 @@ const reverseAffinityHandle = ()=>{
         const node = {
           "nodeLevel": "1",
           "weight": undefined,
-          "preference": required.nodeSelectorTerms
+          "preference": _.cloneDeep(required.nodeSelectorTerms)
         }
-        freeNode.value.push(node)
+        initData.value.option.freeNode.push(node)
       })
     }
     // 首选
@@ -1310,78 +1477,89 @@ const reverseAffinityHandle = ()=>{
         const node = {
           "nodeLevel": "0",
           "weight": preferred.weight,
-          "preference": preferred.preference
+          "preference": _.cloneDeep(preferred.preference)
         }
-        freeNode.value.push(node)
+        initData.value.option.freeNode.push(node)
       })
     }
     
+  }
   // pod亲和性
-  }else if(initData.value.spec.template.spec?.affinity?.podAffinity != undefined){
-    freePod.value.length = 0
-
+  if(initData.value.spec.template.spec?.affinity?.podAffinity != undefined){
     // 必须
-    if(initData.value.spec.template.spec?.affinity?.podAffinity?.requiredDuringSchedulingIgnoredDuringExecution.length > 0){
+    if(initData.value.spec.template.spec?.affinity?.podAffinity?.requiredDuringSchedulingIgnoredDuringExecution?.length > 0){
       initData.value.spec.template.spec.affinity.podAffinity.requiredDuringSchedulingIgnoredDuringExecution.forEach(function(requireds){
-        const pod = {
-          "podAffinity":true,
-          "namespaces":requireds.nodeSelectorTerms?.namespaces,
-          "weight":1,
-          "nodeLevel":"1",
-          "curNameSpace":requireds.nodeSelectorTerms?.namespaces.length == 0,
-          "topologyKey":"",
-          "labelSelector": requireds.labelSelector
-        }
+          const pod = {
+            "podAffinity":true,
+            "namespaces":requireds.nodeSelectorTerms?.namespaces,
+            "weight":requireds.weight,
+            "nodeLevel":"1",
+            "curNameSpace": requireds?.nodeSelectorTerms?.namespaces == undefined || requireds.nodeSelectorTerms?.namespaces.length == 0,
+            "topologyKey":requireds.topologyKey,
+            "labelSelector": _.cloneDeep(requireds.labelSelector)
+          }
 
-        freePod.value.push(pod)
+          initData.value.option.freePod.push(pod)
       })
     }
+
     // 首选
-    if(initData.value.spec.template.spec?.affinity?.podAffinity?.preferredDuringSchedulingIgnoredDuringExecution.length > 0){
+    if(initData.value.spec.template.spec?.affinity?.podAffinity?.preferredDuringSchedulingIgnoredDuringExecution?.length > 0){
       initData.value.spec.template.spec.affinity.podAffinity.preferredDuringSchedulingIgnoredDuringExecution.forEach(function(preferred){
-      const pod = {
-          "podAffinity":true,
-          "namespaces":preferred.nodeSelectorTerms?.namespaces,
-          "weight":preferred.weight,
-          "nodeLevel":"0",
-          "curNameSpace":preferred.nodeSelectorTerms?.namespaces.length == 0,
-          "topologyKey":preferred.podAffinityTerm.topologyKey,
-          "labelSelector": preferred.podAffinityTerm.labelSelector.matchExpressions
-      }
-      freePod.value.push(pod)
-    })
-
-    // pod反亲和性
-    }else if(initData.value.spec.template.spec?.affinity?.podAntiAffinity != undefined){
-      freePod.value.splice(0,freePod.length)
-      freePod.value.push(
-        {
-          "podAffinity":false,
-          "namespaces":[],
-          "weight":undefined,
-          "nodeLevel":"0",
-          "curNameSpace":true,
-          "topologyKey":"",
-          "labelSelector": {}
+        const pod = {
+            "podAffinity":true,
+            "namespaces":preferred.nodeSelectorTerms?.namespaces,
+            "weight":preferred.weight,
+            "nodeLevel":"0",
+            "curNameSpace":preferred?.nodeSelectorTerms?.namespaces == undefined || preferred.nodeSelectorTerms?.namespaces.length == 0,
+            "topologyKey":preferred.podAffinityTerm.topologyKey,
+            "labelSelector": _.cloneDeep(preferred.podAffinityTerm.labelSelector)
         }
-      )
+        initData.value.option.freePod.push(pod)
+      })
 
+    }
+    
+    // pod反亲和性
+    if(initData.value.spec.template.spec?.affinity?.podAntiAffinity != undefined){
       // 必须
       if(initData.value.spec.template.spec?.affinity?.podAntiAffinity?.requiredDuringSchedulingIgnoredDuringExecution != undefined){
-        freePod.value.nodeLevel = "1"
-        Object.assign(freePod.value.labelSelector , initData.value.spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution.labelSelector)
-        if(initData.value.spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms.namespaces.length > 0){
-          freePod.value.namespaces = freePod.value.namespaces.concat( initData.value.spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms.namespaces )
-          freePod.value.curNameSpace = false
+        if(initData.value.spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution?.length > 0){
+          initData.value.spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution.forEach(function(required){
+            const podAnti = {
+              "podAffinity":false,
+              "namespaces":required.namespaces,
+              "weight":required.weight,
+              "nodeLevel":"1",
+              "curNameSpace":required?.namespaces == undefined || required?.namespaces.length == 0,
+              "topologyKey":required.podAffinityTerm.topologyKey,
+              "labelSelector": _.cloneDeep(required.podAffinityTerm.labelSelector)
+            }
+
+            initData.value.option.freePod.push(podAnti)
+          })
         }
 
       }
+
       // 首选
       if(initData.value.spec.template.spec?.affinity?.podAntiAffinity?.preferredDuringSchedulingIgnoredDuringExecution != undefined){
-        freePod.value.nodeLevel = "0"
-        freePod.value.weight = initData.value.spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution?.weight
-        freePod.value.topologyKey = initData.value.spec.template.spec.affinity.podAffinity.preferredDuringSchedulingIgnoredDuringExecution.podAffinityTerm.topologyKey
-        Object.assign(freePod.value.labelSelector , initData.value.spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution.podAffinityTerm.labelSelector)
+        if(initData.value.spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution?.length > 0){
+          initData.value.spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution.forEach(function(preferred){
+            const podAnti = {
+              "podAffinity":false,
+              "namespaces":preferred.namespaces,
+              "weight":preferred.weight,
+              "nodeLevel":"0",
+              "curNameSpace": preferred?.namespaces == undefined || preferred?.namespaces.length == 0,
+              "topologyKey":preferred.podAffinityTerm.topologyKey,
+              "labelSelector": _.cloneDeep(preferred.podAffinityTerm.labelSelector)
+            }
+
+            initData.value.option.freePod.push(podAnti)
+          })
+        }
+
       }
     }
 
@@ -1390,16 +1568,34 @@ const reverseAffinityHandle = ()=>{
 
 // 内存&CPU限制处理
 const reverseResourceHandle = (container) =>{
-  if(container.resources.requests.memory != undefined){
+  if(container?.resources == undefined ){
+    Object.assign(container,{
+      "resources": {
+        "requests": {
+          "cpu": undefined,
+          "memory": undefined,
+          "nvidia.com/gpu": undefined
+        },
+        "limits": {
+          "cpu": undefined,
+          "memory": undefined,
+          "nvidia.com/gpu": undefined
+        }
+      }
+    })
+  }
+
+  if(container?.resources?.requests?.memory != undefined){
     container.resources.requests.memory = container.resources.requests.memory.match(/\d+/)[0];
   }
-  if(container.resources.limits.memory != undefined){
+  if(container?.resources?.limits?.memory != undefined){
     container.resources.limits.memory = container.resources.limits.memory.match(/\d+/)[0];
   }
 }
 
 // 标签 & 注解从yaml逆向回来
 const reverseLabelAnnotationHandle = ()=>{
+  delete initData.value.option.labelAnnotation
   const cleanObj = {
     deployment:{
       labels:[],
@@ -1410,16 +1606,20 @@ const reverseLabelAnnotationHandle = ()=>{
       annotations:[]
     }
   }
-  Object.assign(labelAnnotation,cleanObj)
-  json2labelAnnotation(labelAnnotation.deployment.labels , initData.value.metadata.labels)
-  json2labelAnnotation(labelAnnotation.pod.labels , initData.value.spec.template.metadata.labels)
-  json2labelAnnotation(labelAnnotation.deployment.annotations , initData.value.metadata.annotations)
-  json2labelAnnotation(labelAnnotation.pod.annotations , initData.value.spec.template.metadata.annotations)
+  Object.assign(initData.value.option,{labelAnnotation:cleanObj})
+  json2labelAnnotation(initData.value.option.labelAnnotation.deployment.labels , initData.value.metadata.labels)
+  json2labelAnnotation(initData.value.option.labelAnnotation.pod.labels , initData.value.spec.template.metadata.labels)
+  json2labelAnnotation(initData.value.option.labelAnnotation.deployment.annotations , initData.value.metadata.annotations)
+  json2labelAnnotation(initData.value.option.labelAnnotation.pod.annotations , initData.value.spec.template.metadata.annotations)
 
 }
 
 // 标签 & 注解
 const json2labelAnnotation = (values,yamlValues)=>{
+  if(values == undefined || yamlValues == undefined){
+    return
+  }
+
   const mapObject=new Map(Object.entries(yamlValues))
   for (const k of mapObject.keys()){
     values.push({
@@ -1440,18 +1640,14 @@ const saveData = () => {
 }
 
 const changeSelectTab = (item) =>{
-  selectTabIndexPods.value = item
+  initData.value.option.containerIndex = item
 }
 const changePodSelectTab = (item) =>{
-  selectPod.value = item
+  initData.value.option.selectPod = item
 }
 const changeDeploymentSelectTab = (item) =>{
-  selectDepolyment.value = item
+  initData.value.option.selectDepolyment = item
 }
-
-const selectDepolyment = ref('')
-const selectPod = ref('')
-const selectTabIndexPods = ref('')
 
 
 </script>
@@ -1511,10 +1707,9 @@ const selectTabIndexPods = ref('')
                       </el-tabs>
                     </div>
                     <div class="right">
-                      <div v-show="selectDepolyment === 'deploymentLabel'  ? true : false ">
+                      <div v-show="initData.option.selectDepolyment === 'deploymentLabel'  ? true : false ">
                         <H1>Deployment标签</H1>
-                        {{ labelAnnotation.deployment}}
-                        <el-row :gutter="24" v-for="(label,index) in labelAnnotation.deployment.labels" :key="index" style="margin-top:30px">
+                        <el-row :gutter="24" v-for="(label,index) in initData.option.labelAnnotation.deployment.labels" :key="index" style="margin-top:30px">
                             <el-col :span="6" >
                               <el-input label="键" placeholder="请输入键" v-model="label.key"></el-input>
                             </el-col>
@@ -1527,7 +1722,7 @@ const selectTabIndexPods = ref('')
                           <el-button @click="addDeployLabel" type="primary" plain>添加标签</el-button>
                         </el-row>
                         <H1>注解</H1>
-                        <el-row :gutter="24" v-for="(annotation,index) in labelAnnotation.deployment.annotations" :key="index" style="margin-top:30px">
+                        <el-row :gutter="24" v-for="(annotation,index) in initData.option.labelAnnotation.deployment.annotations" :key="index" style="margin-top:30px">
                           <el-col :span="6" >
                               <el-input label="键" placeholder="请输入键" v-model="annotation.key"></el-input>
                           </el-col>
@@ -1540,7 +1735,7 @@ const selectTabIndexPods = ref('')
                           <el-button @click="addDeployAnnotation" type="primary" plain>添加标签</el-button>
                         </el-row>
                       </div>
-                      <div v-show="selectDepolyment === 'deploymentStrategy'  ? true : false ">
+                      <div v-show="initData.option.selectDepolyment === 'deploymentStrategy'  ? true : false ">
                         <el-row :gutter="24" style="margin-top:10px;margin-left:2px">
                           <el-col :span="12">
                             <el-radio-group v-model="initData.spec.strategy.type" >
@@ -1605,10 +1800,9 @@ const selectTabIndexPods = ref('')
                       </el-tabs>
                     </div>
                     <div class="right" >
-                      <div v-show="selectPod === 'podLabel'  ? true : false ">
+                      <div v-show="initData.option.selectPod === 'podLabel'  ? true : false ">
                         <H1>Pod标签</H1>
-                        {{labelAnnotation.pod }}
-                        <el-row :gutter="24" v-for="(label,index) in labelAnnotation.pod.labels" :key="index" style="margin-top:30px">
+                        <el-row :gutter="24" v-for="(label,index) in initData.option.labelAnnotation.pod.labels" :key="index" style="margin-top:30px">
                             <el-col :span="6" >
                               <el-input label="键" placeholder="请输入键" v-model="label.key"></el-input>
                             </el-col>
@@ -1621,7 +1815,7 @@ const selectTabIndexPods = ref('')
                           <el-button @click="addPodLabel" type="primary" plain>添加标签</el-button>
                         </el-row>
                         <H1>注解</H1>
-                        <el-row :gutter="24" v-for="(annotation,index) in labelAnnotation.pod.annotations" :key="index" style="margin-top:30px">
+                        <el-row :gutter="24" v-for="(annotation,index) in initData.option.labelAnnotation.pod.annotations" :key="index" style="margin-top:30px">
                           <el-col :span="6" >
                               <el-input label="键" placeholder="请输入键" v-model="annotation.key"></el-input>
                           </el-col>
@@ -1635,7 +1829,7 @@ const selectTabIndexPods = ref('')
                         </el-row>
                       </div>
 
-                      <div v-show="selectPod === 'podNet'  ? true : false ">
+                      <div v-show="initData.option.selectPod === 'podNet'  ? true : false ">
                         <H1>网络设置</H1>
                         <el-row :gutter="24">
                           <el-col :span="8">
@@ -1665,10 +1859,7 @@ const selectTabIndexPods = ref('')
                           </el-col>
                           <el-col :span="8">
                             <el-form-item label="子域">
-                              <el-select v-model="initData.spec.template.spec.subdomain" style="width: 100%;" placeholder="请选择">
-                                <el-option label="常规" :value=false></el-option>
-                                <el-option label="主机网络" :value=true></el-option>
-                              </el-select>
+                              <el-input  placeholder="请输入内容" v-model="initData.spec.template.spec.subdomain"></el-input>
                             </el-form-item>
                           </el-col>
                         </el-row>
@@ -1677,7 +1868,7 @@ const selectTabIndexPods = ref('')
                           <H1>域名服务器</H1>
                           <el-row :gutter="8" v-for="(nameServers,index) in initData.spec.template.spec.dnsConfig.nameservers" :key="nameServers" style="margin-top:15px">
                             <el-col :span="8">
-                                <el-input   placeholder="请输入内容" v-model="initData.spec.template.spec.dnsConfig.nameservers[index]"></el-input>
+                                <el-input   placeholder="请输入内容" v-model="initData.spec.template.spec.dnsConfig.nameservers[index].value"></el-input>
                             </el-col>
                             <el-button type="danger" @click="removeNameServer(index)">删除</el-button>
                           </el-row>
@@ -1687,7 +1878,7 @@ const selectTabIndexPods = ref('')
                           <H1>搜索域</H1>
                           <el-row :gutter="8" v-for="(search,index) in initData.spec.template.spec.dnsConfig.searches" :key="search" style="margin-top:15px">
                             <el-col :span="8">
-                                <el-input  placeholder="请输入内容" v-model="initData.spec.template.spec.dnsConfig.searches[index]"></el-input>
+                                <el-input  placeholder="请输入内容" v-model="initData.spec.template.spec.dnsConfig.searches[index].value"></el-input>
                             </el-col>
                             <el-button type="danger" @click="removeSearch(index)">删除</el-button>
                           </el-row>
@@ -1735,11 +1926,11 @@ const selectTabIndexPods = ref('')
                         </div>
                       </div>
 
-                      <div v-show="selectPod === 'podNode'  ? true : false ">
+                      <div v-show="initData.option.selectPod === 'podNode'  ? true : false ">
                         <H1>节点调度</H1>
                         <el-row :gutter="24" >
                           <el-col :span="12">
-                              <el-radio-group v-model="nodeAffinity" @change="nodeChange">
+                              <el-radio-group v-model="initData.option.nodeAffinity" @change="nodeChange">
                                 <el-radio-button
                                   v-for="item in nodeSelector"
                                   :key="item.value"
@@ -1748,9 +1939,9 @@ const selectTabIndexPods = ref('')
                               </el-radio-group>
                           </el-col>
                         </el-row>
-                        <template v-if="nodeAffinity == 'none'">
+                        <template v-if="initData.option.nodeAffinity == 'none'">
                         </template>
-                        <template v-if="nodeAffinity == 'nodeName'">
+                        <template v-if="initData.option.nodeAffinity == 'nodeName'">
                           <el-row>
                             <el-col>
                               <el-select v-model="initData.spec.template.spec.nodeName" placeholder="请选择">
@@ -1762,8 +1953,8 @@ const selectTabIndexPods = ref('')
                             </el-col>
                           </el-row>
                         </template>
-                        <template v-if="nodeAffinity == 'affinity'" >
-                          <template v-for="(node,nodeIndex) in freeNode" :key="nodeIndex">
+                        <template v-if="initData.option.nodeAffinity == 'affinity'" >
+                          <template v-for="(node,nodeIndex) in initData.option.freeNode" :key="nodeIndex">
                             <el-row :gutter="24" style="margin-top:30px">
                               <el-col :span="14">
                                 <el-form-item label="优先级">
@@ -1823,9 +2014,9 @@ const selectTabIndexPods = ref('')
                         </template>
                       </div>
 
-                      <div v-show="selectPod === 'pod'  ? true : false ">
+                      <div v-show="initData.option.selectPod === 'pod'  ? true : false ">
                         <H1>Pod调度</H1>
-                        <template v-for="(pod,podIndex) in freePod" :key="podIndex" >
+                        <template v-for="(pod,podIndex) in initData.option.freePod" :key="podIndex" >
                           <el-row :gutter="24" style="margin-top:30px">
                             <el-col :span="8">
                                 <el-radio-group v-model="pod.podAffinity" >
@@ -1923,7 +2114,7 @@ const selectTabIndexPods = ref('')
                         <el-button @click="addPod" type="primary" plain>添加节点调度</el-button>
                       </div>
               
-                      <div v-show="selectPod === 'podStrategy'  ? true : false ">
+                      <div v-show="initData.option.selectPod === 'podStrategy'  ? true : false ">
                         <H1>扩缩容和升级策略</H1>
                         <el-row :gutter="24" >
                           <el-col :span="8">
@@ -1936,7 +2127,7 @@ const selectTabIndexPods = ref('')
                         </el-row>
                       </div>
 
-                      <div v-show="selectPod === 'podContext'  ? true : false ">
+                      <div v-show="initData.option.selectPod === 'podContext'  ? true : false ">
                         <H1>安全性上下文</H1>
                         <el-row :gutter="24" >
                           <el-col :span="8">
@@ -1965,7 +2156,7 @@ const selectTabIndexPods = ref('')
                       </el-tabs>
                     </div>
                     <div class="right">
-                      <div v-show="selectTabIndexPods === 'containerGeneral'  ? true : false ">
+                      <div v-show="initData.option.containerIndex === 'containerGeneral'  ? true : false ">
                         <H1>通用</H1>
                         <el-row :gutter="24" >
                           <el-col :span="8">
@@ -2292,7 +2483,6 @@ const selectTabIndexPods = ref('')
                           </el-col>
                         </el-row>
                         <H1>生命周期管理</H1>
-                        {{ container.lifecycle.postStart }}
                         <el-row :gutter="24" >
                           <el-col :span="24">
                             <el-form-item label="启动后动作"  >
@@ -2322,12 +2512,19 @@ const selectTabIndexPods = ref('')
                             </el-col>
                             <el-col :span="4">
                               <el-form-item label="端口"  >
-                                <el-input placeholder="如：/myapp" v-model="container.lifecycle.postStart.httpGet.port" />
+                                <el-input type="number" placeholder="如：80" v-model="container.lifecycle.postStart.httpGet.port" />
                               </el-form-item>
                             </el-col>
                             <el-col :span="4">
                               <el-form-item label="Scheme"  >
-                                <el-input placeholder="如：/myapp" v-model="container.lifecycle.postStart.httpGet.scheme" />
+                                <el-select
+                                  class="search-select"
+                                  v-model="container.lifecycle.postStart.httpGet.scheme"
+                                  placeholder="请选择Scheme"
+                                >
+                                  <el-option label="HTTP"/>
+                                  <el-option label="HTTPS"/>
+                                </el-select>
                               </el-form-item>
                             </el-col>
                           </el-row>
@@ -2370,19 +2567,31 @@ const selectTabIndexPods = ref('')
                         <template v-if="container?.lifecycle?.preStop?.item == 'httpGet' &&
                                   container?.lifecycle?.preStop?.httpGet != undefined">
                           <el-row :gutter="24">
-                            <el-col :span="6">
+                            <el-col :span="4">
                               <el-form-item label="主机IP"  >
                                 <el-input placeholder="如：192.168.1.1" v-model="container.lifecycle.preStop.httpGet.host" />
                               </el-form-item>
                             </el-col>
-                            <el-col :span="6">
+                            <el-col :span="4">
                               <el-form-item label="路径"  >
                                 <el-input placeholder="如：/myapp" v-model="container.lifecycle.preStop.httpGet.path" />
                               </el-form-item>
                             </el-col>
-                            <el-col :span="6">
+                            <el-col :span="4">
                               <el-form-item label="端口"  >
-                                <el-input placeholder="如：8080" v-model="container.lifecycle.preStop.httpGet.port" />
+                                <el-input placeholder="如：80" v-model="container.lifecycle.preStop.httpGet.port" />
+                              </el-form-item>
+                            </el-col>
+                            <el-col :span="4">
+                              <el-form-item label="Scheme"  >
+                                <el-select
+                                  class="search-select"
+                                  v-model="container.lifecycle.preStop.httpGet.scheme"
+                                  placeholder="请选择Scheme"
+                                >
+                                  <el-option label="HTTP"/>
+                                  <el-option label="HTTPS"/>
+                                </el-select>
                               </el-form-item>
                             </el-col>
                           </el-row>
@@ -2404,14 +2613,14 @@ const selectTabIndexPods = ref('')
                           <el-row :gutter="24">
                             <el-col :span="4">
                               <el-form-item label="端口"  >
-                                <el-input  placeholder="如：80" v-model="container.lifecycle.preStop.tcpScoket.port" />
+                                <el-input type="number" placeholder="如：80" v-model="container.lifecycle.preStop.tcpScoket.port" />
                               </el-form-item>
                             </el-col>
                           </el-row>
                         </template>
 
                       </div>
-                      <div v-show="selectTabIndexPods === 'containerCheckHealth'  ? true : false ">
+                      <div v-show="initData.option.containerIndex === 'containerCheckHealth'  ? true : false ">
                         <H1>就绪检查</H1>
                         <el-row :gutter="24">
                           <el-col :span="24">
@@ -2489,6 +2698,47 @@ const selectTabIndexPods = ref('')
                               <el-form-item label="请求路径" >
                                 <el-input v-model="container.readinessProbe.httpGet.path" placeholder="例如：/my-project" />
                                 <template #append>秒</template>
+                              </el-form-item>
+                            </el-col>
+                          </el-row>
+                          <el-row :gutter="12">
+                            <el-col :span="3">
+                              <el-form-item label="检查间隔" >
+                                <el-input type="number" v-model="container.readinessProbe.periodSeconds" placeholder="请输入检查间隔" />
+                                <template #append>秒</template>
+                              </el-form-item>
+                            </el-col>
+                            <el-col :span="3">
+                              <el-form-item label="初始延迟" >
+                                <el-input type="number" v-model="container.readinessProbe.initialDelaySeconds" placeholder="请输入初始延迟" />
+                                <template #append>秒</template>
+                              </el-form-item>
+                            </el-col>
+                            <el-col :span="3">
+                              <el-form-item label="超时" >
+                                <el-input type="number" v-model="container.readinessProbe.timeoutSeconds" placeholder="请输入超时时间" />
+                                <template #append>秒</template>
+                              </el-form-item>
+                            </el-col>
+                            <el-col :span="5">
+                              <el-form-item label="成功阈值" >
+                                <el-input type="number" v-model="container.readinessProbe.successThreshold" placeholder="例如：1" />
+                              </el-form-item>
+                            </el-col>
+                            <el-col :span="5">
+                              <el-form-item label="失败阈值" >
+                                <el-input type="number" v-model="container.readinessProbe.failureThreshold" placeholder="例如：1" />
+                              </el-form-item>
+                            </el-col>
+                          </el-row>
+                        </div>
+
+                        <div v-if="container?._checkHealthItem.readinessProbe == 'exec'  &&
+                                container?.readinessProbe?.exec != undefined">
+                          <el-row :gutter="12" >
+                            <el-col :span="5">
+                              <el-form-item label="运行命令" >
+                                  <el-input v-model="container.readinessProbe.exec.command" placeholder="例如：cat /tmp/health" />
                               </el-form-item>
                             </el-col>
                           </el-row>
@@ -2641,6 +2891,47 @@ const selectTabIndexPods = ref('')
                               <el-form-item label="请求路径" >
                                 <el-input v-model="container.livenessProbe.httpGet.path" placeholder="例如：/my-project" />
                                 <template #append>秒</template>
+                              </el-form-item>
+                            </el-col>
+                          </el-row>
+                          <el-row :gutter="12">
+                            <el-col :span="3">
+                              <el-form-item label="检查间隔" >
+                                <el-input type="number" v-model="container.livenessProbe.periodSeconds" placeholder="请输入检查间隔" />
+                                <template #append>秒</template>
+                              </el-form-item>
+                            </el-col>
+                            <el-col :span="3">
+                              <el-form-item label="初始延迟" >
+                                <el-input type="number" v-model="container.livenessProbe.initialDelaySeconds" placeholder="请输入初始延迟" />
+                                <template #append>秒</template>
+                              </el-form-item>
+                            </el-col>
+                            <el-col :span="3">
+                              <el-form-item label="超时" >
+                                <el-input type="number" v-model="container.livenessProbe.timeoutSeconds" placeholder="请输入超时时间" />
+                                <template #append>秒</template>
+                              </el-form-item>
+                            </el-col>
+                            <el-col :span="5">
+                              <el-form-item label="成功阈值" >
+                                <el-input type="number" v-model="container.livenessProbe.successThreshold" placeholder="例如：1" />
+                              </el-form-item>
+                            </el-col>
+                            <el-col :span="5">
+                              <el-form-item label="失败阈值" >
+                                <el-input type="number" v-model="container.livenessProbe.failureThreshold" placeholder="例如：1" />
+                              </el-form-item>
+                            </el-col>
+                          </el-row>
+                        </div>
+
+                        <div v-if="container?._checkHealthItem.livenessProbe == 'exec'  &&
+                                container?.livenessProbe?.exec != undefined">
+                          <el-row :gutter="12" >
+                            <el-col :span="5">
+                              <el-form-item label="运行命令" >
+                                  <el-input v-model="container.livenessProbe.exec.command" placeholder="例如：cat /tmp/health" />
                               </el-form-item>
                             </el-col>
                           </el-row>
@@ -2829,6 +3120,47 @@ const selectTabIndexPods = ref('')
                           </el-row>
                         </div>
 
+                        <div v-if="container?._checkHealthItem.startupProbe == 'exec'  &&
+                                container?.startupProbe?.exec != undefined">
+                          <el-row :gutter="12" >
+                            <el-col :span="5">
+                              <el-form-item label="运行命令" >
+                                  <el-input v-model="container.startupProbe.exec.command" placeholder="例如：cat /tmp/health" />
+                              </el-form-item>
+                            </el-col>
+                          </el-row>
+                          <el-row :gutter="12">
+                            <el-col :span="3">
+                              <el-form-item label="检查间隔" >
+                                <el-input type="number" v-model="container.startupProbe.periodSeconds" placeholder="请输入检查间隔" />
+                                <template #append>秒</template>
+                              </el-form-item>
+                            </el-col>
+                            <el-col :span="3">
+                              <el-form-item label="初始延迟" >
+                                <el-input type="number" v-model="container.startupProbe.initialDelaySeconds" placeholder="请输入初始延迟" />
+                                <template #append>秒</template>
+                              </el-form-item>
+                            </el-col>
+                            <el-col :span="3">
+                              <el-form-item label="超时" >
+                                <el-input type="number" v-model="container.startupProbe.timeoutSeconds" placeholder="请输入超时时间" />
+                                <template #append>秒</template>
+                              </el-form-item>
+                            </el-col>
+                            <el-col :span="5">
+                              <el-form-item label="成功阈值" >
+                                <el-input type="number" v-model="container.startupProbe.successThreshold" placeholder="例如：1" />
+                              </el-form-item>
+                            </el-col>
+                            <el-col :span="5">
+                              <el-form-item label="失败阈值" >
+                                <el-input type="number" v-model="container.startupProbe.failureThreshold" placeholder="例如：1" />
+                              </el-form-item>
+                            </el-col>
+                          </el-row>
+                        </div>
+
                         <div v-if="container?._checkHealthItem.startupProbe == 'tcpSocket'  &&
                                 container?.startupProbe?.tcpSocket != undefined">
                           <el-row :gutter="12" >
@@ -2873,7 +3205,7 @@ const selectTabIndexPods = ref('')
 
                       </div>
 
-                      <div v-show="selectTabIndexPods === 'containerSource'  ? true : false ">
+                      <div v-show="initData.option.containerIndex === 'containerSource'  ? true : false ">
                         <el-row :gutter="24">
                           <el-col :span="8">
                             <el-form-item label="CPU预留" >
@@ -2919,7 +3251,7 @@ const selectTabIndexPods = ref('')
                           </el-col>
                         </el-row>
                       </div>
-                      <div v-show="selectTabIndexPods === 'containerSecurityContext'  ? true : false ">
+                      <div v-show="initData.option.containerIndex === 'containerSecurityContext'  ? true : false ">
                         <el-row :gutter="24">
                           <el-col :span="12">
                             <el-form-item label="Privileged" >
@@ -2994,7 +3326,7 @@ const selectTabIndexPods = ref('')
                           </el-col>
                         </el-row>
                       </div>
-                      <div v-show="selectTabIndexPods === 'containerVolumes'  ? true : false ">
+                      <div v-show="initData.option.containerIndex === 'containerVolumes'  ? true : false ">
                       
                       </div>
                     </div>
