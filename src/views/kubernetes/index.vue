@@ -33,7 +33,7 @@
     const port = {
       'name': undefined,
       'expose': undefined,
-      'protocol': 'TCP',
+      'protocol': undefined,
       'containerPort': 80,
       'hostPort': undefined,
       'hostIP': undefined,
@@ -75,10 +75,10 @@
 
   // 解析器选项增删
   const addOption = () =>{
-    if(initData.value.spec.template.spec?.dnsConfig == undefined){
+    if(!initData.value.spec.template.spec?.dnsConfig ){
       Object.assign(initData.value.spec.template.spec.dnsConfig,{"dnsConfig":""})
     }
-    if(initData.value.spec.template.spec.dnsConfig.searches == undefined){
+    if(!initData.value.spec.template.spec.dnsConfig.searches ){
       Object.assign(initData.value.spec.template.spec.dnsConfig,{"options":[]})
     }
     initData.value.spec.template.spec.dnsConfig.options.push({"name":"","value":""})
@@ -89,10 +89,10 @@
 
   // 搜索域增删
   const addSearch = () =>{
-    if(initData.value.spec.template.spec?.dnsConfig == undefined){
+    if(!initData.value.spec.template.spec?.dnsConfig ){
       Object.assign(initData.value.spec.template.spec.dnsConfig,{"dnsConfig":""})
     }
-    if(initData.value.spec.template.spec.dnsConfig.searches == undefined){
+    if(!initData.value.spec.template.spec.dnsConfig.searches ){
       Object.assign(initData.value.spec.template.spec.dnsConfig,{"searches":[{value:""}]})
     }
     initData.value.spec.template.spec.dnsConfig.searches.push({value:""})
@@ -103,10 +103,10 @@
 
   // 域名服务器增删
   const addNameServer = () =>{
-    if(initData.value.spec.template.spec?.dnsConfig == undefined){
+    if(!initData.value.spec.template.spec?.dnsConfig ){
       Object.assign(initData.value.spec.template.spec.dnsConfig,{"dnsConfig":""})
     }
-    if(initData.value.spec.template.spec?.dnsConfig?.nameservers == undefined){
+    if(!initData.value.spec.template.spec?.dnsConfig?.nameservers ){
       Object.assign(initData.value.spec.template.spec,{"nameservers":[{value:""}]})
     }
     initData.value.spec.template.spec.dnsConfig.nameservers.push({value:""})
@@ -117,7 +117,7 @@
 
   // 主机别名增删
   const addHostAlias = () =>{
-    if(initData.value.spec.template.spec?.hostAliases == undefined){
+    if(!initData.value.spec.template.spec?.hostAliases ){
       Object.assign(initData.value.spec.template.spec,{"hostAliases":""})
     }
     initData.value.spec.template.spec.hostAliases.push({"ip":"","hostnames":[]})
@@ -278,7 +278,7 @@
     }
   }
   const lifeCycles = [
-    {label:"无",value:""},
+    {label:"无",value:undefined},
     {label:"命令",value:"exec"},
     {label:"HTTP",value:"httpGet"},
     {label:"TCP",value:"tcpScoket"}
@@ -624,8 +624,8 @@
               "args": undefined,
               "workingDir": undefined,
               "lifecycle": {
-                "postStart": {},
-                "preStop": {}
+                "postStart": {item:undefined},
+                "preStop": {item:undefined}
               },
               "_checkHealthItem":{
                 "readinessProbe":"",
@@ -664,7 +664,7 @@
             "searches": []
           },
           "hostAliases": [
-            {"hostnames":[]}
+            // {"hostnames":[]}
           ],
           "dnsPolicy": undefined,
           "hostNetwork":undefined,
@@ -762,8 +762,8 @@
               "args": undefined,
               "workingDir": undefined,
               "lifecycle": {
-                "postStart": {},
-                "preStop": {}
+                "postStart": {item:undefined},
+                "preStop": {item:undefined},
               },
               "_checkHealthItem":{
                 "readinessProbe":"",
@@ -853,7 +853,6 @@
   const netSetting = ()=>{
     const specConfig = copyData.value.spec.template.spec
 
-    console.log(specConfig)
     // 域名服务器、解析器、搜索域为空时删除dnsConfig
     if(specConfig.dnsConfig.nameservers.length == 0 && specConfig.dnsConfig.options.length == 0 && specConfig.dnsConfig.searches.length == 0 ){
       delete specConfig.dnsConfig
@@ -884,7 +883,7 @@
     }
 
     // 主机别名
-    if(specConfig.hostAliases == undefined || specConfig.hostAliases.length == 0){
+    if(!specConfig.hostAliases  || specConfig.hostAliases.length == 0){
       delete specConfig.hostAliases
     }
 
@@ -899,13 +898,13 @@
       resourceHandle(container)
 
       // 生命周期相关
-      if(container.lifecycle.postStart?.item == undefined && container.lifecycle.preStop?.item == undefined ){
+      if(!container.lifecycle.postStart?.item  && !container.lifecycle.preStop?.item ){
         delete container.lifecycle
       }else{
-        if(container.lifecycle.postStart?.item == undefined ){
+        if(!container.lifecycle.postStart?.item ){
           delete container.lifecycle.postStart
         }
-        if(container.lifecycle.preStop?.item == undefined ){
+        if(!container.lifecycle.preStop?.item  ){
           delete container.lifecycle.preStop
         }
       }
@@ -919,15 +918,15 @@
       }
 
       // 命令相关
-      if(container.args == undefined && container.command == undefined){
+      if(!container.args && !container.command ){
         delete container.stdin
         delete container.stdinOnce
       }
       // 命令相关
-      if(container.args == undefined){
+      if(!container.args){
         delete container.args
       }
-      if(container.command == undefined){
+      if(!container.command){
         delete container.command
       }
 
@@ -980,14 +979,14 @@
       })
     }
     if(initData.value.option.freePod.length > 0){
-      if(copyData.value.spec.template.spec?.affinity == undefined){
+      if(!copyData.value.spec.template.spec?.affinity ){
         Object.assign(copyData.value.spec.template.spec,{  "affinity": {}  })
       }
 
       initData.value.option.freePod.forEach(function(pod){
         if(pod.podAffinity){
 
-          if(copyData.value.spec.template.spec?.affinity?.podAffinity == undefined){
+          if(!copyData.value.spec.template.spec?.affinity?.podAffinity ){
             Object.assign(copyData.value.spec.template.spec.affinity,{
               "podAffinity":{
                 "preferredDuringSchedulingIgnoredDuringExecution":[],
@@ -1017,7 +1016,7 @@
           }
         }else if(!pod.podAffinity){
 
-          if(copyData.value.spec.template.spec?.affinity?.podAntiAffinity == undefined){
+          if(!copyData.value.spec.template.spec?.affinity?.podAntiAffinity ){
             Object.assign(copyData.value.spec.template.spec.affinity,{
               "podAntiAffinity":{
                 "preferredDuringSchedulingIgnoredDuringExecution":[],
@@ -1091,7 +1090,7 @@
   }
   // 标签 & 注解
   const labelAnnotation2Json = (formValue,yamlValue)=>{
-    if(formValue == undefined || yamlValue == undefined){
+    if(!formValue  || !yamlValue ){
       return
     }
     const mapObject=new Map()
@@ -1118,19 +1117,28 @@
 
     // 设置标签 & 注解
     reverseLabelAnnotationHandle()
-    if(initData.value.spec.template.spec?.imagePullSecrets == undefined || initData.value.spec.template.spec?.imagePullSecrets.length == 0){
-      Object.assign(initData.value.spec.template.spec,{"imagePullSecrets":[{name:""}]})
-    }
-
     // 设置容器处理
     reverseContainerHandle()
     // 设置网络处理
     reverseDnsConfigHandle()
     // 设置亲和度处理
     reverseAffinityHandle()
+    // 空数据处理
+    reverseEmptyDataHandle()
 
-    if(initData.value.spec?.strategy == undefined){
+  }
 
+  // 逆转 空数据处理
+  const reverseEmptyDataHandle = ()=>{
+    if(!initData.value.spec.template.spec?.imagePullSecrets  || initData.value.spec.template.spec?.imagePullSecrets.length == 0){
+      Object.assign(initData.value.spec.template.spec,{"imagePullSecrets":[{name:""}]})
+    }
+
+    if(!initData.value.spec.template.spec?.securityContext ){
+      Object.assign(initData.value.spec.template.spec,{"securityContext":[]})
+    }
+
+    if(!initData.value.spec?.strategy ){
       Object.assign(initData.value.spec,{"strategy": {
                   "rollingUpdate": {
                     "maxSurge": "25%",
@@ -1141,12 +1149,11 @@
               }
       )
     }
-
   }
 
   // 逆转 设置网络处理
   const reverseDnsConfigHandle = ()=>{
-    if(initData.value.spec.template.spec?.dnsConfig == undefined){
+    if(!initData.value.spec.template.spec?.dnsConfig ){
       Object.assign(initData.value.spec.template.spec,{
         "dnsConfig": {
           "nameservers": [],
@@ -1156,7 +1163,7 @@
       })
     }else{
       // 域名服务
-      if(initData.value.spec.template.spec.dnsConfig?.nameservers == undefined){
+      if(!initData.value.spec.template.spec.dnsConfig?.nameservers ){
         Object.assign(initData.value.spec.template.spec.dnsConfig,{nameservers:[]})
       }else{
         const nameServers = _.cloneDeep(initData.value.spec.template.spec.dnsConfig.nameservers)
@@ -1167,12 +1174,12 @@
       }
 
       // 解析器
-      if(initData.value.spec.template.spec.dnsConfig?.options == undefined){
+      if(!initData.value.spec.template.spec.dnsConfig?.options ){
         Object.assign(initData.value.spec.template.spec.dnsConfig,{options:[]})
       }
 
       // 搜索域
-      if(initData.value.spec.template.spec.dnsConfig?.searches == undefined){
+      if(!initData.value.spec.template.spec.dnsConfig?.searches ){
         Object.assign(initData.value.spec.template.spec.dnsConfig,{searches:[]})
       }else{
         const searches = _.cloneDeep(initData.value.spec.template.spec.dnsConfig.searches)
@@ -1183,24 +1190,24 @@
       }
     }
 
-    if(initData.value.spec.template.spec?.hostAliases == undefined){
+    if(!initData.value.spec.template.spec?.hostAliases ){
       Object.assign(initData.value.spec.template.spec,{
         "hostAliases": [
-          {"hostnames":[]}
+          // {"hostnames":[]}
         ]
       })
     }
 
-    if(initData.value.spec.template.spec?.dnsPolicy == undefined){
+    if(!initData.value.spec.template.spec?.dnsPolicy ){
       Object.assign(initData.value.spec.template.spec,{"dnsPolicy": undefined})
     }
-    if(initData.value.spec.template.spec?.hostNetwork == undefined){
+    if(!initData.value.spec.template.spec?.hostNetwork ){
       Object.assign(initData.value.spec.template.spec,{"hostNetwork": undefined})
     }
-    if(initData.value.spec.template.spec?.hostname == undefined){
+    if(!initData.value.spec.template.spec?.hostname ){
       Object.assign(initData.value.spec.template.spec,{"hostname": undefined})
     }
-    if(initData.value.spec.template.spec?.subdomain == undefined){
+    if(!initData.value.spec.template.spec?.subdomain ){
       Object.assign(initData.value.spec.template.spec,{"subdomain": undefined})
     }
 
@@ -1258,7 +1265,7 @@
 
   // 逆转 环境变量配置
   const reverseEnvHandle = (container)=>{
-    if(container?.env == undefined){
+    if(!container?.env ){
       Object.assign(container,{"env":[]})
     }else{
       container.env.forEach(function(envItem){
@@ -1279,13 +1286,13 @@
 
   // 逆转 命令配置
   const reverseCommandHandle = (container)=>{
-    if(container?.args == undefined){
+    if(!container?.args ){
       Object.assign(container,{"args":undefined})
     }
-    if(container?.command == undefined){
+    if(!container?.command ){
       Object.assign(container,{"command":undefined})
     }
-    if(container?.workingDir == undefined){
+    if(!container?.workingDir ){
       Object.assign(container,{"workingDir":undefined})
     }
     // 标准输入处理
@@ -1294,11 +1301,11 @@
 
   // 逆转 端口设置
   const reversePortsHandle = (container)=>{
-    if(container?.ports == undefined){
+    if(!container?.ports ){
       Object.assign(container,{"ports":[]})
     }else{
       container.ports.forEach(function(port){
-        if(port.hostPort == undefined){
+        if(!port.hostPort ){
           Object.assign(port,{"_serviceType":"ClusterIP"})
         }else{
           Object.assign(port,{"_serviceType":"NodePort"})
@@ -1309,7 +1316,7 @@
 
   // 逆转 安全上下文
   const reverseSecurityContextHandle = (container)=>{
-    if(container?.securityContext == undefined){
+    if(!container?.securityContext ){
       Object.assign(container,{
         "securityContext": {
           "capabilities": {
@@ -1392,14 +1399,14 @@
   // 逆转 生命周期处理
   const reverseLifecycleHandle = (container)=>{
     // 都为空的情况初始化生命周期对象
-    if(container?.lifecycle == undefined ){
+    if(!container?.lifecycle  ){
       Object.assign(container,{
         "lifecycle": {
           "postStart": {
-            "item":""
+            "item":undefined
           },
           "preStop": {
-            "item":""
+            "item":undefined
           }
         }
       })
@@ -1417,7 +1424,7 @@
         }
       }else{
         Object.assign(container.lifecycle,{"postStart": {
-            "item":""
+            "item":undefined
           }
         })
       }
@@ -1435,7 +1442,7 @@
 
       }else{
         Object.assign(container.lifecycle,{"preStop": {
-            "item":""
+            "item":undefined
           }
         })
       }
@@ -1494,7 +1501,7 @@
             "namespaces":requireds.nodeSelectorTerms?.namespaces,
             "weight":requireds.weight,
             "nodeLevel":"1",
-            "curNameSpace": requireds?.nodeSelectorTerms?.namespaces == undefined || requireds.nodeSelectorTerms?.namespaces.length == 0,
+            "curNameSpace": !requireds?.nodeSelectorTerms?.namespaces  || requireds.nodeSelectorTerms?.namespaces.length == 0,
             "topologyKey":requireds.topologyKey,
             "labelSelector": _.cloneDeep(requireds.labelSelector)
           }
@@ -1511,7 +1518,7 @@
             "namespaces":preferred.nodeSelectorTerms?.namespaces,
             "weight":preferred.weight,
             "nodeLevel":"0",
-            "curNameSpace":preferred?.nodeSelectorTerms?.namespaces == undefined || preferred.nodeSelectorTerms?.namespaces.length == 0,
+            "curNameSpace": !preferred?.nodeSelectorTerms?.namespaces  || preferred.nodeSelectorTerms?.namespaces.length == 0,
             "topologyKey":preferred.podAffinityTerm.topologyKey,
             "labelSelector": _.cloneDeep(preferred.podAffinityTerm.labelSelector)
           }
@@ -1531,7 +1538,7 @@
                 "namespaces":required.namespaces,
                 "weight":required.weight,
                 "nodeLevel":"1",
-                "curNameSpace":required?.namespaces == undefined || required?.namespaces.length == 0,
+                "curNameSpace": !required?.namespaces  || required?.namespaces.length == 0,
                 "topologyKey":required.podAffinityTerm.topologyKey,
                 "labelSelector": _.cloneDeep(required.podAffinityTerm.labelSelector)
               }
@@ -1551,7 +1558,7 @@
                 "namespaces":preferred.namespaces,
                 "weight":preferred.weight,
                 "nodeLevel":"0",
-                "curNameSpace": preferred?.namespaces == undefined || preferred?.namespaces.length == 0,
+                "curNameSpace": !preferred?.namespaces  || preferred?.namespaces.length == 0,
                 "topologyKey":preferred.podAffinityTerm.topologyKey,
                 "labelSelector": _.cloneDeep(preferred.podAffinityTerm.labelSelector)
               }
@@ -1568,7 +1575,7 @@
 
   // 内存&CPU限制处理
   const reverseResourceHandle = (container) =>{
-    if(container?.resources == undefined ){
+    if(!container?.resources  ){
       Object.assign(container,{
         "resources": {
           "requests": {
@@ -1616,7 +1623,7 @@
 
   // 标签 & 注解
   const json2labelAnnotation = (values,yamlValues)=>{
-    if(values == undefined || yamlValues == undefined){
+    if(!values  || !yamlValues ){
       return
     }
 
@@ -1673,6 +1680,11 @@
                   <el-option label="Deployment" value="Deployment"></el-option>
                   <el-option label="Create" value="Create"></el-option>
                 </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="容器副本数量">
+                <el-input-number  v-model="initData.spec.replicas" placeholder="请输入副本数量"></el-input-number>
               </el-form-item>
             </el-col>
             <el-col :span="8">
@@ -1759,23 +1771,23 @@
                         <el-row :gutter="24" style="margin-top:10px;margin-left:2px">
                           <el-col :span="12">
                             <el-form-item label="最短就绪时间">
-                              <el-input type="number" placeholder="请输入最短就绪时间" v-model="initData.spec.minReadySeconds">
+                              <el-input-number  placeholder="请输入最短就绪时间" v-model="initData.spec.minReadySeconds">
                                 <template #append>秒</template>
-                              </el-input>
+                              </el-input-number>
                             </el-form-item>
                           </el-col>
                           <el-col :span="12">
                             <el-form-item label="修订历史记录限制">
-                              <el-input type="number" placeholder="请输入修订历史记录限制" v-model="initData.spec.revisionHistoryLimit">
+                              <el-input-number  placeholder="请输入修订历史记录限制" v-model="initData.spec.revisionHistoryLimit">
                                 <template #append>秒</template>
-                              </el-input>
+                              </el-input-number>
                             </el-form-item>
                           </el-col>
                           <el-col :span="12">
                             <el-form-item label="进程截止时间">
-                              <el-input type="number" placeholder="请输入进程截止时间数量" v-model="initData.spec.progressDeadlineSeconds">
+                              <el-input-number  placeholder="请输入进程截止时间数量" v-model="initData.spec.progressDeadlineSeconds">
                                 <template #append>秒</template>
-                              </el-input>
+                              </el-input-number>
                             </el-form-item>
                           </el-col>
                         </el-row>
@@ -1966,7 +1978,7 @@
                               </el-col>
                               <el-col :span="6" v-if="node.nodeLevel == '0'">
                                 <el-form-item label="权重">
-                                  <el-input type="number"
+                                  <el-input-number 
                                             v-model="node.weight"/>
                                 </el-form-item>
                               </el-col>
@@ -2051,7 +2063,7 @@
                             </el-col>
                             <el-col :span="3" v-if="pod.nodeLevel == '0'">
                               <el-form-item label="权重">
-                                <el-input type="number"
+                                <el-input-number 
                                           v-model="pod.weight"/>
                               </el-form-item>
                             </el-col>
@@ -2119,9 +2131,9 @@
                         <el-row :gutter="24" >
                           <el-col :span="8">
                             <el-form-item label="终止宽限期"  >
-                              <el-input placeholder="请输入内容" type="number" v-model="initData.spec.template.spec.terminationGracePeriodSeconds" >
+                              <el-input-number placeholder="请输入内容"  v-model="initData.spec.template.spec.terminationGracePeriodSeconds" >
                                 <template #append>秒</template>
-                              </el-input>
+                              </el-input-number>
                             </el-form-item>
                           </el-col>
                         </el-row>
@@ -2132,8 +2144,8 @@
                         <el-row :gutter="24" >
                           <el-col :span="8">
                             <el-form-item label="Pod文件系统组"  >
-                              <el-input placeholder="请输入内容" type="number" v-model="initData.spec.template.spec.securityContext.fsGroup" >
-                              </el-input>
+                              <el-input-number placeholder="请输入内容"  v-model="initData.spec.template.spec.securityContext.fsGroup" >
+                              </el-input-number>
                             </el-form-item>
                           </el-col>
                         </el-row>
@@ -2220,7 +2232,7 @@
                           </el-col>
                           <el-col :span="3">
                             <el-form-item label="私有容器端口">
-                              <el-input type="number" v-model="port.containerPort" placeholder="如：8080"></el-input>
+                              <el-input-number v-model="port.containerPort" placeholder="如：8080"></el-input-number>
                             </el-form-item>
                           </el-col>
                           <el-col :span="2">
@@ -2240,7 +2252,7 @@
                           </el-col>
                           <el-col :span="3">
                             <el-form-item label="公共主机端口">
-                              <el-input type="number" v-model="port.hostPort" placeholder="如：80"></el-input>
+                              <el-input-number  v-model="port.hostPort" placeholder="如：80"></el-input-number>
                             </el-form-item>
                           </el-col>
                           <el-col :span="3">
@@ -2483,6 +2495,7 @@
                           </el-col>
                         </el-row>
                         <H1>生命周期管理</H1>
+                        {{ container.lifecycle.postStart }}
                         <el-row :gutter="24" >
                           <el-col :span="24">
                             <el-form-item label="启动后动作"  >
@@ -2512,7 +2525,7 @@
                             </el-col>
                             <el-col :span="4">
                               <el-form-item label="端口"  >
-                                <el-input type="number" placeholder="如：80" v-model="container.lifecycle.postStart.httpGet.port" />
+                                <el-input-number placeholder="如：80" v-model="container.lifecycle.postStart.httpGet.port" />
                               </el-form-item>
                             </el-col>
                             <el-col :span="4">
@@ -2544,7 +2557,7 @@
                           <el-row :gutter="24">
                             <el-col :span="4">
                               <el-form-item label="端口"  >
-                                <el-input  placeholder="如：80" v-model="container.lifecycle.postStart.tcpScoket.port" />
+                                <el-input-number  placeholder="如：80" v-model="container.lifecycle.postStart.tcpScoket.port" />
                               </el-form-item>
                             </el-col>
                           </el-row>
@@ -2579,7 +2592,7 @@
                             </el-col>
                             <el-col :span="4">
                               <el-form-item label="端口"  >
-                                <el-input placeholder="如：80" v-model="container.lifecycle.preStop.httpGet.port" />
+                                <el-input-number placeholder="如：80" v-model="container.lifecycle.preStop.httpGet.port" />
                               </el-form-item>
                             </el-col>
                             <el-col :span="4">
@@ -2613,7 +2626,7 @@
                           <el-row :gutter="24">
                             <el-col :span="4">
                               <el-form-item label="端口"  >
-                                <el-input type="number" placeholder="如：80" v-model="container.lifecycle.preStop.tcpScoket.port" />
+                                <el-input-number placeholder="如：80" v-model="container.lifecycle.preStop.tcpScoket.port" />
                               </el-form-item>
                             </el-col>
                           </el-row>
@@ -2642,7 +2655,7 @@
                           <el-row :gutter="12" >
                             <el-col :span="5">
                               <el-form-item label="检查端口" >
-                                <el-input type="number" v-model="container.readinessProbe.httpGet.port" placeholder="例如：" />
+                                <el-input-number v-model="container.readinessProbe.httpGet.port" placeholder="例如：80" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
@@ -2656,30 +2669,30 @@
                           <el-row :gutter="12">
                             <el-col :span="3">
                               <el-form-item label="检查间隔" >
-                                <el-input type="number" v-model="container.readinessProbe.periodSeconds" placeholder="请输入检查间隔" />
+                                <el-input-number v-model="container.readinessProbe.periodSeconds" placeholder="请输入检查间隔" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="3">
                               <el-form-item label="初始延迟" >
-                                <el-input type="number" v-model="container.readinessProbe.initialDelaySeconds" placeholder="请输入初始延迟" />
+                                <el-input-number v-model="container.readinessProbe.initialDelaySeconds" placeholder="请输入初始延迟" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="3">
                               <el-form-item label="超时" >
-                                <el-input type="number" v-model="container.readinessProbe.timeoutSeconds" placeholder="请输入超时时间" />
+                                <el-input-number v-model="container.readinessProbe.timeoutSeconds" placeholder="请输入超时时间" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="5">
                               <el-form-item label="成功阈值" >
-                                <el-input type="number" v-model="container.readinessProbe.successThreshold" placeholder="例如：1" />
+                                <el-input-number v-model="container.readinessProbe.successThreshold" placeholder="例如：1" />
                               </el-form-item>
                             </el-col>
                             <el-col :span="5">
                               <el-form-item label="失败阈值" >
-                                <el-input type="number" v-model="container.readinessProbe.failureThreshold" placeholder="例如：1" />
+                                <el-input-number v-model="container.readinessProbe.failureThreshold" placeholder="例如：1" />
                               </el-form-item>
                             </el-col>
                           </el-row>
@@ -2690,7 +2703,7 @@
                           <el-row :gutter="12" >
                             <el-col :span="5">
                               <el-form-item label="检查端口" >
-                                <el-input type="number" v-model="container.readinessProbe.httpGet.port" placeholder="例如：" />
+                                <el-input-number v-model="container.readinessProbe.httpGet.port" placeholder="例如：80" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
@@ -2704,30 +2717,30 @@
                           <el-row :gutter="12">
                             <el-col :span="3">
                               <el-form-item label="检查间隔" >
-                                <el-input type="number" v-model="container.readinessProbe.periodSeconds" placeholder="请输入检查间隔" />
+                                <el-input-number v-model="container.readinessProbe.periodSeconds" placeholder="请输入检查间隔" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="3">
                               <el-form-item label="初始延迟" >
-                                <el-input type="number" v-model="container.readinessProbe.initialDelaySeconds" placeholder="请输入初始延迟" />
+                                <el-input-number v-model="container.readinessProbe.initialDelaySeconds" placeholder="请输入初始延迟" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="3">
                               <el-form-item label="超时" >
-                                <el-input type="number" v-model="container.readinessProbe.timeoutSeconds" placeholder="请输入超时时间" />
+                                <el-input-number v-model="container.readinessProbe.timeoutSeconds" placeholder="请输入超时时间" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="5">
                               <el-form-item label="成功阈值" >
-                                <el-input type="number" v-model="container.readinessProbe.successThreshold" placeholder="例如：1" />
+                                <el-input-number v-model="container.readinessProbe.successThreshold" placeholder="例如：1" />
                               </el-form-item>
                             </el-col>
                             <el-col :span="5">
                               <el-form-item label="失败阈值" >
-                                <el-input type="number" v-model="container.readinessProbe.failureThreshold" placeholder="例如：1" />
+                                <el-input-number v-model="container.readinessProbe.failureThreshold" placeholder="例如：1" />
                               </el-form-item>
                             </el-col>
                           </el-row>
@@ -2745,30 +2758,30 @@
                           <el-row :gutter="12">
                             <el-col :span="3">
                               <el-form-item label="检查间隔" >
-                                <el-input type="number" v-model="container.readinessProbe.periodSeconds" placeholder="请输入检查间隔" />
+                                <el-input-number v-model="container.readinessProbe.periodSeconds" placeholder="请输入检查间隔" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="3">
                               <el-form-item label="初始延迟" >
-                                <el-input type="number" v-model="container.readinessProbe.initialDelaySeconds" placeholder="请输入初始延迟" />
+                                <el-input-number v-model="container.readinessProbe.initialDelaySeconds" placeholder="请输入初始延迟" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="3">
                               <el-form-item label="超时" >
-                                <el-input type="number" v-model="container.readinessProbe.timeoutSeconds" placeholder="请输入超时时间" />
+                                <el-input-number v-model="container.readinessProbe.timeoutSeconds" placeholder="请输入超时时间" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="5">
                               <el-form-item label="成功阈值" >
-                                <el-input type="number" v-model="container.readinessProbe.successThreshold" placeholder="例如：1" />
+                                <el-input-number v-model="container.readinessProbe.successThreshold" placeholder="例如：1" />
                               </el-form-item>
                             </el-col>
                             <el-col :span="5">
                               <el-form-item label="失败阈值" >
-                                <el-input type="number" v-model="container.readinessProbe.failureThreshold" placeholder="例如：1" />
+                                <el-input-number v-model="container.readinessProbe.failureThreshold" placeholder="例如：1" />
                               </el-form-item>
                             </el-col>
                           </el-row>
@@ -2779,7 +2792,7 @@
                           <el-row :gutter="12" >
                             <el-col :span="5">
                               <el-form-item label="检查端口" >
-                                <el-input type="number" v-model="container.readinessProbe.tcpSocket.port" placeholder="例如：80" />
+                                <el-input-number v-model="container.readinessProbe.tcpSocket.port" placeholder="例如：80" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
@@ -2787,30 +2800,30 @@
                           <el-row :gutter="12">
                             <el-col :span="3">
                               <el-form-item label="检查间隔" >
-                                <el-input type="number" v-model="container.readinessProbe.periodSeconds" placeholder="请输入检查间隔" />
+                                <el-input-number v-model="container.readinessProbe.periodSeconds" placeholder="请输入检查间隔" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="3">
                               <el-form-item label="初始延迟" >
-                                <el-input type="number" v-model="container.readinessProbe.initialDelaySeconds" placeholder="请输入初始延迟" />
+                                <el-input-number v-model="container.readinessProbe.initialDelaySeconds" placeholder="请输入初始延迟" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="3">
                               <el-form-item label="超时" >
-                                <el-input type="number" v-model="container.readinessProbe.timeoutSeconds" placeholder="请输入超时时间" />
+                                <el-input-number v-model="container.readinessProbe.timeoutSeconds" placeholder="请输入超时时间" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="5">
                               <el-form-item label="成功阈值" >
-                                <el-input type="number" v-model="container.readinessProbe.successThreshold" placeholder="例如：1" />
+                                <el-input-number v-model="container.readinessProbe.successThreshold" placeholder="例如：1" />
                               </el-form-item>
                             </el-col>
                             <el-col :span="5">
                               <el-form-item label="失败阈值" >
-                                <el-input type="number" v-model="container.readinessProbe.failureThreshold" placeholder="例如：1" />
+                                <el-input-number v-model="container.readinessProbe.failureThreshold" placeholder="例如：1" />
                               </el-form-item>
                             </el-col>
                           </el-row>
@@ -2835,7 +2848,7 @@
                           <el-row :gutter="12" >
                             <el-col :span="5">
                               <el-form-item label="检查端口" >
-                                <el-input type="number" v-model="container.livenessProbe.httpGet.port" placeholder="例如：" />
+                                <el-input-number v-model="container.livenessProbe.httpGet.port" placeholder="例如：80" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
@@ -2849,30 +2862,30 @@
                           <el-row :gutter="12">
                             <el-col :span="3">
                               <el-form-item label="检查间隔" >
-                                <el-input type="number" v-model="container.livenessProbe.periodSeconds" placeholder="请输入检查间隔" />
+                                <el-input-number v-model="container.livenessProbe.periodSeconds" placeholder="请输入检查间隔" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="3">
                               <el-form-item label="初始延迟" >
-                                <el-input type="number" v-model="container.livenessProbe.initialDelaySeconds" placeholder="请输入初始延迟" />
+                                <el-input-number v-model="container.livenessProbe.initialDelaySeconds" placeholder="请输入初始延迟" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="3">
                               <el-form-item label="超时" >
-                                <el-input type="number" v-model="container.livenessProbe.timeoutSeconds" placeholder="请输入超时时间" />
+                                <el-input-number v-model="container.livenessProbe.timeoutSeconds" placeholder="请输入超时时间" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="5">
                               <el-form-item label="成功阈值" >
-                                <el-input type="number" v-model="container.livenessProbe.successThreshold" placeholder="例如：1" />
+                                <el-input-number v-model="container.livenessProbe.successThreshold" placeholder="例如：1" />
                               </el-form-item>
                             </el-col>
                             <el-col :span="5">
                               <el-form-item label="失败阈值" >
-                                <el-input type="number" v-model="container.livenessProbe.failureThreshold" placeholder="例如：1" />
+                                <el-input-number v-model="container.livenessProbe.failureThreshold" placeholder="例如：1" />
                               </el-form-item>
                             </el-col>
                           </el-row>
@@ -2883,7 +2896,7 @@
                           <el-row :gutter="12" >
                             <el-col :span="5">
                               <el-form-item label="检查端口" >
-                                <el-input type="number" v-model="container.livenessProbe.httpGet.port" placeholder="例如：" />
+                                <el-input-number v-model="container.livenessProbe.httpGet.port" placeholder="例如：80" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
@@ -2897,30 +2910,30 @@
                           <el-row :gutter="12">
                             <el-col :span="3">
                               <el-form-item label="检查间隔" >
-                                <el-input type="number" v-model="container.livenessProbe.periodSeconds" placeholder="请输入检查间隔" />
+                                <el-input-number v-model="container.livenessProbe.periodSeconds" placeholder="请输入检查间隔" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="3">
                               <el-form-item label="初始延迟" >
-                                <el-input type="number" v-model="container.livenessProbe.initialDelaySeconds" placeholder="请输入初始延迟" />
+                                <el-input-number v-model="container.livenessProbe.initialDelaySeconds" placeholder="请输入初始延迟" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="3">
                               <el-form-item label="超时" >
-                                <el-input type="number" v-model="container.livenessProbe.timeoutSeconds" placeholder="请输入超时时间" />
+                                <el-input-number v-model="container.livenessProbe.timeoutSeconds" placeholder="请输入超时时间" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="5">
                               <el-form-item label="成功阈值" >
-                                <el-input type="number" v-model="container.livenessProbe.successThreshold" placeholder="例如：1" />
+                                <el-input-number v-model="container.livenessProbe.successThreshold" placeholder="例如：1" />
                               </el-form-item>
                             </el-col>
                             <el-col :span="5">
                               <el-form-item label="失败阈值" >
-                                <el-input type="number" v-model="container.livenessProbe.failureThreshold" placeholder="例如：1" />
+                                <el-input-number v-model="container.livenessProbe.failureThreshold" placeholder="例如：1" />
                               </el-form-item>
                             </el-col>
                           </el-row>
@@ -2938,30 +2951,30 @@
                           <el-row :gutter="12">
                             <el-col :span="3">
                               <el-form-item label="检查间隔" >
-                                <el-input type="number" v-model="container.livenessProbe.periodSeconds" placeholder="请输入检查间隔" />
+                                <el-input-number v-model="container.livenessProbe.periodSeconds" placeholder="请输入检查间隔" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="3">
                               <el-form-item label="初始延迟" >
-                                <el-input type="number" v-model="container.livenessProbe.initialDelaySeconds" placeholder="请输入初始延迟" />
+                                <el-input-number v-model="container.livenessProbe.initialDelaySeconds" placeholder="请输入初始延迟" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="3">
                               <el-form-item label="超时" >
-                                <el-input type="number" v-model="container.livenessProbe.timeoutSeconds" placeholder="请输入超时时间" />
+                                <el-input-number v-model="container.livenessProbe.timeoutSeconds" placeholder="请输入超时时间" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="5">
                               <el-form-item label="成功阈值" >
-                                <el-input type="number" v-model="container.livenessProbe.successThreshold" placeholder="例如：1" />
+                                <el-input-number v-model="container.livenessProbe.successThreshold" placeholder="例如：1" />
                               </el-form-item>
                             </el-col>
                             <el-col :span="5">
                               <el-form-item label="失败阈值" >
-                                <el-input type="number" v-model="container.livenessProbe.failureThreshold" placeholder="例如：1" />
+                                <el-input-number v-model="container.livenessProbe.failureThreshold" placeholder="例如：1" />
                               </el-form-item>
                             </el-col>
                           </el-row>
@@ -2972,7 +2985,7 @@
                           <el-row :gutter="12" >
                             <el-col :span="5">
                               <el-form-item label="检查端口" >
-                                <el-input type="number" v-model="container.livenessProbe.tcpSocket.port" placeholder="例如：80" />
+                                <el-input-number v-model="container.livenessProbe.tcpSocket.port" placeholder="例如：80" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
@@ -2980,30 +2993,30 @@
                           <el-row :gutter="12">
                             <el-col :span="3">
                               <el-form-item label="检查间隔" >
-                                <el-input type="number" v-model="container.livenessProbe.periodSeconds" placeholder="请输入检查间隔" />
+                                <el-input-number v-model="container.livenessProbe.periodSeconds" placeholder="请输入检查间隔" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="3">
                               <el-form-item label="初始延迟" >
-                                <el-input type="number" v-model="container.livenessProbe.initialDelaySeconds" placeholder="请输入初始延迟" />
+                                <el-input-number v-model="container.livenessProbe.initialDelaySeconds" placeholder="请输入初始延迟" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="3">
                               <el-form-item label="超时" >
-                                <el-input type="number" v-model="container.livenessProbe.timeoutSeconds" placeholder="请输入超时时间" />
+                                <el-input-number v-model="container.livenessProbe.timeoutSeconds" placeholder="请输入超时时间" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="5">
                               <el-form-item label="成功阈值" >
-                                <el-input type="number" v-model="container.livenessProbe.successThreshold" placeholder="例如：1" />
+                                <el-input-number v-model="container.livenessProbe.successThreshold" placeholder="例如：1" />
                               </el-form-item>
                             </el-col>
                             <el-col :span="5">
                               <el-form-item label="失败阈值" >
-                                <el-input type="number" v-model="container.livenessProbe.failureThreshold" placeholder="例如：1" />
+                                <el-input-number v-model="container.livenessProbe.failureThreshold" placeholder="例如：1" />
                               </el-form-item>
                             </el-col>
                           </el-row>
@@ -3029,7 +3042,7 @@
                           <el-row :gutter="12" >
                             <el-col :span="5">
                               <el-form-item label="检查端口" >
-                                <el-input type="number" v-model="container.startupProbe.httpGet.port" placeholder="例如：" />
+                                <el-input-number v-model="container.startupProbe.httpGet.port" placeholder="例如：80" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
@@ -3043,30 +3056,30 @@
                           <el-row :gutter="12">
                             <el-col :span="3">
                               <el-form-item label="检查间隔" >
-                                <el-input type="number" v-model="container.startupProbe.periodSeconds" placeholder="请输入检查间隔" />
+                                <el-input-number v-model="container.startupProbe.periodSeconds" placeholder="请输入检查间隔" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="3">
                               <el-form-item label="初始延迟" >
-                                <el-input type="number" v-model="container.startupProbe.initialDelaySeconds" placeholder="请输入初始延迟" />
+                                <el-input-number v-model="container.startupProbe.initialDelaySeconds" placeholder="请输入初始延迟" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="3">
                               <el-form-item label="超时" >
-                                <el-input type="number" v-model="container.startupProbe.timeoutSeconds" placeholder="请输入超时时间" />
+                                <el-input-number v-model="container.startupProbe.timeoutSeconds" placeholder="请输入超时时间" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="5">
                               <el-form-item label="成功阈值" >
-                                <el-input type="number" v-model="container.startupProbe.successThreshold" placeholder="例如：1" />
+                                <el-input-number v-model="container.startupProbe.successThreshold" placeholder="例如：1" />
                               </el-form-item>
                             </el-col>
                             <el-col :span="5">
                               <el-form-item label="失败阈值" >
-                                <el-input type="number" v-model="container.startupProbe.failureThreshold" placeholder="例如：1" />
+                                <el-input-number v-model="container.startupProbe.failureThreshold" placeholder="例如：1" />
                               </el-form-item>
                             </el-col>
                           </el-row>
@@ -3077,7 +3090,7 @@
                           <el-row :gutter="12" >
                             <el-col :span="5">
                               <el-form-item label="检查端口" >
-                                <el-input type="number" v-model="container.startupProbe.httpGet.port" placeholder="例如：" />
+                                <el-input-number v-model="container.startupProbe.httpGet.port" placeholder="例如：80" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
@@ -3091,30 +3104,30 @@
                           <el-row :gutter="12">
                             <el-col :span="3">
                               <el-form-item label="检查间隔" >
-                                <el-input type="number" v-model="container.startupProbe.periodSeconds" placeholder="请输入检查间隔" />
+                                <el-input-number v-model="container.startupProbe.periodSeconds" placeholder="请输入检查间隔" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="3">
                               <el-form-item label="初始延迟" >
-                                <el-input type="number" v-model="container.startupProbe.initialDelaySeconds" placeholder="请输入初始延迟" />
+                                <el-input-number v-model="container.startupProbe.initialDelaySeconds" placeholder="请输入初始延迟" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="3">
                               <el-form-item label="超时" >
-                                <el-input type="number" v-model="container.startupProbe.timeoutSeconds" placeholder="请输入超时时间" />
+                                <el-input-number v-model="container.startupProbe.timeoutSeconds" placeholder="请输入超时时间" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="5">
                               <el-form-item label="成功阈值" >
-                                <el-input type="number" v-model="container.startupProbe.successThreshold" placeholder="例如：1" />
+                                <el-input-number v-model="container.startupProbe.successThreshold" placeholder="例如：1" />
                               </el-form-item>
                             </el-col>
                             <el-col :span="5">
                               <el-form-item label="失败阈值" >
-                                <el-input type="number" v-model="container.startupProbe.failureThreshold" placeholder="例如：1" />
+                                <el-input-number v-model="container.startupProbe.failureThreshold" placeholder="例如：1" />
                               </el-form-item>
                             </el-col>
                           </el-row>
@@ -3132,30 +3145,30 @@
                           <el-row :gutter="12">
                             <el-col :span="3">
                               <el-form-item label="检查间隔" >
-                                <el-input type="number" v-model="container.startupProbe.periodSeconds" placeholder="请输入检查间隔" />
+                                <el-input-number v-model="container.startupProbe.periodSeconds" placeholder="请输入检查间隔" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="3">
                               <el-form-item label="初始延迟" >
-                                <el-input type="number" v-model="container.startupProbe.initialDelaySeconds" placeholder="请输入初始延迟" />
+                                <el-input-number v-model="container.startupProbe.initialDelaySeconds" placeholder="请输入初始延迟" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="3">
                               <el-form-item label="超时" >
-                                <el-input type="number" v-model="container.startupProbe.timeoutSeconds" placeholder="请输入超时时间" />
+                                <el-input-number v-model="container.startupProbe.timeoutSeconds" placeholder="请输入超时时间" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="5">
                               <el-form-item label="成功阈值" >
-                                <el-input type="number" v-model="container.startupProbe.successThreshold" placeholder="例如：1" />
+                                <el-input-number v-model="container.startupProbe.successThreshold" placeholder="例如：1" />
                               </el-form-item>
                             </el-col>
                             <el-col :span="5">
                               <el-form-item label="失败阈值" >
-                                <el-input type="number" v-model="container.startupProbe.failureThreshold" placeholder="例如：1" />
+                                <el-input-number v-model="container.startupProbe.failureThreshold" placeholder="例如：1" />
                               </el-form-item>
                             </el-col>
                           </el-row>
@@ -3166,7 +3179,7 @@
                           <el-row :gutter="12" >
                             <el-col :span="5">
                               <el-form-item label="检查端口" >
-                                <el-input type="number" v-model="container.startupProbe.tcpSocket.port" placeholder="例如：80" />
+                                <el-input-number v-model="container.startupProbe.tcpSocket.port" placeholder="例如：80" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
@@ -3174,30 +3187,30 @@
                           <el-row :gutter="12">
                             <el-col :span="3">
                               <el-form-item label="检查间隔" >
-                                <el-input type="number" v-model="container.startupProbe.periodSeconds" placeholder="请输入检查间隔" />
+                                <el-input-number v-model="container.startupProbe.periodSeconds" placeholder="请输入检查间隔" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="3">
                               <el-form-item label="初始延迟" >
-                                <el-input type="number" v-model="container.startupProbe.initialDelaySeconds" placeholder="请输入初始延迟" />
+                                <el-input-number v-model="container.startupProbe.initialDelaySeconds" placeholder="请输入初始延迟" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="3">
                               <el-form-item label="超时" >
-                                <el-input type="number" v-model="container.startupProbe.timeoutSeconds" placeholder="请输入超时时间" />
+                                <el-input-number v-model="container.startupProbe.timeoutSeconds" placeholder="请输入超时时间" />
                                 <template #append>秒</template>
                               </el-form-item>
                             </el-col>
                             <el-col :span="5">
                               <el-form-item label="成功阈值" >
-                                <el-input type="number" v-model="container.startupProbe.successThreshold" placeholder="例如：1" />
+                                <el-input-number v-model="container.startupProbe.successThreshold" placeholder="例如：1" />
                               </el-form-item>
                             </el-col>
                             <el-col :span="5">
                               <el-form-item label="失败阈值" >
-                                <el-input type="number" v-model="container.startupProbe.failureThreshold" placeholder="例如：1" />
+                                <el-input-number v-model="container.startupProbe.failureThreshold" placeholder="例如：1" />
                               </el-form-item>
                             </el-col>
                           </el-row>
@@ -3209,44 +3222,44 @@
                         <el-row :gutter="24">
                           <el-col :span="8">
                             <el-form-item label="CPU预留" >
-                              <el-input v-model="container.resources.requests.cpu" placeholder="例如：1.5" type="number">
+                              <el-input-number v-model="container.resources.requests.cpu" placeholder="例如：1.5" >
                                 <template #append>CPU</template>
-                              </el-input>
+                              </el-input-number>
                             </el-form-item>
                           </el-col>
                           <el-col :span="8">
                             <el-form-item label="内存预留" >
-                              <el-input v-model="container.resources.requests.memory" placeholder="例如：128" type="number">
+                              <el-input-number v-model="container.resources.requests.memory" placeholder="例如：128" >
                                 <template #append>MiB</template>
-                              </el-input>
+                              </el-input-number>
                             </el-form-item>
                           </el-col>
                           <el-col :span="8">
                             <el-form-item label="NVIDIA GPU预留" >
-                              <el-input v-model="container.resources.requests['nvidia.com/gpu']" placeholder="例如：1" type="number">
+                              <el-input-number v-model="container.resources.requests['nvidia.com/gpu']" placeholder="例如：1" >
                                 <template #append>GPU</template>
-                              </el-input>
+                              </el-input-number>
                             </el-form-item>
                           </el-col>
                           <el-col :span="8">
                             <el-form-item label="CPU限制" >
-                              <el-input v-model="container.resources.limits.cpu" placeholder="例如：1.5" type="number">
+                              <el-input-number v-model="container.resources.limits.cpu" placeholder="例如：1.5" >
                                 <template #append>CPU</template>
-                              </el-input>
+                              </el-input-number>
                             </el-form-item>
                           </el-col>
                           <el-col :span="8">
                             <el-form-item label="内存限制" >
-                              <el-input v-model="container.resources.limits.memory" placeholder="例如：128" type="number">
+                              <el-input-number v-model="container.resources.limits.memory" placeholder="例如：128" >
                                 <template #append>MiB</template>
-                              </el-input>
+                              </el-input-number>
                             </el-form-item>
                           </el-col>
                           <el-col :span="8">
                             <el-form-item label="NVIDIA GPU限制" >
-                              <el-input v-model="container.resources.limits['nvidia.com/gpu']" placeholder="例如：1" type="number">
+                              <el-input-number v-model="container.resources.limits['nvidia.com/gpu']" placeholder="例如：1" >
                                 <template #append>GPU</template>
-                              </el-input>
+                              </el-input-number>
                             </el-form-item>
                           </el-col>
                         </el-row>
