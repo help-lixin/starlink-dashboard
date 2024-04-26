@@ -162,11 +162,11 @@
             }
     )
   }
-  // 删除节点调度
+  // 删除pod节点调度
   const removePod = (index)=>{
     initData.value.option.freePod.splice(index, 1);
   }
-  // 添加规则
+  // 添加pod规则
   const addPodRule = (pod)=>{
     pod.labelSelector.matchExpressions.push(
             {
@@ -176,6 +176,23 @@
                 ""
               ]
             }
+    );
+  }
+  // 删除容忍度规则
+  const removeTolerationRule = (index)=>{
+    initData.spec.template.spec.tolerations.splice(index, 1);
+  }
+
+  // 添加容忍度规则
+  const addTolerationRule = ()=>{
+    initData.value.spec.template.spec.tolerations.push(
+        {
+          "key": undefined,
+          "operator": undefined,
+          "value": undefined,
+          "effect": undefined,
+          "tolerationSeconds": undefined,
+        }
     );
   }
   // 删除规则
@@ -657,7 +674,9 @@
               }
             }
           ],
-
+          "priority": undefined,
+          "priorityClassName": undefined,
+          "tolerations":[],
           "dnsConfig": {
             "nameservers": [],
             "options": [],
@@ -1994,8 +2013,8 @@
                                   <el-select style="width: 100%;" v-model="item.operator" placeholder="请选择">
                                     <el-option label="包含" value="In"></el-option>
                                     <el-option label="不包含" value="NotIn"></el-option>
-                                    <el-option label="等于" value="Exists"></el-option>
-                                    <el-option label="不等于" value="DoesNotExist"></el-option>
+                                    <el-option label="存在" value="Exists"></el-option>
+                                    <el-option label="不存在" value="DoesNotExist"></el-option>
                                     <el-option label="小于" value="Gt"></el-option>
                                     <el-option label="大于" value="Lt"></el-option>
                                   </el-select>
@@ -2095,8 +2114,8 @@
                                 <el-select style="width: 100%;" v-model="item.operator" placeholder="请选择">
                                   <el-option label="包含" value="In"></el-option>
                                   <el-option label="不包含" value="NotIn"></el-option>
-                                  <el-option label="等于" value="Exists"></el-option>
-                                  <el-option label="不等于" value="DoesNotExist"></el-option>
+                                  <el-option label="存在" value="Exists"></el-option>
+                                  <el-option label="不存在" value="DoesNotExist"></el-option>
                                   <el-option label="小于" value="Gt"></el-option>
                                   <el-option label="大于" value="Lt"></el-option>
                                 </el-select>
@@ -2124,6 +2143,66 @@
                           </el-row>
                         </template>
                         <el-button @click="addPod" type="primary" plain>添加节点调度</el-button>
+                      </div>
+
+                      <div v-show="initData.option.selectPod === 'podResource'  ? true : false ">
+                        <H1>容忍度</H1>
+                        <el-row :gutter="24" >
+                          <el-col :span="12">
+                            <el-form-item label="优先级">
+                              <el-input v-model="initData.spec.template.spec.priority"/>
+                            </el-form-item>
+                          </el-col>
+                          <el-col :span="12">
+                            <el-form-item label="优先级名称">
+                              <el-input v-model="initData.spec.template.spec.priorityClassName"/>
+                            </el-form-item>
+                          </el-col>
+                        </el-row>
+                        <el-row :gutter="24" v-for="(item,index) in initData.spec.template.spec.tolerations" :key="index">
+                          <el-col :span="6" >
+                            <el-form-item label="键">
+                              <el-input v-model="item.key"/>
+                            </el-form-item>
+                          </el-col>
+                          <el-col :span="2">
+                            <el-form-item label="运算符">
+                              <el-select style="width: 100%;" v-model="item.operator" placeholder="请选择">
+                                <el-option label="存在" value="Exists"></el-option>
+                                <el-option label="等于" value="Equal"></el-option>
+                              </el-select>
+                            </el-form-item>
+                          </el-col>
+                          <el-col :span="6">
+                            <el-form-item label="值">
+                              <el-input v-model="item.value"/>
+                            </el-form-item>
+                          </el-col>
+                          <el-col :span="2">
+                            <el-form-item label="效果">
+                              <el-select style="width: 100%;" v-model="item.effect" placeholder="请选择">
+                                <el-option label="倾向不调度" value="PreferNoSchedule"></el-option>
+                                <el-option label="不执行" value="NoExecute"></el-option>
+                                <el-option label="不调度" value="NoSchedule"></el-option>
+                              </el-select>
+                            </el-form-item>
+                          </el-col>
+                          <el-col :span="4">
+                            <el-form-item label="容忍（秒）">
+                              <el-input-number v-model="item.tolerationSeconds">
+                                <template #append>秒</template>
+                              </el-input-number>
+                            </el-form-item>
+                          </el-col>
+                          <el-col :span="3" style="margin-top:30px">
+                            <el-button @click="removeTolerationRule(index)" type="danger" plain>删除</el-button>
+                          </el-col>
+                        </el-row>
+                        <el-row>
+                          <el-col :span="12">
+                            <el-button @click="addTolerationRule()" type="primary" plain>添加规则</el-button>
+                          </el-col>
+                        </el-row>
                       </div>
 
                       <div v-show="initData.option.selectPod === 'podStrategy'  ? true : false ">
