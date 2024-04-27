@@ -1,11 +1,12 @@
 import request from "@/utils/request";
-import {GATEWAY_BASE_URL} from "@/utils/env"
+import {GATEWAY_BASE_URL,SYSTEM_SERVICE} from "@/utils/env"
+
 
 
 // 查询角色
 export function getRoles() {
     return request({
-        url: GATEWAY_BASE_URL + '/system-service/system/role/optionSelect',
+        url: SYSTEM_SERVICE + '/system/role/optionSelect',
         method: 'get'
     }).then((res)=>{
         return res?.data;
@@ -16,7 +17,7 @@ export function getRoles() {
 // 查询角色列表
 export function listRole(query:any) {
     return request({
-        url:  GATEWAY_BASE_URL + '/system-service/system/role/list',
+        url:  SYSTEM_SERVICE + '/system/role/list',
         method: 'POST',
         data: query
     }).then((res)=>{
@@ -28,7 +29,7 @@ export function listRole(query:any) {
 // 新增角色
 export function addRole(data:any) {
     return request({
-        url: GATEWAY_BASE_URL + '/system-service/system/role/add',
+        url: SYSTEM_SERVICE + '/system/role/add',
         method: 'post',
         headers: {
             'content-type': 'application/json'
@@ -42,7 +43,7 @@ export function addRole(data:any) {
 // 修改角色
 export function updateRole(data:any) {
     return request({
-        url: GATEWAY_BASE_URL + '/system-service/system/role/edit',
+        url: SYSTEM_SERVICE + '/system/role/edit',
         method: 'put',
         data: data,
         headers: {
@@ -57,7 +58,7 @@ export function updateRole(data:any) {
 // 删除角色
 export function delRole(roleId:any) {
     return request({
-        url: GATEWAY_BASE_URL + '/system-service/system/role/del/' + roleId,
+        url: SYSTEM_SERVICE + '/system/role/del/' + roleId,
         method: 'delete'
     }).then((res)=>{
         return res.data;
@@ -67,7 +68,7 @@ export function delRole(roleId:any) {
 // 查询角色详细
 export function getRole(roleId:any) {
     return request({
-      url: GATEWAY_BASE_URL + '/system-service/system/role/info/' + roleId,
+      url: SYSTEM_SERVICE + '/system/role/info/' + roleId,
       method: 'get'
     }).then((res)=>{
         return res.data;
@@ -78,7 +79,7 @@ export function getRole(roleId:any) {
 // 根据角色ID查询菜单下拉树结构
 export function roleMenuTreeSelect(roleId:any) {
     return request({
-        url: GATEWAY_BASE_URL + '/system-service/system/menu/roleMenuTreeSelect/' + roleId,
+        url: SYSTEM_SERVICE + '/system/menu/roleMenuTreeSelect/' + roleId,
         method: 'get'
     }).then((res)=>{
         return res.data?.data;
@@ -95,7 +96,7 @@ export function changeRoleStatus(roleId:any, status:any) {
     }
 
     return request({
-      url: GATEWAY_BASE_URL + '/system-service/system/role/changeStatus',
+      url: SYSTEM_SERVICE + '/system/role/changeStatus',
       method: 'put',
       data: data
     }).then((res)=>{

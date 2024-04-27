@@ -2,7 +2,7 @@
 // ts不检查该文件,否则,打包都不能通过
 
 import request from "@/utils/request";
-import {GATEWAY_BASE_URL} from "@/utils/env"
+import {SYSTEM_SERVICE} from "@/utils/env"
 
 type Perms = Set<string>;
 
@@ -22,7 +22,7 @@ export const getPerms = function() {
     }
     lockGetPermsOperator = true;
     promiseGetPerms =  request<Perms>({
-        url: GATEWAY_BASE_URL + "/system-service/system/menu/perms",
+        url: SYSTEM_SERVICE + "/system/menu/perms",
         method: 'GET',
         withCredentials: true
     }).then((res:any) => {
@@ -52,9 +52,9 @@ export const getRouters = () => {
     return promiseGetRouters;
   }
   lockRouterOperator = true;
-
+  
 	promiseGetRouters =  request<RouteInfo>({
-	  url: GATEWAY_BASE_URL + '/system-service/getRouters',
+	  url: SYSTEM_SERVICE + '/getRouters',
 	  method: 'get'
 	}).then((res)=>{
     console.log("=====================================================================")
