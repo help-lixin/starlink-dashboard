@@ -63,9 +63,6 @@ export const login = function (requsetData: LoginRequest) {
         withCredentials: true,
         params: requsetData
     }).then((res) => {
-        console.log("==========================++=============================")
-        console.log(res)
-        console.log("==========================++=============================")
         const loginFailJson = {
             code: 500,
             msg: "登录失败,用户名或密码错误"
