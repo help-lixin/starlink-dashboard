@@ -73,28 +73,26 @@ async function onSubmit() {
           //     "jti": "zYg8LxrUAyCnqwuXLEAlyfWWTDA"
           //   }
           // }
-          
-            if (authorizeRes.code == 200) {
-                ElMessage({ message: '登录成功', type: 'success' });
-                // 保存token信息(先把token信息转换成json字符串)
-                tokenStore.saveToken(JSON.stringify(authorizeRes.data));
-                // 初始化权限列表
-                permsStore.initPermList();
-                // 对路由进行处理
-                processRoutes();
-                // 初始化所有的action meta
-                actionMetasStore.initActions();
-                // 跳转到首页
-                router.push((route.query.redirect as string) || "/");
-                
-                // 注册流水线事件监听
-                registerPipelineEventHandler()
 
-                // 建立连接
-                const stompClient = StompClient.getInstance()
-                await stompClient.connect()
-                await stompClient.subscribe()
-            }
+            ElMessage({ message: '登录成功', type: 'success' });
+            // 保存token信息(先把token信息转换成json字符串)
+            tokenStore.saveToken(JSON.stringify(loginRes.data));
+            // 初始化权限列表
+            permsStore.initPermList();
+            // 对路由进行处理
+            processRoutes();
+            // 初始化所有的action meta
+            actionMetasStore.initActions();
+            // 跳转到首页
+            router.push((route.query.redirect as string) || "/");
+            
+            // 注册流水线事件监听
+            registerPipelineEventHandler()
+
+            // 建立连接
+            const stompClient = StompClient.getInstance()
+            await stompClient.connect()
+            await stompClient.subscribe()
         } else {
             let msg = loginRes.msg;
             ElMessage.error(msg);
