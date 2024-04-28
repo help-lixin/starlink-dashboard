@@ -2,13 +2,13 @@
 // ts不检查该文件,否则,打包都不能通过
 
 import request from "@/utils/request"
-import { GATEWAY_BASE_URL } from '@/utils/env';
+import { STARLINK_SERVICE } from '@/utils/env';
 
 
 // 列出所有的流水线定义
 export const list = (queryParams:any)=>{
     return request({
-		url: GATEWAY_BASE_URL + '/starlink-service/workflow/definition/list',
+		url: STARLINK_SERVICE + '/workflow/definition/list',
 		method: 'GET',
 		params: queryParams
 	}).then((res)=>{
@@ -19,7 +19,7 @@ export const list = (queryParams:any)=>{
 // 根据流水线定义id获得流水线定义信息.
 export const get = (id:any)=>{
     return request({
-		url: GATEWAY_BASE_URL + '/starlink-service/workflow/definition/info/' + id,
+		url: STARLINK_SERVICE + '/workflow/definition/info/' + id,
 		method: 'GET'
 	}).then((res)=>{
         return res.data;
@@ -29,7 +29,7 @@ export const get = (id:any)=>{
 // 部署流程
 export const deploy = (data:string)=>{
     return request({
-		url: GATEWAY_BASE_URL + '/starlink-service/workflow/definition/deploy',
+		url: STARLINK_SERVICE + '/workflow/definition/deploy',
 		method: 'POST',
 		headers: {
             'content-type': 'application/json'
@@ -43,7 +43,7 @@ export const deploy = (data:string)=>{
 // 启动流程
 export const startWorkFlowById = (data)=>{
     return request({
-		url: GATEWAY_BASE_URL + '/starlink-service/workflow/instance/startById',
+		url: STARLINK_SERVICE + '/workflow/instance/startById',
 		method: 'POST',
 		headers: {
             'content-type': 'application/json'
@@ -57,7 +57,7 @@ export const startWorkFlowById = (data)=>{
 // 修改状态
 export const changeStatus = (id:any,status:any)=>{
     return request({
-		url: GATEWAY_BASE_URL + '/starlink-service/workflow/definition/changeStatus/' + id + "/"+status,
+		url: STARLINK_SERVICE + '/workflow/definition/changeStatus/' + id + "/"+status,
 		method: 'PUT'
 	}).then((res)=>{
         return res.data;

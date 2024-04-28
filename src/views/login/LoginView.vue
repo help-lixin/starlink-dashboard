@@ -42,7 +42,7 @@ const isLoading = ref(false);
 const formRef = ref<FormInstance>();
 async function onSubmit() {
     isLoading.value = true;
-
+        
     let validate = await formRef.value?.validate()
         .catch((err: Error) => {
             ElMessage({
@@ -53,13 +53,14 @@ async function onSubmit() {
             isLoading.value = false;
             throw err;
         });
+        
 
     if (validate) {
         let loginRes: any = await login(form);
         console.log(loginRes, 'loginRes')
         // const loginRes = {code:200}
         if (loginRes.code == 200) {
-            let authorizeRes = await authorize(loginRes.url);
+            // let authorizeRes = await authorize(loginRes.url);
             // console.log(authorizeRes, 'authorizeRes')
           // const authorizeRes = {
           //   "msg": "获取token成功",
@@ -72,40 +73,39 @@ async function onSubmit() {
           //     "jti": "zYg8LxrUAyCnqwuXLEAlyfWWTDA"
           //   }
           // }
-            if (authorizeRes.code == 200) {
-                ElMessage({ message: '登录成功', type: 'success' });
-                // 保存token信息(先把token信息转换成json字符串)
-                tokenStore.saveToken(JSON.stringify(authorizeRes.data));
-                // 初始化权限列表
-                permsStore.initPermList();
-                // 对路由进行处理
-                processRoutes();
-                // 初始化所有的action meta
-                actionMetasStore.initActions();
-                // 跳转到首页
-                router.push((route.query.redirect as string) || "/");
-                
-                // 注册流水线事件监听
-                registerPipelineEventHandler()
 
-                // 建立连接
-                const stompClient = StompClient.getInstance()
-                await stompClient.connect()
-                await stompClient.subscribe()
-            }
+            ElMessage({ message: '登录成功', type: 'success' });
+            // 保存token信息(先把token信息转换成json字符串)
+            tokenStore.saveToken(JSON.stringify(loginRes.data));
+            // 初始化权限列表
+            permsStore.initPermList();
+            // 对路由进行处理
+            processRoutes();
+            // 初始化所有的action meta
+            actionMetasStore.initActions();
+            // 跳转到首页
+            router.push((route.query.redirect as string) || "/");
+            
+            // 注册流水线事件监听
+            registerPipelineEventHandler()
+
+            // 建立连接
+            const stompClient = StompClient.getInstance()
+            await stompClient.connect()
+            await stompClient.subscribe()
         } else {
             let msg = loginRes.msg;
             ElMessage.error(msg);
         }
     }
-
     isLoading.value = false;
 }
 </script>
 
 <template>
+    <!--
     <div class="login">
-        <el-form :model="form" ref="formRef" :rules="rules" label-width="120px" label-position="top" size="large">
+        <el-form :model="form" @submit.prevent="onSubmit" ref="formRef" :rules="rules" label-width="120px" label-position="top" size="large">
             <h2>登录</h2>
             <el-form-item label="用户名" prop="username">
                 <el-input v-model="form.username" />
@@ -116,41 +116,86 @@ async function onSubmit() {
             </el-form-item>
 
             <el-form-item>
-                <el-button type="primary" @click="onSubmit()" :loading="isLoading">登录</el-button>
+                <el-button type="primary" native-type="submit" :loading="isLoading">登录</el-button>
             </el-form-item>
         </el-form>
     </div>
+    -->
+
+    <div class="login">
+    <div class="loginform">
+      <span class="login-head">用户登录</span>
+      <el-form :model="form" :rules="rules" ref="formRef" @submit.prevent="onSubmit">
+        <el-form-item label="账户" prop="username" label-width="80px">
+          <el-input v-model="form.username" class="input" clearable></el-input>
+        </el-form-item>
+        <el-form-item label="密码" prop="password" label-width="80px">
+          <el-input v-model="form.password" class="input" show-password></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" native-type="submit" :disabled="false">登入</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
+  </div>
+
 </template>
 
 <style lang="scss" scoped>
 .login {
-    background-color: #ccc;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    .el-form {
-        width: 300px;
-        background: #fff;
-        padding: 30px;
-        border-radius: 10px;
-
-        h2 {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .el-form-item {
-            margin-top: 20px;
-        }
-
-        .el-button {
-            width: 100%;
-            margin-top: 30px;
-        }
-
-    }
+  position: fixed;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  min-width: 1000px;
+  /* z-index: -10; */
+  zoom: 1;
+  background-color: #fff;
+  background: url(@/assets/loginimg/login1.jpg) no-repeat;
+  background-size: cover;
+  -webkit-background-size: cover;
+  -o-background-size: cover;
+  background-position: center 0;
+}
+.loginform {
+  margin-left: 700px;
+  margin-top: 150px;
+  background-color: #fff;
+  width: 500px;
+  height: 460px;
+  border: 1px solid #fff;
+  border-radius: 5px;
+  opacity: 0.9;
+}
+.login-head {
+  font-size: 28px;
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+.el-form {
+  width: 70%;
+  margin-left: 10%;
+}
+.el-form-item {
+  height: 50px;
+  /* background-color: blue; */
+  padding-top: 20px;
+  text-align: center;
+}
+/* .input >>> .el-input__inner {
+  width: 70%;
+  margin-left: 15%;
+} */
+.router-link {
+  margin-left: 50%;
+}
+</style>
+<style>
+* {
+  margin: 0;
+  padding: 0;
 }
 </style>

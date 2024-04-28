@@ -1,6 +1,6 @@
 import {useTokenStore} from "@/stores/token";
 import request from "@/utils/request";
-import {GATEWAY_BASE_URL,SYSTEM_SERVICE} from "@/utils/env"
+import {GATEWAY_BASE_URL , SYSTEM_SERVICE , PASSPORT_SERVICE} from "@/utils/env"
 import { parseStrEmpty } from "@/utils/common";
 
 
@@ -41,7 +41,7 @@ export type ResponseResult = {
 // 请求获取验证码
 export const captcha = function () {
     return request<ResponseResult>({
-        url: GATEWAY_BASE_URL + '/authorization-service/captcha',
+        url: PASSPORT_SERVICE + '/captcha',
         method: 'GET',
         withCredentials: true
     }).then(res => {
@@ -52,8 +52,9 @@ export const captcha = function () {
 
 // 登录
 export const login = function (requsetData: LoginRequest) {
+    const url = PASSPORT_SERVICE + '/login'
     return request<ResponseResult>({
-        url: GATEWAY_BASE_URL + '/authorization-service/login',
+        url: url,
         maxRedirects: 0,
         method: 'POST',
         headers: {
@@ -65,7 +66,8 @@ export const login = function (requsetData: LoginRequest) {
         const loginFailJson = {
             code: 500,
             msg: "登录失败,用户名或密码错误"
-        };
+        }
+
         // http status
         if (res.status == 200) {
             const data = res.data;
@@ -88,7 +90,7 @@ export const login = function (requsetData: LoginRequest) {
 // oauth authorize
 export const authorize = function (url: string) {
     const urlObj = new URL(url);
-    const newUrl = GATEWAY_BASE_URL + "/authorization-service" + urlObj.pathname + urlObj.search;
+    const newUrl = PASSPORT_SERVICE + urlObj.pathname + urlObj.search;
     return request<ResponseResult>({
         url: newUrl,
         method: 'GET',
@@ -99,7 +101,7 @@ export const authorize = function (url: string) {
     });
 }
 
-// /system-service/system/user/getProfile
+// /system/user/getProfile
 // 获取个人信息
 export const getProfile = () => {
     return request<Profile>({
@@ -112,7 +114,7 @@ export const getProfile = () => {
 // http://passport.lixin.help/logout
 export const logout = () => {
     request({
-        url: GATEWAY_BASE_URL + '/authorization-service/logout'
+        url: PASSPORT_SERVICE + '/logout'
     }).then((res) => {
         if (res.status == 200) {
             console.log("退出成功");
@@ -137,7 +139,7 @@ export const refreshToken = () => {
     const tokenStore = useTokenStore();
     promiseRefresh = request<RefreshTokenResult>({
         // 刷token交给了gateway做处理,并不属于某个具体的业务系统.
-        url: GATEWAY_BASE_URL + '/refresh/token',
+        url: PASSPORT_SERVICE + '/refresh/token',
         method: 'GET',
         params: {
             refresh_token: tokenStore.token?.refreshToken
@@ -154,7 +156,7 @@ export const refreshToken = () => {
 // 查询用户列表
 export function listUser(query:any) {
     return request({
-      url: GATEWAY_BASE_URL + '/system-service/system/user/list',
+      url: SYSTEM_SERVICE + '/system/user/list',
       method: 'POST',
       headers: {
         'content-type': 'application/json'
@@ -168,7 +170,7 @@ export function listUser(query:any) {
 // 查询用户详细
 export function getUser(userId:string) {
     return request({
-        url: GATEWAY_BASE_URL + '/system-service/system/user/info/' + parseStrEmpty(userId),
+        url: SYSTEM_SERVICE + '/system/user/info/' + parseStrEmpty(userId),
         method: 'get'
     }).then((res)=>{
         return res?.data;
@@ -180,7 +182,7 @@ export function getUser(userId:string) {
 // 新增用户
 export function addUser(data:any) {
 return request({
-        url: GATEWAY_BASE_URL + '/system-service/system/user/add',
+        url: SYSTEM_SERVICE + '/system/user/add',
         method: 'post',
         data: data
     }).then((res)=>{
@@ -191,7 +193,7 @@ return request({
 // 修改用户
 export function updateUser(data:any) {
 return request({
-        url: GATEWAY_BASE_URL + '/system-service/system/user/edit',
+        url: SYSTEM_SERVICE + '/system/user/edit',
         method: 'put',
         data: data
     }).then((res)=>{
@@ -202,7 +204,7 @@ return request({
   // 删除用户
 export function delUser(userId:string) {
 return request({
-        url: GATEWAY_BASE_URL + '/system-service/system/user/del/' + userId,
+        url: SYSTEM_SERVICE + '/system/user/del/' + userId,
         method: 'delete'
     }).then((res)=>{
         return res?.data;
@@ -217,7 +219,7 @@ export function changeUserStatus(userId:any, status:any) {
         status
     }
     return request({
-        url: GATEWAY_BASE_URL + '/system-service/system/user/changeStatus',
+        url: SYSTEM_SERVICE + '/system/user/changeStatus',
         method: 'put',
         data: data
     }).then((res)=>{
@@ -233,7 +235,7 @@ export function resetUserPwd(userId:string, password:string) {
       password
     }
     return request({
-      url: GATEWAY_BASE_URL + '/system-service/system/user/resetPwd',
+      url: SYSTEM_SERVICE + '/system/user/resetPwd',
       method: 'put',
       data: data
     }).then((res)=>{

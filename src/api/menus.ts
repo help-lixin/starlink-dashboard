@@ -2,7 +2,7 @@
 // ts不检查该文件,否则,打包都不能通过
 
 import request from '@/utils/request';
-import { GATEWAY_BASE_URL } from '@/utils/env';
+import { GATEWAY_BASE_URL,SYSTEM_SERVICE } from '@/utils/env';
 
 type Response<T> = {
 	code: number,
@@ -67,7 +67,7 @@ export type MenuList = Array<Menu>;
 // 获取菜单树
 export const getMenuTree = ()=> {
 	return request<MenuList>({
-		url: GATEWAY_BASE_URL + '/system-service/system/menu/menuTree',
+		url: SYSTEM_SERVICE + '/system/menu/menuTree',
 		method: 'GET'
 	}).then(res => {
 		if(res.data?.code == 200){
@@ -77,10 +77,10 @@ export const getMenuTree = ()=> {
 	});
 }
 
-// POST  /system-service/system/menu/list
+// POST  /system/menu/list
 export const queryMenuList = (params: SysMenuRequest) => {
 	return  request <SysMenuListResult>({
-			url: GATEWAY_BASE_URL + '/system-service/system/menu/list',
+			url: SYSTEM_SERVICE + '/system/menu/list',
 			method: 'POST',
 			headers: {
 				'content-type': 'application/json'
@@ -94,7 +94,7 @@ export const queryMenuList = (params: SysMenuRequest) => {
 // 添加菜单
 export const addMenu = (menu: MenuRequest) => {
 	return request({
-		url: GATEWAY_BASE_URL + '/system-service/system/menu/add',
+		url: SYSTEM_SERVICE + '/system/menu/add',
 		method: 'POST',
 		headers: {
 			'content-type': 'application/json'
@@ -106,7 +106,7 @@ export const addMenu = (menu: MenuRequest) => {
 // 更新菜单
 export const updateMenu = (menu: MenuRequest) => {
 	return request({
-		url: GATEWAY_BASE_URL + '/system-service/system/menu/edit',
+		url: SYSTEM_SERVICE + '/system/menu/edit',
 		method: 'PUT',
 		headers: {
 			'content-type': 'application/json'
@@ -118,7 +118,7 @@ export const updateMenu = (menu: MenuRequest) => {
 // 获取某个菜单id的详细信息
 export const getMenu = (menuId: number) => {
 	return request({
-		url: GATEWAY_BASE_URL + '/system-service/system/menu/' + menuId,
+		url: SYSTEM_SERVICE + '/system/menu/' + menuId,
 		method: 'GET'
 	});
 };
@@ -126,7 +126,7 @@ export const getMenu = (menuId: number) => {
 // 删除菜单
 export function delMenu(menuId) {
 	return request({
-		url: GATEWAY_BASE_URL + '/system-service/system/menu/del/' + menuId,
+		url: SYSTEM_SERVICE + '/system/menu/del/' + menuId,
 		method: 'DELETE'
 	});
 }
@@ -135,7 +135,7 @@ export function delMenu(menuId) {
 export function treeSelect(params: SysMenuRequest) {
 	params = params || {};
 	return request({
-		url: GATEWAY_BASE_URL + '/system-service/system/menu/treeSelect',
+		url: SYSTEM_SERVICE + '/system/menu/treeSelect',
 		method: 'POST',
 		headers: {
 			'content-type': 'application/json'
