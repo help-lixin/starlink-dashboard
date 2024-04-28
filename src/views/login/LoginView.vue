@@ -60,7 +60,7 @@ async function onSubmit() {
         console.log(loginRes, 'loginRes')
         // const loginRes = {code:200}
         if (loginRes.code == 200) {
-            let authorizeRes = await authorize(loginRes.url);
+            // let authorizeRes = await authorize(loginRes.url);
             // console.log(authorizeRes, 'authorizeRes')
           // const authorizeRes = {
           //   "msg": "获取token成功",
@@ -73,6 +73,7 @@ async function onSubmit() {
           //     "jti": "zYg8LxrUAyCnqwuXLEAlyfWWTDA"
           //   }
           // }
+          
             if (authorizeRes.code == 200) {
                 ElMessage({ message: '登录成功', type: 'success' });
                 // 保存token信息(先把token信息转换成json字符串)
