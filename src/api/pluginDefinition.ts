@@ -2,11 +2,11 @@
 // ts不检查该文件,否则,打包都不能通过
 
 import request from "@/utils/request"
-import { STARLINK_SERVICE } from '@/utils/env';
+import { SYSTEM_SERVICE } from '@/utils/env';
 
 export const list = (queryParams:any)=>{
     return request({
-		url: STARLINK_SERVICE + '/system/plugin/definition/list',
+		url: SYSTEM_SERVICE + '/system/plugin/definition/list',
 		method: 'GET',
 		params: queryParams
 	}).then((res)=>{
@@ -17,7 +17,7 @@ export const list = (queryParams:any)=>{
 // 根据环境id获得环信息
 export const get = (envId:any)=>{
     return request({
-		url: STARLINK_SERVICE + '/system/plugin/definition/info/' + envId,
+		url: SYSTEM_SERVICE + '/system/plugin/definition/info/' + envId,
 		method: 'GET'
 	}).then((res)=>{
         return res.data;
@@ -27,7 +27,7 @@ export const get = (envId:any)=>{
 
 export const changeStatus = (envId:any,status:any)=>{
     return request({
-		url: STARLINK_SERVICE + '/system/plugin/definition/changeStatus/' + envId + "/"+status,
+		url: SYSTEM_SERVICE + '/system/plugin/definition/changeStatus/' + envId + "/"+status,
 		method: 'PUT'
 	}).then((res)=>{
         return res.data;
@@ -38,7 +38,7 @@ export const changeStatus = (envId:any,status:any)=>{
 // 更新环境
 export function update(params:any) {
     return request({
-      url: STARLINK_SERVICE + '/system/plugin/definition/edit',
+      url: SYSTEM_SERVICE + '/system/plugin/definition/edit',
       method: 'put',
 	  headers: {
 		'content-type': 'application/json'
@@ -52,7 +52,7 @@ export function update(params:any) {
 // 新增环境
 export function add(data:any) {
     return request({
-        url: STARLINK_SERVICE + '/system/plugin/definition/add',
+        url: SYSTEM_SERVICE + '/system/plugin/definition/add',
         method: 'post',
         headers: {
             'content-type': 'application/json'
@@ -67,7 +67,7 @@ export function add(data:any) {
 // 根据插件code,获得插件元数据信息
 export const getPluginMeta = (pluginCode:any)=>{
     return request({
-		url: STARLINK_SERVICE + '/system/plugin/definition/meta/' + pluginCode,
+		url: SYSTEM_SERVICE + '/system/plugin/definition/meta/' + pluginCode,
 		method: 'GET'
 	}).then((res)=>{
         return res.data;
@@ -77,7 +77,7 @@ export const getPluginMeta = (pluginCode:any)=>{
 // 删除插件定义管理
 export const removePluginDefinition = (id:number)=>{
     return request({
-		url: STARLINK_SERVICE + '/system/plugin/definition/del/' + id,
+		url: SYSTEM_SERVICE + '/system/plugin/definition/del/' + id,
 		method: 'DELETE'
 	}).then((res)=>{
         return res.data;
