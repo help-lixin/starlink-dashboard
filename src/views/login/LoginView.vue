@@ -90,7 +90,8 @@ async function onSubmit() {
             registerPipelineEventHandler()
 
             // 建立连接
-            const stompClient = StompClient.getInstance()
+            const url = window.location.href + "message/websocket"
+            const stompClient = StompClient.getInstance(url)
             await stompClient.connect()
             await stompClient.subscribe()
         } else {
