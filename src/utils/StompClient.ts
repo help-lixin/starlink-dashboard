@@ -28,10 +28,6 @@ class StompClient {
         } 
       }
       
-      console.log("===================^^^^========================")
-      console.log(url)
-      console.log("===================^^^^========================")
-
       // 代理实例
       StompClient.instance = new Proxy(new StompClient(url, token, reConnectCount), {
         construct: function(target, args) {
