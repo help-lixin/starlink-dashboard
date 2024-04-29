@@ -10,7 +10,7 @@ import { emitter } from "@/utils/mitt";
 class StompClient {
   // 唯一实例
   private static instance: StompClient;
-  public static getInstance(url?: string = "http://starlink.lixin.help/message/websocket" , authInfo?: string = window.localStorage.getItem("_token") , reConnectCount?: number = 3): StompClient {
+  public static getInstance(url?: string = "https://starlink.lixin.help/message/websocket" , authInfo?: string = window.localStorage.getItem("_token") , reConnectCount?: number = 3): StompClient {
     if (!StompClient.instance) {
       const authInfoObj = JSON.parse(authInfo);
       const token = authInfoObj.accessToken;
