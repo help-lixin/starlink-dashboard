@@ -18,7 +18,10 @@ class StompClient {
       const token = authInfoObj.accessToken;
 
       if(url == undefined){
-        url = MESSAGE_SERVICE
+          const locationURL = new URL(window.location.href)
+          const protocol = locationURL.protocol
+          const host = locationURL.host;
+          url = protocol + "//" + host + MESSAGE_SERVICE
       }
 
       console.log("===================^^^^========================")
