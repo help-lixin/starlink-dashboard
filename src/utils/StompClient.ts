@@ -6,15 +6,28 @@ import * as stomp from 'stompjs'
 import * as decode from 'jwt-decode';
 import { reject } from "lodash";
 import { emitter } from "@/utils/mitt";
+import { MESSAGE_SERVICE } from "@/utils/env";
+
 
 class StompClient {
   // 唯一实例
   private static instance: StompClient;
-  public static getInstance(url?: string = "http://starlink.lixin.help/message/websocket" , authInfo?: string = window.localStorage.getItem("_token") , reConnectCount?: number = 3): StompClient {
+  public static getInstance(url?: string = undefined , authInfo?: string = window.localStorage.getItem("_token") , reConnectCount?: number = 3): StompClient {
     if (!StompClient.instance) {
       const authInfoObj = JSON.parse(authInfo);
       const token = authInfoObj.accessToken;
 
+      if(url == undefined){
+        if(MESSAGE_SERVICE.startsWith("http")){
+          url = MESSAGE_SERVICE;
+        }else{
+          const locationURL = new URL(window.location.href)
+          const protocol = locationURL.protocol
+          const host = locationURL.host;
+          url = protocol + "//" + host + MESSAGE_SERVICE
+        } 
+      }
+      
       // 代理实例
       StompClient.instance = new Proxy(new StompClient(url, token, reConnectCount), {
         construct: function(target, args) {
