@@ -46,7 +46,6 @@ const isLoading = ref(false)
 const captchaUrl = ref("")
 
 function getCaptcha(){
-  console.log("---------------------");
   captchaUrl.value = PASSPORT_SERVICE + "/captcha?"+ new Date().getTime()
 }
 
