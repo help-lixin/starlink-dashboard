@@ -685,14 +685,12 @@
             "options": [],
             "searches": []
           },
-          "hostAliases": [
-            // {"hostnames":[]}
-          ],
+          "hostAliases": [],
           "dnsPolicy": undefined,
           "hostNetwork":undefined,
           "hostname": undefined,
           "subdomain": undefined,
-          "imagePullSecrets": [{name:"default"}]
+          "imagePullSecrets": []
         }
       },
       "minReadySeconds":3,
@@ -713,7 +711,12 @@
       "labelAnnotation":{
         "deployment":{
           "labels":[],
-          "annotations":[]
+          "annotations":[
+            {
+              "key":"field.cattle.io/description",
+              "value":undefined
+            }
+          ]
         },
         "pod":{
           "labels":[],
@@ -799,20 +802,15 @@
     if (action === 'add') {
       container.name = "container-"+size
       containers.push(container)
-      initData.value.spec.template.spec.imagePullSecrets.push({name:"default"})
     } else if (action === 'remove') {
       if (size === 1) {
         ElMessage.warning('请至少保留一个tab页')
         return
       }
 
-      console.log("删除container")
-      console.log(containers)
-      console.log(targetName)
       for(const index in containers){
         if(containers[index].name == targetName){
           containers.splice(index,1);
-          initData.value.spec.template.spec.imagePullSecrets.splice(index,1)
         }
       }
     }
@@ -850,9 +848,7 @@
     const switchArr = []
 
     specConfig.imagePullSecrets.forEach(function(secret){
-      if(secret.name != "default"){
         switchArr.push(secret)
-      }
     })
     specConfig.imagePullSecrets.splice(0,specConfig.imagePullSecrets.length)
     specConfig.imagePullSecrets = switchArr
@@ -1160,7 +1156,7 @@
   // 逆转 空数据处理
   const reverseEmptyDataHandle = ()=>{
     if(!initData.value.spec.template.spec?.imagePullSecrets  || initData.value.spec.template.spec?.imagePullSecrets.length == 0){
-      Object.assign(initData.value.spec.template.spec,{"imagePullSecrets":[{name:""}]})
+      Object.assign(initData.value.spec.template.spec,{"imagePullSecrets":[]})
     }
 
     if(!initData.value.spec.template.spec?.securityContext ){
@@ -1631,11 +1627,17 @@
 
   // 标签 & 注解从yaml逆向回来
   const reverseLabelAnnotationHandle = ()=>{
+    
     delete initData.value.option.labelAnnotation
     const cleanObj = {
       deployment:{
         labels:[],
-        annotations:[]
+        annotations:[
+          {
+            key:"field.cattle.io/description",
+            value:undefined
+          }
+        ]
       },
       pod:{
         labels:[],
@@ -1658,10 +1660,14 @@
 
     const mapObject=new Map(Object.entries(yamlValues))
     for (const k of mapObject.keys()){
-      values.push({
-        key:k,
-        value:mapObject.get(k)
-      })
+      if(k == "field.cattle.io/description"){
+        values[0].value = mapObject.get(k)
+      }else{
+        values.push({
+          key:k,
+          value:mapObject.get(k)
+        })
+      }
     }
   }
 
@@ -1694,13 +1700,21 @@
         <yt-card :title="'公共配置'">
           <el-row :gutter="24">
             <el-col :span="8">
-              <el-form-item label="版本号">
-                <el-input v-model="initData.apiVersion" placeholder="请输入内容"></el-input>
+              <el-form-item label="命名空间">
+                <el-select v-model="initData.metadata.namespace" style="width: 100%;" placeholder="请选择">
+                  <el-option label="default" value="default"></el-option>
+                  <el-option label="my-project" value="my-project"></el-option>
+                </el-select>
               </el-form-item>
             </el-col>
             <el-col :span="8">
               <el-form-item label="名称">
                 <el-input v-model="initData.metadata.name" placeholder="请输入内容"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="描述">
+                <el-input v-model="initData.option.labelAnnotation.deployment.annotations[0].value" placeholder="请输入描述内容"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="8">
@@ -1716,14 +1730,7 @@
                 <el-input-number  v-model="initData.spec.replicas" placeholder="请输入副本数量"></el-input-number>
               </el-form-item>
             </el-col>
-            <el-col :span="8">
-              <el-form-item label="命名空间">
-                <el-select v-model="initData.metadata.namespace" style="width: 100%;" placeholder="请选择">
-                  <el-option label="default" value="default"></el-option>
-                  <el-option label="my-project" value="my-project"></el-option>
-                </el-select>
-              </el-form-item>
-            </el-col>
+            
           </el-row>
         </yt-card>
         <yt-card :title="'详细配置'">
@@ -1763,7 +1770,8 @@
                           <el-button @click="addDeployLabel" type="primary" plain>添加标签</el-button>
                         </el-row>
                         <H1>注解</H1>
-                        <el-row :gutter="24" v-for="(annotation,index) in initData.option.labelAnnotation.deployment.annotations" :key="index" style="margin-top:30px">
+                        <el-row :gutter="24" v-for="(annotation,index) in initData.option.labelAnnotation.deployment.annotations" :key="index" style="margin-top:30px"
+                          v-show="annotation.key != 'field.cattle.io/description'">
                           <el-col :span="6" >
                             <el-input label="键" placeholder="请输入键" v-model="annotation.key"></el-input>
                           </el-col>
@@ -2289,7 +2297,7 @@
                           </el-col>
                           <el-col :span="8">
                             <el-form-item label="拉取密文">
-                              <el-select v-model="initData.spec.template.spec.imagePullSecrets[index].name" style="width: 100%;" placeholder="请选择">
+                              <el-select v-model="initData.spec.template.spec.imagePullSecrets" style="width: 100%;" multiple placeholder="请选择">
                                 <el-option label="harbor" value="harbor-login"></el-option>
                                 <el-option label="default" value="default"></el-option>
                               </el-select>
@@ -2583,7 +2591,6 @@
                           </el-col>
                         </el-row>
                         <H1>生命周期管理</H1>
-                        {{ container.lifecycle.postStart }}
                         <el-row :gutter="24" >
                           <el-col :span="24">
                             <el-form-item label="启动后动作"  >
