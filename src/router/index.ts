@@ -178,8 +178,16 @@ export const dynamicRoutes = [
   },
   {
     path: '/kubernetes/index',
-    name: 'kubernetes-manage',
+    name: 'kubernetes-deploy',
     component: () => import('../views/kubernetes/index.vue'),
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/kubernetes/job/index',
+    name: 'kubernetes-cron-job',
+    component: () => import('../views/kubernetes/job/index.vue'),
     meta: {
       requiresAuth: true
     }
