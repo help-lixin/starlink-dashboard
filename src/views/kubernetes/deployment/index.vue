@@ -809,7 +809,7 @@
       }
 
       for(const index in containers){
-        if(containers[index].name == targetName){
+        if(index == targetName){
           containers.splice(index,1);
         }
       }
@@ -838,6 +838,10 @@
     netSetting();
     // 镜像拉取密文
     imageSecret();
+    // 资源容忍度处理
+    if(copyData.value.spec.template.spec.tolerations.length == 0){
+      delete copyData.value.spec.template.spec.tolerations
+    }
     //亲和度处理
     affinityHandle()
   }
@@ -929,12 +933,21 @@
         delete container.stdin
         delete container.stdinOnce
       }
-      // 命令相关
+      
+      // 命令参数
       if(!container.args){
         delete container.args
+      }else{
+        const argsStr = container.args
+        container.args = argsStr.split(',')
       }
+
+      // 命令
       if(!container.command){
         delete container.command
+      }else{
+        const commandStr = container.command
+        container.command = commandStr.split(',')
       }
 
       // 环境变量
@@ -1144,6 +1157,10 @@
     reverseLabelAnnotationHandle()
     // 设置容器处理
     reverseContainerHandle()
+    // 资源容忍度处理
+    if(!initData.value.spec.template.spec.tolerations){
+      Object.assign(initData.value.spec.template.spec,{tolerations:[]})
+    }
     // 设置网络处理
     reverseDnsConfigHandle()
     // 设置亲和度处理
@@ -1316,10 +1333,26 @@
   const reverseCommandHandle = (container)=>{
     if(!container?.args ){
       Object.assign(container,{"args":undefined})
+    }else{
+      let argStr = ""
+      container.args.forEach(function(arg){
+        argStr = argStr + arg + ","
+      })
+
+      container.args = argStr.substring(0, argStr.length - 1)
     }
+
     if(!container?.command ){
       Object.assign(container,{"command":undefined})
+    }else{
+      let commandStr = ""
+      container.command.forEach(function(command){
+        commandStr = commandStr + command + ","
+      })
+
+      container.command = commandStr.substring(0, commandStr.length - 1)
     }
+
     if(!container?.workingDir ){
       Object.assign(container,{"workingDir":undefined})
     }
@@ -2250,7 +2283,7 @@
                   </div>
                 </el-scrollbar>
               </el-tab-pane>
-              <el-tab-pane v-for="(container, index) in initData.spec.template.spec.containers" :name="container.name"
+              <el-tab-pane v-for="(container, index) in initData.spec.template.spec.containers" :name="index"
                            :key="index" :label="container.name" >
                 <el-scrollbar>
                   <div class="tab-content">

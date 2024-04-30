@@ -204,7 +204,6 @@
   // 节点调度
   const nodeSelector=[{label:"默认规则",value:"none"},{label:"集中调度",value:"nodeName"},{label:"自定义规则",value:"affinity"}]
   const nodeData=[{label:"node-default",value:"node-default"},{label:"my-project",value:"my-project"},{label:"slave-node",value:"slave-node"}]
-  // 自定义规则节点对象（*）
   // 添加节点调度
   const addNode = ()=>{
     initData.value.option.freeNode.push(
@@ -618,7 +617,6 @@
       "backoffLimit": undefined,
       "completions": undefined,
       "parallelism": undefined,
-      "suspend":false,
       "template":{
         "metadata":{
           "labels":{},
@@ -706,7 +704,7 @@
           "labels":[],
           "annotations":[
             {
-              "key":"kubesphere.io/description",
+              "key":"field.cattle.io/description",
               "value":undefined
             }
           ]
@@ -802,7 +800,7 @@
       }
 
       for(const index in containers){
-        if(containers[index].name == targetName){
+        if(index == targetName){
           containers.splice(index,1);
         }
       }
@@ -831,6 +829,10 @@
     netSetting();
     // 镜像拉取密文
     imageSecret();
+    // 资源容忍度处理
+    if(copyData.value.spec.template.spec.tolerations.length == 0){
+      delete copyData.value.spec.template.spec.tolerations
+    }
     //亲和度处理
     affinityHandle()
   }
@@ -922,12 +924,21 @@
         delete container.stdin
         delete container.stdinOnce
       }
-      // 命令相关
+
+      // 命令参数
       if(!container.args){
         delete container.args
+      }else{
+        const argsStr = container.args
+        container.args = argsStr.split(',')
       }
+
+      // 命令
       if(!container.command){
         delete container.command
+      }else{
+        const commandStr = container.command
+        container.command = commandStr.split(',')
       }
 
       // 环境变量
@@ -1069,12 +1080,12 @@
   // 处理标签 & 注解
   const labelAnnotationHandle = ()=>{
     labelAnnotation2Json(initData.value.option.labelAnnotation.job.labels , initData.value.metadata.labels)
-    labelAnnotation2Json(initData.value.option.labelAnnotation.pod.labels , initData.value.metadata.labels)
+    labelAnnotation2Json(initData.value.option.labelAnnotation.pod.labels , initData.value.spec.template.metadata.labels)
     labelAnnotation2Json(initData.value.option.labelAnnotation.job.annotations , initData.value.metadata.annotations)
-    labelAnnotation2Json(initData.value.option.labelAnnotation.pod.annotations , initData.value.metadata.annotations)
+    labelAnnotation2Json(initData.value.option.labelAnnotation.pod.annotations , initData.value.spec.template.metadata.annotations)
 
-    if(initData.value.metadata.labels.length == 0){
-      Object.assign(initData.value.metadata.labels,initData.value.metadata.labels)
+    if(initData.value.spec.template.metadata.labels.length == 0){
+      Object.assign(initData.value.spec.template.metadata.labels,initData.value.metadata.labels)
     }
 
   }
@@ -1112,8 +1123,9 @@
     const mapObject=new Map()
     for(const index in formValue){
       if((formValue[index].key != undefined && formValue[index].key != '')
-              &&
-              (formValue[index].value != undefined && formValue[index].value != '')){
+          &&
+          (formValue[index].value != undefined && formValue[index].value != '')
+        ){
 
         mapObject.set(formValue[index].key,formValue[index].value)
       }
@@ -1135,6 +1147,10 @@
     reverseLabelAnnotationHandle()
     // 设置容器处理
     reverseContainerHandle()
+    // 资源容忍度处理
+    if(!initData.value.spec.template.spec.tolerations){
+      Object.assign(initData.value.spec.template.spec,{tolerations:[]})
+    }
     // 设置网络处理
     reverseDnsConfigHandle()
     // 设置亲和度处理
@@ -1253,7 +1269,7 @@
 
       })
     }
-    if(!initData.value.spec.template.spec?.initContainers != undefined && initData.value.spec.template.spec.initContainers.length > 0 ){
+    if(initData.value.spec.template.spec?.initContainers != undefined && initData.value.spec.template.spec.initContainers.length > 0 ){
       for( const index in initData.value.spec.template.spec.initContainers){
         const container = initData.value.spec.template.spec.initContainers[index]
         Object.assign(container,{_init : true})
@@ -1307,10 +1323,26 @@
   const reverseCommandHandle = (container)=>{
     if(!container?.args ){
       Object.assign(container,{"args":undefined})
+    }else{
+      let argStr = ""
+      container.args.forEach(function(arg){
+        argStr = argStr + arg + ","
+      })
+
+      container.args = argStr.substring(0, argStr.length - 1)
     }
+
     if(!container?.command ){
       Object.assign(container,{"command":undefined})
+    }else{
+      let commandStr = ""
+      container.command.forEach(function(command){
+        commandStr = commandStr + command + ","
+      })
+
+      container.command = commandStr.substring(0, commandStr.length - 1)
     }
+
     if(!container?.workingDir ){
       Object.assign(container,{"workingDir":undefined})
     }
@@ -1623,7 +1655,7 @@
       job:{
         labels:[],
         annotations:[
-          {key:"kubesphere.io/description",value:undefined}
+          {key:"field.cattle.io/description",value:undefined}
         ]
       },
       pod:{
@@ -1647,7 +1679,7 @@
 
     const mapObject=new Map(Object.entries(yamlValues))
     for (const k of mapObject.keys()){
-      if(k == "kubesphere.io/description"){
+      if(k == "field.cattle.io/description"){
         values[0].value = mapObject.get(k)
       }else{
         values.push({
@@ -1723,14 +1755,13 @@
                 <el-scrollbar>
                   <div class="tab-content">
                     <div class="left">
-                      <el-tabs :tab-position="'left'" @tab-change="changejobSelectTab">
+                      <el-tabs :tab-position="'left'" @tab-change="changeJobSelectTab">
                         <el-tab-pane label="标签注释" name="jobLabel" />
                         <el-tab-pane label="扩缩容和升级策略" name="jobStrategy" />
                       </el-tabs>
                     </div>
                     <div class="right">
-                      {{ initData.option.selectJob }}
-                      <div v-show="initData.option.selectJob === 'jobLabel'  ? true : false ">
+                      <div v-show="initData.option.selectJob == 'jobLabel'  ? true : false ">
                         <H1>Job标签</H1>
                         <el-row :gutter="24" v-for="(label,index) in initData.option.labelAnnotation.job.labels" :key="index" style="margin-top:30px">
                           <el-col :span="6" >
@@ -1746,7 +1777,7 @@
                         </el-row>
                         <H1>注解</H1>
                         <el-row :gutter="24" v-for="(annotation,index) in initData.option.labelAnnotation.job.annotations" :key="index" style="margin-top:30px"
-                            v-show="annotation.key != 'kubesphere.io/description'">
+                            v-show="annotation.key != 'field.cattle.io/description'">
                           <el-col :span="6" >
                             <el-input label="键" placeholder="请输入键" v-model="annotation.key"></el-input>
                           </el-col>
@@ -1759,27 +1790,8 @@
                           <el-button @click="addDeployAnnotation" type="primary" plain>添加标签</el-button>
                         </el-row>
                       </div>
-                      <div v-show="initData.option.selectJob === 'jobStrategy'  ? true : false ">
+                      <div v-show="initData.option.selectJob == 'jobStrategy'  ? true : false ">
                         <H1>扩缩容和升级策略</H1>
-                        <el-row :gutter="24" style="margin-top:10px;margin-left:2px">
-                          <el-col :span="12">
-                            <el-form-item label="并发">
-                              <el-radio-group v-model="initData.spec.concurrencyPolicy" >
-                                <el-radio-button label="Allow">并发运行</el-radio-button>
-                                <el-radio-button label="Forbid">新建运行</el-radio-button>
-                                <el-radio-button label="Replace">替换运行</el-radio-button>
-                              </el-radio-group>
-                            </el-form-item>
-                          </el-col>
-                          <el-col :span="12">
-                            <el-form-item label="暂停">
-                              <el-radio-group v-model="initData.spec.suspend" >
-                                <el-radio-button label="true">是</el-radio-button>
-                                <el-radio-button label="false">否</el-radio-button>
-                              </el-radio-group>
-                            </el-form-item>
-                          </el-col>
-                        </el-row>
                         <el-row :gutter="24" style="margin-top:10px;margin-left:2px" >
                           <el-col :span="12">
                             <el-form-item label="完成job历史数">
@@ -1799,27 +1811,6 @@
                           <el-col :span="12">
                             <el-form-item label="活动终止时间(秒)">
                               <el-input-number  placeholder="请输入秒数" v-model="initData.spec.template.spec.activeDeadlineSeconds">
-                                <template #append>秒</template>
-                              </el-input-number>
-                            </el-form-item>
-                          </el-col>
-                          <el-col :span="12">
-                            <el-form-item label="成功Job历史数">
-                              <el-input-number  placeholder="请输入数量" v-model="initData.successfulJobsHistoryLimit">
-                                <template #append>秒</template>
-                              </el-input-number>
-                            </el-form-item>
-                          </el-col>
-                          <el-col :span="12">
-                            <el-form-item label="失败Job历史数">
-                              <el-input-number  placeholder="请输入数量" v-model="initData.spec.failedJobsHistoryLimit">
-                                <template #append>秒</template>
-                              </el-input-number>
-                            </el-form-item>
-                          </el-col>
-                          <el-col :span="12">
-                            <el-form-item label="运行Job的截止时间(秒)">
-                              <el-input-number  placeholder="请输入秒数" v-model="initData.spec.startingDeadlineSeconds">
                                 <template #append>秒</template>
                               </el-input-number>
                             </el-form-item>
@@ -1849,7 +1840,7 @@
                         <el-tab-pane label="资源" name="podResource" />
                         <el-tab-pane label="扩缩容和升级策略" name="podStrategy" />
                         <el-tab-pane label="安全性上下文" name="podContext" />
-                        <el-tab-pane label="存储" name="podVolumes" />
+                        <!-- <el-tab-pane label="存储" name="podVolumes" /> -->
                       </el-tabs>
                     </div>
                     <div class="right" >
@@ -2229,25 +2220,6 @@
 
                       <div v-show="initData.option.selectPod === 'podStrategy'  ? true : false ">
                         <H1>扩缩容和升级策略</H1>
-                        <el-row :gutter="24" style="margin-top:10px;margin-left:2px">
-                          <el-col :span="12">
-                            <el-form-item label="并发">
-                              <el-radio-group v-model="initData.spec.concurrencyPolicy" >
-                                <el-radio-button label="Allow">并发运行</el-radio-button>
-                                <el-radio-button label="Forbid">新建运行</el-radio-button>
-                                <el-radio-button label="Replace">替换运行</el-radio-button>
-                              </el-radio-group>
-                            </el-form-item>
-                          </el-col>
-                          <el-col :span="12">
-                            <el-form-item label="暂停">
-                              <el-radio-group v-model="initData.spec.suspend" >
-                                <el-radio-button label="true">是</el-radio-button>
-                                <el-radio-button label="false">否</el-radio-button>
-                              </el-radio-group>
-                            </el-form-item>
-                          </el-col>
-                        </el-row>
                         <el-row :gutter="24" style="margin-top:10px;margin-left:2px" >
                           <el-col :span="12">
                             <el-form-item label="完成job历史数">
@@ -2267,27 +2239,6 @@
                           <el-col :span="12">
                             <el-form-item label="活动终止时间(秒)">
                               <el-input-number  placeholder="请输入秒数" v-model="initData.spec.template.spec.activeDeadlineSeconds">
-                                <template #append>秒</template>
-                              </el-input-number>
-                            </el-form-item>
-                          </el-col>
-                          <el-col :span="12">
-                            <el-form-item label="成功Job历史数">
-                              <el-input-number  placeholder="请输入数量" v-model="initData.successfulJobsHistoryLimit">
-                                <template #append>秒</template>
-                              </el-input-number>
-                            </el-form-item>
-                          </el-col>
-                          <el-col :span="12">
-                            <el-form-item label="失败Job历史数">
-                              <el-input-number  placeholder="请输入数量" v-model="initData.spec.failedJobsHistoryLimit">
-                                <template #append>秒</template>
-                              </el-input-number>
-                            </el-form-item>
-                          </el-col>
-                          <el-col :span="12">
-                            <el-form-item label="运行Job的截止时间(秒)">
-                              <el-input-number  placeholder="请输入秒数" v-model="initData.spec.startingDeadlineSeconds">
                                 <template #append>秒</template>
                               </el-input-number>
                             </el-form-item>
@@ -2317,7 +2268,7 @@
                   </div>
                 </el-scrollbar>
               </el-tab-pane>
-              <el-tab-pane v-for="(container, index) in initData.spec.template.spec.containers" :name="container.name"
+              <el-tab-pane v-for="(container, index) in initData.spec.template.spec.containers" :name="index"
                            :key="index" :label="container.name" >
                 <el-scrollbar>
                   <div class="tab-content">
@@ -2327,7 +2278,7 @@
                         <el-tab-pane label="健康检查" name="containerCheckHealth"/>
                         <el-tab-pane label="资源" name="containerSource"/>
                         <el-tab-pane label="安全性上下文" name="containerSecurityContext" />
-                        <el-tab-pane label="存储" name="containerVolumes"/>
+                        <!-- <el-tab-pane label="存储" name="containerVolumes"/> -->
                       </el-tabs>
                     </div>
                     <div class="right">

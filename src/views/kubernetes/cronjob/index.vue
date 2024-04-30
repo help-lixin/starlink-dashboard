@@ -812,7 +812,7 @@
       }
 
       for(const index in containers){
-        if(containers[index].name == targetName){
+        if(index == targetName){
           containers.splice(index,1);
         }
       }
@@ -841,6 +841,10 @@
     netSetting();
     // 镜像拉取密文
     imageSecret();
+    // 资源容忍度处理
+    if(copyData.value.spec.jobTemplate.spec.template.spec.tolerations.length == 0){
+      delete copyData.value.spec.jobTemplate.spec.template.spec.tolerations
+    }
     //亲和度处理
     affinityHandle()
   }
@@ -932,12 +936,21 @@
         delete container.stdin
         delete container.stdinOnce
       }
-      // 命令相关
+
+      // 命令参数
       if(!container.args){
         delete container.args
+      }else{
+        const argsStr = container.args
+        container.args = argsStr.split(',')
       }
+
+      // 命令
       if(!container.command){
         delete container.command
+      }else{
+        const commandStr = container.command
+        container.command = commandStr.split(',')
       }
 
       // 环境变量
@@ -1083,11 +1096,10 @@
     labelAnnotation2Json(initData.value.option.labelAnnotation.cronJob.annotations , initData.value.metadata.annotations)
     labelAnnotation2Json(initData.value.option.labelAnnotation.pod.annotations , initData.value.spec.jobTemplate.metadata.annotations)
 
-    if(initData.value.spec.jobTemplate.metadata.labels.length == 0){
+    if(Object.keys(initData.value.spec.jobTemplate.metadata.labels).length == 0){
       Object.assign(initData.value.spec.jobTemplate.metadata.labels,initData.value.metadata.labels)
     }
 
-    // Object.assign(initData.value.spec.selector.matchLabels,initData.value.spec.jobTemplate.metadata.labels)
   }
 
   // 内存&CPU限制处理
@@ -1146,6 +1158,10 @@
     reverseLabelAnnotationHandle()
     // 设置容器处理
     reverseContainerHandle()
+    // 资源容忍度处理
+    if(!initData.value.spec.jobTemplate.spec.template.spec.tolerations){
+      Object.assign(initData.value.spec.jobTemplate.spec.template.spec,{tolerations:[]})
+    }
     // 设置网络处理
     reverseDnsConfigHandle()
     // 设置亲和度处理
@@ -1264,7 +1280,7 @@
 
       })
     }
-    if(!initData.value.spec.jobTemplate.spec.template.spec?.initContainers != undefined && initData.value.spec.jobTemplate.spec.template.spec.initContainers.length > 0 ){
+    if(initData.value.spec.jobTemplate.spec.template.spec?.initContainers != undefined && initData.value.spec.jobTemplate.spec.template.spec.initContainers.length > 0 ){
       for( const index in initData.value.spec.jobTemplate.spec.template.spec.initContainers){
         const container = initData.value.spec.jobTemplate.spec.template.spec.initContainers[index]
         Object.assign(container,{_init : true})
@@ -1318,10 +1334,26 @@
   const reverseCommandHandle = (container)=>{
     if(!container?.args ){
       Object.assign(container,{"args":undefined})
+    }else{
+      let argStr = ""
+      container.args.forEach(function(arg){
+        argStr = argStr + arg + ","
+      })
+
+      container.args = argStr.substring(0, argStr.length - 1)
     }
+
     if(!container?.command ){
       Object.assign(container,{"command":undefined})
+    }else{
+      let commandStr = ""
+      container.command.forEach(function(command){
+        commandStr = commandStr + command + ","
+      })
+
+      container.command = commandStr.substring(0, commandStr.length - 1)
     }
+
     if(!container?.workingDir ){
       Object.assign(container,{"workingDir":undefined})
     }
@@ -2333,7 +2365,7 @@
                   </div>
                 </el-scrollbar>
               </el-tab-pane>
-              <el-tab-pane v-for="(container, index) in initData.spec.jobTemplate.spec.template.spec.containers" :name="container.name"
+              <el-tab-pane v-for="(container, index) in initData.spec.jobTemplate.spec.template.spec.containers" :name="index"
                            :key="index" :label="container.name" >
                 <el-scrollbar>
                   <div class="tab-content">
