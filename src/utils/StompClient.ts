@@ -14,9 +14,10 @@ class StompClient {
   private static instance: StompClient;
   public static getInstance(url?: string = undefined , authInfo?: string = window.localStorage.getItem("_token") , reConnectCount?: number = 3): StompClient {
     if (!StompClient.instance) {
-      const authInfoObj = JSON.parse(authInfo);
+      const authInfoObj = JSON.parse(authInfo) ?? {};
+      console.log(authInfoObj, 'authInfoObj')
       const token = authInfoObj.accessToken;
-
+      if (!token) return
       if(url == undefined){
         if(MESSAGE_SERVICE.startsWith("http")){
           url = MESSAGE_SERVICE;
@@ -25,9 +26,9 @@ class StompClient {
           const protocol = locationURL.protocol
           const host = locationURL.host;
           url = protocol + "//" + host + MESSAGE_SERVICE
-        } 
+        }
       }
-      
+
       // 代理实例
       StompClient.instance = new Proxy(new StompClient(url, token, reConnectCount), {
         construct: function(target, args) {
