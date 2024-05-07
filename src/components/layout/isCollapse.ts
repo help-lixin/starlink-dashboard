@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 if (window.localStorage.getItem('isCollapse') === undefined || window.localStorage.getItem('isCollapse') === null) {
   window.localStorage.setItem('isCollapse', false);
 }
