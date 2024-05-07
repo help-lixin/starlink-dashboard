@@ -18,6 +18,13 @@ const props = defineProps({
 const isShowProperties = ref(false)
 const selectedElements = ref([])
 const element = ref(null)
+const scrollbarRef = ref()
+const helperRef = ref()
+watch(() => props.workFlowInstanceLogs, () => {
+  if (isShowProperties.value && element.value.id) {
+    setNodeLog()
+  }
+}, {deep: true});
 
 // 表单schema
 const formSchema = {
@@ -85,23 +92,7 @@ function init() {
 			// 展示右侧属性面板
 			isShowProperties.value=true;
 		}
-
-		const nodeId = element.value.id
-		const nodeName = element.value.businessObject?.name
-		const processInstanceId = props.processInstanceId
-		const workFlowInstanceLogs = props.workFlowInstanceLogs;
-
-		if(workFlowInstanceLogs){
-			const log = workFlowInstanceLogs[nodeId]
-			if(log){
-				schema.value = formSchema;
-				// 先清空表单里的内容
-				form.setValues({ log })
-				console.log(log, 'run123')
-			} else {
-				form.setValues({ log: '暂无日志！' })
-			}
-		}
+    setNodeLog()
 	}) // end  selection.changed
 
 	props.modeler.on('element.changed', e => {
@@ -114,6 +105,33 @@ function init() {
 		}
 	}) // end element.changed
 }
+
+const setNodeLog = async () => {
+  const nodeId = element.value.id
+  const nodeName = element.value.businessObject?.name
+  const processInstanceId = props.processInstanceId
+  const workFlowInstanceLogs = props.workFlowInstanceLogs;
+
+  if(workFlowInstanceLogs){
+    const log = workFlowInstanceLogs[nodeId]
+    if(log){
+      schema.value = formSchema;
+      // 先清空表单里的内容
+      form.setValues({ log })
+    } else {
+      form.setValues({ log: '暂无日志！' })
+    }
+    setTimeout(() => {
+      // 滚动到最底下
+      console.log(helperRef.value?.clientHeight, scrollbarRef.value, 'test123')
+      const clientHeight = helperRef.value?.clientHeight
+      if (clientHeight > 300) {
+        scrollbarRef.value?.setScrollTop?.(clientHeight - 100)
+      }
+    })
+  }
+}
+
 const scrollbarHeight = computed(() => {
   return props.showPosition === 'bottom' ? '220px' : 'calc(100vh - var(--el-header-height) - 88px)'
 })
@@ -125,10 +143,12 @@ init()
 <template>
     <div v-if="isShowProperties" class="custom-properties-panel" :class="[showPosition]">
       <yt-card style="height: 100%;">
-        <el-scrollbar :height="scrollbarHeight">
-          <FormProvider :form="form">
-            <SchemaField :schema="schema" />
-          </FormProvider>
+        <el-scrollbar :height="scrollbarHeight" ref="scrollbarRef">
+          <div class="helper" ref="helperRef">
+            <FormProvider :form="form">
+              <SchemaField :schema="schema" />
+            </FormProvider>
+          </div>
         </el-scrollbar>
       </yt-card>
     </div>

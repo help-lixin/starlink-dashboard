@@ -109,7 +109,7 @@ function init() {
             // 工作流实例id
             workFlowInstanceId.value = res?.data?.processInstanceId
             const processStatus = res?.data?.processStatus
-            
+
             const processDefinitionBody = res?.data?.processDefinitionBody
             // 把json转换成xml进行展示
             if (processInstanceId.value) {
@@ -117,13 +117,13 @@ function init() {
               const processDefinitionXml = jsonToXml(processDefinitionJson)
               setDiagram(processDefinitionXml)
             }// end if
-            
-            
+
+
             // 只有当实例状态为:0时,才会开启定时拉取日志
-            if(processStatus == 0){              
+            if(processStatus == 0){
               // 定时任务获取状态
               timerPullInstanceLog.value = setInterval(timerPullInstanceLogFunction, 1000 * 2);
-              
+
               const storeActiveNodeId = getActiveNode(route.params?.processInstnaceId)
               if(null != storeActiveNodeId){
                 activeElementId.value = storeActiveNodeId
@@ -322,7 +322,7 @@ onMounted(() => {
 			if(businessId && ( processInstanceId.value == businessId ) ){
 				// 1.延迟10秒后,关闭定时任务
 				setTimeout(cancelPullLog,1000 * 30)
-        
+
         // 2. 取消所有的高亮
         unAllHighlight()
 

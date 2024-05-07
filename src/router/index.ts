@@ -3,6 +3,7 @@ import AppLayoutVue from '@/components/layout/AppLayout.vue'
 import IndexView from '@/views/IndexView.vue'
 import { useTokenStore } from '@/stores/token'
 import { useMenuStore } from "@/stores/menu.ts";
+import StompClient from "@/utils/StompClient.ts";
 const publicRoutes = [
   {
     path: '',
@@ -284,13 +285,19 @@ const router = createRouter({
 })
 
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   // some对数组进行遍历
   // 目标地址是否需要进行登录判断
   if (to.matched.some(r => r.meta?.requiresAuth)) {
     const token = useTokenStore().token
     if (!token?.accessToken) { // token不存在,跳转到login
       next({ name: 'login', query: { redirect: to.fullPath } })
+    } else {
+      // 建立连接
+      const stompClient = StompClient.getInstance()
+      await stompClient.connect()
+      // 需要用到的地方再订阅
+      // await stompClient.subscribe()
     }
   }
   // 继续往下走
