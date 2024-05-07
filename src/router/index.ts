@@ -201,6 +201,14 @@ export const dynamicRoutes = [
     }
   },
   {
+    path: '/kubernetes/pod/index',
+    name: 'kubernetes-pod',
+    component: () => import('../views/kubernetes/pod/index.vue'),
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
     path: '/system/credential/index',
     name: 'sys-credential',
     component: () => import('../views/system/credential/index.vue'),

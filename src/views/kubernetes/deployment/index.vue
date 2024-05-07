@@ -914,9 +914,20 @@
       }else{
         if(!container.lifecycle.postStart?.item ){
           delete container.lifecycle.postStart
+        }else if(container.lifecycle.postStart?.item == "exec"){
+          container.lifecycle.postStart.exec.command = container.lifecycle.postStart.exec.command.split(',')
+          delete container.lifecycle.postStart.item
+        }else{
+          delete container.lifecycle.postStart.item
         }
+
         if(!container.lifecycle.preStop?.item  ){
           delete container.lifecycle.preStop
+        }else if(container.lifecycle.preStop?.item == "exec"){
+          container.lifecycle.preStop.exec.command = container.lifecycle.preStop.exec.command.split(',')
+          delete container.lifecycle.preStop.item
+        }else{
+          delete container.lifecycle.preStop.item
         }
       }
 
@@ -953,11 +964,17 @@
       // 环境变量
       if(container.env.length == 0){
         delete container.env
+      }else{
+        container.env.forEach(function(envItem){
+          delete envItem.item
+        })
       }
 
       // 安全性上下文
-      if(!(container.securityContext.runAsNonRoot && container.securityContext.readOnlyRootFilesystem
-              && container.securityContext.privileged && container.securityContext.allowPrivilegeEscalation) ){
+      if(!container.securityContext.runAsNonRoot && !container.securityContext.readOnlyRootFilesystem
+              && !container.securityContext.privileged && !container.securityContext.allowPrivilegeEscalation
+            && !container.securityContext.runAsUser 
+          && container.securityContext.capabilities.add.length == 0 && container.securityContext.capabilities.drop.length == 0){
         delete container.securityContext
       }
 
@@ -1477,6 +1494,12 @@
 
         }else if(container.lifecycle.postStart?.exec != undefined){
           Object.assign(container.lifecycle.postStart,{"item":"exec"})
+          let commandStr = ""
+          container.lifecycle.postStart.exec.command.forEach(function(command){
+            commandStr = commandStr + command + ","
+          })
+          container.lifecycle.postStart.exec.command = commandStr.substring(0, commandStr.length - 1)
+
 
         }else if(container.lifecycle.postStart?.tcpSocket != undefined){
           Object.assign(container.lifecycle.postStart,{"item":"tcpSocket"})
@@ -1494,6 +1517,12 @@
 
         }else if(container.lifecycle.preStop?.exec != undefined){
           Object.assign(container.lifecycle.preStop,{"item":"exec"})
+          let commandStr = ""
+          container.lifecycle.preStop.exec.command.forEach(function(command){
+            commandStr = commandStr + command + ","
+          })
+          container.lifecycle.preStop.exec.command = commandStr.substring(0, commandStr.length - 1)
+
 
         }else if(container.lifecycle.preStop?.tcpSocket != undefined){
           Object.assign(container.lifecycle.preStop,{"item":"tcpSocket"})
