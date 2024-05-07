@@ -24,7 +24,7 @@ watch(() => props.workFlowInstanceLogs, () => {
   if (isShowProperties.value && element.value.id) {
     setNodeLog()
   }
-});
+}, {deep: true});
 
 // 表单schema
 const formSchema = {
