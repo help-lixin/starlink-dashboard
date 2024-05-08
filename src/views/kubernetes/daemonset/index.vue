@@ -42,19 +42,19 @@
     initData.value.spec.template.spec.containers[index].ports.push(port)
   }
 
-  // deployment标签增删
+  // daemonSet标签增删
   const removeDeployLabel = (index) =>{
-    initData.value.option.labelAnnotation.deployment.labels.splice(index, 1);
+    initData.value.option.labelAnnotation.daemonSet.labels.splice(index, 1);
   }
   const addDeployLabel = () =>{
-    initData.value.option.labelAnnotation.deployment.labels.push({key:"", value:""})
+    initData.value.option.labelAnnotation.daemonSet.labels.push({key:"", value:""})
   }
-  // deployment注解增删
+  // daemonSet注解增删
   const removeDeployAnnotation = (labelIndex) =>{
-    initData.value.option.labelAnnotation.deployment.annotations.splice(labelIndex, 1);
+    initData.value.option.labelAnnotation.daemonSet.annotations.splice(labelIndex, 1);
   }
   const addDeployAnnotation = () =>{
-    initData.value.option.labelAnnotation.deployment.annotations.push({key:"", value:""})
+    initData.value.option.labelAnnotation.daemonSet.annotations.push({key:"", value:""})
   }
 
   // pod标签增删
@@ -605,7 +605,7 @@
   const copyData = ref({})
   const initData = ref({
     "apiVersion": "apps/v1",
-    "kind": "Deployment",
+    "kind": "DaemonSet",
     "metadata": {
       "name": undefined,
       "annotations": {},
@@ -694,12 +694,9 @@
         }
       },
       "minReadySeconds":3,
-      "progressDeadlineSeconds": 600,
-      "replicas": 2,
       "revisionHistoryLimit": 10,
-      "strategy": {
+      "updateStrategy": {
         "rollingUpdate": {
-          "maxSurge": "25%",
           "maxUnavailable": "25%"
         },
         "type": "RollingUpdate"
@@ -709,7 +706,7 @@
     "option":{
       // 标签 & 注解统一设置对象
       "labelAnnotation":{
-        "deployment":{
+        "daemonSet":{
           "labels":[],
           "annotations":[
             {
@@ -843,12 +840,8 @@
       delete copyData.value.spec.template.spec.tolerations
     }
     // 最大不可用数量字符转数字
-    if(!copyData.value.spec.strategy.rollingUpdate.maxUnavailable.match(/\%/)){
-      copyData.value.spec.strategy.rollingUpdate.maxUnavailable = Number(copyData.value.spec.strategy.rollingUpdate.maxUnavailable)
-    }
-    // 最大可用数量字符转数字
-    if(!copyData.value.spec.strategy.rollingUpdate.maxSurge.match(/\%/)){
-      copyData.value.spec.strategy.rollingUpdate.maxSurge = Number(copyData.value.spec.strategy.rollingUpdate.maxSurge)
+    if(!copyData.value.spec.updateStrategy.rollingUpdate.maxUnavailable.match(/\%/)){
+      copyData.value.spec.updateStrategy.rollingUpdate.maxUnavailable = Number(copyData.value.spec.updateStrategy.rollingUpdate.maxUnavailable)
     }
     //亲和度处理
     affinityHandle()
@@ -1114,9 +1107,9 @@
 
   // 处理标签 & 注解
   const labelAnnotationHandle = ()=>{
-    labelAnnotation2Json(initData.value.option.labelAnnotation.deployment.labels , initData.value.metadata.labels)
+    labelAnnotation2Json(initData.value.option.labelAnnotation.daemonSet.labels , initData.value.metadata.labels)
     labelAnnotation2Json(initData.value.option.labelAnnotation.pod.labels , initData.value.spec.template.metadata.labels)
-    labelAnnotation2Json(initData.value.option.labelAnnotation.deployment.annotations , initData.value.metadata.annotations)
+    labelAnnotation2Json(initData.value.option.labelAnnotation.daemonSet.annotations , initData.value.metadata.annotations)
     labelAnnotation2Json(initData.value.option.labelAnnotation.pod.annotations , initData.value.spec.template.metadata.annotations)
 
     if(initData.value.spec.template.metadata.labels.length == 0){
@@ -1205,8 +1198,8 @@
       Object.assign(initData.value.spec.template.spec,{"securityContext":[]})
     }
 
-    if(!initData.value.spec?.strategy ){
-      Object.assign(initData.value.spec,{"strategy": {
+    if(!initData.value.spec?.updateStrategy ){
+      Object.assign(initData.value.spec,{"updateStrategy": {
                   "rollingUpdate": {
                     "maxSurge": "25%",
                     "maxUnavailable": "25%"
@@ -1700,7 +1693,7 @@
     
     delete initData.value.option.labelAnnotation
     const cleanObj = {
-      deployment:{
+      daemonSet:{
         labels:[],
         annotations:[
           {
@@ -1715,9 +1708,9 @@
       }
     }
     Object.assign(initData.value.option,{labelAnnotation:cleanObj})
-    json2labelAnnotation(initData.value.option.labelAnnotation.deployment.labels , initData.value.metadata.labels)
+    json2labelAnnotation(initData.value.option.labelAnnotation.daemonSet.labels , initData.value.metadata.labels)
     json2labelAnnotation(initData.value.option.labelAnnotation.pod.labels , initData.value.spec.template.metadata.labels)
-    json2labelAnnotation(initData.value.option.labelAnnotation.deployment.annotations , initData.value.metadata.annotations)
+    json2labelAnnotation(initData.value.option.labelAnnotation.daemonSet.annotations , initData.value.metadata.annotations)
     json2labelAnnotation(initData.value.option.labelAnnotation.pod.annotations , initData.value.spec.template.metadata.annotations)
 
   }
@@ -1757,7 +1750,7 @@
   const changePodSelectTab = (item) =>{
     initData.value.option.selectPod = item
   }
-  const changeDeploymentSelectTab = (item) =>{
+  const changeDaemonSetSelectTab = (item) =>{
     initData.value.option.selectDepolyment = item
   }
 
@@ -1784,12 +1777,7 @@
             </el-col>
             <el-col :span="8">
               <el-form-item label="描述">
-                <el-input v-model="initData.option.labelAnnotation.deployment.annotations[0].value" placeholder="请输入描述内容"></el-input>
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="容器副本数量">
-                <el-input-number  v-model="initData.spec.replicas" placeholder="请输入副本数量"></el-input-number>
+                <el-input v-model="initData.option.labelAnnotation.daemonSet.annotations[0].value" placeholder="请输入描述内容"></el-input>
               </el-form-item>
             </el-col>
             
@@ -1807,19 +1795,19 @@
               <template #add-icon>
                 <el-icon><Select /></el-icon>
               </template>
-              <el-tab-pane name="Deployment" label="Deployment" closable="false">
+              <el-tab-pane name="DaemonSet" label="DaemonSet" closable="false">
                 <el-scrollbar>
                   <div class="tab-content">
                     <div class="left">
-                      <el-tabs :tab-position="'left'" @tab-change="changeDeploymentSelectTab">
-                        <el-tab-pane label="标签注释" name="deploymentLabel" />
-                        <el-tab-pane label="扩缩容和升级策略" name="deploymentStrategy" />
+                      <el-tabs :tab-position="'left'" @tab-change="changeDaemonSetSelectTab">
+                        <el-tab-pane label="标签注释" name="daemonSetLabel" />
+                        <el-tab-pane label="扩缩容和升级策略" name="daemonSetStrategy" />
                       </el-tabs>
                     </div>
                     <div class="right">
-                      <div v-show="initData.option.selectDepolyment === 'deploymentLabel'  ? true : false ">
-                        <H1>Deployment标签</H1>
-                        <el-row :gutter="24" v-for="(label,index) in initData.option.labelAnnotation.deployment.labels" :key="index" style="margin-top:30px">
+                      <div v-show="initData.option.selectDepolyment === 'daemonSetLabel'  ? true : false ">
+                        <H1>DaemonSet标签</H1>
+                        <el-row :gutter="24" v-for="(label,index) in initData.option.labelAnnotation.daemonSet.labels" :key="index" style="margin-top:30px">
                           <el-col :span="6" >
                             <el-input label="键" placeholder="请输入键" v-model="label.key"></el-input>
                           </el-col>
@@ -1832,7 +1820,7 @@
                           <el-button @click="addDeployLabel" type="primary" plain>添加标签</el-button>
                         </el-row>
                         <H1>注解</H1>
-                        <el-row :gutter="24" v-for="(annotation,index) in initData.option.labelAnnotation.deployment.annotations" :key="index" style="margin-top:30px"
+                        <el-row :gutter="24" v-for="(annotation,index) in initData.option.labelAnnotation.daemonSet.annotations" :key="index" style="margin-top:30px"
                           v-show="annotation.key != 'field.cattle.io/description'">
                           <el-col :span="6" >
                             <el-input label="键" placeholder="请输入键" v-model="annotation.key"></el-input>
@@ -1846,25 +1834,20 @@
                           <el-button @click="addDeployAnnotation" type="primary" plain>添加标签</el-button>
                         </el-row>
                       </div>
-                      <div v-show="initData.option.selectDepolyment === 'deploymentStrategy'  ? true : false ">
+                      <div v-show="initData.option.selectDepolyment === 'daemonSetStrategy'  ? true : false ">
                         <H1>扩缩容和升级策略</H1>
                         <el-row :gutter="24" style="margin-top:10px;margin-left:2px">
                           <el-col :span="12">
-                            <el-radio-group v-model="initData.spec.strategy.type" >
+                            <el-radio-group v-model="initData.spec.updateStrategy.type" >
                               <el-radio-button label="RollingUpdate">滚动升级</el-radio-button>
                               <el-radio-button label="Recreate">重新创建</el-radio-button>
                             </el-radio-group>
                           </el-col>
                         </el-row>
-                        <el-row :gutter="24" style="margin-top:10px;margin-left:2px" v-if="initData.spec.strategy.type == 'RollingUpdate'">
-                          <el-col :span="12">
-                            <el-form-item label="最大可用数量">
-                              <el-input placeholder="请输入数量" v-model="initData.spec.strategy.rollingUpdate.maxSurge"></el-input>
-                            </el-form-item>
-                          </el-col>
+                        <el-row :gutter="24" style="margin-top:10px;margin-left:2px" v-if="initData.spec.updateStrategy.type == 'RollingUpdate'">
                           <el-col :span="12">
                             <el-form-item label="最大不可用数量">
-                              <el-input placeholder="请输入数量" v-model="initData.spec.strategy.rollingUpdate.maxUnavailable"></el-input>
+                              <el-input placeholder="请输入数量" v-model="initData.spec.updateStrategy.rollingUpdate.maxUnavailable"></el-input>
                             </el-form-item>
                           </el-col>
                         </el-row>
@@ -1877,13 +1860,6 @@
                           <el-col :span="12">
                             <el-form-item label="修订历史记录限制">
                               <el-input-number  placeholder="请输入修订历史记录限制" v-model="initData.spec.revisionHistoryLimit">
-                                <template #append>秒</template>
-                              </el-input-number>
-                            </el-form-item>
-                          </el-col>
-                          <el-col :span="12">
-                            <el-form-item label="进程截止时间">
-                              <el-input-number  placeholder="请输入进程截止时间数量" v-model="initData.spec.progressDeadlineSeconds">
                                 <template #append>秒</template>
                               </el-input-number>
                             </el-form-item>

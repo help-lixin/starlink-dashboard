@@ -893,7 +893,6 @@
           delete container.lifecycle.postStart
         //针对命令特殊处理
         }else if(container.lifecycle.postStart?.item == "exec"){
-          console.log(container.lifecycle.postStart.exec.command)
           container.lifecycle.postStart.exec.command = container.lifecycle.postStart.exec.command.split(',')
           delete container.lifecycle.postStart.item
         }else{
