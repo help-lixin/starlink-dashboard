@@ -4,6 +4,8 @@ import IndexView from '@/views/IndexView.vue'
 import { useTokenStore } from '@/stores/token'
 import { useMenuStore } from "@/stores/menu.ts";
 import StompClient from "@/utils/StompClient.ts";
+import { registerPipelineEventHandler } from '@/utils/pipeline-event-handler'
+
 const publicRoutes = [
   {
     path: '',
@@ -301,11 +303,14 @@ router.beforeEach(async (to, from, next) => {
     if (!token?.accessToken) { // token不存在,跳转到login
       next({ name: 'login', query: { redirect: to.fullPath } })
     } else {
+      // TODO 朱捷
+      // 注册流水线事件监听
+      registerPipelineEventHandler()
+      
       // 建立连接
       const stompClient = StompClient.getInstance()
       await stompClient.connect()
-      // 需要用到的地方再订阅
-      // await stompClient.subscribe()
+      await stompClient.subscribe()
     }
   }
   // 继续往下走
