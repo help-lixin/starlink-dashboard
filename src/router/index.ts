@@ -306,11 +306,11 @@ router.beforeEach(async (to, from, next) => {
       // TODO 朱捷
       // 注册流水线事件监听
       registerPipelineEventHandler()
-      
+
       // 建立连接
       const stompClient = StompClient.getInstance()
+      // 链接并订阅
       await stompClient.connect()
-      // await stompClient.subscribe()
     }
   }
   // 继续往下走
