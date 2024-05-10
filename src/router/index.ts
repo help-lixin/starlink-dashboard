@@ -310,7 +310,7 @@ router.beforeEach(async (to, from, next) => {
       // 建立连接
       const stompClient = StompClient.getInstance()
       await stompClient.connect()
-      await stompClient.subscribe()
+      // await stompClient.subscribe()
     }
   }
   // 继续往下走
