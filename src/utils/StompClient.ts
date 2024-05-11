@@ -68,9 +68,9 @@ class StompClient {
 
       // 覆盖sockjs使用stomp客户端
       this.stompClient.connect({token:this.token},
-        async (frame: any) => {
+        (frame: any) => {
           // 第一次链接成功，直接订阅
-          await this.instance.subscribe()
+          StompClient.instance.subscribe()
           resolve()
         },
         (error: any) => {
