@@ -7,6 +7,7 @@ import * as decode from 'jwt-decode';
 import { reject } from "lodash";
 import { emitter } from "@/utils/mitt";
 import { MESSAGE_SERVICE } from "@/utils/env";
+import { registerPipelineEventHandler } from '@/utils/pipeline-event-handler'
 
 
 class StompClient {
@@ -97,6 +98,9 @@ class StompClient {
       // 订阅
       subscribe(){
         return new Promise((resolve, reject) => {
+          // 注册:流水线默认处理事件
+          registerPipelineEventHandler()
+
           this.stompClient.subscribe(
             `/queue/${this.userName}/message`,
             (response: any) => {
