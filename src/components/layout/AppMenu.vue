@@ -55,9 +55,6 @@ const processUrl = (component: string) => {
         unique-opened
         :default-active="menuSelectPath"
         :default-openeds="['0']"
-        background-color="var(--menu-bg-color)"
-        text-color="var(--menu-text-color)"
-        active-text-color="var(--menu-text-active-color)"
         class="el-menu-vertical"
         :collapse="isCollapse"
         @select="menuSelect"
