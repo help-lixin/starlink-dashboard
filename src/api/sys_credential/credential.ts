@@ -18,6 +18,14 @@ export const credentialTypes=[
   {
     value:"SSH",
     label:"SSH"
+  },
+  {
+    value:"TLS",
+    label:"TLS"
+  },
+  {
+    value:"OPAQUE",
+    label:"OPAQUE"
   }
 ]
 
@@ -87,6 +95,15 @@ return request({
 export function syncAllCredential(){
     return request({
       url: STARLINK_SERVICE + '/credential/syncAllCredential' ,
+      method: 'get'
+    }).then((res)=>{
+        return res?.data;
+    });
+}
+
+export function nameSpaceList(){
+    return request({
+      url: STARLINK_SERVICE + '/credential/nameSpace/list' ,
       method: 'get'
     }).then((res)=>{
         return res?.data;

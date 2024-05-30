@@ -15,7 +15,7 @@
 
   watch(() => props.visible, async (newValue) => {
     if (newValue) {
-      // console.log(yaml.dump(props.initData), '111')
+      console.log(yaml.dump(props.initData), '111')
       await nextTick()
       editor.initEditor({
         value: yaml.dump(props.initData),

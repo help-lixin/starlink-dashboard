@@ -3,7 +3,7 @@
   import { showStatusOperateFun , status , showStatusFun , addDateRange, getStatusIcon } from "@/utils/common"
   import { queryInstanceInfoByPluginCode,pluginOptionSelect } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
-  import {sysCredentialList, addCredential, queryCredentialInfoById, checkKey , 
+  import {sysCredentialList, addCredential, queryCredentialInfoById, checkKey , nameSpaceList,
     removeCredential,changeStatus ,credentialTypes,syncAllCredential} from "@/api/sys_credential/credential"
 
   const queryFormRef = ref(null);
@@ -37,7 +37,7 @@
   const showSearch = ref(true)
   // 日期范围
   const dateRange = ref([])
-
+  const nameSpaces = reactive([])
 
   const total= ref(0)
   const sysCredentialPageList = reactive([])
@@ -114,12 +114,17 @@
         id: undefined,
         credentialKey: undefined,
         credentialName: undefined,
+        nameSpace:undefined,
+        key:undefined,
+        value:undefined,
         secret:undefined,
         userName:undefined,
         privateKey:undefined,
+        certificate:undefined,
         passphrase:undefined,
         publicKey:undefined,
         password:undefined,
+        imgDomain:undefined,
         token:undefined,
         credentialType:undefined,
         pluginCode: undefined,
@@ -208,6 +213,14 @@
     queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
       Object.assign(formPluginInstance,res?.data)
     })
+
+    if(pluginCode == "k8s"){
+      nameSpaceList().then((res)=>{
+        Object.assign(nameSpaces ,res.data)
+      })
+    }else{
+      Object.assign(nameSpaces ,[])
+    }
   }
 
 
@@ -607,6 +620,25 @@
             </el-col>
           </el-row>
 
+        <el-row v-if="form.pluginCode == 'k8s'">
+          <el-col :span="12">
+            <el-form-item label="命名空间" prop="nameSpace" :rules="[
+                { required: true, message: '命名空间不能为空', trigger: 'blur' }]">
+                <el-select
+                    class="search-select"
+                    v-model="form.nameSpace"
+                    placeholder="请选择凭证类型"
+                    style="width: 240px"
+                  >
+                    <el-option v-for="item in nameSpaces"
+                             :key="item.value"
+                             :label="item.label"
+                             :value="item.value"/>
+                </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+
           <el-row v-if="form.credentialType == 'SECRET'">
             <el-col :span="24">
               <el-form-item label="密钥" prop="secret" :rules="[
@@ -615,7 +647,7 @@
               </el-form-item>
             </el-col>
 
-        </el-row>
+          </el-row>
 
           <el-row v-if="form.credentialType == 'SSH'">
             <el-col :span="12">
@@ -664,6 +696,12 @@
                 <el-input v-model="form.password" type="password" placeholder="请输入密码" maxlength="200" show-password />
               </el-form-item>
             </el-col>
+
+            <el-col :span="12">
+              <el-form-item label="镜像域名" prop="imgDomain" >
+                <el-input v-model="form.imgDomain"  placeholder="如：https://starlink.lixin.help" maxlength="1024" />
+              </el-form-item>
+            </el-col>
           </el-row>
 
           <el-row v-if="form.credentialType == 'TOKEN'">
@@ -678,6 +716,42 @@
                   { required: true, message: 'token不能为空', trigger: 'blur' },
                   { min: 2, max: 2000, message: 'token长度必须介于 2 和 2000 之间', trigger: 'blur' } ]">
                 <el-input v-model="form.token"  placeholder="请输入token" maxlength="2000" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row v-if="form.credentialType == 'TLS'">
+            <el-col :span="12">
+              <el-form-item label="证书" prop="certificate" :rules="[
+                  { required: true, message: '证书不能为空', trigger: 'blur' },
+                  { min: 2, max: 2000, message: '证书长度必须介于 2 和 2000 之间', trigger: 'blur' } ]">
+                <el-input v-model="form.certificate" placeholder="请输入证书" maxlength="2000" />
+              </el-form-item>
+            </el-col>
+
+            <el-col :span="12">
+              <el-form-item label="私钥" prop="privateKey" :rules="[
+                  { required: true, message: '私钥不能为空', trigger: 'blur' },
+                  { min: 2, max: 2000, message: '私钥长度必须介于 2 和 2000 之间', trigger: 'blur' } ]">
+                <el-input v-model="form.privateKey"  placeholder="请输入私钥" maxlength="2000" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row v-if="form.credentialType == 'OPAQUE'">
+            <el-col :span="12">
+              <el-form-item label="键" prop="key" :rules="[
+                  { required: true, message: '键名不能为空', trigger: 'blur' },
+                  { min: 2, max: 255, message: '键名长度必须介于 2 和 255 之间', trigger: 'blur' } ]">
+                <el-input v-model="form.userName" placeholder="请输入键名" maxlength="255" />
+              </el-form-item>
+            </el-col>
+
+            <el-col :span="12">
+              <el-form-item label="值" prop="value" :rules="[
+                  { required: true, message: '值不能为空', trigger: 'blur' },
+                  { min: 2, max: 255, message: '值长度必须介于 2 和 255 之间', trigger: 'blur' } ]">
+                <el-input v-model="form.token"  placeholder="请输入值" maxlength="255" />
               </el-form-item>
             </el-col>
           </el-row>
