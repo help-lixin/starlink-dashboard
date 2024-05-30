@@ -24,6 +24,13 @@ request.interceptors.response.use((respose)=>{
 }, async (err)=>{
     // 针对401进行独立处理
     if(err?.response?.status == 401) {
+
+        if(err.config.url.endsWith("/login")){
+            ElMessage.error(err.response.data.msg);
+            window.location.reload()
+            return;
+        }
+
         const tokenStore = useTokenStore();
         if(Object.keys(tokenStore?.token).length == 0){
             ElMessage.error("刷新token失败,您将重新登录");

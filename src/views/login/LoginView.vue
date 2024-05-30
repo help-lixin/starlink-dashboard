@@ -11,8 +11,6 @@ import { processRoutes } from '@/api/router'
 import { usePermsStore } from '@/stores/perms'
 import { useActionMetasStore } from '@/stores/plugin'
 
-import { registerPipelineEventHandler } from '@/utils/pipeline-event-handler'
-
 const tokenStore = useTokenStore()
 const permsStore = usePermsStore()
 const router = useRouter()
@@ -75,9 +73,6 @@ async function onSubmit() {
         isLoading.value = false
         // 跳转到首页
         router.push((route.query.redirect as string) || '/')
-
-        // 注册流水线事件监听
-        registerPipelineEventHandler()
       } else {
         isLoading.value = false
         let msg = loginRes.msg

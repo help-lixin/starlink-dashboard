@@ -7,6 +7,7 @@ import * as decode from 'jwt-decode';
 import { reject } from "lodash";
 import { emitter } from "@/utils/mitt";
 import { MESSAGE_SERVICE } from "@/utils/env";
+import { registerPipelineEventHandler } from '@/utils/pipeline-event-handler'
 
 
 class StompClient {
@@ -69,6 +70,8 @@ class StompClient {
       // 覆盖sockjs使用stomp客户端
       this.stompClient.connect({token:this.token},
         (frame: any) => {
+          // 第一次链接成功，直接订阅
+          StompClient.instance.subscribe()
           resolve()
         },
         (error: any) => {
@@ -95,6 +98,9 @@ class StompClient {
       // 订阅
       subscribe(){
         return new Promise((resolve, reject) => {
+          // 注册:流水线默认处理事件
+          registerPipelineEventHandler()
+
           this.stompClient.subscribe(
             `/queue/${this.userName}/message`,
             (response: any) => {

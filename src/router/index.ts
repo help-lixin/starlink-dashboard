@@ -4,13 +4,14 @@ import IndexView from '@/views/IndexView.vue'
 import { useTokenStore } from '@/stores/token'
 import { useMenuStore } from "@/stores/menu.ts";
 import StompClient from "@/utils/StompClient.ts";
+
 const publicRoutes = [
   {
     path: '',
     name: 'index',
     component: IndexView,
     meta: {
-      requiresAuth: false
+      requiresAuth: true
     }
   },
   {
@@ -309,11 +310,15 @@ router.beforeEach(async (to, from, next) => {
     if (!token?.accessToken) { // token不存在,跳转到login
       next({ name: 'login', query: { redirect: to.fullPath } })
     } else {
-      // 建立连接
-      const stompClient = StompClient.getInstance()
-      await stompClient.connect()
-      // 需要用到的地方再订阅
-      // await stompClient.subscribe()
+      try {
+        // 建立连接
+        const stompClient = StompClient.getInstance()
+        // 链接并订阅
+        await stompClient.connect()
+      } catch (e) {
+        console.log(e, 'err')
+      }
+
     }
   }
   // 继续往下走
