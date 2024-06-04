@@ -105,11 +105,6 @@
       ]
   })
 
-  const handleCredentialType = (type)=>{
-    form.credentialType = type;
-  }
-
-
   const form = reactive({
         id: undefined,
         credentialKey: undefined,
@@ -126,12 +121,35 @@
         password:undefined,
         imgDomain:undefined,
         token:undefined,
+        dataMap:[],
         credentialType:undefined,
         pluginCode: undefined,
         remark: undefined,
         status: undefined,
         instanceCode: undefined
   })
+
+  const handleCredentialType = (type)=>{
+    form.credentialType = type;
+
+    if(form.credentialType == 'OPAQUE'){
+      form.dataMap = []
+      form.dataMap.push({key:"", value:""})
+    }else{
+      form.dataMap.splice(0,form.dataMap.length)
+    }
+  }
+
+  const addDataMap = ()=>{
+    form.dataMap.push({key:"", value:""})
+  }
+
+  const deleteDataMap = (index)=>{
+    if(form.dataMap.length != 1){
+      form.dataMap.splice(index,1)
+    }
+  }
+
   const title = ref("")
   // 查询页面的实例编码
   const pluginInstance = reactive([]);
@@ -575,6 +593,7 @@
             <el-col :span="12">
               <el-form-item label="凭证key" prop="credentialKey" :rules="[
                   { required: true, message: '凭证key不能为空', trigger: 'blur' },
+                  { pattern: /^[-a-z0-9]*$/, message: '只可以输入小写字母、数字、中划线', trigger: 'blur' },
                   { min: 2, max: 50, message: '凭证key长度必须介于 2 和 50 之间', trigger: 'blur' } ]">
                 <el-input v-model="form.credentialKey" :disabled="form.id != undefined" placeholder="请输入凭证唯一名称" maxlength="50" />
               </el-form-item>
@@ -738,26 +757,36 @@
             </el-col>
           </el-row>
 
-          <el-row v-if="form.credentialType == 'OPAQUE'">
-            <el-col :span="12">
-              <el-form-item label="键" prop="key" :rules="[
-                  { required: true, message: '键名不能为空', trigger: 'blur' },
-                  { min: 2, max: 255, message: '键名长度必须介于 2 和 255 之间', trigger: 'blur' } ]">
-                <el-input v-model="form.userName" placeholder="请输入键名" maxlength="255" />
-              </el-form-item>
-            </el-col>
+          <div v-if="form.credentialType == 'OPAQUE'" >
+            <el-row  v-for="(label,index) in form.dataMap" :key="index">
+              <el-col :span="12">
+                <el-form-item label="键" :prop="`dataMap[${index}].key`" :rules="[
+                    { required: true, message: '键名不能为空', trigger: 'blur' },
+                    { min: 2, max: 255, message: '键名长度必须介于 2 和 255 之间', trigger: 'blur' } ]">
+                  <el-input v-model="label.key" placeholder="请输入键名" maxlength="255" />
+                </el-form-item>
+              </el-col>
 
-            <el-col :span="12">
-              <el-form-item label="值" prop="value" :rules="[
-                  { required: true, message: '值不能为空', trigger: 'blur' },
-                  { min: 2, max: 255, message: '值长度必须介于 2 和 255 之间', trigger: 'blur' } ]">
-                <el-input v-model="form.token"  placeholder="请输入值" maxlength="255" />
-              </el-form-item>
-            </el-col>
-          </el-row>
+              <el-col :span="10">
+                <el-form-item label="值" :prop="`dataMap[${index}].value`" :rules="[
+                    { required: true, message: '值不能为空', trigger: 'blur' },
+                    { min: 2, max: 255, message: '值长度必须介于 2 和 255 之间', trigger: 'blur' } ]">
+                  <el-input v-model="label.value"  placeholder="请输入值" maxlength="255" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="1">
+                <el-button type="danger" @click="deleteDataMap(index)" icon="Delete"></el-button>
+              </el-col>
+            </el-row>
+            <el-row >
+              <el-col :span="12" style="margin: 0px 0px 10px 80px;">
+                <el-button type="primary" @click="addDataMap">添加Opaque</el-button>
+              </el-col>
+            </el-row>
+          </div>
 
           <el-row>
-            <el-col :span="24">
+            <el-col :span="12">
               <el-form-item label="备注" prop="remark">
                 <el-input v-model="form.remark" type="textarea" placeholder="请输入备注" maxlength="200" />
               </el-form-item>
