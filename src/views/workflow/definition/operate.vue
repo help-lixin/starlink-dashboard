@@ -2,7 +2,9 @@
 	<div class="bpmn">
 		<div ref="canvasRef" class="canvas"></div>
 		<CustomPropertiesPanel v-if="bpmnModeler" :modeler="bpmnModeler" />
-    <YtBottomOperate><el-button @click="showSavePage()">保存&运行</el-button></YtBottomOperate>
+    <YtBottomOperate>
+      <el-button @click="$router.go(-1)">取消</el-button>
+      <el-button @click="showSavePage()" type="primary">保存&运行</el-button></YtBottomOperate>
 	</div>
 
 	<!-- 弹出层 -->
@@ -475,7 +477,7 @@ async function saveAndRun(isRunning: boolean) {
 										const processInstnaceId = startWorkflowRes?.data?.id;
 										router.push({
 											name: "workflow-definition-view",
-											params: { 
+											params: {
 												processInstnaceId
 											}
 										})

@@ -9,10 +9,11 @@
 import { getCollapse } from '@/components/layout/isCollapse'
 const props = defineProps({
   isShowLoading: Boolean,
-  isFullScreen: Boolean
+  isFullScreen: Boolean,
+  isTop: Boolean
 })
 const showClass = computed(() => {
-  return props.isFullScreen ? 'isFullScreen' : (getCollapse() ? 'navCollapsed' : 'navNoCollapsed')
+  return (props.isFullScreen ? `isFullScreen` : (getCollapse() ? 'navCollapsed' : 'navNoCollapsed')) + `${props.isTop ? ' isTop' : ''}`
 })
 </script>
 
@@ -29,7 +30,11 @@ const showClass = computed(() => {
   padding: 0 16px;
   z-index: 999;
   background: rgba(255, 255, 255, 1);
-  box-shadow: 0px -1px 10px 0px rgba(8, 54, 80, 0.06);
+  //box-shadow: 0px -1px 10px 0px rgba(8, 54, 80, 0.06);
+  &.isTop {
+    top: var(--el-header-height);
+    text-align: left;
+  }
 }
 
 .isFullScreen {

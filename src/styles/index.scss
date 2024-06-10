@@ -59,7 +59,10 @@ html {
   --el-header-height: 60px;
   --menu-width: 200px;
   --el-table-header-bg-color-my: #f9fafb;
-  --el-menu-hover-bg-color: #f9fafb;
+  .el-menu {
+    --el-menu-hover-bg-color: var(--el-color-primary-light-8);
+  }
+  //--el-menu-hover-bg-color: var(--el-color-primary-light-9);
 }
 // 覆盖dialog样式
 .el-dialog {
@@ -83,4 +86,8 @@ html {
 }
 #app .el-table {
   --el-table-header-bg-color: var(--el-table-header-bg-color-my)
+}
+
+#app .djs-palette {
+  top: 60px;
 }

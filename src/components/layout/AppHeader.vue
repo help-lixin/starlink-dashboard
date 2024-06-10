@@ -89,8 +89,8 @@ const handlerLogout = () => {
       </el-icon>
 
       <el-breadcrumb separator="/" style="padding-left: 12px;">
-        <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-        <el-breadcrumb-item v-for="nav in navStore.navArray" :key="nav"> {{ nav }}</el-breadcrumb-item>
+        <el-breadcrumb-item v-for="nav in navStore.navArray" :key="nav.name" :to="nav.path ? {path: nav.path} : undefined"> {{ nav.name }}</el-breadcrumb-item>
+        <el-breadcrumb-item></el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div class="layout-right">
@@ -100,7 +100,7 @@ const handlerLogout = () => {
             <el-icon><Message /></el-icon>
           </el-badge>
         </div>
-<!--        <el-icon>-->
+<!--        <el-icon @click="toggleDark">-->
 <!--          <Moon v-if="!isDark" />-->
 <!--          <Sunny v-else />-->
 <!--        </el-icon>-->
@@ -124,11 +124,23 @@ const handlerLogout = () => {
   </el-header>
   <SystemMsg v-model:is-show="isShowMessage"></SystemMsg>
 </template>
-
+<style>
+.el-menu-item.is-active {
+  background-color: var(--el-menu-hover-bg-color);
+}
+</style>
 <style lang="scss" scoped>
 ::v-deep(.el-breadcrumb__inner.is-link) {
-  color: #E5EAF3;
+  //color: #E5EAF3;
 }
+::v-deep(.el-breadcrumb__item) {
+  &:nth-last-child(2) {
+    .el-breadcrumb__separator {
+      display: none;
+    }
+  }
+}
+
 ::v-deep(.el-breadcrumb__separator) {
   color: var(--el-text-color-regular);
 }
@@ -159,7 +171,6 @@ const handlerLogout = () => {
   align-items: center;
   text-decoration: none;
   height: 60px;
-  color: #fff;
 
   img {
     width: 32px;
@@ -177,8 +188,8 @@ const handlerLogout = () => {
   border-bottom: 0;
   display: flex;
   align-items: center;
-  background-color: rgba(31, 35, 57, 1);
-  box-shadow: 0px 4px 8px rgba(31, 35, 57, 0.4);
+  //background-color: rgba(31, 35, 57, 1);
+  box-shadow: none;
   z-index: 11;
   .el-icon {
     margin-right: 0;

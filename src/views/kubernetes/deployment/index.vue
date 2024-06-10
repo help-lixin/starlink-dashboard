@@ -744,6 +744,7 @@
   import { Select } from '@element-plus/icons-vue'
   import type { FormRules } from 'element-plus'
   import yaml from 'js-yaml'
+  import router from "@/router";
 
   const handleTabsEdit = (
     targetName: string | number,
@@ -952,7 +953,7 @@
         delete container.stdin
         delete container.stdinOnce
       }
-      
+
       // 命令参数
       if(!container.args){
         delete container.args
@@ -981,7 +982,7 @@
       // 安全性上下文
       if(!container.securityContext.runAsNonRoot && !container.securityContext.readOnlyRootFilesystem
               && !container.securityContext.privileged && !container.securityContext.allowPrivilegeEscalation
-            && !container.securityContext.runAsUser 
+            && !container.securityContext.runAsUser
           && container.securityContext.capabilities.add.length == 0 && container.securityContext.capabilities.drop.length == 0){
         delete container.securityContext
       }
@@ -1017,7 +1018,7 @@
           "nodeAffinity": {"preferredDuringSchedulingIgnoredDuringExecution":[],"requiredDuringSchedulingIgnoredDuringExecution":[]}
         }
       })
-      
+
       initData.value.option.freeNode.forEach(function(node){
         // 首选
         if(node.nodeLevel == "0"){
@@ -1697,7 +1698,7 @@
 
   // 标签 & 注解从yaml逆向回来
   const reverseLabelAnnotationHandle = ()=>{
-    
+
     delete initData.value.option.labelAnnotation
     const cleanObj = {
       deployment:{
@@ -1801,7 +1802,7 @@
                 <el-input-number min="1" v-model="initData.spec.replicas" placeholder="请输入副本数量"></el-input-number>
               </el-form-item>
             </el-col>
-            
+
           </el-row>
         </yt-card>
         <yt-card :title="'详细配置'">
@@ -2085,7 +2086,7 @@
                               </el-col>
                               <el-col :span="6" v-if="node.nodeLevel == '0'">
                                 <el-form-item label="权重">
-                                  <el-input-number 
+                                  <el-input-number
                                             v-model="node.weight"/>
                                 </el-form-item>
                               </el-col>
@@ -2170,7 +2171,7 @@
                             </el-col>
                             <el-col :span="3" v-if="pod.nodeLevel == '0'">
                               <el-form-item label="权重">
-                                <el-input-number 
+                                <el-input-number
                                           v-model="pod.weight"/>
                               </el-form-item>
                             </el-col>
@@ -3518,6 +3519,7 @@
       </div>
     </el-form>
     <yt-bottom-operate>
+      <el-button @click="router.go(-1)">取消</el-button>
       <el-button @click="editYaml">编辑yaml</el-button>
       <el-button type="primary" @click="saveData">保存</el-button>
     </yt-bottom-operate>
@@ -3526,6 +3528,10 @@
 </template>
 <style lang="scss" scoped>
   .detail-content {
+    ::v-deep(.el-tabs__new-tab) {
+      transform: scale(1.2);
+      transform-origin: right;
+    }
     ::v-deep(.el-tabs--card > .el-tabs__header) {
       margin-bottom: 0;
     }
@@ -3555,9 +3561,9 @@
     }
     .tab-content {
       display: flex;
-      height: 400px;
       overflow-x: hidden;
       padding-top: 16px;
+      height: calc(100vh - 512px);
       .left {
         background: var(--el-table-header-bg-color-my);
         ::v-deep(.el-tabs__content) {

@@ -112,18 +112,16 @@ async function onSubmit() {
           </el-col>
         </el-row>
 
-        <el-form-item>
-          <el-form-item label="" label-width="80px">
-            <el-button
-              style="width: 200px"
-              type="primary"
-              native-type="submit"
-              :loading="isLoading"
-              :disabled="isLoading"
-              >登入
-            </el-button>
-          </el-form-item>
-        </el-form-item>
+        <div class="login-btn">
+          <el-button
+            style="width: 200px"
+            type="primary"
+            native-type="submit"
+            :loading="isLoading"
+            :disabled="isLoading"
+          >登入
+          </el-button>
+        </div>
       </el-form>
     </div>
   </div>
@@ -151,12 +149,15 @@ async function onSubmit() {
 
 .loginform {
   background-color: #fff;
-  width: 500px;
+  width: 360px;
   height: 460px;
   border: 1px solid #fff;
   border-radius: 5px;
   opacity: 0.9;
-
+  .login-btn {
+    text-align: center;
+    margin-top: 40px;
+  }
   .verificationCode {
     margin-left: 6px;
     height: 30px;
@@ -182,7 +183,7 @@ async function onSubmit() {
 
 .el-form {
   width: 70%;
-  margin-left: 10%;
+  margin: 0 auto;
 }
 
 .el-form-item {
