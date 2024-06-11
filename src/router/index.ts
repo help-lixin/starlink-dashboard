@@ -179,49 +179,49 @@ export const dynamicRoutes = [
     }
   },
   {
-    path: '/kubernetes/deployment/index',
+    path: '/kubernetes/deployment/list/index',
     name: 'kubernetes-deploy',
-    component: () => import('../views/kubernetes/deployment/index.vue'),
+    component: () => import('../views/kubernetes/deployment/list/index.vue'),
     meta: {
       requiresAuth: true
     }
   },
   {
-    path: '/kubernetes/cronjob/index',
+    path: '/kubernetes/cronjob/list/index',
     name: 'kubernetes-cron-job',
-    component: () => import('../views/kubernetes/cronjob/index.vue'),
+    component: () => import('../views/kubernetes/cronjob/list/index.vue'),
     meta: {
       requiresAuth: true
     }
   },
   {
-    path: '/kubernetes/job/index',
+    path: '/kubernetes/job/list/index',
     name: 'kubernetes-job',
-    component: () => import('../views/kubernetes/job/index.vue'),
+    component: () => import('../views/kubernetes/job/list/index.vue'),
     meta: {
       requiresAuth: true
     }
   },
   {
-    path: '/kubernetes/pod/index',
+    path: '/kubernetes/pod/list/index',
     name: 'kubernetes-pod',
-    component: () => import('../views/kubernetes/pod/index.vue'),
+    component: () => import('../views/kubernetes/pod/list/index.vue'),
     meta: {
       requiresAuth: true
     }
   },
   {
-    path: '/kubernetes/daemonset/index',
+    path: '/kubernetes/daemonset/list/index',
     name: 'kubernetes-daemon-set',
-    component: () => import('../views/kubernetes/daemonset/index.vue'),
+    component: () => import('../views/kubernetes/daemonset/list/index.vue'),
     meta: {
       requiresAuth: true
     }
   },
   {
-    path: '/kubernetes/service/index',
+    path: '/kubernetes/service/list/index',
     name: 'kubernetes-service',
-    component: () => import('../views/kubernetes/service/index.vue'),
+    component: () => import('../views/kubernetes/service/list/index.vue'),
     meta: {
       requiresAuth: true
     }

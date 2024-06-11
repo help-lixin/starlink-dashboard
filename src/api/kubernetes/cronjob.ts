@@ -15,16 +15,6 @@ export function pageList(query:any) {
     });
 }
 
-// 查询命名空间列表
-export function nameSpaceList(instanceCode:string) {
-    return request({
-      url: STARLINK_SERVICE + '/kubernetes/deployment/nameSpace/list/'+instanceCode,
-      method: 'get'
-    }).then((res)=>{
-        return res?.data;
-    });
-}
-
 
 // 新增/修改 kubernetes任务配置
 export function addDeployment(data:any) {

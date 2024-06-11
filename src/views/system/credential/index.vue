@@ -16,7 +16,8 @@
     status: undefined,
     instanceCode:undefined,
     credentialType:undefined,
-    credentialName: undefined
+    credentialName: undefined,
+    credentialKey: undefined
   })
 
   const handleSyncAllCredential = () =>{
@@ -121,7 +122,7 @@
         password:undefined,
         imgDomain:undefined,
         token:undefined,
-        dataMap:[],
+        dataList:[],
         credentialType:undefined,
         pluginCode: undefined,
         remark: undefined,
@@ -133,20 +134,20 @@
     form.credentialType = type;
 
     if(form.credentialType == 'OPAQUE'){
-      form.dataMap = []
-      form.dataMap.push({key:"", value:""})
-    }else{
-      form.dataMap.splice(0,form.dataMap.length)
+      form.dataList = []
+      form.dataList.push({key:"", value:""})
+    }else if(form.dataList != undefined){
+      form.dataList.splice(0,form.dataList.length)
     }
   }
 
-  const addDataMap = ()=>{
-    form.dataMap.push({key:"", value:""})
+  const addDataList = ()=>{
+    form.dataList.push({key:"", value:""})
   }
 
-  const deleteDataMap = (index)=>{
-    if(form.dataMap.length != 1){
-      form.dataMap.splice(index,1)
+  const deleteDataList = (index)=>{
+    if(form.dataList.length != 1){
+      form.dataList.splice(index,1)
     }
   }
 
@@ -407,9 +408,9 @@
                 style="width: 240px"
               >
                 <el-option v-for="item in pluginCodes"
-                           :key="item.label"
-                           :label="item.value"
-                           :value="item.label"/>
+                           :key="item.value"
+                           :label="item.label"
+                           :value="item.value"/>
               </el-select>
             </el-form-item>
             <el-form-item label="插件实例" prop="instanceCode">
@@ -430,6 +431,14 @@
               <el-input
                 v-model="queryParams.credentialName"
                 placeholder="请输入凭证别名"
+                clearable
+                style="width: 240px"
+              />
+            </el-form-item>
+            <el-form-item label="凭证唯一名称" prop="credentialKey">
+              <el-input
+                v-model="queryParams.credentialKey"
+                placeholder="请输入凭证唯一名称"
                 clearable
                 style="width: 240px"
               />
@@ -758,9 +767,9 @@
           </el-row>
 
           <div v-if="form.credentialType == 'OPAQUE'" >
-            <el-row  v-for="(label,index) in form.dataMap" :key="index">
+            <el-row  v-for="(label,index) in form.dataList" :key="index">
               <el-col :span="12">
-                <el-form-item label="键" :prop="`dataMap[${index}].key`" :rules="[
+                <el-form-item label="键" :prop="`dataList[${index}].key`" :rules="[
                     { required: true, message: '键名不能为空', trigger: 'blur' },
                     { min: 2, max: 255, message: '键名长度必须介于 2 和 255 之间', trigger: 'blur' } ]">
                   <el-input v-model="label.key" placeholder="请输入键名" maxlength="255" />
@@ -768,19 +777,19 @@
               </el-col>
 
               <el-col :span="10">
-                <el-form-item label="值" :prop="`dataMap[${index}].value`" :rules="[
+                <el-form-item label="值" :prop="`dataList[${index}].value`" :rules="[
                     { required: true, message: '值不能为空', trigger: 'blur' },
                     { min: 2, max: 255, message: '值长度必须介于 2 和 255 之间', trigger: 'blur' } ]">
                   <el-input v-model="label.value"  placeholder="请输入值" maxlength="255" />
                 </el-form-item>
               </el-col>
               <el-col :span="1">
-                <el-button type="danger" @click="deleteDataMap(index)" icon="Delete"></el-button>
+                <el-button type="danger" @click="deleteDataList(index)" icon="Delete"></el-button>
               </el-col>
             </el-row>
             <el-row >
               <el-col :span="12" style="margin: 0px 0px 10px 80px;">
-                <el-button type="primary" @click="addDataMap">添加Opaque</el-button>
+                <el-button type="primary" @click="addDataList">添加Opaque</el-button>
               </el-col>
             </el-row>
           </div>
