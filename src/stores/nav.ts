@@ -9,8 +9,8 @@ export const useNavStore = defineStore('nav', () => {
 
     function triggerParse(){
         try{
-            const array = JSON.parse(navigationJson.value || 
-                              window.localStorage.getItem(navLocalStorageKey)  || 
+            const array = JSON.parse(navigationJson.value ||
+                              window.localStorage.getItem(navLocalStorageKey)  ||
                               "[]");
             navArray.value = array;
         }catch(err){
@@ -19,8 +19,8 @@ export const useNavStore = defineStore('nav', () => {
             throw err;
         }
     }
-    
-    function saveNavigation(data:string){
+
+    function saveNavigation(data:string, path: string){
         // 把对象转换成字符串
         navigationJson.value = data;
         window.localStorage.setItem(navLocalStorageKey,data);

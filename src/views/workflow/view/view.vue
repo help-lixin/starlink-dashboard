@@ -65,9 +65,6 @@ function setDiagram(bpmn: any) {
     if (err) {
       console.error(err)
     } else {
-      // 去掉左侧Palette
-      const palette = bpmnModeler.value.get('palette')
-      palette._container.style.display = 'none'
       bpmnModeler.value.on('commandStack.changed', function () {
         getXml((_err, xml) => console.log(xml))
       })
@@ -90,7 +87,16 @@ function init() {
       propertiesPanelModule,
       propertiesProviderModule,
       // 汉化模块
-      customTranslateModule
+      customTranslateModule,
+      {
+        paletteProvider: ["value", ''], //禁用/清空左侧工具栏
+        labelEditingProvider: ["value", ''], //禁用节点编辑
+        contextPadProvider: ["value", ''], //禁用图形菜单
+        bendpoints: ["value", {}], //禁用连线拖动
+        zoomScroll: ["value", ''], //禁用滚动
+        moveCanvas: ['value', ''], //禁用拖动整个流程图
+        move: ['value', ''] //禁用单个图形拖动
+      }
     ],
     moddleExtensions: {
       camunda: camundaModdleDescriptor

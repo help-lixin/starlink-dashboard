@@ -30,12 +30,12 @@ const menuSelect = (path: string) => {
   // 通过常量:改变面包屑内容,建议保存到store里
   const navArray = navigation.get(path)
   if (undefined != navArray) {
-    const navArrayJson = JSON.stringify(navArray)
+    // 把当前路径添加到最后一级
+    const navArrayJson = JSON.stringify(navArray.map((row, index) => {return {name: row, path: index === navArray.length - 1 ? path: undefined}}))
     navStore.saveNavigation(navArrayJson)
   }
 }
 const menuSelectPath = computed(() => {
-  console.log('run111', menuStore.menuSelectPath)
   return menuStore.menuSelectPath
 })
 // 处理url
@@ -55,9 +55,6 @@ const processUrl = (component: string) => {
         unique-opened
         :default-active="menuSelectPath"
         :default-openeds="['0']"
-        background-color="var(--menu-bg-color)"
-        text-color="var(--menu-text-color)"
-        active-text-color="var(--menu-text-active-color)"
         class="el-menu-vertical"
         :collapse="isCollapse"
         @select="menuSelect"
@@ -90,6 +87,7 @@ const processUrl = (component: string) => {
 /** 设置菜单样式 */
 .el-menu {
   border-right: none;
+  //box-shadow: 10px 0 15px -5px rgba(0, 0, 0, 0.6);
   width: var(--menu-width);
 
   &.el-menu--collapse {

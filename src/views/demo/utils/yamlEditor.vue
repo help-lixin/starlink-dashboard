@@ -19,7 +19,8 @@ watch(() => props.visible, async (newValue) => {
     await nextTick()
     editor.initEditor({
       value: yaml.dump(props.copyData),
-      language: 'yaml'
+      language: 'yaml',
+      theme: 'vs-dark'
     })
   }
 });

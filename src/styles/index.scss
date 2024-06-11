@@ -53,12 +53,16 @@ html.dark {
 html {
   /* 自定义浅色背景颜色 */
   --el-bg-main-color: #f6f6f7;
-  --menu-bg-color: rgba(31, 35, 57, 1);
+  --menu-bg-color: rgba(255, 255, 255, 1);
   --menu-text-color: rgba(131, 138, 155, 1);
-  --menu-text-active-color: #fff;
+  --menu-text-active-color: #000;
   --el-header-height: 60px;
   --menu-width: 200px;
   --el-table-header-bg-color-my: #f9fafb;
+  .el-menu {
+    --el-menu-hover-bg-color: var(--el-color-primary-light-8);
+  }
+  //--el-menu-hover-bg-color: var(--el-color-primary-light-9);
 }
 // 覆盖dialog样式
 .el-dialog {
@@ -82,4 +86,8 @@ html {
 }
 #app .el-table {
   --el-table-header-bg-color: var(--el-table-header-bg-color-my)
+}
+
+#app .djs-palette {
+  top: 60px;
 }

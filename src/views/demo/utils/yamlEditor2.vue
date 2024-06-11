@@ -19,7 +19,8 @@
       await nextTick()
       editor.initEditor({
         value: yaml.dump(props.initData),
-        language: 'yaml'
+        language: 'yaml',
+        theme: 'vs-dark'
       })
     }
   });
@@ -41,7 +42,7 @@
 </script>
 <template>
   <div class="yamlDemo">
-    <el-dialog :width="'80vw'" :model-value="visible" @close="closeDialog">
+    <el-dialog :width="'80vw'" class="dark" :model-value="visible" @close="closeDialog">
       <template #title>
         <span>YAML编辑器</span>
       </template>
