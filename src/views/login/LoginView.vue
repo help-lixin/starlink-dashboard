@@ -150,18 +150,17 @@ async function onSubmit() {
 .loginform {
   background-color: #fff;
   width: 360px;
-  height: 460px;
   border: 1px solid #fff;
   border-radius: 5px;
   opacity: 0.9;
   .login-btn {
     text-align: center;
-    margin-top: 40px;
+    margin: 0 0 40px 0;
   }
   .verificationCode {
     margin-left: 6px;
     height: 30px;
-    margin-top: 29px;
+    margin-top: 10px;
 
     img {
       width: 100%;
@@ -182,7 +181,7 @@ async function onSubmit() {
 }
 
 .el-form {
-  width: 70%;
+  width: 80%;
   margin: 0 auto;
 }
 
@@ -191,7 +190,7 @@ async function onSubmit() {
   display: flex;
   align-items: center;
   /* background-color: blue; */
-  padding-top: 20px;
+  //padding-top: 20px;
   text-align: center;
 }
 
