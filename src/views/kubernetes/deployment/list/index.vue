@@ -4,7 +4,12 @@
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
   import {  Edit } from '@element-plus/icons-vue'
+  // import router from '@/router'
   import { pageList,nameSpaceList} from "@/api/kubernetes/deployment"
+  import { useRouter, useRoute } from "vue-router";
+
+  const router = useRouter();
+
 
   const queryFormRef = ref(null);
 
@@ -58,6 +63,10 @@
     );
   }
 
+  const addHandle = function(){
+    router.push("/kubernetes/deployment/index")
+  }
+
   // 处理搜索按钮
   const handleQuery = function(){
     getList()
@@ -87,8 +96,8 @@
 
   
 
-  const queryNameSpace = function(){
-    nameSpaceList().then((res) =>{
+  const queryNameSpace = function(instanceCode){
+    nameSpaceList(instanceCode).then((res) =>{
       if(res.code == 200){
         Object.assign(nameSpaces,res?.data)
       }
@@ -104,7 +113,7 @@
 
       // 触发查询
       getList();
-      queryNameSpace();
+      queryNameSpace(defaultInstanceCode.value);
     }
   });
 </script>
@@ -149,7 +158,15 @@
       </el-form>
     </yt-card>
     <yt-card>
-
+        <div class="option-wrap">
+          <!-- <router-link :to="{ path: '/kubernetes/deployment/index', query: { timestamp: Date.now() }}" > -->
+            <el-button
+              type="primary"
+              plain
+              size="default"
+              @click="addHandle" v-hasPerms="['/kubernetes/deployment/add']" ><el-icon><Plus /></el-icon>新增</el-button>
+          <!-- </router-link> -->
+        </div>
       <!--table  -->
       <div class="table-wrap">
         <el-table v-loading="loading" :data="tabelDataList" @selection-change="handleSelectionChange">

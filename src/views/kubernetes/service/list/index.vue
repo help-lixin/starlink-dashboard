@@ -4,7 +4,7 @@
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
   import {  Edit } from '@element-plus/icons-vue'
-  import { pageList, resources} from "@api/kubernetes/deployment"
+  import { pageList} from "@/api/kubernetes/deployment"
 
   const queryFormRef = ref(null);
 

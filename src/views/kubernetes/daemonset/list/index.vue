@@ -4,7 +4,7 @@
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
   import {  Edit } from '@element-plus/icons-vue'
-  import { pageList, resources} from "@api/kubernetes/deployment"
+  import { pageList} from "@/api/kubernetes/deployment"
 
   const queryFormRef = ref(null);
 
@@ -134,7 +134,16 @@
       </el-form>
     </yt-card>
     <yt-card>
-
+      <!--  option-->
+      <router-link :to="{ name: 'Test'}">
+        <div class="option-wrap">
+          <el-button
+            type="primary"
+            plain
+            size="default"
+            @click="handleAdd" v-hasPerms="['/kubernetes/deployment/add']" ><el-icon><Plus /></el-icon>新增</el-button>
+        </div>
+      </router-link>
       <!--table  -->
       <div class="table-wrap">
         <el-table v-loading="loading" :data="projectList" @selection-change="handleSelectionChange">

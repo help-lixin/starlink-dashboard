@@ -1743,11 +1743,13 @@
   }
 
   const saveData = () => {
+    
+    
     ruleFormRef.value.validate((valid) => {
       if (valid) {
-        console.log(yaml.safeLoad(initData.value))
+        console.log(yaml.load(yaml.dump(initData.value)))
       } else {
-        ElMessage.error('请填写完整')
+        ElMessage.error('请填写完整'+valid)
       }
     })
   }
@@ -1764,11 +1766,15 @@
 
   // 表单验证规则
   const rules = reactive<FormRules>({
-    'metadata.name' : [
+    metadataName : [
       { required: true, message: "名称不能为空", trigger: "blur" },
       { min: 2, max: 20, message: '名称长度必须介于 2 和 20 之间', trigger: 'blur' },
-      { pattern: /^[-a-zA-Z0-9]*$/, message: '只可以输入字母、数字、中划线', trigger: 'blur' }
+      { pattern: /^[-a-z0-9]*$/, message: '只可以输入小写字母、数字、中划线', trigger: 'blur' }
     ],
+    'image' : [
+      { required: true, message: "容器镜像不能为空", trigger: "blur" },
+      { min: 2, max: 50, message: '名称长度必须介于 2 和 50 之间', trigger: 'blur' }
+    ]
   })
 
 
@@ -1788,7 +1794,7 @@
               </el-form-item>
             </el-col>
             <el-col :span="8">
-              <el-form-item label="名称" prop="metadata.name">
+              <el-form-item label="名称" prop="metadataName">
                 <el-input v-model="initData.metadata.name" placeholder="请输入内容"></el-input>
               </el-form-item>
             </el-col>
@@ -2354,8 +2360,8 @@
                         <H1>镜像</H1>
                         <el-row :gutter="24" >
                           <el-col :span="8">
-                            <el-form-item label="容器镜像"  :rules="[  { required: true, message: '容器镜像不能为空', trigger: 'blur' } ]">
-                              <el-input placeholder="如：nginx:1.17.2" v-model="container.image" />
+                            <el-form-item label="容器镜像" prop="image">
+                              <el-input placeholder="如：nginx:1.17.2" v-model="container.image" ></el-input>
                             </el-form-item>
                           </el-col>
                           <el-col :span="8">
