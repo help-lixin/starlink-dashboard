@@ -27,5 +27,21 @@ export const navigation = new Map<string,string[]>([
 
     [ "/ssh/label/index" ,  ["ssh管理","ssh标签管理"] ],
     [ "/ssh/host/index" ,  ["ssh管理","ssh主机管理"] ],
+
+    [ "/kubernetes/deployment/list/index" ,  ["kubernetes管理","Deployment管理"] ],
+    [ "/kubernetes/daemonset/list/index" ,  ["kubernetes管理","Daemonset管理"] ],
+    [ "/kubernetes/cronjob/list/index" ,  ["kubernetes管理","CronJob管理"] ],
+    [ "/kubernetes/job/list/index" ,  ["kubernetes管理","Job管理"] ],
+    [ "/kubernetes/pod/list/index" ,  ["kubernetes管理","Pod管理"] ],
+    [ "/kubernetes/service/list/index" ,  ["kubernetes管理","Service管理"] ],
+
+    [ "/kubernetes/deployment/index" ,  ["kubernetes管理","Deployment管理","编辑页面"] ],
+    [ "/kubernetes/daemonset/index" ,  ["kubernetes管理","Daemonset管理","编辑页面"] ],
+    [ "/kubernetes/cronjob/index" ,  ["kubernetes管理","CronJob管理","编辑页面"] ],
+    [ "/kubernetes/job/index" ,  ["kubernetes管理","Job管理","编辑页面"] ],
+    [ "/kubernetes/pod/index" ,  ["kubernetes管理","Pod管理","编辑页面"] ],
+    [ "/kubernetes/service/index" ,  ["kubernetes管理","Service管理","编辑页面"] ],
+
+
 ]);
 

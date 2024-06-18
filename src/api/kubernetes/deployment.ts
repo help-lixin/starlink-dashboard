@@ -2,9 +2,17 @@ import request from "@/utils/request";
 import {STARLINK_SERVICE} from "@/utils/env"
 
 
+// 查询deployment详情
+export function queryDetail(id:number) {
+    return request({
+      url: STARLINK_SERVICE + '/kubernetes/deployment/detail/'+id,
+      method: 'get'
+    }).then((res)=>{
+        return res?.data;
+    });
+}
 
-
-// 查询组列表
+// 查询deployment列表
 export function pageList(query:any) {
     return request({
       url: STARLINK_SERVICE + '/kubernetes/deployment/list',
@@ -26,7 +34,7 @@ export function nameSpaceList(instanceCode:string) {
 }
 
 
-// 新增/修改 kubernetes任务配置
+// 新增/修改 deployment
 export function addDeployment(data:any) {
 return request({
         url: STARLINK_SERVICE + '/kubernetes/deployment/add',
@@ -37,10 +45,10 @@ return request({
     });
 }
 
-// 组状态修改
+// deployment状态修改
 export function changeStatus(deploymentId:any, status:any) {
     return request({
-        url: STARLINK_SERVICE + '/kubernetes/deployment/changeStatus/'+deploymentId+"/"+status,
+        url: STARLINK_SERVICE + '/kubernetes/deployment/changeStatus/'+status+"/"+deploymentId,
         method: 'put'
     }).then((res)=>{
         return res?.data;
@@ -48,32 +56,20 @@ export function changeStatus(deploymentId:any, status:any) {
 }
 
 
-
-// 查询构建依赖任务下拉列表
-export function deploymentSelectOption(instanceCode:string) {
+// 查询deployment名称是否可用
+export function deploymentNameIsExist(instanceCode:string,deploymentName:string) {
     return request({
-      url: STARLINK_SERVICE + '/kubernetes/deployment/deploymentOption/'+instanceCode,
+      url: STARLINK_SERVICE + '/kubernetes/deployment/deploymentNameIsExist/' + instanceCode +"/" + deploymentName,
       method: 'get'
     }).then((res)=>{
         return res?.data;
     });
 }
 
-
-// 查询凭证名称是否可用
-export function deploymentNameIsExist(deploymentName:string,instanceCode:string) {
+// 删除deployment
+export function removeDeployment(deploymentId:number) {
     return request({
-      url: STARLINK_SERVICE + '/kubernetes/deployment/deploymentNameIsExist/' + deploymentName +"/" + instanceCode,
-      method: 'get'
-    }).then((res)=>{
-        return res?.data;
-    });
-}
-
-// 删除凭证
-export function removeDeployment(deploymentId:number,instanceCode:string) {
-    return request({
-      url: STARLINK_SERVICE + '/kubernetes/deployment/del/' + deploymentId + "/" + instanceCode,
+      url: STARLINK_SERVICE + '/kubernetes/deployment/del/' + deploymentId,
       method: 'delete'
     }).then((res)=>{
         return res?.data;
