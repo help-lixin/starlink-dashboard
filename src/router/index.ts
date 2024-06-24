@@ -75,14 +75,6 @@ export const dynamicRoutes = [
     }
   },
   {
-    path: '/yamlDemo',
-    name: 'plugin-instance',
-    component: () => import('../views/demo/yamlDemo.vue'),
-    meta: {
-      requiresAuth: true
-    }
-  },
-  {
     path: '/gitlab/group/index',
     name: 'gitlab-group',
     component: () => import('../views/gitlab/group/index.vue'),
@@ -215,7 +207,7 @@ export const dynamicRoutes = [
     name: 'kubernetes-cron-job',
     component: () => import('../views/kubernetes/cronjob/index.vue'),
     meta: {
-      requiresAuth: true
+      requiresAuth: false
     }
   },
   {
@@ -231,7 +223,7 @@ export const dynamicRoutes = [
     name: 'kubernetes-job',
     component: () => import('../views/kubernetes/job/index.vue'),
     meta: {
-      requiresAuth: true
+      requiresAuth: false
     }
   },
   {
@@ -263,7 +255,7 @@ export const dynamicRoutes = [
     name: 'kubernetes-daemon-set',
     component: () => import('../views/kubernetes/daemonset/index.vue'),
     meta: {
-      requiresAuth: true
+      requiresAuth: false
     }
   },
   {

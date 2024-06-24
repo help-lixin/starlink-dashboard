@@ -754,14 +754,11 @@
   import type { FormRules } from 'element-plus'
   import yaml from 'js-yaml'
   import router from "@/router";
-  import { addDeployment,nameSpaceList,deploymentNameIsExist,queryDetail} from "@/api/kubernetes/deployment"
+  import { addDeployment,nameSpaceList,nameIsExist,queryDetail} from "@/api/kubernetes/deployment"
   import { secretOptionList} from "@/api/kubernetes/secret"
   import { useRouter } from "vue-router";
 
   const $route = useRouter();
-  const handleClick = (data)=>{
-    console.log(data)
-  }
   const handleTabsEdit = (
     targetName: string | number,
     action: 'remove' | 'add'
@@ -1764,6 +1761,10 @@
     }
   }
 
+  const cancel = ()=>{
+    $route.push({path : "/kubernetes/deployment/list/index"})
+  }
+
   const saveData = () => {
     ruleFormRef.value.validate((valid) => {
       if (valid) {
@@ -1782,11 +1783,15 @@
         }
         addDeployment(saveData).then(res=>{
           if(res.code == 200){
+            ElMessage({
+                type: 'success',
+                message: '保存成功',
+            })
             router.push({path : "/kubernetes/deployment/list/index"})
           }
         })
       } else {
-        ElMessage.error('请填写完整'+valid)
+        ElMessage.error('请填写完整')
       }
     })
   }
@@ -1811,12 +1816,31 @@
     secretOption()
   }
 
+  const validName = (rule:any,value:any, callback:any)=>{
+    if($route.currentRoute.value.query.id != undefined){
+      callback()
+      return
+    }
+
+    nameIsExist($route.currentRoute.value.query.instanceCode,value).then((res)=>{
+        if(res.code == 200){
+          if(!res.data){
+            callback()
+            return
+          }else{
+            callback(new Error('名称已存在，请确认后修改'));
+          }
+        }
+    })
+  }
+
   // 表单验证规则
   const rules = reactive<FormRules>({
     "metadata.name" : [
       { required: true, message: "名称不能为空", trigger: "blur" },
       { min: 2, max: 20, message: '名称长度必须介于 2 和 20 之间', trigger: 'blur' },
-      { pattern: /^[-a-z0-9]*$/, message: '只可以输入小写字母、数字、中划线', trigger: 'blur' }
+      { pattern: /^[-a-z0-9]*$/, message: '只可以输入小写字母、数字、中划线', trigger: 'blur' },
+      { validator: validName , trigger: 'blur' }
     ]
   })
 
@@ -1832,7 +1856,6 @@
 
   // 初始化页面
   const initPage = ()=>{
-    initData.value.option.containerIndex = "containerGeneral"
     const id = $route.currentRoute.value.query.id
     if(id != null){
       queryDetail(id).then((res)=>{
@@ -3608,7 +3631,7 @@
       </div>
     </el-form>
     <yt-bottom-operate>
-      <el-button @click="router.go(-1)">取消</el-button>
+      <el-button @click="cancel">取消</el-button>
       <el-button @click="editYaml">编辑yaml</el-button>
       <el-button type="primary" @click="saveData">保存</el-button>
     </yt-bottom-operate>

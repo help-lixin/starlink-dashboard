@@ -720,12 +720,16 @@
           "annotations":[]
         }
       },
+      // 拉取密文下拉列表
+      "imagePullSecrets":[],
+      // 命名空间下拉列表
+      "namespaces":[],
       // 记录当前容器点击的左侧标签位置
-      "containerIndex":"",
+      "containerIndex":"containerGeneral",
       // 记录当前pod点击的左侧标签位置
-      "selectPod":"",
-      // 记录当前depolyment点击的左侧标签位置
-      "selectDepolyment":"",
+      "selectPod":"podLabel",
+      // 记录当前job点击的左侧标签位置
+      "selectDaemonSet":"daemonSetLabel",
       // pod亲和度存储对象
       "freePod":[],
       // node亲和度存储对象
@@ -733,14 +737,20 @@
       // 节点调度方式
       "nodeAffinity":"none",
       // 是否显示yaml弹窗
-      "isShowYamlEditor":false
-
+      "isShowYamlEditor":false,
+      "namespaceId":undefined,
+      "selectTabIndex":"2"
     }
   })
 
   import { Select } from '@element-plus/icons-vue'
   import type { FormRules } from 'element-plus'
   import yaml from 'js-yaml'
+  import { addDaemonSet,nameSpaceList,nameIsExist,queryDetail} from "@/api/kubernetes/daemonset"
+  import { secretOptionList} from "@/api/kubernetes/secret"
+  import { useRouter } from "vue-router";
+
+  const $route = useRouter();
 
   const handleTabsEdit = (
     targetName: string | number,
@@ -817,7 +827,12 @@
   const editYaml = () => {
     isShowYamlEditor.value = true
     generateYamlJson()
-
+    
+  }
+  // 查看yaml详情
+  const viewYaml = ()=>{
+    editYaml()
+    Object.assign(copyData.value,{readOnly:true})
   }
 
   // 生成yaml所需Json
@@ -857,7 +872,6 @@
     })
     specConfig.imagePullSecrets.splice(0,specConfig.imagePullSecrets.length)
     specConfig.imagePullSecrets = switchArr
-
   }
 
   // 网络设置
@@ -932,6 +946,7 @@
         }
       }
 
+      // 端口相关
       if(container.ports.length == 0){
         delete container.ports
       }else{
@@ -1112,7 +1127,11 @@
     labelAnnotation2Json(initData.value.option.labelAnnotation.daemonSet.annotations , initData.value.metadata.annotations)
     labelAnnotation2Json(initData.value.option.labelAnnotation.pod.annotations , initData.value.spec.template.metadata.annotations)
 
-    if(initData.value.spec.template.metadata.labels.length == 0){
+    if(!initData.value.metadata.labels.length){
+      Object.assign(initData.value.metadata.labels ,{"workload.user.cattle.io/workloadselector":"apps.daemonset-default-undefined"})
+    }
+
+    if(!initData.value.spec.template.metadata.labels.length){
       Object.assign(initData.value.spec.template.metadata.labels,initData.value.metadata.labels)
     }
 
@@ -1316,7 +1335,7 @@
         // 环境变量配置
         reverseEnvHandle(container)
 
-        if(initData.value.spec.template.spec.containers == undefined){
+        if(initData.value.spec.template.spec?.containers == undefined){
           initData.value.spec.template.spec.containers = []
         }
         initData.value.spec.template.spec.containers.push(_.cloneDeep(container))
@@ -1663,7 +1682,7 @@
 
   // 内存&CPU限制处理
   const reverseResourceHandle = (container) =>{
-    if(!container?.resources  ){
+    if(!container?.resources?.requests){
       Object.assign(container,{
         "resources": {
           "requests": {
@@ -1734,11 +1753,39 @@
     }
   }
 
+  const cancel = ()=>{
+    $route.push({path : "/kubernetes/daemonset/list/index"})
+  }
+
   const saveData = () => {
+    console.log("enter")
     ruleFormRef.value.validate((valid) => {
+      console.log(valid)
       if (valid) {
-        console.log(yaml.safeLoad(initData.value))
-      } else {
+        generateYamlJson()
+        const nameSpaceId = initData.value.option.namespaceId
+        const data =  _.cloneDeep(copyData.value)
+        data.option = undefined
+        const saveData = {
+          "id": $route.currentRoute.value.query.id,
+          "instanceCode": $route.currentRoute.value.query.instanceCode,
+          "namespace": initData.value.metadata.namespace,
+          "nameSpaceId": nameSpaceId,
+          "name": initData.value.metadata.name,
+          "kind": initData.value.kind,
+          "jsonBody": JSON.stringify(yaml.load(yaml.dump(data)))
+        }
+        console.log(saveData)
+        addDaemonSet(saveData).then(res=>{
+          if(res.code == 200){
+            ElMessage({
+                type: 'success',
+                message: '保存成功',
+            })
+            $route.push({path : "/kubernetes/daemonset/list/index"})
+          }
+        })
+     } else {
         ElMessage.error('请填写完整')
       }
     })
@@ -1751,17 +1798,82 @@
     initData.value.option.selectPod = item
   }
   const changeDaemonSetSelectTab = (item) =>{
-    initData.value.option.selectDepolyment = item
+    initData.value.option.selectDaemonSet = item
+  }
+
+  // 修改命名空间下拉框时修改id
+  const changeNameSpace = (name)=>{
+    for(const index in initData.value.option.namespaces){
+      if(name == initData.value.option.namespaces[index].label){
+        initData.value.option.namespaceId = initData.value.option.namespaces[index].value
+      }
+    }
+    secretOption()
+  }
+
+  const validName = (rule:any,value:any, callback:any)=>{
+    callback()
+    return
+    if($route.currentRoute.value.query.id != undefined){
+      callback()
+      return
+    }
+
+    nameIsExist($route.currentRoute.value.query.instanceCode,value).then((res)=>{
+        if(res.code == 200){
+          if(!res.data){
+            callback()
+            return
+          }else{
+            callback(new Error('名称已存在，请确认后修改'));
+          }
+        }
+    })
   }
 
   // 表单验证规则
   const rules = reactive<FormRules>({
-    'metadata.name' : [
+    "metadata.name" : [
       { required: true, message: "名称不能为空", trigger: "blur" },
       { min: 2, max: 20, message: '名称长度必须介于 2 和 20 之间', trigger: 'blur' },
-      { pattern: /^[-a-zA-Z0-9]*$/, message: '只可以输入字母、数字、中划线', trigger: 'blur' }
-    ],
+      { pattern: /^[-a-z0-9]*$/, message: '只可以输入小写字母、数字、中划线', trigger: 'blur' },
+      { validator: validName , trigger: 'blur' }
+    ]
   })
+
+  // 查询密文下拉列表
+  const secretOption = ()=>{
+    secretOptionList($route.currentRoute.value.query.instanceCode,initData.value.metadata.namespace).then((res)=>{
+        if(res.code == 200){
+          Object.assign(initData.value.option.imagePullSecrets,res.data);
+        }
+    })
+  }
+
+
+  // 初始化页面
+  const initPage = ()=>{
+    const id = $route.currentRoute.value.query.id
+    if(id != null){
+      queryDetail(id).then((res)=>{
+        if(res.code == 200){
+          setValue(yaml.load(res.data))
+        }
+      })
+    }
+
+    nameSpaceList($route.currentRoute.value.query.instanceCode).then((res)=>{
+      if(res.code == 200){
+        Object.assign(initData.value.option.namespaces,res.data);
+        changeNameSpace("default")
+      }
+    })
+
+    secretOption()
+
+  }
+
+  initPage();
 
 
 </script>
@@ -1773,15 +1885,18 @@
           <el-row :gutter="24">
             <el-col :span="8">
               <el-form-item label="命名空间">
-                <el-select v-model="initData.metadata.namespace" style="width: 100%;" placeholder="请选择">
-                  <el-option label="default" value="default"></el-option>
-                  <el-option label="my-project" value="my-project"></el-option>
+                <el-select v-model="initData.metadata.namespace" style="width: 100%;" placeholder="请选择" @change="changeNameSpace" 
+                    :disabled="$route.currentRoute.value.query.id != undefined">
+                  <el-option v-for="namespace in initData.option.namespaces"
+                    :key="namespace.value"
+                    :label="namespace.label"
+                    :value="namespace.label"/>
                 </el-select>
               </el-form-item>
-            </el-col>
+            </el-col> 
             <el-col :span="8">
               <el-form-item label="名称" prop="metadata.name">
-                <el-input v-model="initData.metadata.name" placeholder="请输入内容"></el-input>
+                <el-input v-model="initData.metadata.name" placeholder="请输入内容" :disabled="$route.currentRoute.value.query.id != undefined" />
               </el-form-item>
             </el-col>
             <el-col :span="8">
@@ -1795,7 +1910,7 @@
         <yt-card :title="'详细配置'">
           <div class="detail-content">
             <el-tabs
-                    v-model="selectTabIndex"
+                    v-model="initData.option.selectTabIndex"
                     class="top-tabs"
                     editable
                     type="card"
@@ -1814,7 +1929,7 @@
                       </el-tabs>
                     </div>
                     <div class="right">
-                      <div v-show="initData.option.selectDepolyment === 'daemonSetLabel'  ? true : false ">
+                      <div v-show="initData.option.selectDaemonSet === 'daemonSetLabel'  ? true : false ">
                         <H1>DaemonSet标签</H1>
                         <el-row :gutter="24" v-for="(label,index) in initData.option.labelAnnotation.daemonSet.labels" :key="index" style="margin-top:30px">
                           <el-col :span="6" >
@@ -1891,7 +2006,7 @@
                         <el-tab-pane label="资源" name="podResource" />
                         <el-tab-pane label="扩缩容和升级策略" name="podStrategy" />
                         <el-tab-pane label="安全性上下文" name="podContext" />
-                        <el-tab-pane label="存储" name="podVolumes" />
+                        <!-- <el-tab-pane label="存储" name="podVolumes" /> -->
                       </el-tabs>
                     </div>
                     <div class="right" >
@@ -2024,7 +2139,7 @@
                       <div v-show="initData.option.selectPod === 'podNode'  ? true : false ">
                         <H1>节点调度</H1>
                         <el-row :gutter="24" >
-                          <el-col :span="12">
+                          <el-col :span="24">
                             <el-radio-group v-model="initData.option.nodeAffinity" @change="nodeChange">
                               <el-radio-button
                                       v-for="item in nodeSelector"
@@ -2037,7 +2152,7 @@
                         <template v-if="initData.option.nodeAffinity == 'none'">
                         </template>
                         <template v-if="initData.option.nodeAffinity == 'nodeName'">
-                          <el-row>
+                          <el-row style="margin-top: 20px;">
                             <el-col>
                               <el-select v-model="initData.spec.template.spec.nodeName" placeholder="请选择">
                                 <el-option v-for="node in nodeData"
@@ -2095,17 +2210,14 @@
                               </el-col>
                             </el-row>
                             <el-row>
-                              <el-col :span="12">
+                              <el-col :span="24">
                                 <el-button @click="addRule(node)" type="primary" plain>添加规则</el-button>
-                              </el-col>
-                            </el-row>
-                            <el-row>
-                              <el-col :span="12">
                                 <el-button @click="removeNode(nodeIndex)" type="danger" plain>删除节点调度</el-button>
+                                <el-button @click="addNode" type="primary" plain>添加节点调度</el-button>
                               </el-col>
                             </el-row>
                           </template>
-                          <el-button @click="addNode" type="primary" plain>添加节点调度</el-button>
+
                         </template>
                       </div>
 
@@ -2302,12 +2414,12 @@
                 <el-scrollbar>
                   <div class="tab-content">
                     <div class="left">
-                      <el-tabs :tab-position="'left'" @tab-change="changeSelectTab">
+                      <el-tabs :tab-position="'left'" @tab-change="changeSelectTab" v-model="initData.option.containerIndex">
                         <el-tab-pane label="通用" name="containerGeneral" />
                         <el-tab-pane label="健康检查" name="containerCheckHealth"/>
                         <el-tab-pane label="资源" name="containerSource"/>
                         <el-tab-pane label="安全性上下文" name="containerSecurityContext" />
-                        <el-tab-pane label="存储" name="containerVolumes"/>
+                        <!-- <el-tab-pane label="存储" name="containerVolumes"/> -->
                       </el-tabs>
                     </div>
                     <div class="right">
@@ -2329,8 +2441,12 @@
                         <H1>镜像</H1>
                         <el-row :gutter="24" >
                           <el-col :span="8">
-                            <el-form-item label="容器镜像" :rules="[  { required: true, message: '容器镜像不能为空', trigger: 'blur' } ]" >
-                              <el-input placeholder="如：nginx:1.17.2" v-model="container.image" />
+                            <el-form-item label="容器镜像"  :prop="`spec.template.spec.containers[${index}][image]`"
+                              :rules="[
+                                { required: true, message: '容器镜像不能为空', trigger: 'blur' },
+                                { min: 2, max: 50, message: '名称长度必须介于 2 和 50 之间', trigger: 'blur' }
+                              ]">
+                              <el-input placeholder="如：nginx:1.17.2" v-model="container.image" ></el-input>
                             </el-form-item>
                           </el-col>
                           <el-col :span="8">
@@ -2345,8 +2461,10 @@
                           <el-col :span="8">
                             <el-form-item label="拉取密文">
                               <el-select v-model="initData.spec.template.spec.imagePullSecrets" style="width: 100%;" multiple placeholder="请选择">
-                                <el-option label="harbor" value="harbor-login"></el-option>
-                                <el-option label="default" value="default"></el-option>
+                                <el-option v-for="imagePullSecret in initData.option.imagePullSecrets"
+                                  :key="imagePullSecret.value"
+                                  :label="imagePullSecret.label"
+                                  :value="imagePullSecret.label"/>
                               </el-select>
                             </el-form-item>
                           </el-col>
@@ -3494,8 +3612,10 @@
       </div>
     </el-form>
     <yt-bottom-operate>
-      <el-button @click="editYaml">编辑yaml</el-button>
-      <el-button type="primary" @click="saveData">保存</el-button>
+      <el-button @click="cancel">取消</el-button>
+      <el-button @click="editYaml" v-if="$route.currentRoute.value.query.id == undefined">编辑yaml</el-button>
+      <el-button @click="viewYaml" v-if="$route.currentRoute.value.query.id != undefined">查看yaml</el-button>
+      <el-button type="primary" @click="saveData" v-if="$route.currentRoute.value.query.id == undefined">保存</el-button>
     </yt-bottom-operate>
   </div>
   <yaml-editor :copy-data="copyData" v-model:visible="isShowYamlEditor" @setValue="setValue"></yaml-editor>
@@ -3531,9 +3651,9 @@
     }
     .tab-content {
       display: flex;
-      height: 400px;
       overflow-x: hidden;
       padding-top: 16px;
+      height: calc(100vh - 512px);
       .left {
         background: var(--el-table-header-bg-color-my);
         ::v-deep(.el-tabs__content) {
@@ -3544,6 +3664,7 @@
         padding: 16px;
         box-sizing: border-box;
         flex: 1;
+        width: 100%;
       }
     }
   }

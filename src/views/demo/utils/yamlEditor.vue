@@ -16,14 +16,26 @@ const closeDialog = () => {
 watch(() => props.visible, async (newValue) => {
   if (newValue) {
     // console.log(yaml.dump(props.copyData), '111')
+    console.log(props.copyData)
     await nextTick()
     editor.initEditor({
+      readOnly: isReadOly(props),
       value: yaml.dump(props.copyData),
       language: 'yaml',
-      theme: 'vs-dark'
+      theme: 'vs-dark',
     })
   }
 });
+
+const isReadOly = (props)=>{
+  if(props.copyData?.readOnly == true){
+    delete props.copyData.readOnly
+    return true;
+  }else{
+    return false;
+  }
+}
+
 const confirm = () => {
   try {
     // 尝试将 YAML 解析为 JSON

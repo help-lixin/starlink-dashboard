@@ -5,7 +5,7 @@
   import { dayjs } from "@/utils/common-dayjs"
   import {  Edit } from '@element-plus/icons-vue'
   // import router from '@/router'
-  import { pageList,nameSpaceList,removeDeployment,changeStatus,deploymentNameIsExist} from "@/api/kubernetes/deployment"
+  import { pageList,nameSpaceList,removeDeployment,changeStatus} from "@/api/kubernetes/deployment"
   import { useRouter } from "vue-router";
 
   const router = useRouter();
@@ -17,10 +17,12 @@
   const queryParams = reactive({
     pageNum: 1,
     pageSize: 10,
+    beginTime: undefined,
+    endTime: undefined,
+    status: undefined,
     instanceCode:undefined,
     nameSpaceId:undefined,
-    key: undefined,
-    value: undefined
+    kind:"Deployment"
   })
 
   const defaultInstanceCode = ref('')
@@ -73,21 +75,46 @@
   }
 
   const handleDelete = function(row){
-    removeDeployment(row.id).then(res => {
-      if(res?.code == 200){
-        getList()
+    const name = row.name
+    let msg = ""
+    msg = '是否删除任务【"' + name + '"】的数据项？'
+
+    ElMessageBox.confirm(
+      msg,
+      'Warning',
+      {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning',
       }
+    ).then(() => {
+      removeDeployment(row.id).then((res)=>{
+          if(res.code == 200){
+              // 重置查询表单,并进行查询
+              queryParams.pageNum=1
+              getList()
+              ElMessage({
+                type: 'success',
+                message: '删除成功',
+              })
+          }else{
+              ElMessage({
+                type: 'error',
+                message: '删除失败:'+res.msg,
+              })
+          }
+      })
     })
   }
 
   const handleStatusChange = (row)=>{
-    const jobName = row.jobName
+    const name = row.name
     const status = row.status
     let msg = ""
     if(status == 1){
-      msg = '是否禁用名称为"' + jobName + '"的数据项？'
+      msg = '是否停用名称为"' + name + '"的数据项？'
     }else{
-      msg = '是否启用名称为"' + jobName + '"的数据项？'
+      msg = '是否启用名称为"' + name + '"的数据项？'
     }
 
     ElMessageBox.confirm(
@@ -125,8 +152,6 @@
 
   // 处理重置按钮
   const resetQuery = function(){
-    queryParams.value = undefined
-    queryParams.key = undefined
     queryParams.instanceCode = defaultInstanceCode.value;
     handleQuery();
   }
@@ -199,6 +224,29 @@
                       :label="namespace.label"
                       :value="namespace.value"/>
               </el-select>
+            </el-form-item>
+            <el-form-item label="状态" prop="status">
+              <el-select
+                class="search-select"
+                v-model="queryParams.status"
+                placeholder="任务状态"
+                clearable
+              >
+                <el-option v-for="dict in status"
+                           :key="dict.value"
+                           :label="dict.label"
+                           :value="dict.value"/>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="创建时间">
+              <el-date-picker
+                v-model="dateRange"
+                value-format="YYYY-MM-DD"
+                type="daterange"
+                range-separator="-"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
+              ></el-date-picker>
             </el-form-item>
             <el-form-item>
               <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
