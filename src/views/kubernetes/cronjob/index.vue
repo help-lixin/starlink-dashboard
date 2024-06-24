@@ -753,7 +753,7 @@
   import type { FormRules } from 'element-plus'
   import yaml from 'js-yaml'
   import router from "@/router";
-  import { addCronJob,nameSpaceList,nameIsExist,queryDetail} from "@/api/kubernetes/cronJob"
+  import { addCronJob,nameSpaceList,nameIsExist,queryDetail} from "@/api/kubernetes/cronjob"
   import { secretOptionList} from "@/api/kubernetes/secret"
   import { useRouter } from "vue-router";
 
