@@ -191,7 +191,7 @@ export const dynamicRoutes = [
     name: 'kubernetes-deploy',
     component: () => import('../views/kubernetes/deployment/index.vue'),
     meta: {
-      requiresAuth: false
+      requiresAuth: true
     }
   },
   {
