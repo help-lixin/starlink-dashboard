@@ -492,8 +492,8 @@ const handleDelete = function(row){
         </el-form>
       </yt-card>
       <template #footer>
-        <el-button type="primary" @click="submitForm(false)">确 定</el-button>
         <el-button @click="cancelAdd">取 消</el-button>
+        <el-button type="primary" @click="submitForm(false)">确 定</el-button>
       </template>
     </el-dialog>
 
