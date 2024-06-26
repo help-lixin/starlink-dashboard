@@ -428,7 +428,7 @@
     </yt-card>
 
     <!-- 新增对话框 -->
-    <el-dialog :title="title" v-model="addDialog" width="600px" append-to-body>
+    <el-dialog :title="title" v-model="addDialog" width="500px" append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="120px">
           <el-row>
@@ -439,6 +439,7 @@
                   v-model="form.sshInstanceCode"
                   placeholder="请选择插件实例"
                   @change="switchInstance"
+                  clearable
                   style="width: 240px"
                 >
                   <el-option v-for="item in sshInstanceCodes"

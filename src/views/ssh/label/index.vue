@@ -456,26 +456,30 @@ const handleDelete = function(row){
     </yt-card>
 
     <!-- 新增/更新对话框 -->
-    <el-dialog :title="title" v-model="addDialog" width="600px" append-to-body>
+    <el-dialog :title="title" v-model="addDialog" width="720px" append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
           <el-row>
             <el-col :span="12">
               <el-form-item label="标签key" prop="labelKey">
-                <el-input v-model="form.labelKey" placeholder="请输入标签key" maxlength="20" :disabled="form.id != undefined"/>
+                <el-input v-model="form.labelKey" placeholder="请输入标签key" maxlength="20" :disabled="form.id != undefined" style="width: 300px"/>
               </el-form-item>
             </el-col>
+          </el-row>
+
+          <el-row>
             <el-col :span="12">
               <el-form-item label="标签名" prop="labelName">
-                <el-input v-model="form.labelName" placeholder="请输入标签名" maxlength="20" />
+                <el-input v-model="form.labelName" placeholder="请输入标签名" maxlength="20" style="width: 300px"/>
               </el-form-item>
             </el-col>
           </el-row>
 
           <el-row>
             <el-col>
-              <el-transfer v-model="form.hosts" :data="formInstance"
-              :titles="[ '未关联' , '已关联']"/>
+              <el-form-item label="SSH实例" >
+                <el-transfer v-model="form.hosts" :data="formInstance"  :titles="[ '未关联' , '已关联']"/>
+              </el-form-item>
             </el-col>
           </el-row>
 

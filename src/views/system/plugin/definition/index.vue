@@ -334,7 +334,7 @@
       <div class="table-wrap">
         <el-table v-loading="loading" :data="dataList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="插件编码" align="left" key="pluginCode" prop="pluginCode"/>
+          <el-table-column label="插件编码" align="left" key="pluginCode" prop="pluginCode" :show-overflow-tooltip="true"/>
           <el-table-column label="插件名称" align="left" key="pluginName" prop="pluginName"  :show-overflow-tooltip="true"/>
           <el-table-column label="插件元数据" align="left" key="pluginMeta" prop="pluginMeta"  :show-overflow-tooltip="true"/>
           <el-table-column label="状态" align="center" key="status">
