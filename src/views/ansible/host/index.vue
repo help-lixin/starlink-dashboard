@@ -127,7 +127,7 @@
             console.log(sshInstanceCodes)
           }
     })
-    
+
   }
 
   // 处理搜索按钮
@@ -137,7 +137,7 @@
 
   // 处理查询按钮
   const resetQuery = function(){
-    
+
     queryParams.serverName = undefined
     dateRange.value = [];
     queryFormRef.value.resetFields();
@@ -227,7 +227,7 @@
       addDialog.value = false;
       getList();
     });
-      
+
   }
 
   const handleDelete = function(row){
@@ -355,6 +355,7 @@
             </el-form-item>
       </el-form>
     </yt-card>
+
     <yt-card>
       <!--  option-->
       <div class="option-wrap">
@@ -392,43 +393,37 @@
           </el-table-column>
           <el-table-column
             label="操作"
-            align="left"
+            align="center"
+            width="220"
           >
-            <template #default="scope">
+            <template v-slot="scope">
               <div class="action-btn">
                 <el-button
                   size="small"
-                  :icon="getStatusIcon(scope.row)"
                   @click="handleStatusChange(scope.row)"
                   v-hasPerms="['/ansible/host/changeStatus/**']"
                 >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
+
+
                 <el-button
                   size="small"
-                  :icon="Edit"
                   @click="handleUpdate(scope.row)"
                   v-hasPerms="['/ansible/host/add']"
                 >修改</el-button>
+
                 <el-button
                   size="small"
-                  :icon="Delete"
                   @click="handleDelete(scope.row)"
                   v-hasPerms="['/ansible/host/del/*']"
                 >删除</el-button>
+
               </div>
             </template>
           </el-table-column>
         </el-table>
       </div>
       <div class="page-wrap">
-        <el-pagination
-          v-show="total>0"
-          :total="total"
-          :page-sizes=[10,20]
-          background layout="prev, pager, next"
-          v-model:current-page="queryParams.pageNum"
-          v-model:page-size="queryParams.pageSize"
-          @current-change="getList"
-        />
+        <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>
       </div>
     </yt-card>
 
@@ -481,48 +476,5 @@
 </template>
 
 <style lang="scss" scoped>
-.main-wrap {
-  height: 100%;
-  width: 100%;
-  box-sizing: border-box;
-  background: #fff;
-
-}
-
-.option-wrap {
-  margin-bottom: 8px;
-  .el-button {
-    // margin-right: 6px;
-  }
-}
-.table-wrap {
-  width: 100%;
-  box-sizing: border-box;
-  overflow-y: auto;
-  .action-btn {
-    display: flex;
-  }
-}
-
-.page-wrap {
-  padding: 20px 0;
-  .el-pagination {
-    display: flex;
-    align-items: center;
-    justify-content: end;
-  }
-
-}
-
-
-</style>
-<style>
- .el-form-item__label {
-  font-size: 14px;
- }
-
-.search-select .el-input {
-  --el-input-width: 240px;
-}
 
 </style>

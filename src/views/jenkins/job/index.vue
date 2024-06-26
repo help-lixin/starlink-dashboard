@@ -634,11 +634,7 @@
               {{  showStatusFun(scope.row.status) }}
             </template>
           </el-table-column>
-          <!-- <el-table-column label="最后成功时间" align="center" key="lastSuccess" prop="lastSuccess" :show-overflow-tooltip="true" width="180"/> -->
-          <!-- <el-table-column label="最后失败时间" align="center" key="lastFailure" prop="lastFailure" :show-overflow-tooltip="true"   width="180"/> -->
-          <!-- <el-table-column label="最后构建所需时间" align="center" key="lastDuration" prop="lastDuration" :show-overflow-tooltip="true"  width="180"/> -->
-          <!-- <el-table-column label="聚合状态" align="center" key="aggregatedStatus" prop="aggregatedStatus" :show-overflow-tooltip="true" /> -->
-          <el-table-column label="构建状态" align="left" key="buildStatus" prop="buildStatus" :show-overflow-tooltip="true"  width="120"/>
+<!--          <el-table-column label="构建状态" align="left" key="buildStatus" prop="buildStatus" :show-overflow-tooltip="true"  width="120"/>-->
           <el-table-column label="备注" align="left" key="remark" prop="remark" :show-overflow-tooltip="true"  />
           <el-table-column label="创建时间" align="left" prop="createTime" width="180">
             <template #default="scope">
@@ -652,7 +648,7 @@
           </el-table-column>
           <el-table-column
             label="操作"
-            align="left"
+            align="center"
             width="320"
             flxed="right"
           >
@@ -777,11 +773,11 @@
 
           <el-row>
             <el-col :span="12">
-              <el-form-item label="语言选择" prop="toolsType">
+              <el-form-item label="工具" prop="toolsType">
                 <el-select
                   class="search-select2"
                   v-model="form.toolsType"
-                  placeholder="请选择语言"
+                  placeholder="请选择工具"
                   clearable
                   style="width: 240px"
                   @change="switchLanguage"
@@ -818,7 +814,7 @@
             <template
               v-for="(item, index) in form.setups">
               <el-col :span="12">
-                <el-form-item label="maven版本选择" :prop="`setups.${index}.mavenId`" :rules="[  { required: true, message: 'maven版本是必选项', trigger: 'change' } ]" >
+                <el-form-item label="maven" :prop="`setups.${index}.mavenId`" :rules="[  { required: true, message: 'maven版本是必选项', trigger: 'change' } ]" >
                   <el-select
                     class="search-select2"
                     v-model="item.mavenId"
@@ -848,7 +844,7 @@
             <template
               v-for="(item, index) in form.setups">
               <el-col :span="12">
-                <el-form-item label="go版本" :prop="`setups.${index}.goId`" :rules="[  { required: true, message: 'go版本是必选项', trigger: 'change' } ]" >
+                <el-form-item label="go" :prop="`setups.${index}.goId`" :rules="[  { required: true, message: 'go版本是必选项', trigger: 'change' } ]" >
                   <el-select
                     class="search-select2"
                     v-model="item.goId"
@@ -890,7 +886,7 @@
             <template
               v-for="(item, index) in form.setups">
               <el-col :span="12">
-                <el-form-item label="ant版本" :prop="`setups.${index}.antId`" :rules="[  { required: true, message: 'ant版本是必选项', trigger: 'change' } ]" >
+                <el-form-item label="ant" :prop="`setups.${index}.antId`" :rules="[  { required: true, message: 'ant版本是必选项', trigger: 'change' } ]" >
                   <el-select
                     class="search-select2"
                     v-model="item.antId"
@@ -919,7 +915,7 @@
             <template
               v-for="(item, index) in form.setups">
               <el-col :span="12">
-                <el-form-item label="gradle版本" :prop="`setups.${index}.gradleId`" :rules="[  { required: true, message: 'gradle版本是必选项', trigger: 'change' } ]" >
+                <el-form-item label="gradle" :prop="`setups.${index}.gradleId`" :rules="[  { required: true, message: 'gradle版本是必选项', trigger: 'change' } ]" >
                   <el-select
                     class="search-select2"
                     v-model="item.gradleId"
@@ -948,7 +944,7 @@
             <template
               v-for="(item, index) in form.setups">
               <el-col :span="12">
-                <el-form-item label="nodejs版本" :prop="`setups.${index}.nodejsId`" :rules="[  { required: true, message: 'nodejs版本是必选项', trigger: 'change' } ]" >
+                <el-form-item label="nodejs" :prop="`setups.${index}.nodejsId`" :rules="[  { required: true, message: 'nodejs版本是必选项', trigger: 'change' } ]" >
                   <el-select
                     class="search-select2"
                     v-model="item.nodejsId"
@@ -977,7 +973,7 @@
             <template
               v-for="(item, index) in form.setups">
               <el-col :span="12">
-                <el-form-item label="python版本" :prop="`setups.${index}.pythonId`" :rules="[  { required: true, message: 'python版本是必选项', trigger: 'change' } ]" >
+                <el-form-item label="python" :prop="`setups.${index}.pythonId`" :rules="[  { required: true, message: 'python版本是必选项', trigger: 'change' } ]" >
                   <el-select
                     class="search-select2"
                     v-model="item.pythonId"
@@ -1046,7 +1042,7 @@
               </el-form-item>
             </el-col>
             <el-col :span="24">
-              <el-form-item label="任务备注">
+              <el-form-item label="备注">
                 <el-input v-model="form.remark" type="textarea" placeholder="请输入内容"></el-input>
               </el-form-item>
             </el-col>

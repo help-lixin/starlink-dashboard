@@ -391,7 +391,7 @@
           </el-table-column>
           <el-table-column
             label="操作"
-            align="left"
+            align="center"
             width="220"
           >
             <template #default="scope">
@@ -414,15 +414,7 @@
         </el-table>
       </div>
       <div class="page-wrap">
-        <el-pagination
-          v-show="total>0"
-          :total="total"
-          :page-sizes=[10,20]
-          background layout="prev, pager, next"
-          v-model:current-page="queryParams.pageNum"
-          v-model:page-size="queryParams.pageSize"
-          @current-change="getList"
-        />
+        <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>
       </div>
 
     </yt-card>
@@ -434,7 +426,7 @@
 
         <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
           <el-row>
-            <el-col :span="12">
+            <el-col :span="24">
               <el-form-item label="插件实例" prop="instanceCode">
                 <el-select
                   class="search-select2"
@@ -448,14 +440,13 @@
                              :value="item.instanceCode"/>
                 </el-select>
               </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="插件类型" prop="pluginType">
+
+              <el-form-item label="工具类型" prop="pluginType">
                 <el-select
-                  class="search-select"
-                  v-model="form.pluginType"
-                  placeholder="请选择插件类型"
-                  style="width: 240px"
+                    class="search-select"
+                    v-model="form.pluginType"
+                    placeholder="请选择工具类型"
+                    style="width: 240px"
                 >
                   <el-option v-for="item in tools"
                              :key="item.value"
@@ -464,20 +455,23 @@
                 </el-select>
               </el-form-item>
             </el-col>
-            <el-col :span="12">
+          </el-row>
+
+          <el-row>
+            <el-col :span="24">
               <el-form-item label="别名" prop="name">
-                <el-input v-model="form.name" placeholder="请输入别名" maxlength="200" />
+                <el-input v-model="form.name" placeholder="请输入别名" maxlength="200" style="width: 240px"/>
               </el-form-item>
-            </el-col>
-            <el-col :span="12">
+
               <el-form-item label="PATH" prop="value">
-                <el-input v-model="form.value" placeholder="请输入Path路径" maxlength="200" />
+                <el-input v-model="form.value" placeholder="请输入Path路径" maxlength="200" style="width: 240px"/>
               </el-form-item>
             </el-col>
           </el-row>
 
+
           <el-row>
-            <el-col :span="12">
+            <el-col :span="24">
               <el-form-item label="状态">
                 <el-radio-group v-model="form.status">
                   <el-radio

@@ -6,7 +6,7 @@
   import { dayjs } from "@/utils/common-dayjs"
   import {  Edit, List, CopyDocument, Unlock, Lock } from '@element-plus/icons-vue'
   import { handleTree } from "@/utils/common"
-  import { changeStatus, pageList, queryNodeList, addProject, projectNameIsExist, 
+  import { changeStatus, pageList, queryNodeList, addProject, projectNameIsExist,
     units, pullCommand, pushCommand, showIsPublicFun, changeAccessLevel, showAccessLevelOperateFun, isPublic, removeProject} from "@/api/harbor/project"
 
   const queryFormRef = ref(null);
@@ -459,7 +459,6 @@
           <el-table-column type="selection" width="60" align="center" />
           <el-table-column label="项目编号" align="left" key="id" prop="id" v-if="false"/>
           <el-table-column label="项目名称" align="left" key="projectName" prop="projectName"  :show-overflow-tooltip="true"  />
-          <!-- <el-table-column label="容量" align="center" key="capacity" prop="capacity" :show-overflow-tooltip="true"   /> -->
           <el-table-column label="访问级别" align="center" key="isPublic" prop="isPublic" :show-overflow-tooltip="true"   >
             <template #default="scope">
               {{  showIsPublicFun(scope.row.isPublic) }}
@@ -484,7 +483,7 @@
           </el-table-column>
           <el-table-column
             label="操作"
-            align="left"
+            align="center"
             width="420"
             flixed="right"
           >
@@ -503,15 +502,15 @@
                   v-hasPerms="['/harbor/project/changeStatus/**']"
                 >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
                 <el-button size="small"
-                :icon="getAccessLevel(scope.row)" 
-                @click="handleChangeAccessLevel(scope.row)" 
+                :icon="getAccessLevel(scope.row)"
+                @click="handleChangeAccessLevel(scope.row)"
                   v-hasPerms="['/harbor/project/changeAccessLevel/**']">
                   {{ showAccessLevelOperateFun(scope.row.isPublic)  }}
                 </el-button>
                 <el-button size="small" icon="CopyDocument" @click="copyPushCommand(scope.row)">复制push</el-button>
                 <el-button size="small"
-                icon="Delete" 
-                @click="handleDelete(scope.row)" 
+                icon="Delete"
+                @click="handleDelete(scope.row)"
                   v-hasPerms="['/harbor/project/del/*']">
                   删除
                 </el-button>
@@ -521,15 +520,7 @@
         </el-table>
       </div>
       <div class="page-wrap">
-        <el-pagination
-          v-show="total>0"
-          :total="total"
-          :page-sizes=[10,20]
-          background layout="prev, pager, next"
-          v-model:current-page="queryParams.pageNum"
-          v-model:page-size="queryParams.pageSize"
-          @current-change="getList"
-        />
+        <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>
       </div>
     </yt-card>
 
@@ -538,7 +529,7 @@
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
           <el-row>
-            <el-col :span="12">
+            <el-col :span="24">
               <el-form-item label="插件实例" prop="instanceCode">
                 <el-select
                   class="search-select"
@@ -553,17 +544,17 @@
                              :value="item.instanceCode"/>
                 </el-select>
               </el-form-item>
-            </el-col>
-            <el-col :span="12">
+
               <el-form-item label="项目名称" prop="projectName">
-                <el-input v-model="form.projectName" placeholder="请输入项目名称" maxlength="20" />
+                <el-input v-model="form.projectName" placeholder="请输入项目名称" maxlength="20" style="width: 240px"/>
               </el-form-item>
+
             </el-col>
           </el-row>
           <el-row>
-            <el-col :span="12">
+            <el-col :span="24">
               <el-form-item label="存储容量" prop="capacity">
-                <el-input v-model="form.capacity" placeholder="请输入容量" style="width: 200px" maxlength="5">
+                <el-input v-model="form.capacity" placeholder="请输入容量" style="width: 240px" maxlength="5">
                     <template #append>
                         <el-select
                           class="search-select"
@@ -579,21 +570,18 @@
                     </template>
                 </el-input>
               </el-form-item>
-            </el-col>
-            <el-col :span="12">
               <el-form-item label="访问级别" prop="isPublic">
                 <el-radio-group v-model="form.isPublic">
                   <el-radio
-                    v-for="item in isPublic"
-                    :key="item.value"
-                    :label="item.value"
+                      v-for="item in isPublic"
+                      :key="item.value"
+                      :label="item.value"
                   >{{item.label}}
                   </el-radio>
                 </el-radio-group>
               </el-form-item>
             </el-col>
           </el-row>
-
         </el-form>
       </yt-card>
       <template #footer>

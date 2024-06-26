@@ -404,7 +404,7 @@
           </el-table-column>
           <el-table-column
             label="操作"
-            align="left"
+            align="center"
             width="240"
           >
             <template #default="scope">

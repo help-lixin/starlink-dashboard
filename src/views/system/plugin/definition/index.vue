@@ -163,7 +163,7 @@
           }
         }
       })
-      
+
     })
   }
 
@@ -328,13 +328,6 @@
           size="default"
           @click="handleAdd" v-hasPerms="['/system/plugin/definition/add']" ><el-icon><Plus /></el-icon>新增</el-button>
 
-
-        <el-button
-          type="success"
-          plain
-          size="default"
-          :disabled="single"
-          @click="handleUpdate" v-hasPerms="['/system/plugin/definition/edit']" ><el-icon><EditPen /></el-icon>修改</el-button>
       </div>
 
       <!--table  -->
@@ -356,7 +349,7 @@
           </el-table-column>
           <el-table-column
             label="操作"
-            align="left"
+            align="center"
             width="250"
           >
             <template v-slot="scope">
@@ -367,7 +360,7 @@
                   @click="handleUpdate(scope.row)"
                   v-hasPerms="['/system/plugin/definition/edit']"
                 >修改</el-button>
-                
+
                 <el-button
                 size="small"
                 :icon="getStatusIcon(scope.row)"

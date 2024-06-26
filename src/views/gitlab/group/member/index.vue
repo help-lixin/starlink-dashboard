@@ -402,7 +402,7 @@ import { assign } from 'lodash'
           <el-table-column label="成员昵称" align="left" key="nickName" prop="nickName"  :show-overflow-tooltip="true" />
           <el-table-column label="邮箱" align="left" key="email" prop="email"  :show-overflow-tooltip="true" />
           <el-table-column label="成员名称" align="left" key="userName" prop="userName"  :show-overflow-tooltip="true" />
-          <el-table-column label="组" align="left" key="gitlabGroupName" prop="gitlabGroupName" />
+          <el-table-column label="组" align="left" key="gitlabGroupName" prop="gitlabGroupName" :show-overflow-tooltip="true" />
           <el-table-column label="状态" align="center" key="status" >
             <template #default="scope">
               {{  showStatusFun(scope.row.status) }}
@@ -415,7 +415,7 @@ import { assign } from 'lodash'
           </el-table-column>
           <el-table-column
             label="操作"
-            align="left"
+            align="center"
             width="220"
           >
             <template #default="scope">

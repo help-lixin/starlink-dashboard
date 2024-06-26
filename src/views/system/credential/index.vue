@@ -435,7 +435,7 @@
                 style="width: 240px"
               />
             </el-form-item>
-            <el-form-item label="凭证唯一名称" prop="credentialKey">
+            <el-form-item label="凭证名称" prop="credentialKey">
               <el-input
                 v-model="queryParams.credentialKey"
                 placeholder="请输入凭证唯一名称"
@@ -526,7 +526,7 @@
           </el-table-column>
           <el-table-column
             label="操作"
-            align="left"
+            align="center"
             width="250"
           >
             <template #default="scope">
@@ -726,7 +726,7 @@
             </el-col>
 
             <el-col :span="12">
-              <el-form-item label="镜像域名" prop="imgDomain" >
+              <el-form-item label="域名" prop="imgDomain" >
                 <el-input v-model="form.imgDomain"  placeholder="如：https://starlink.lixin.help" maxlength="1024" />
               </el-form-item>
             </el-col>
@@ -795,7 +795,7 @@
           </div>
 
           <el-row>
-            <el-col :span="12">
+            <el-col :span="24">
               <el-form-item label="备注" prop="remark">
                 <el-input v-model="form.remark" type="textarea" placeholder="请输入备注" maxlength="200" />
               </el-form-item>

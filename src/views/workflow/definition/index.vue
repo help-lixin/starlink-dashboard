@@ -217,11 +217,6 @@ getList()
                    v-hasPerms="['/workflow/definition/operate']"><el-icon>
           <Plus />
         </el-icon>新增</el-button>
-
-        <el-button type="success" plain size="default" :disabled="single" @click="handleUpdate"
-                   v-hasPerms="['/workflow/definition/operate']"><el-icon>
-          <EditPen />
-        </el-icon>修改</el-button>
       </div>
 
       <!--table  -->
@@ -230,7 +225,7 @@ getList()
           <el-table-column type="selection" width="60" align="center" />
           <el-table-column label="流水线名称" key="processDefinitionName" prop="processDefinitionName"
                            :show-overflow-tooltip="true" />
-          <el-table-column label="流水线定义key" key="processDefinitionKey" prop="processDefinitionKey" width="180"/>
+          <el-table-column label="流水线定义key" key="processDefinitionKey" prop="processDefinitionKey" width="180" :show-overflow-tooltip="true"/>
           <el-table-column label="流水线版本" key="processDefinitionVersion" prop="processDefinitionVersion" />
           <el-table-column label="状态" align="center" key="status" width="100">
             <template v-slot="scope">

@@ -395,21 +395,14 @@ const getList = ()=>{
           size="default"
           @click="handleAdd" v-hasPerms="['/system/plugin/instance/add']" ><el-icon><Plus /></el-icon>新增</el-button>
 
-
-        <el-button
-          type="success"
-          plain
-          size="default"
-          :disabled="single"
-          @click="handleUpdate" v-hasPerms="['/system/plugin/instance/edit']" ><el-icon><EditPen /></el-icon>修改</el-button>
       </div>
 
       <!--table  -->
       <div class="table-wrap">
         <el-table v-loading="loading" :data="dataList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="插件编码" align="left" key="pluginCode" prop="pluginCode"/>
-          <el-table-column label="实例编码" align="left" key="instanceCode" prop="instanceCode"/>
+          <el-table-column label="插件编码" align="left" key="pluginCode" prop="pluginCode" :show-overflow-tooltip="true"/>
+          <el-table-column label="实例编码" align="left" key="instanceCode" prop="instanceCode" :show-overflow-tooltip="true"/>
           <el-table-column label="实例名称" align="left" key="instanceName" prop="instanceName"  :show-overflow-tooltip="true" />
           <el-table-column label="状态" align="center" key="status"  width="100">
             <template v-slot="scope">
@@ -423,7 +416,7 @@ const getList = ()=>{
           </el-table-column>
           <el-table-column
             label="操作"
-            align="left"
+            align="center"
             width="220"
           >
             <template v-slot="scope">
