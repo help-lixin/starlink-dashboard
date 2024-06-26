@@ -187,9 +187,9 @@ export const dynamicRoutes = [
     }
   },
   {
-    path: '/kubernetes/deployment/index',
+    path: '/kubernetes/deployment/operate',
     name: 'kubernetes-deploy',
-    component: () => import('../views/kubernetes/deployment/index.vue'),
+    component: () => import('../views/kubernetes/deployment/operate.vue'),
     meta: {
       requiresAuth: true
     }
@@ -203,11 +203,11 @@ export const dynamicRoutes = [
     }
   },
   {
-    path: '/kubernetes/cronjob/index',
+    path: '/kubernetes/cronjob/operate',
     name: 'kubernetes-cron-job',
-    component: () => import('../views/kubernetes/cronjob/index.vue'),
+    component: () => import('../views/kubernetes/cronjob/operate.vue'),
     meta: {
-      requiresAuth: false
+      requiresAuth: true
     }
   },
   {
@@ -219,11 +219,11 @@ export const dynamicRoutes = [
     }
   },
   {
-    path: '/kubernetes/job/index',
+    path: '/kubernetes/job/operate',
     name: 'kubernetes-job',
-    component: () => import('../views/kubernetes/job/index.vue'),
+    component: () => import('../views/kubernetes/job/operate.vue'),
     meta: {
-      requiresAuth: false
+      requiresAuth: true
     }
   },
   {
@@ -235,9 +235,9 @@ export const dynamicRoutes = [
     }
   },
   {
-    path: '/kubernetes/pod/index',
+    path: '/kubernetes/pod/operate',
     name: 'kubernetes-pod',
-    component: () => import('../views/kubernetes/pod/index.vue'),
+    component: () => import('../views/kubernetes/pod/operate.vue'),
     meta: {
       requiresAuth: true
     }
@@ -251,11 +251,11 @@ export const dynamicRoutes = [
     }
   },
   {
-    path: '/kubernetes/daemonset/index',
+    path: '/kubernetes/daemonset/operate',
     name: 'kubernetes-daemon-set',
-    component: () => import('../views/kubernetes/daemonset/index.vue'),
+    component: () => import('../views/kubernetes/daemonset/operate.vue'),
     meta: {
-      requiresAuth: false
+      requiresAuth: true
     }
   },
   {
@@ -267,9 +267,9 @@ export const dynamicRoutes = [
     }
   },
   {
-    path: '/kubernetes/service/index',
+    path: '/kubernetes/service/operate',
     name: 'kubernetes-service',
-    component: () => import('../views/kubernetes/service/index.vue'),
+    component: () => import('../views/kubernetes/service/operate.vue'),
     meta: {
       requiresAuth: true
     }

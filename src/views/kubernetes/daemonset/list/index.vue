@@ -67,11 +67,11 @@
   }
 
   const handleAdd = function(){
-    router.push({path : "/kubernetes/daemonset/index", query:{ instanceCode: defaultInstanceCode.value } })
+    router.push({path : "/kubernetes/daemonset/operate", query:{ instanceCode: defaultInstanceCode.value } })
   }
 
   const handleDetail = function(id){
-    router.push({path : "/kubernetes/daemonset/index", query:{ instanceCode: defaultInstanceCode.value ,id: id} })
+    router.push({path : "/kubernetes/daemonset/operate", query:{ instanceCode: defaultInstanceCode.value ,id: id} })
   }
 
   const handleDelete = function(row){

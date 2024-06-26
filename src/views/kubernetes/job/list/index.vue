@@ -67,11 +67,11 @@
   }
 
   const handleAdd = function(){
-    router.push({path : "/kubernetes/job/index", query:{ instanceCode: defaultInstanceCode.value } })
+    router.push({path : "/kubernetes/job/operate", query:{ instanceCode: defaultInstanceCode.value } })
   }
 
   const handleDetail = function(id){
-    router.push({path : "/kubernetes/job/index", query:{ instanceCode: defaultInstanceCode.value ,id: id} })
+    router.push({path : "/kubernetes/job/operate", query:{ instanceCode: defaultInstanceCode.value ,id: id} })
   }
 
   const handleDelete = function(row){

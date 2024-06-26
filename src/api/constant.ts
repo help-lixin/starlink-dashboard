@@ -35,12 +35,12 @@ export const navigation = new Map<string,string[]>([
     [ "/kubernetes/pod/list/index" ,  ["kubernetes管理","Pod管理"] ],
     [ "/kubernetes/service/list/index" ,  ["kubernetes管理","Service管理"] ],
 
-    [ "/kubernetes/deployment/index" ,  ["kubernetes管理","Deployment管理","编辑页面"] ],
-    [ "/kubernetes/daemonset/index" ,  ["kubernetes管理","Daemonset管理","编辑页面"] ],
-    [ "/kubernetes/cronjob/index" ,  ["kubernetes管理","CronJob管理","编辑页面"] ],
-    [ "/kubernetes/job/index" ,  ["kubernetes管理","Job管理","编辑页面"] ],
-    [ "/kubernetes/pod/index" ,  ["kubernetes管理","Pod管理","编辑页面"] ],
-    [ "/kubernetes/service/index" ,  ["kubernetes管理","Service管理","编辑页面"] ],
+    [ "/kubernetes/deployment/operate" ,  ["kubernetes管理","Deployment管理","编辑页面"] ],
+    [ "/kubernetes/daemonset/operate" ,  ["kubernetes管理","Daemonset管理","编辑页面"] ],
+    [ "/kubernetes/cronjob/operate" ,  ["kubernetes管理","CronJob管理","编辑页面"] ],
+    [ "/kubernetes/job/operate" ,  ["kubernetes管理","Job管理","编辑页面"] ],
+    [ "/kubernetes/pod/operate" ,  ["kubernetes管理","Pod管理","编辑页面"] ],
+    [ "/kubernetes/service/operate" ,  ["kubernetes管理","Service管理","编辑页面"] ],
 
 
 ]);

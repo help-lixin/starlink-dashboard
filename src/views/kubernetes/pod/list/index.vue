@@ -67,11 +67,11 @@
   }
 
   const handleAdd = function(){
-    router.push({path : "/kubernetes/pod/index", query:{ instanceCode: defaultInstanceCode.value } })
+    router.push({path : "/kubernetes/pod/operate", query:{ instanceCode: defaultInstanceCode.value } })
   }
 
   const handleDetail = function(id){
-    router.push({path : "/kubernetes/pod/index", query:{ instanceCode: defaultInstanceCode.value ,id: id} })
+    router.push({path : "/kubernetes/pod/operate", query:{ instanceCode: defaultInstanceCode.value ,id: id} })
   }
 
   const handleDelete = function(row){
@@ -253,13 +253,6 @@
       </el-form>
     </yt-card>
     <yt-card>
-        <div class="option-wrap">
-          <el-button
-            type="primary"
-            plain
-            size="default"
-            @click="handleAdd" v-hasPerms="['/kubernetes/pod/add']" ><el-icon><Plus /></el-icon>新增</el-button>
-        </div>
       <!--table  -->
       <div class="table-wrap">
         <el-table v-loading="loading" :data="tabelDataList" @selection-change="handleSelectionChange">

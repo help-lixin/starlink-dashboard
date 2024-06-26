@@ -67,11 +67,11 @@
   }
 
   const handleAdd = function(){
-    router.push({path : "/kubernetes/cronjob/index", query:{ instanceCode: defaultInstanceCode.value } })
+    router.push({path : "/kubernetes/cronjob/operate", query:{ instanceCode: defaultInstanceCode.value } })
   }
 
   const handleUpdate = function(id){
-    router.push({path : "/kubernetes/cronjob/index", query:{ instanceCode: defaultInstanceCode.value ,id: id} })
+    router.push({path : "/kubernetes/cronjob/operate", query:{ instanceCode: defaultInstanceCode.value ,id: id} })
   }
 
   const handleDelete = function(row){
