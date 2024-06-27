@@ -1,4 +1,4 @@
-// @ts-nocheck  
+// @ts-nocheck
 
 /**
  * 定义画布
@@ -6,7 +6,7 @@
 /* eslint-disable no-unused-vars */
 import inherits from 'inherits'
 
-import {STARLINK_SERVICE} from "@/utils/env"
+import {STARLINK_SERVICE,ICON_SERVICE} from "@/utils/env"
 
 import BaseRenderer from 'diagram-js/lib/draw/BaseRenderer'
 import {
@@ -51,9 +51,18 @@ export default function CustomRenderer(eventBus, styles, textRenderer) {
 
                 if(element.businessObject.$attrs?.pluginIcon){
                     // customIconAttr.href = new URL(element.businessObject.$attrs?.pluginIcon, import.meta.url).href
-                    customIconAttr.href = element.businessObject.$attrs?.pluginIcon
+                    if(!element.businessObject.$attrs?.pluginIcon.startsWith("http")){ // 不是http或https
+                        var tempIcon = element.businessObject.$attrs?.pluginIcon
+                        if(!tempIcon.startsWith("/")){
+                            tempIcon = "/" + tempIcon;
+                        }
+                        tempIcon = ICON_SERVICE + tempIcon;
+                        customIconAttr.href = tempIcon
+                    }else{
+                        customIconAttr.href = element.businessObject.$attrs?.pluginIcon
+                    }
                 }
-                
+
                 const customIcon = svgCreate('image', customIconAttr)
                 element['width'] = attr.width // 这里我是取了巧, 直接修改了元素的宽高
                 element['height'] = attr.height

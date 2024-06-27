@@ -5,7 +5,7 @@ import {STARLINK_SERVICE} from "@/utils/env"
 // 查询任务详情
 export function queryDetail(id:number) {
     return request({
-      url: STARLINK_SERVICE + '/kubernetes/cronjob/detail/'+id,
+      url: STARLINK_SERVICE + '/kubernetes/job/detail/'+id,
       method: 'get'
     }).then((res)=>{
         return res?.data;
@@ -15,7 +15,7 @@ export function queryDetail(id:number) {
 // 查询任务列表
 export function pageList(query:any) {
     return request({
-      url: STARLINK_SERVICE + '/kubernetes/cronjob/list',
+      url: STARLINK_SERVICE + '/kubernetes/job/list',
       method: 'get',
       params: query
     }).then((res)=>{
@@ -26,7 +26,7 @@ export function pageList(query:any) {
 // 查询命名空间列表
 export function nameSpaceList(instanceCode:string) {
     return request({
-      url: STARLINK_SERVICE + '/kubernetes/cronjob/nameSpace/list/'+instanceCode,
+      url: STARLINK_SERVICE + '/kubernetes/job/nameSpace/list/'+instanceCode,
       method: 'get'
     }).then((res)=>{
         return res?.data;
@@ -34,9 +34,9 @@ export function nameSpaceList(instanceCode:string) {
 }
 
 // 新增/修改 kubernetes任务
-export function addCronJob(data:any) {
+export function addJob(data:any) {
 return request({
-        url: STARLINK_SERVICE + '/kubernetes/cronjob/add',
+        url: STARLINK_SERVICE + '/kubernetes/job/add',
         method: 'post',
         data: data
     }).then((res)=>{
@@ -45,9 +45,9 @@ return request({
 }
 
 // 状态修改
-export function changeStatus(cronjobId:any, status:any) {
+export function changeStatus(jobId:any, status:any) {
     return request({
-        url: STARLINK_SERVICE + '/kubernetes/cronjob/changeStatus/'+status+"/"+cronjobId,
+        url: STARLINK_SERVICE + '/kubernetes/job/changeStatus/'+status+"/"+jobId,
         method: 'put'
     }).then((res)=>{
         return res?.data;
@@ -55,9 +55,9 @@ export function changeStatus(cronjobId:any, status:any) {
 }
 
 // 查询名称是否可用
-export function nameIsExist(cronjobName:string,instanceCode:string) {
+export function nameIsExist(jobName:string,instanceCode:string) {
     return request({
-      url: STARLINK_SERVICE + '/kubernetes/cronjob/nameIsExist/' + cronjobName +"/" + instanceCode,
+      url: STARLINK_SERVICE + '/kubernetes/job/nameIsExist/' + jobName +"/" + instanceCode,
       method: 'get'
     }).then((res)=>{
         return res?.data;
@@ -65,12 +65,21 @@ export function nameIsExist(cronjobName:string,instanceCode:string) {
 }
 
 // 删除任务
-export function removeCronJob(cronjobId:number) {
+export function removeJob(jobId:number) {
     return request({
-      url: STARLINK_SERVICE + '/kubernetes/cronjob/del/' + cronjobId ,
+      url: STARLINK_SERVICE + '/kubernetes/job/del/' + jobId ,
       method: 'delete'
     }).then((res)=>{
         return res?.data;
     });
 }
 
+// 重新运行
+export function restrat(jobId:number) {
+    return request({
+      url: STARLINK_SERVICE + '/kubernetes/job/restart/' + jobId ,
+      method: 'put'
+    }).then((res)=>{
+        return res?.data;
+    });
+}

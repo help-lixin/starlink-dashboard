@@ -64,13 +64,14 @@
         { required: true, message: "插件类型不能为空", trigger: "blur" }
       ],
       name : [
-        { required: true,  message: "插件名称不能为空", trigger: "blur" },
-        { min: 2, max: 200, message: '插件名称长度必须介于 2 和 200 之间', trigger: 'blur' }
+        { required: true,  message: "别名不能为空", trigger: "blur" },
+        { pattern: /^[-_a-zA-Z0-9]*$/, message: '别名只可以输入字母、数字、下划线及中划线', trigger: 'blur' },
+        { min: 2, max: 200, message: '别名长度必须介于 2 和 200 之间', trigger: 'blur' }
       ],
       value : [
-        { required: true, message: "插件路径不能为空", trigger: "blur" },
+        { required: true, message: "PATH不能为空", trigger: "blur" },
         { required: true, validator: validHome,  trigger: "blur" },
-        { min: 2, max: 200, message: '插件路径长度必须介于 2 和 200 之间', trigger: 'blur' }
+        { min: 2, max: 200, message: 'PATH长度必须介于 2 和 200 之间', trigger: 'blur' }
       ],
   })
 
@@ -400,7 +401,7 @@
           </el-table-column>
           <el-table-column
             label="操作"
-            align="left"
+            align="center"
             width="220"
           >
             <template #default="scope">
@@ -423,15 +424,7 @@
         </el-table>
       </div>
       <div class="page-wrap">
-        <el-pagination
-          v-show="total>0"
-          :total="total"
-          :page-sizes=[10,20]
-          background layout="prev, pager, next"
-          v-model:current-page="queryParams.pageNum"
-          v-model:page-size="queryParams.pageSize"
-          @current-change="getList"
-        />
+        <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>
       </div>
 
     </yt-card>
@@ -443,7 +436,7 @@
 
         <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
           <el-row>
-            <el-col :span="12">
+            <el-col :span="24">
               <el-form-item label="插件实例" prop="instanceCode">
                 <el-select
                   class="search-select2"
@@ -457,14 +450,13 @@
                              :value="item.instanceCode"/>
                 </el-select>
               </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="插件类型" prop="pluginType">
+
+              <el-form-item label="工具类型" prop="pluginType">
                 <el-select
-                  class="search-select"
-                  v-model="form.pluginType"
-                  placeholder="请选择插件类型"
-                  style="width: 240px"
+                    class="search-select"
+                    v-model="form.pluginType"
+                    placeholder="请选择工具类型"
+                    style="width: 240px"
                 >
                   <el-option v-for="item in tools"
                              :key="item.value"
@@ -473,20 +465,23 @@
                 </el-select>
               </el-form-item>
             </el-col>
-            <el-col :span="12">
+          </el-row>
+
+          <el-row>
+            <el-col :span="24">
               <el-form-item label="别名" prop="name">
-                <el-input v-model="form.name" placeholder="请输入别名" maxlength="200" />
+                <el-input v-model="form.name" placeholder="请输入别名" maxlength="200" style="width: 240px"/>
               </el-form-item>
-            </el-col>
-            <el-col :span="12">
+
               <el-form-item label="PATH" prop="value">
-                <el-input v-model="form.value" placeholder="请输入Path路径" maxlength="200" />
+                <el-input v-model="form.value" placeholder="请输入Path路径" maxlength="200" style="width: 240px"/>
               </el-form-item>
             </el-col>
           </el-row>
 
+
           <el-row>
-            <el-col :span="12">
+            <el-col :span="24">
               <el-form-item label="状态">
                 <el-radio-group v-model="form.status">
                   <el-radio
@@ -501,8 +496,8 @@
         </el-form>
       </yt-card>
       <template #footer>
-        <el-button type="primary" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
+        <el-button type="primary" @click="submitForm">确 定</el-button>
       </template>
     </el-dialog>
   </div>

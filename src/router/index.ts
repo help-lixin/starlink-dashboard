@@ -180,56 +180,96 @@ export const dynamicRoutes = [
   },
   {
     path: '/kubernetes/deployment/list/index',
-    name: 'kubernetes-deploy',
+    name: 'kubernetes-deploy-list',
     component: () => import('../views/kubernetes/deployment/list/index.vue'),
     meta: {
       requiresAuth: true
     }
   },
   {
-    path: '/kubernetes/deployment/index',
+    path: '/kubernetes/deployment/operate',
     name: 'kubernetes-deploy',
-    component: () => import('../views/kubernetes/deployment/index.vue'),
+    component: () => import('../views/kubernetes/deployment/operate.vue'),
     meta: {
       requiresAuth: true
     }
   },
   {
     path: '/kubernetes/cronjob/list/index',
-    name: 'kubernetes-cron-job',
+    name: 'kubernetes-cron-job-list',
     component: () => import('../views/kubernetes/cronjob/list/index.vue'),
     meta: {
       requiresAuth: true
     }
   },
   {
+    path: '/kubernetes/cronjob/operate',
+    name: 'kubernetes-cron-job',
+    component: () => import('../views/kubernetes/cronjob/operate.vue'),
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
     path: '/kubernetes/job/list/index',
-    name: 'kubernetes-job',
+    name: 'kubernetes-job-list',
     component: () => import('../views/kubernetes/job/list/index.vue'),
     meta: {
       requiresAuth: true
     }
   },
   {
+    path: '/kubernetes/job/operate',
+    name: 'kubernetes-job',
+    component: () => import('../views/kubernetes/job/operate.vue'),
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
     path: '/kubernetes/pod/list/index',
-    name: 'kubernetes-pod',
+    name: 'kubernetes-pod-list',
     component: () => import('../views/kubernetes/pod/list/index.vue'),
     meta: {
       requiresAuth: true
     }
   },
   {
+    path: '/kubernetes/pod/operate',
+    name: 'kubernetes-pod',
+    component: () => import('../views/kubernetes/pod/operate.vue'),
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
     path: '/kubernetes/daemonset/list/index',
-    name: 'kubernetes-daemon-set',
+    name: 'kubernetes-daemon-set-list',
     component: () => import('../views/kubernetes/daemonset/list/index.vue'),
     meta: {
       requiresAuth: true
     }
   },
   {
+    path: '/kubernetes/daemonset/operate',
+    name: 'kubernetes-daemon-set',
+    component: () => import('../views/kubernetes/daemonset/operate.vue'),
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
     path: '/kubernetes/service/list/index',
-    name: 'kubernetes-service',
+    name: 'kubernetes-service-list',
     component: () => import('../views/kubernetes/service/list/index.vue'),
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/kubernetes/service/operate',
+    name: 'kubernetes-service',
+    component: () => import('../views/kubernetes/service/operate.vue'),
     meta: {
       requiresAuth: true
     }

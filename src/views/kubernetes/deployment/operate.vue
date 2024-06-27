@@ -21,7 +21,7 @@
   const protocols = ref([{
     "label":"TCP",
     "value":"TCP"
-  },
+    },
     {
       "label":"UDP",
       "value":"UDP"
@@ -42,19 +42,19 @@
     initData.value.spec.template.spec.containers[index].ports.push(port)
   }
 
-  // job标签增删
+  // deployment标签增删
   const removeDeployLabel = (index) =>{
-    initData.value.option.labelAnnotation.job.labels.splice(index, 1);
+    initData.value.option.labelAnnotation.deployment.labels.splice(index, 1);
   }
   const addDeployLabel = () =>{
-    initData.value.option.labelAnnotation.job.labels.push({key:"", value:""})
+    initData.value.option.labelAnnotation.deployment.labels.push({key:"", value:""})
   }
-  // job注解增删
+  // deployment注解增删
   const removeDeployAnnotation = (labelIndex) =>{
-    initData.value.option.labelAnnotation.job.annotations.splice(labelIndex, 1);
+    initData.value.option.labelAnnotation.deployment.annotations.splice(labelIndex, 1);
   }
   const addDeployAnnotation = () =>{
-    initData.value.option.labelAnnotation.job.annotations.push({key:"", value:""})
+    initData.value.option.labelAnnotation.deployment.annotations.push({key:"", value:""})
   }
 
   // pod标签增删
@@ -602,10 +602,13 @@
 
   }
   // 通用标签 end
+
+  // 表单数据副本
   const copyData = ref({})
+  // 初始化表单数据
   const initData = ref({
-    "apiVersion": "batch/v1",
-    "kind": "Job",
+    "apiVersion": "apps/v1",
+    "kind": "Deployment",
     "metadata": {
       "name": undefined,
       "annotations": {},
@@ -613,19 +616,16 @@
       "namespace": "default",
     },
     "spec": {
-      "activeDeadlineSeconds": undefined,
-      "backoffLimit": undefined,
-      "completions": undefined,
-      "parallelism": undefined,
-      "template":{
-        "metadata":{
-          "labels":{},
-          "annotations":{},
+      "selector": {
+        "matchLabels": {}
+      },
+      "template": {
+        "metadata": {
+          "labels": {},
+          "annotations": {},
           "namespace": "default"
         },
-        "spec":{
-          "restartPolicy": "Never",
-          "terminationGracePeriodSeconds":undefined,
+        "spec": {
           "serviceAccountName":"default",
           "securityContext":{
             "fsGroup":undefined
@@ -695,13 +695,24 @@
           "subdomain": undefined,
           "imagePullSecrets": []
         }
+      },
+      "minReadySeconds":3,
+      "progressDeadlineSeconds": 600,
+      "replicas": 2,
+      "revisionHistoryLimit": 10,
+      "strategy": {
+        "rollingUpdate": {
+          "maxSurge": "25%",
+          "maxUnavailable": "25%"
+        },
+        "type": "RollingUpdate"
       }
     },
     //外部操作参数
     "option":{
       // 标签 & 注解统一设置对象
       "labelAnnotation":{
-        "job":{
+        "deployment":{
           "labels":[],
           "annotations":[
             {
@@ -715,12 +726,16 @@
           "annotations":[]
         }
       },
+      // 拉取密文下拉列表
+      "imagePullSecrets":[],
+      // 命名空间下拉列表
+      "namespaces":[],
       // 记录当前容器点击的左侧标签位置
-      "containerIndex":"",
+      "containerIndex":"containerGeneral",
       // 记录当前pod点击的左侧标签位置
-      "selectPod":"",
-      // 记录当前job点击的左侧标签位置
-      "selectJob":"",
+      "selectPod":"podLabel",
+      // 记录当前depolyment点击的左侧标签位置
+      "selectDepolyment":"deploymentLabel",
       // pod亲和度存储对象
       "freePod":[],
       // node亲和度存储对象
@@ -728,7 +743,9 @@
       // 节点调度方式
       "nodeAffinity":"none",
       // 是否显示yaml弹窗
-      "isShowYamlEditor":false
+      "isShowYamlEditor":false,
+      "namespaceId":undefined,
+      "selectTabIndex":"2"
 
     }
   })
@@ -736,10 +753,15 @@
   import { Select } from '@element-plus/icons-vue'
   import type { FormRules } from 'element-plus'
   import yaml from 'js-yaml'
+  import router from "@/router";
+  import { addDeployment,nameSpaceList,nameIsExist,queryDetail} from "@/api/kubernetes/deployment"
+  import { secretOptionList} from "@/api/kubernetes/secret"
+  import { useRouter } from "vue-router";
 
+  const $route = useRouter();
   const handleTabsEdit = (
-          targetName: string | number,
-          action: 'remove' | 'add'
+    targetName: string | number,
+    action: 'remove' | 'add'
   ) => {
     const container =
             {
@@ -819,7 +841,7 @@
   const generateYamlJson = ()=>{
     // 处理标签 & 注解
     labelAnnotationHandle()
-    initData.value.metadata.namespace = initData.value.metadata.namespace
+    initData.value.spec.template.metadata.namespace = initData.value.metadata.namespace
 
     copyData.value = _.cloneDeep(initData.value)
     delete copyData.value.option
@@ -833,6 +855,14 @@
     // 资源容忍度处理
     if(copyData.value.spec.template.spec.tolerations.length == 0){
       delete copyData.value.spec.template.spec.tolerations
+    }
+    // 最大不可用数量字符转数字
+    if(!copyData.value.spec.strategy.rollingUpdate.maxUnavailable.match(/\%/)){
+      copyData.value.spec.strategy.rollingUpdate.maxUnavailable = Number(copyData.value.spec.strategy.rollingUpdate.maxUnavailable)
+    }
+    // 最大可用数量字符转数字
+    if(!copyData.value.spec.strategy.rollingUpdate.maxSurge.match(/\%/)){
+      copyData.value.spec.strategy.rollingUpdate.maxSurge = Number(copyData.value.spec.strategy.rollingUpdate.maxSurge)
     }
     //亲和度处理
     affinityHandle()
@@ -848,6 +878,7 @@
     })
     specConfig.imagePullSecrets.splice(0,specConfig.imagePullSecrets.length)
     specConfig.imagePullSecrets = switchArr
+
   }
 
   // 网络设置
@@ -922,7 +953,6 @@
         }
       }
 
-      // 端口相关
       if(container.ports.length == 0){
         delete container.ports
       }else{
@@ -965,7 +995,7 @@
       // 安全性上下文
       if(!container.securityContext.runAsNonRoot && !container.securityContext.readOnlyRootFilesystem
               && !container.securityContext.privileged && !container.securityContext.allowPrivilegeEscalation
-            && !container.securityContext.runAsUser 
+            && !container.securityContext.runAsUser
           && container.securityContext.capabilities.add.length == 0 && container.securityContext.capabilities.drop.length == 0){
         delete container.securityContext
       }
@@ -983,10 +1013,11 @@
     }
 
     copyData.value.spec.template.spec.containers = []
-    
+
     saveContainer.forEach(function(container){
       copyData.value.spec.template.spec.containers.push(container)
     })
+
   }
 
   // 亲和度处理
@@ -1000,7 +1031,7 @@
           "nodeAffinity": {"preferredDuringSchedulingIgnoredDuringExecution":[],"requiredDuringSchedulingIgnoredDuringExecution":[]}
         }
       })
-      
+
       initData.value.option.freeNode.forEach(function(node){
         // 首选
         if(node.nodeLevel == "0"){
@@ -1097,15 +1128,20 @@
 
   // 处理标签 & 注解
   const labelAnnotationHandle = ()=>{
-    labelAnnotation2Json(initData.value.option.labelAnnotation.job.labels , initData.value.metadata.labels)
+    labelAnnotation2Json(initData.value.option.labelAnnotation.deployment.labels , initData.value.metadata.labels)
     labelAnnotation2Json(initData.value.option.labelAnnotation.pod.labels , initData.value.spec.template.metadata.labels)
-    labelAnnotation2Json(initData.value.option.labelAnnotation.job.annotations , initData.value.metadata.annotations)
+    labelAnnotation2Json(initData.value.option.labelAnnotation.deployment.annotations , initData.value.metadata.annotations)
     labelAnnotation2Json(initData.value.option.labelAnnotation.pod.annotations , initData.value.spec.template.metadata.annotations)
 
-    if(initData.value.spec.template.metadata.labels.length == 0){
+    if(!initData.value.metadata.labels.length){
+      Object.assign(initData.value.metadata.labels ,{"workload.user.cattle.io/workloadselector":"apps.deployment-default-undefined"})
+    }
+
+    if(!initData.value.spec.template.metadata.labels.length){
       Object.assign(initData.value.spec.template.metadata.labels,initData.value.metadata.labels)
     }
 
+    Object.assign(initData.value.spec.selector.matchLabels,initData.value.spec.template.metadata.labels)
   }
 
   // 内存&CPU限制处理
@@ -1141,9 +1177,8 @@
     const mapObject=new Map()
     for(const index in formValue){
       if((formValue[index].key != undefined && formValue[index].key != '')
-          &&
-          (formValue[index].value != undefined && formValue[index].value != '')
-        ){
+              &&
+              (formValue[index].value != undefined && formValue[index].value != '')){
 
         mapObject.set(formValue[index].key,formValue[index].value)
       }
@@ -1266,7 +1301,7 @@
 
   // 逆转 容器处理
   const reverseContainerHandle = ()=>{
-    if(initData.value.spec.template.spec?.containers != undefined && initData.value.spec.template.spec.containers.length > 0 ){
+    if(initData.value.spec.template.spec?.containers != undefined && initData.value.spec.template.spec.containers.length > 0){
       initData.value.spec.template.spec.containers.forEach(function(container){
         Object.assign(container,{_init : false})
 
@@ -1287,7 +1322,7 @@
 
       })
     }
-    if(initData.value.spec.template.spec?.initContainers != undefined && initData.value.spec.template.spec.initContainers.length > 0 ){
+    if(initData.value.spec.template.spec?.initContainers != undefined && initData.value.spec.template.spec.initContainers.length > 0){
       for( const index in initData.value.spec.template.spec.initContainers){
         const container = initData.value.spec.template.spec.initContainers[index]
         Object.assign(container,{_init : true})
@@ -1306,7 +1341,7 @@
         // 环境变量配置
         reverseEnvHandle(container)
 
-        if(initData.value.spec.template.spec?.containers == undefined){
+        if(initData.value.spec.template.spec.containers == undefined){
           initData.value.spec.template.spec.containers = []
         }
         initData.value.spec.template.spec.containers.push(_.cloneDeep(container))
@@ -1491,6 +1526,7 @@
           })
           container.lifecycle.postStart.exec.command = commandStr.substring(0, commandStr.length - 1)
 
+
         }else if(container.lifecycle.postStart?.tcpSocket != undefined){
           Object.assign(container.lifecycle.postStart,{"item":"tcpSocket"})
 
@@ -1512,6 +1548,7 @@
             commandStr = commandStr + command + ","
           })
           container.lifecycle.preStop.exec.command = commandStr.substring(0, commandStr.length - 1)
+
 
         }else if(container.lifecycle.preStop?.tcpSocket != undefined){
           Object.assign(container.lifecycle.preStop,{"item":"tcpSocket"})
@@ -1576,10 +1613,10 @@
         initData.value.spec.template.spec.affinity.podAffinity.requiredDuringSchedulingIgnoredDuringExecution.forEach(function(requireds){
           const pod = {
             "podAffinity":true,
-            "namespaces":requireds.namespaces,
+            "namespaces":requireds?.namespaces,
             "weight":requireds.weight,
             "nodeLevel":"1",
-            "curNameSpace": !requireds?.namespaces  || requireds.namespaces.length == 0,
+            "curNameSpace": !requireds?.namespaces  || requireds?.namespaces.length == 0,
             "topologyKey":requireds.topologyKey,
             "labelSelector": _.cloneDeep(requireds.labelSelector)
           }
@@ -1593,11 +1630,11 @@
         initData.value.spec.template.spec.affinity.podAffinity.preferredDuringSchedulingIgnoredDuringExecution.forEach(function(preferred){
           const pod = {
             "podAffinity":true,
-            "namespaces":preferred.podAffinityTerm?.namespaces,
+            "namespaces":preferred?.podAffinityTerm?.namespaces,
             "weight":preferred.weight,
             "nodeLevel":"0",
-            "curNameSpace": !preferred?.podAffinityTerm?.namespaces  || preferred.podAffinityTerm?.namespaces.length == 0,
-            "topologyKey":preferred.podAffinityTerm.topologyKey,
+            "curNameSpace": !preferred?.podAffinityTerm?.namespaces  || preferred?.podAffinityTerm?.namespaces.length == 0,
+            "topologyKey":preferred?.podAffinityTerm?.topologyKey,
             "labelSelector": _.cloneDeep(preferred.podAffinityTerm.labelSelector)
           }
           initData.value.option.freePod.push(pod)
@@ -1607,51 +1644,51 @@
     }
     // pod反亲和性
     if(initData.value.spec.template.spec?.affinity?.podAntiAffinity != undefined){
-        // 必须
-        if(initData.value.spec.template.spec?.affinity?.podAntiAffinity?.requiredDuringSchedulingIgnoredDuringExecution != undefined){
-          if(initData.value.spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution?.length > 0){
-            initData.value.spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution.forEach(function(required){
-              const podAnti = {
-                "podAffinity":false,
-                "namespaces":required.namespaces,
-                "weight":required.weight,
-                "nodeLevel":"1",
-                "curNameSpace": !required?.namespaces  || required?.namespaces.length == 0,
-                "topologyKey":required.topologyKey,
-                "labelSelector": _.cloneDeep(required.labelSelector)
-              }
+      // 必须
+      if(initData.value.spec.template.spec?.affinity?.podAntiAffinity?.requiredDuringSchedulingIgnoredDuringExecution != undefined){
+        if(initData.value.spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution?.length > 0){
+          initData.value.spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution.forEach(function(required){
+            const podAnti = {
+              "podAffinity":false,
+              "namespaces":required?.namespaces,
+              "weight":required.weight,
+              "nodeLevel":"1",
+              "curNameSpace": !required?.namespaces  || required?.namespaces.length == 0,
+              "topologyKey":required.topologyKey,
+              "labelSelector": _.cloneDeep(required.labelSelector)
+            }
 
-              initData.value.option.freePod.push(podAnti)
-            })
-          }
-
+            initData.value.option.freePod.push(podAnti)
+          })
         }
 
-        // 首选
-        if(initData.value.spec.template.spec?.affinity?.podAntiAffinity?.preferredDuringSchedulingIgnoredDuringExecution != undefined){
-          if(initData.value.spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution?.length > 0){
-            initData.value.spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution.forEach(function(preferred){
-              const podAnti = {
-                "podAffinity":false,
-                "namespaces":preferred?.podAffinityTerm?.namespaces,
-                "weight":preferred.weight,
-                "nodeLevel":"0",
-                "curNameSpace": !preferred?.podAffinityTerm?.namespaces  || preferred?.podAffinityTerm?.namespaces.length == 0,
-                "topologyKey":preferred.podAffinityTerm.topologyKey,
-                "labelSelector": _.cloneDeep(preferred.podAffinityTerm.labelSelector)
-              }
-
-              initData.value.option.freePod.push(podAnti)
-            })
-          }
-
-        }
       }
+
+      // 首选
+      if(initData.value.spec.template.spec?.affinity?.podAntiAffinity?.preferredDuringSchedulingIgnoredDuringExecution != undefined){
+        if(initData.value.spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution?.length > 0){
+          initData.value.spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution.forEach(function(preferred){
+            const podAnti = {
+              "podAffinity":false,
+              "namespaces":preferred?.podAffinityTerm?.namespaces,
+              "weight":preferred.weight,
+              "nodeLevel":"0",
+              "curNameSpace": !preferred?.podAffinityTerm?.namespaces  || preferred?.podAffinityTerm?.namespaces.length == 0,
+              "topologyKey":preferred.podAffinityTerm.topologyKey,
+              "labelSelector": _.cloneDeep(preferred.podAffinityTerm.labelSelector)
+            }
+
+            initData.value.option.freePod.push(podAnti)
+          })
+        }
+
+      }
+    }
   }
 
   // 内存&CPU限制处理
   const reverseResourceHandle = (container) =>{
-    if(!container?.resources  ){
+    if(!container?.resources?.requests){
       Object.assign(container,{
         "resources": {
           "requests": {
@@ -1674,16 +1711,22 @@
     if(container?.resources?.limits?.memory != undefined){
       container.resources.limits.memory = container.resources.limits.memory.match(/\d+/)[0];
     }
+
+    
   }
 
   // 标签 & 注解从yaml逆向回来
   const reverseLabelAnnotationHandle = ()=>{
-    delete initData.value.option.labelAnnotation
+
+    delete initData.value?.option?.labelAnnotation
     const cleanObj = {
-      job:{
+      deployment:{
         labels:[],
         annotations:[
-          {key:"field.cattle.io/description",value:undefined}
+          {
+            key:"field.cattle.io/description",
+            value:undefined
+          }
         ]
       },
       pod:{
@@ -1691,10 +1734,10 @@
         annotations:[]
       }
     }
-    Object.assign(initData.value.option,{labelAnnotation:cleanObj})
-    json2labelAnnotation(initData.value.option.labelAnnotation.job.labels , initData.value.metadata.labels)
+    Object.assign(initData.value?.option,{labelAnnotation:cleanObj})
+    json2labelAnnotation(initData.value.option.labelAnnotation.deployment.labels , initData.value.metadata.labels)
     json2labelAnnotation(initData.value.option.labelAnnotation.pod.labels , initData.value.spec.template.metadata.labels)
-    json2labelAnnotation(initData.value.option.labelAnnotation.job.annotations , initData.value.metadata.annotations)
+    json2labelAnnotation(initData.value.option.labelAnnotation.deployment.annotations , initData.value.metadata.annotations)
     json2labelAnnotation(initData.value.option.labelAnnotation.pod.annotations , initData.value.spec.template.metadata.annotations)
 
   }
@@ -1718,10 +1761,35 @@
     }
   }
 
+  const cancel = ()=>{
+    $route.push({path : "/kubernetes/deployment/list/index"})
+  }
+
   const saveData = () => {
     ruleFormRef.value.validate((valid) => {
       if (valid) {
-        console.log(yaml.safeLoad(initData.value))
+        generateYamlJson()
+        const nameSpaceId = initData.value.option.namespaceId
+        const data =  _.cloneDeep(copyData.value)
+        data.option = undefined
+        const saveData = {
+          "id": $route.currentRoute.value.query.id,
+          "instanceCode": $route.currentRoute.value.query.instanceCode,
+          "namespace": initData.value.metadata.namespace,
+          "nameSpaceId": nameSpaceId,
+          "name": initData.value.metadata.name,
+          "kind": initData.value.kind,
+          "jsonBody": JSON.stringify(yaml.load(yaml.dump(data)))
+        }
+        addDeployment(saveData).then(res=>{
+          if(res.code == 200){
+            ElMessage({
+                type: 'success',
+                message: '保存成功',
+            })
+            router.push({path : "/kubernetes/deployment/list/index"})
+          }
+        })
       } else {
         ElMessage.error('请填写完整')
       }
@@ -1734,18 +1802,81 @@
   const changePodSelectTab = (item) =>{
     initData.value.option.selectPod = item
   }
-  const changeJobSelectTab = (item) =>{
-    initData.value.option.selectJob = item
+  const changeDeploymentSelectTab = (item) =>{
+    initData.value.option.selectDepolyment = item
   }
+
+  // 修改命名空间下拉框时修改id
+  const changeNameSpace = (name)=>{
+    for(const index in initData.value.option.namespaces){
+      if(name == initData.value.option.namespaces[index].label){
+        initData.value.option.namespaceId = initData.value.option.namespaces[index].value
+      }
+    }
+    secretOption()
+  }
+
+  const validName = (rule:any,value:any, callback:any)=>{
+    if($route.currentRoute.value.query.id != undefined){
+      callback()
+      return
+    }
+
+    nameIsExist($route.currentRoute.value.query.instanceCode,value).then((res)=>{
+        if(res.code == 200){
+          if(!res.data){
+            callback()
+            return
+          }else{
+            callback(new Error('名称已存在，请确认后修改'));
+          }
+        }
+    })
+  }
+
   // 表单验证规则
   const rules = reactive<FormRules>({
-    'metadata.name' : [
+    "metadata.name" : [
       { required: true, message: "名称不能为空", trigger: "blur" },
       { min: 2, max: 20, message: '名称长度必须介于 2 和 20 之间', trigger: 'blur' },
-      { pattern: /^[-a-zA-Z0-9]*$/, message: '只可以输入字母、数字、中划线', trigger: 'blur' }
-    ],
+      { pattern: /^[-a-z0-9]*$/, message: '只可以输入小写字母、数字、中划线', trigger: 'blur' },
+      { validator: validName , trigger: 'blur' }
+    ]
   })
 
+  // 查询密文下拉列表
+  const secretOption = ()=>{
+    secretOptionList($route.currentRoute.value.query.instanceCode,initData.value.metadata.namespace).then((res)=>{
+        if(res.code == 200){
+          Object.assign(initData.value.option.imagePullSecrets,res.data);
+        }
+    })
+  }
+
+
+  // 初始化页面
+  const initPage = ()=>{
+    const id = $route.currentRoute.value.query.id
+    if(id != null){
+      queryDetail(id).then((res)=>{
+        if(res.code == 200){
+          setValue(yaml.load(res.data))
+        }
+      })
+    }
+
+    nameSpaceList($route.currentRoute.value.query.instanceCode).then((res)=>{
+      if(res.code == 200){
+        Object.assign(initData.value.option.namespaces,res.data);
+        changeNameSpace("default")
+      }
+    })
+
+    secretOption()
+
+  }
+
+  initPage();
 
 </script>
 <template>
@@ -1756,29 +1887,37 @@
           <el-row :gutter="24">
             <el-col :span="8">
               <el-form-item label="命名空间">
-                <el-select v-model="initData.metadata.namespace" style="width: 100%;" placeholder="请选择">
-                  <el-option label="default" value="default"></el-option>
-                  <el-option label="my-project" value="my-project"></el-option>
+                <el-select v-model="initData.metadata.namespace" style="width: 100%;" placeholder="请选择" @change="changeNameSpace" 
+                    :disabled="$route.currentRoute.value.query.id != undefined">
+                  <el-option v-for="namespace in initData.option.namespaces"
+                    :key="namespace.value"
+                    :label="namespace.label"
+                    :value="namespace.label"/>
                 </el-select>
               </el-form-item>
-            </el-col> 
+            </el-col>
             <el-col :span="8">
-              <el-form-item label="名称" prop="metadata.name">
-                <el-input v-model="initData.metadata.name" placeholder="请输入内容" prop="name" :rules="[
-                  { required: true, message: '名称不能为空', trigger: 'blur' } ]"></el-input>
+              <el-form-item label="名称" prop="metadata.name" >
+                <el-input v-model="initData.metadata.name" placeholder="请输入内容" :disabled="$route.currentRoute.value.query.id != undefined"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="8">
               <el-form-item label="描述">
-                <el-input v-model="initData.option.labelAnnotation.job.annotations[0].value" placeholder="请输入可以描述该资源的文本"></el-input>
+                <el-input v-model="initData.option.labelAnnotation.deployment.annotations[0].value" placeholder="请输入描述内容"></el-input>
               </el-form-item>
             </el-col>
+            <el-col :span="8">
+              <el-form-item label="容器副本数量">
+                <el-input-number min="1" v-model="initData.spec.replicas" placeholder="请输入副本数量"></el-input-number>
+              </el-form-item>
+            </el-col>
+
           </el-row>
         </yt-card>
         <yt-card :title="'详细配置'">
           <div class="detail-content">
             <el-tabs
-                    v-model="selectTabIndex"
+                    v-model="initData.option.selectTabIndex"
                     class="top-tabs"
                     editable
                     type="card"
@@ -1787,19 +1926,19 @@
               <template #add-icon>
                 <el-icon><Select /></el-icon>
               </template>
-              <el-tab-pane name="Job" label="Job" closable="false">
+              <el-tab-pane name="Deployment" label="Deployment" closable="false">
                 <el-scrollbar>
                   <div class="tab-content">
                     <div class="left">
-                      <el-tabs :tab-position="'left'" @tab-change="changeJobSelectTab">
-                        <el-tab-pane label="标签注释" name="jobLabel" />
-                        <el-tab-pane label="扩缩容和升级策略" name="jobStrategy" />
+                      <el-tabs :tab-position="'left'" @tab-change="changeDeploymentSelectTab">
+                        <el-tab-pane label="标签注释" name="deploymentLabel" />
+                        <el-tab-pane label="扩缩容和升级策略" name="deploymentStrategy" />
                       </el-tabs>
                     </div>
                     <div class="right">
-                      <div v-show="initData.option.selectJob == 'jobLabel'  ? true : false ">
-                        <H1>Job标签</H1>
-                        <el-row :gutter="24" v-for="(label,index) in initData.option.labelAnnotation.job.labels" :key="index" style="margin-top:30px">
+                      <div v-show="initData.option.selectDepolyment === 'deploymentLabel'  ? true : false ">
+                        <H1>Deployment标签</H1>
+                        <el-row :gutter="24" v-for="(label,index) in initData.option.labelAnnotation.deployment.labels" :key="index" style="margin-top:30px">
                           <el-col :span="6" >
                             <el-input label="键" placeholder="请输入键" v-model="label.key"></el-input>
                           </el-col>
@@ -1812,8 +1951,8 @@
                           <el-button @click="addDeployLabel" type="primary" plain>添加标签</el-button>
                         </el-row>
                         <H1>注解</H1>
-                        <el-row :gutter="24" v-for="(annotation,index) in initData.option.labelAnnotation.job.annotations" :key="index" style="margin-top:30px"
-                            v-show="annotation.key != 'field.cattle.io/description'">
+                        <el-row :gutter="24" v-for="(annotation,index) in initData.option.labelAnnotation.deployment.annotations" :key="index" style="margin-top:30px"
+                          v-show="annotation.key != 'field.cattle.io/description'">
                           <el-col :span="6" >
                             <el-input label="键" placeholder="请输入键" v-model="annotation.key"></el-input>
                           </el-col>
@@ -1826,34 +1965,44 @@
                           <el-button @click="addDeployAnnotation" type="primary" plain>添加标签</el-button>
                         </el-row>
                       </div>
-                      <div v-show="initData.option.selectJob == 'jobStrategy'  ? true : false ">
+                      <div v-show="initData.option.selectDepolyment === 'deploymentStrategy'  ? true : false ">
                         <H1>扩缩容和升级策略</H1>
-                        <el-row :gutter="24" style="margin-top:10px;margin-left:2px" >
+                        <el-row :gutter="24" style="margin-top:10px;margin-left:2px">
                           <el-col :span="12">
-                            <el-form-item label="完成job历史数">
-                              <el-input-number  placeholder="请输入数量" v-model="initData.spec.template.spec.completions"/>
+                            <el-radio-group v-model="initData.spec.strategy.type" >
+                              <el-radio-button label="RollingUpdate">滚动升级</el-radio-button>
+                              <el-radio-button label="Recreate">重新创建</el-radio-button>
+                            </el-radio-group>
+                          </el-col>
+                        </el-row>
+                        <el-row :gutter="24" style="margin-top:10px;margin-left:2px" v-if="initData.spec.strategy.type == 'RollingUpdate'">
+                          <el-col :span="12">
+                            <el-form-item label="最大可用数量">
+                              <el-input placeholder="请输入数量" v-model="initData.spec.strategy.rollingUpdate.maxSurge"></el-input>
                             </el-form-item>
                           </el-col>
                           <el-col :span="12">
-                            <el-form-item label="并发数">
-                              <el-input-number placeholder="请输入数量" v-model="initData.spec.template.spec.parallelism" />
+                            <el-form-item label="最大不可用数量">
+                              <el-input placeholder="请输入数量" v-model="initData.spec.strategy.rollingUpdate.maxUnavailable"></el-input>
+                            </el-form-item>
+                          </el-col>
+                        </el-row>
+                        <el-row :gutter="24" style="margin-top:10px;margin-left:2px">
+                          <el-col :span="12">
+                            <el-form-item label="最短就绪时间">
+                              <el-input-number  placeholder="请输入最短就绪时间" v-model="initData.spec.minReadySeconds" />
                             </el-form-item>
                           </el-col>
                           <el-col :span="12">
-                            <el-form-item label="重试次数限制">
-                              <el-input-number  placeholder="请输入次数" v-model="initData.spec.template.spec.backoffLimit"/>
-                            </el-form-item>
-                          </el-col>
-                          <el-col :span="12">
-                            <el-form-item label="活动终止时间(秒)">
-                              <el-input-number  placeholder="请输入秒数" v-model="initData.spec.template.spec.activeDeadlineSeconds">
+                            <el-form-item label="修订历史记录限制">
+                              <el-input-number  placeholder="请输入修订历史记录限制" v-model="initData.spec.revisionHistoryLimit">
                                 <template #append>秒</template>
                               </el-input-number>
                             </el-form-item>
                           </el-col>
                           <el-col :span="12">
-                            <el-form-item label="判定pod是否活跃的截止时间(秒)">
-                              <el-input-number  placeholder="请输入秒数" v-model="initData.spec.template.spec.terminationGracePeriodSeconds">
+                            <el-form-item label="进程截止时间">
+                              <el-input-number  placeholder="请输入进程截止时间数量" v-model="initData.spec.progressDeadlineSeconds">
                                 <template #append>秒</template>
                               </el-input-number>
                             </el-form-item>
@@ -2009,7 +2158,7 @@
                       <div v-show="initData.option.selectPod === 'podNode'  ? true : false ">
                         <H1>节点调度</H1>
                         <el-row :gutter="24" >
-                          <el-col :span="12">
+                          <el-col :span="24">
                             <el-radio-group v-model="initData.option.nodeAffinity" @change="nodeChange">
                               <el-radio-button
                                       v-for="item in nodeSelector"
@@ -2022,7 +2171,7 @@
                         <template v-if="initData.option.nodeAffinity == 'none'">
                         </template>
                         <template v-if="initData.option.nodeAffinity == 'nodeName'">
-                          <el-row>
+                          <el-row style="margin-top: 20px;">
                             <el-col>
                               <el-select v-model="initData.spec.template.spec.nodeName" placeholder="请选择">
                                 <el-option v-for="node in nodeData"
@@ -2046,7 +2195,7 @@
                               </el-col>
                               <el-col :span="6" v-if="node.nodeLevel == '0'">
                                 <el-form-item label="权重">
-                                  <el-input-number 
+                                  <el-input-number
                                             v-model="node.weight"/>
                                 </el-form-item>
                               </el-col>
@@ -2080,17 +2229,14 @@
                               </el-col>
                             </el-row>
                             <el-row>
-                              <el-col :span="12">
+                              <el-col :span="24">
                                 <el-button @click="addRule(node)" type="primary" plain>添加规则</el-button>
-                              </el-col>
-                            </el-row>
-                            <el-row>
-                              <el-col :span="12">
                                 <el-button @click="removeNode(nodeIndex)" type="danger" plain>删除节点调度</el-button>
+                                <el-button @click="addNode" type="primary" plain>添加节点调度</el-button>
                               </el-col>
                             </el-row>
                           </template>
-                          <el-button @click="addNode" type="primary" plain>添加节点调度</el-button>
+
                         </template>
                       </div>
 
@@ -2131,7 +2277,7 @@
                             </el-col>
                             <el-col :span="3" v-if="pod.nodeLevel == '0'">
                               <el-form-item label="权重">
-                                <el-input-number 
+                                <el-input-number
                                           v-model="pod.weight"/>
                               </el-form-item>
                             </el-col>
@@ -2256,32 +2402,10 @@
 
                       <div v-show="initData.option.selectPod === 'podStrategy'  ? true : false ">
                         <H1>扩缩容和升级策略</H1>
-                        <el-row :gutter="24" style="margin-top:10px;margin-left:2px" >
-                          <el-col :span="12">
-                            <el-form-item label="完成job历史数">
-                              <el-input-number  placeholder="请输入数量" v-model="initData.spec.template.spec.completions"/>
-                            </el-form-item>
-                          </el-col>
-                          <el-col :span="12">
-                            <el-form-item label="并发数">
-                              <el-input-number placeholder="请输入数量" v-model="initData.spec.template.spec.parallelism" />
-                            </el-form-item>
-                          </el-col>
-                          <el-col :span="12">
-                            <el-form-item label="重试次数限制">
-                              <el-input-number  placeholder="请输入次数" v-model="initData.spec.template.spec.backoffLimit"/>
-                            </el-form-item>
-                          </el-col>
-                          <el-col :span="12">
-                            <el-form-item label="活动终止时间(秒)">
-                              <el-input-number  placeholder="请输入秒数" v-model="initData.spec.template.spec.activeDeadlineSeconds">
-                                <template #append>秒</template>
-                              </el-input-number>
-                            </el-form-item>
-                          </el-col>
-                          <el-col :span="12">
-                            <el-form-item label="判定pod是否活跃的截止时间(秒)">
-                              <el-input-number  placeholder="请输入秒数" v-model="initData.spec.template.spec.terminationGracePeriodSeconds">
+                        <el-row :gutter="24" >
+                          <el-col :span="8">
+                            <el-form-item label="终止宽限期"  >
+                              <el-input-number placeholder="请输入内容"  v-model="initData.spec.template.spec.terminationGracePeriodSeconds" >
                                 <template #append>秒</template>
                               </el-input-number>
                             </el-form-item>
@@ -2309,7 +2433,7 @@
                 <el-scrollbar>
                   <div class="tab-content">
                     <div class="left">
-                      <el-tabs :tab-position="'left'" @tab-change="changeSelectTab">
+                      <el-tabs :tab-position="'left'" @tab-change="changeSelectTab" v-model="initData.option.containerIndex">
                         <el-tab-pane label="通用" name="containerGeneral" />
                         <el-tab-pane label="健康检查" name="containerCheckHealth"/>
                         <el-tab-pane label="资源" name="containerSource"/>
@@ -2336,8 +2460,12 @@
                         <H1>镜像</H1>
                         <el-row :gutter="24" >
                           <el-col :span="8">
-                            <el-form-item label="容器镜像"  :rules="[  { required: true, message: '容器镜像不能为空', trigger: 'blur' } ]">
-                              <el-input placeholder="如：nginx:1.17.2" v-model="container.image" />
+                            <el-form-item label="容器镜像" :prop="`spec.template.spec.containers[${index}][image]`"
+                              :rules="[
+                                { required: true, message: '容器镜像不能为空', trigger: 'blur' },
+                                { min: 2, max: 50, message: '名称长度必须介于 2 和 50 之间', trigger: 'blur' }
+                              ]">
+                              <el-input placeholder="如：nginx:1.17.2" v-model="container.image" ></el-input>
                             </el-form-item>
                           </el-col>
                           <el-col :span="8">
@@ -2351,9 +2479,11 @@
                           </el-col>
                           <el-col :span="8">
                             <el-form-item label="拉取密文">
-                              <el-select v-model="initData.spec.template.spec.imagePullSecrets" multiple style="width: 100%;" placeholder="请选择">
-                                <el-option label="harbor" value="harbor-login"></el-option>
-                                <el-option label="default" value="default"></el-option>
+                              <el-select v-model="initData.spec.template.spec.imagePullSecrets" style="width: 100%;" multiple placeholder="请选择">
+                                <el-option v-for="imagePullSecret in initData.option.imagePullSecrets"
+                                  :key="imagePullSecret.value"
+                                  :label="imagePullSecret.label"
+                                  :value="imagePullSecret.label"/>
                               </el-select>
                             </el-form-item>
                           </el-col>
@@ -3501,6 +3631,7 @@
       </div>
     </el-form>
     <yt-bottom-operate>
+      <el-button @click="cancel">取消</el-button>
       <el-button @click="editYaml">编辑yaml</el-button>
       <el-button type="primary" @click="saveData">保存</el-button>
     </yt-bottom-operate>
@@ -3509,6 +3640,10 @@
 </template>
 <style lang="scss" scoped>
   .detail-content {
+    ::v-deep(.el-tabs__new-tab) {
+      transform: scale(1.2);
+      transform-origin: right;
+    }
     ::v-deep(.el-tabs--card > .el-tabs__header) {
       margin-bottom: 0;
     }
@@ -3538,9 +3673,9 @@
     }
     .tab-content {
       display: flex;
-      height: 400px;
       overflow-x: hidden;
       padding-top: 16px;
+      height: calc(100vh - 512px);
       .left {
         background: var(--el-table-header-bg-color-my);
         ::v-deep(.el-tabs__content) {
@@ -3551,6 +3686,7 @@
         padding: 16px;
         box-sizing: border-box;
         flex: 1;
+        width: 100%;
       }
     }
   }

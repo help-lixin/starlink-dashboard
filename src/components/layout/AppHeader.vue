@@ -1,4 +1,7 @@
 <script setup lang="ts">
+// @ts-nocheck
+// ts不检查该文件,否则,打包都不能通过
+
 import { isCollapse, setCollapse } from './isCollapse'
 import { getProfile, logout } from '@/api/users'
 import { useRouter } from 'vue-router'

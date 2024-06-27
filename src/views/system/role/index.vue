@@ -370,14 +370,6 @@
           size="default"
           @click="handleAdd" v-hasPerms="['/system/role/add']" ><el-icon><Plus /></el-icon>新增</el-button>
 
-
-        <el-button
-          type="success"
-          plain
-          size="default"
-          :disabled="single"
-          @click="handleUpdate" v-hasPerms="['/system/role/edit']" ><el-icon><EditPen /></el-icon>修改</el-button>
-
         <el-button
           type="danger"
           plain
@@ -412,7 +404,7 @@
           </el-table-column>
           <el-table-column
             label="操作"
-            align="left"
+            align="center"
             width="220"
           >
             <template v-slot="scope">
@@ -488,8 +480,8 @@
         </el-form>
       </yt-card>
       <template #footer>
-        <el-button type="primary" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
+        <el-button type="primary" @click="submitForm">确 定</el-button>
       </template>
     </el-dialog>
   </div>

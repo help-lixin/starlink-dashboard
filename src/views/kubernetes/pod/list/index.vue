@@ -1,10 +1,15 @@
 <script setup lang="ts">
   // @ts-nocheck
-  import { showStatusOperateFun , status , showStatusFun , addDateRange } from "@/utils/common"
+  import { showStatusOperateFun , status , showStatusFun , addDateRange, getStatusIcon } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
   import {  Edit } from '@element-plus/icons-vue'
-  import { pageList, resources} from "@api/kubernetes/deployment"
+  // import router from '@/router'
+  import { pageList,nameSpaceList,removePod,changeStatus} from "@/api/kubernetes/pod"
+  import { useRouter } from "vue-router";
+
+  const router = useRouter();
+
 
   const queryFormRef = ref(null);
 
@@ -12,9 +17,12 @@
   const queryParams = reactive({
     pageNum: 1,
     pageSize: 10,
+    beginTime: undefined,
+    endTime: undefined,
+    status: undefined,
     instanceCode:undefined,
-    key: undefined,
-    value: undefined
+    nameSpaceId:undefined,
+    kind: "Pod"
   })
 
   const defaultInstanceCode = ref('')
@@ -25,10 +33,12 @@
   const showSearch = ref(true)
   // 日期范围
   const dateRange = ref([])
+  const nameSpaces = reactive([])
+  const nameSpaceMap =new Map()
 
 
   const total= ref(0)
-  const projectList = reactive([])
+  const tabelDataList = reactive([])
 
   // 表单
   const open = ref(false);
@@ -36,25 +46,103 @@
 
   const title = ref(null)
   const pluginInstance = reactive([]);
-  const pluginCode = "harbor"
-
+  const pluginCode = "k8s"
 
   // 获取列表
   const getList = ()=>{
-    loading.value = true;
+    // loading.value = true;
     pageList(addDateRange(queryParams, dateRange.value))
     .then(response => {
           loading.value = false
           if(response?.data?.records.length > 0){
-            projectList.splice(0,projectList.length);
-            Object.assign(projectList, response?.data?.records)
+            tabelDataList.splice(0,tabelDataList.length);
+            Object.assign(tabelDataList, response?.data?.records)
             total.value = response?.data?.total
           }else{
-            projectList.splice(0,projectList.length);
+            tabelDataList.splice(0,tabelDataList.length);
             total.value = 0;
           }
         }
     );
+  }
+
+  const handleAdd = function(){
+    router.push({path : "/kubernetes/pod/operate", query:{ instanceCode: defaultInstanceCode.value } })
+  }
+
+  const handleDetail = function(id){
+    router.push({path : "/kubernetes/pod/operate", query:{ instanceCode: defaultInstanceCode.value ,id: id} })
+  }
+
+  const handleDelete = function(row){
+    const name = row.name
+    let msg = ""
+    msg = '是否删除任务【"' + name + '"】的数据项？'
+
+    ElMessageBox.confirm(
+      msg,
+      'Warning',
+      {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    ).then(() => {
+      removePod(row.id).then((res)=>{
+          if(res.code == 200){
+              // 重置查询表单,并进行查询
+              queryParams.pageNum=1
+              getList()
+              ElMessage({
+                type: 'success',
+                message: '删除成功',
+              })
+          }else{
+              ElMessage({
+                type: 'error',
+                message: '删除失败:'+res.msg,
+              })
+          }
+      })
+    })
+  }
+
+  const handleStatusChange = (row)=>{
+    const name = row.name
+    const status = row.status
+    let msg = ""
+    if(status == 1){
+      msg = '是否停用名称为"' + name + '"的数据项？'
+    }else{
+      msg = '是否启用名称为"' + name + '"的数据项？'
+    }
+
+    ElMessageBox.confirm(
+      msg,
+      'Warning',
+      {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    ).then(() => {
+        let tmpStatus;
+        if(status == 0){
+          tmpStatus = 1
+        }else{
+          tmpStatus = 0
+        }
+        changeStatus(row.id,tmpStatus).then((res)=>{
+            if(res.code == 200){
+                getList()
+                ElMessage({
+                  type: 'success',
+                  message: '操作成功',
+                })
+            }
+        })
+    })
+    .catch(() => { })
   }
 
   // 处理搜索按钮
@@ -64,18 +152,19 @@
 
   // 处理重置按钮
   const resetQuery = function(){
-    // queryFormRef.value.resetFields();
-    queryParams.value = undefined
-    queryParams.key = undefined
     queryParams.instanceCode = defaultInstanceCode.value;
     handleQuery();
   }
 
+  const showNameSpace = function(id){
+    return nameSpaceMap.get(id)
+  }
 
   // 多选框选中数据
   const handleSelectionChange = function(selection){
 
   }
+
 
   // 进入页面时,就初始化实例列表
   queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
@@ -84,8 +173,19 @@
       queryParams.instanceCode = pluginInstance[0].instanceCode
       defaultInstanceCode.value = pluginInstance[0].instanceCode
 
+      nameSpaceList(defaultInstanceCode.value).then((res) =>{
+        if(res.code == 200){
+          Object.assign(nameSpaces,res?.data)
+          nameSpaces.forEach(function(nameSpace){
+            nameSpaceMap.set(Number(nameSpace.value),nameSpace.label)
+          })
+        }
+      })
       // 触发查询
       getList();
+
+      
+
     }
   });
 </script>
@@ -109,23 +209,42 @@
                            :value="item.instanceCode"/>
               </el-select>
             </el-form-item>
-            <el-form-item label="资源" prop="instanceCode">
-              <el-input v-model="queryParams.value" placeholder="请输入内容" clearable style="width: 240px">
-                <template #prepend>
-                  <el-select
-                    class="search-select2"
-                    v-model="queryParams.key"
-                    placeholder="请选择资源"
-                    style="width: 100px"
-                    clearable
-                  >
-                      <el-option v-for="item in resources"
-                              :key="item.value"
-                              :label="item.label"
-                              :value="item.value"/>
-                  </el-select>
-                </template>
-              </el-input>
+            <el-form-item label="命名空间" prop="nameSpace">
+              <el-select
+                class="search-select2"
+                v-model="queryParams.nameSpaceId"
+                placeholder="请选择命名空间"
+                style="width: 240px"
+                clearable
+              >
+                <el-option v-for="namespace in nameSpaces"
+                      :key="namespace.value"
+                      :label="namespace.label"
+                      :value="namespace.value"/>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="状态" prop="status">
+              <el-select
+                class="search-select"
+                v-model="queryParams.status"
+                placeholder="任务状态"
+                clearable
+              >
+                <el-option v-for="dict in status"
+                           :key="dict.value"
+                           :label="dict.label"
+                           :value="dict.value"/>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="创建时间">
+              <el-date-picker
+                v-model="dateRange"
+                value-format="YYYY-MM-DD"
+                type="daterange"
+                range-separator="-"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
+              ></el-date-picker>
             </el-form-item>
             <el-form-item>
               <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
@@ -134,19 +253,50 @@
       </el-form>
     </yt-card>
     <yt-card>
-
       <!--table  -->
       <div class="table-wrap">
-        <el-table v-loading="loading" :data="projectList" @selection-change="handleSelectionChange">
+        <el-table v-loading="loading" :data="tabelDataList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="项目编号" align="left" key="id" prop="id" v-if="false"/>
-          <el-table-column label="资源" align="left" key="resource" prop="resource"  :show-overflow-tooltip="true"  />
-          <el-table-column label="资源类型" align="left" key="resourceType" prop="resourceType"  :show-overflow-tooltip="true"  />
-          <el-table-column label="用户名" align="left" key="username" prop="username" :show-overflow-tooltip="true"   />
-          <el-table-column label="操作" align="left" key="operation" prop="operation" :show-overflow-tooltip="true"   />
-          <el-table-column label="创建时间" align="left" prop="opTime"  width="180">
+          <el-table-column label="id" align="left" key="id" prop="id" v-if="false"/>
+          <el-table-column label="命名空间" align="left" key="nameSpace" prop="nameSpace" width="180">
+            <template #default="scope">
+              {{ showNameSpace(scope.row.nameSpaceId)   }}
+            </template>
+          </el-table-column>
+          <el-table-column label="应用名称" align="left" key="name" prop="name"  :show-overflow-tooltip="true" />
+          <el-table-column label="实例编码" align="left" key="instanceCode" prop="instanceCode" :show-overflow-tooltip="true"   />
+          <el-table-column label="状态" align="left" key="status" prop="status" :show-overflow-tooltip="true" width="100"  >
+            <template #default="scope">
+              {{  showStatusFun(scope.row.status) }}
+            </template>
+          </el-table-column>
+          <el-table-column label="创建时间" align="left" prop="opTime"  width="200">
             <template #default="scope">
               {{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" align="left" key="operation" prop="operation" :show-overflow-tooltip="true" width="350"  >
+            <template #default="scope">
+              <div class="action-btn">
+                <el-button
+                  size="small"
+                  icon="View"
+                  @click="handleDetail(scope.row.id)"
+                  v-hasPerms="['/kubernetes/pod/detail/*']"
+                >查看</el-button>
+                <el-button
+                  size="small"
+                  :icon="getStatusIcon(scope.row)"
+                  @click="handleStatusChange(scope.row)"
+                  v-hasPerms="['/kubernetes/pod/changeStatus/**']"
+                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
+                <el-button
+                  size="small"
+                  icon="Delete"
+                  @click="handleDelete(scope.row)"
+                  v-hasPerms="['/kubernetes/pod/del/**']"
+                >删除</el-button>
+              </div>
             </template>
           </el-table-column>
         </el-table>

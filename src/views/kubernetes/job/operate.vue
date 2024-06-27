@@ -27,7 +27,7 @@
       "value":"UDP"
     }])
   const removePort = (index,portIndex) =>{
-    initData.value.spec.jobTemplate.spec.template.spec.containers[index].ports.splice(portIndex, 1);
+    initData.value.spec.template.spec.containers[index].ports.splice(portIndex, 1);
   }
   const addPort = (index) =>{
     const port = {
@@ -39,22 +39,22 @@
       'hostIP': undefined,
       '_serviceType': [],
     }
-    initData.value.spec.jobTemplate.spec.template.spec.containers[index].ports.push(port)
+    initData.value.spec.template.spec.containers[index].ports.push(port)
   }
 
-  // cronJob标签增删
-  const removeJobLabel = (index) =>{
-    initData.value.option.labelAnnotation.cronJob.labels.splice(index, 1);
+  // job标签增删
+  const removeLabel = (index) =>{
+    initData.value.option.labelAnnotation.job.labels.splice(index, 1);
   }
-  const addJobLabel = () =>{
-    initData.value.option.labelAnnotation.cronJob.labels.push({key:"", value:""})
+  const addLabel = () =>{
+    initData.value.option.labelAnnotation.job.labels.push({key:"", value:""})
   }
-  // cronJob注解增删
-  const removeJobAnnotation = (labelIndex) =>{
-    initData.value.option.labelAnnotation.cronJob.annotations.splice(labelIndex, 1);
+  // job注解增删
+  const removeAnnotation = (labelIndex) =>{
+    initData.value.option.labelAnnotation.job.annotations.splice(labelIndex, 1);
   }
-  const addJobAnnotation = () =>{
-    initData.value.option.labelAnnotation.cronJob.annotations.push({key:"", value:""})
+  const addAnnotation = () =>{
+    initData.value.option.labelAnnotation.job.annotations.push({key:"", value:""})
   }
 
   // pod标签增删
@@ -75,60 +75,60 @@
 
   // 解析器选项增删
   const addOption = () =>{
-    if(!initData.value.spec.jobTemplate.spec.template.spec?.dnsConfig ){
-      Object.assign(initData.value.spec.jobTemplate.spec.template.spec.dnsConfig,{"dnsConfig":""})
+    if(!initData.value.spec.template.spec?.dnsConfig ){
+      Object.assign(initData.value.spec.template.spec.dnsConfig,{"dnsConfig":""})
     }
-    if(!initData.value.spec.jobTemplate.spec.template.spec.dnsConfig.searches ){
-      Object.assign(initData.value.spec.jobTemplate.spec.template.spec.dnsConfig,{"options":[]})
+    if(!initData.value.spec.template.spec.dnsConfig.searches ){
+      Object.assign(initData.value.spec.template.spec.dnsConfig,{"options":[]})
     }
-    initData.value.spec.jobTemplate.spec.template.spec.dnsConfig.options.push({"name":"","value":""})
+    initData.value.spec.template.spec.dnsConfig.options.push({"name":"","value":""})
   }
   const removeOption = (optionIndex) =>{
-    initData.value.spec.jobTemplate.spec.template.spec.dnsConfig.options.splice(optionIndex, 1);
+    initData.value.spec.template.spec.dnsConfig.options.splice(optionIndex, 1);
   }
 
   // 搜索域增删
   const addSearch = () =>{
-    if(!initData.value.spec.jobTemplate.spec.template.spec?.dnsConfig ){
-      Object.assign(initData.value.spec.jobTemplate.spec.template.spec.dnsConfig,{"dnsConfig":""})
+    if(!initData.value.spec.template.spec?.dnsConfig ){
+      Object.assign(initData.value.spec.template.spec.dnsConfig,{"dnsConfig":""})
     }
-    if(!initData.value.spec.jobTemplate.spec.template.spec.dnsConfig.searches ){
-      Object.assign(initData.value.spec.jobTemplate.spec.template.spec.dnsConfig,{"searches":[{value:""}]})
+    if(!initData.value.spec.template.spec.dnsConfig.searches ){
+      Object.assign(initData.value.spec.template.spec.dnsConfig,{"searches":[{value:""}]})
     }
-    initData.value.spec.jobTemplate.spec.template.spec.dnsConfig.searches.push({value:""})
+    initData.value.spec.template.spec.dnsConfig.searches.push({value:""})
   }
   const removeSearch = (searchIndex) =>{
-    initData.value.spec.jobTemplate.spec.template.spec.dnsConfig.searches.splice(searchIndex, 1);
+    initData.value.spec.template.spec.dnsConfig.searches.splice(searchIndex, 1);
   }
 
   // 域名服务器增删
   const addNameServer = () =>{
-    if(!initData.value.spec.jobTemplate.spec.template.spec?.dnsConfig ){
-      Object.assign(initData.value.spec.jobTemplate.spec.template.spec.dnsConfig,{"dnsConfig":""})
+    if(!initData.value.spec.template.spec?.dnsConfig ){
+      Object.assign(initData.value.spec.template.spec.dnsConfig,{"dnsConfig":""})
     }
-    if(!initData.value.spec.jobTemplate.spec.template.spec?.dnsConfig?.nameservers ){
-      Object.assign(initData.value.spec.jobTemplate.spec.template.spec,{"nameservers":[{value:""}]})
+    if(!initData.value.spec.template.spec?.dnsConfig?.nameservers ){
+      Object.assign(initData.value.spec.template.spec,{"nameservers":[{value:""}]})
     }
-    initData.value.spec.jobTemplate.spec.template.spec.dnsConfig.nameservers.push({value:""})
+    initData.value.spec.template.spec.dnsConfig.nameservers.push({value:""})
   }
   const removeNameServer = (searchIndex) =>{
-    initData.value.spec.jobTemplate.spec.template.spec.dnsConfig.nameservers.splice(searchIndex, 1);
+    initData.value.spec.template.spec.dnsConfig.nameservers.splice(searchIndex, 1);
   }
 
   // 主机别名增删
   const addHostAlias = () =>{
-    if(!initData.value.spec.jobTemplate.spec.template.spec?.hostAliases ){
-      Object.assign(initData.value.spec.jobTemplate.spec.template.spec,{"hostAliases":""})
+    if(!initData.value.spec.template.spec?.hostAliases ){
+      Object.assign(initData.value.spec.template.spec,{"hostAliases":""})
     }
-    initData.value.spec.jobTemplate.spec.template.spec.hostAliases.push({"ip":"","hostnames":[]})
+    initData.value.spec.template.spec.hostAliases.push({"ip":"","hostnames":[]})
   }
   const removeHostAlias = (searchIndex) =>{
-    initData.value.spec.jobTemplate.spec.template.spec.hostAliases.splice(searchIndex, 1);
+    initData.value.spec.template.spec.hostAliases.splice(searchIndex, 1);
   }
 
   // 环境变量增删
   const removeEnv = (index,envIndex) =>{
-    initData.value.spec.jobTemplate.spec.template.spec.containers[index].env.splice(envIndex, 1);
+    initData.value.spec.template.spec.containers[index].env.splice(envIndex, 1);
   }
   const addEnv = (container) =>{
     const env = {
@@ -180,12 +180,12 @@
   }
   // 删除容忍度规则
   const removeTolerationRule = (index)=>{
-    initData.value.spec.jobTemplate.spec.template.spec.tolerations.splice(index, 1);
+    initData.value.spec.template.spec.tolerations.splice(index, 1);
   }
 
   // 添加容忍度规则
   const addTolerationRule = ()=>{
-    initData.value.spec.jobTemplate.spec.template.spec.tolerations.push(
+    initData.value.spec.template.spec.tolerations.push(
         {
           "key": undefined,
           "operator": undefined,
@@ -204,7 +204,6 @@
   // 节点调度
   const nodeSelector=[{label:"默认规则",value:"none"},{label:"集中调度",value:"nodeName"},{label:"自定义规则",value:"affinity"}]
   const nodeData=[{label:"node-default",value:"node-default"},{label:"my-project",value:"my-project"},{label:"slave-node",value:"slave-node"}]
-  // 自定义规则节点对象（*）
   // 添加节点调度
   const addNode = ()=>{
     initData.value.option.freeNode.push(
@@ -248,10 +247,10 @@
   // 修改节点亲和度方式
   const nodeChange = (selectItem)=>{
     initData.value.option.nodeAffinity = selectItem
-    delete initData.value.spec.jobTemplate.spec.template.spec?.nodeName
+    delete initData.value.spec.template.spec?.nodeName
 
     if(selectItem == "nodeName"){
-      Object.assign(initData.value.spec.jobTemplate.spec.template.spec,{"nodeName":""})
+      Object.assign(initData.value.spec.template.spec,{"nodeName":""})
     }else if(selectItem == "affinity"){
       if(initData.value.option.freeNode.length == 0){
         addNode()
@@ -606,7 +605,7 @@
   const copyData = ref({})
   const initData = ref({
     "apiVersion": "batch/v1",
-    "kind": "CronJob",
+    "kind": "Job",
     "metadata": {
       "name": undefined,
       "annotations": {},
@@ -614,109 +613,99 @@
       "namespace": "default",
     },
     "spec": {
-      "concurrencyPolicy":"Allow",
-      "schedule":"0 * * * *",
-      "startingDeadlineSeconds": undefined,
-      "successfulJobsHistoryLimit": undefined,
-      "failedJobsHistoryLimit": undefined,
-      "jobTemplate": {
-        "metadata": {
-          "labels": {},
-          "annotations": {},
+      "activeDeadlineSeconds": undefined,
+      "backoffLimit": undefined,
+      "completions": undefined,
+      "parallelism": undefined,
+      "template":{
+        "metadata":{
+          "labels":{},
+          "annotations":{},
           "namespace": "default"
         },
-        "spec": {
-          "activeDeadlineSeconds": undefined,
-          "backoffLimit": undefined,
-          "completions": undefined,
-          "parallelism": undefined,
-          "template":{
-            "spec":{
-              "restartPolicy": "Never",
-              "terminationGracePeriodSeconds":undefined,
-              "serviceAccountName":"default",
-              "securityContext":{
-                "fsGroup":undefined
+        "spec":{
+          "restartPolicy": "Never",
+          "terminationGracePeriodSeconds":undefined,
+          "serviceAccountName":"default",
+          "securityContext":{
+            "fsGroup":undefined
+          },
+          "initContainers":[],
+          "containers": [
+            {
+              "image": undefined,
+              "imagePullPolicy": "Always",
+              "name": "container-0",
+              "_init": false,
+              "ports":[],
+              "env": [],
+              "stdin": false,
+              "stdinOnce": false,
+              "_commandIO":"NO",
+              "command": undefined,
+              "tty": true,
+              "args": undefined,
+              "workingDir": undefined,
+              "lifecycle": {
+                "postStart": {item:undefined},
+                "preStop": {item:undefined}
               },
-              "initContainers":[],
-              "containers": [
-                {
-                  "image": undefined,
-                  "imagePullPolicy": "Always",
-                  "name": "container-0",
-                  "_init": false,
-                  "ports":[],
-                  "env": [],
-                  "stdin": false,
-                  "stdinOnce": false,
-                  "_commandIO":"NO",
-                  "command": undefined,
-                  "tty": true,
-                  "args": undefined,
-                  "workingDir": undefined,
-                  "lifecycle": {
-                    "postStart": {item:undefined},
-                    "preStop": {item:undefined}
-                  },
-                  "_checkHealthItem":{
-                    "readinessProbe":"",
-                    "livenessProbe":"",
-                    "startupProbe":""
-                  },
-                  "securityContext": {
-                    "capabilities": {
-                      "add": [],
-                      "drop": []
-                    },
-                    "runAsNonRoot": false,
-                    "readOnlyRootFilesystem": false,
-                    "privileged": false,
-                    "allowPrivilegeEscalation": false,
-                    "runAsUser": undefined
-                  },
-                  "resources": {
-                    "requests": {
-                      "cpu": undefined,
-                      "memory": undefined,
-                      "nvidia.com/gpu": undefined
-                    },
-                    "limits": {
-                      "cpu": undefined,
-                      "memory": undefined,
-                      "nvidia.com/gpu": undefined
-                    }
-                  }
+              "_checkHealthItem":{
+                "readinessProbe":"",
+                "livenessProbe":"",
+                "startupProbe":""
+              },
+              "securityContext": {
+                "capabilities": {
+                  "add": [],
+                  "drop": []
+                },
+                "runAsNonRoot": false,
+                "readOnlyRootFilesystem": false,
+                "privileged": false,
+                "allowPrivilegeEscalation": false,
+                "runAsUser": undefined
+              },
+              "resources": {
+                "requests": {
+                  "cpu": undefined,
+                  "memory": undefined,
+                  "nvidia.com/gpu": undefined
+                },
+                "limits": {
+                  "cpu": undefined,
+                  "memory": undefined,
+                  "nvidia.com/gpu": undefined
                 }
-              ],
-              "priority": undefined,
-              "priorityClassName": undefined,
-              "tolerations":[],
-              "dnsConfig": {
-                "nameservers": [],
-                "options": [],
-                "searches": []
-              },
-              "hostAliases": [],
-              "dnsPolicy": undefined,
-              "hostNetwork":undefined,
-              "hostname": undefined,
-              "subdomain": undefined,
-              "imagePullSecrets": []
+              }
             }
-          }
+          ],
+          "priority": undefined,
+          "priorityClassName": undefined,
+          "tolerations":[],
+          "dnsConfig": {
+            "nameservers": [],
+            "options": [],
+            "searches": []
+          },
+          "hostAliases": [],
+          "dnsPolicy": undefined,
+          "hostNetwork":undefined,
+          "hostname": undefined,
+          "subdomain": undefined,
+          "imagePullSecrets": []
         }
-      },
-      "suspend":false,
+      }
     },
     //外部操作参数
     "option":{
       // 标签 & 注解统一设置对象
       "labelAnnotation":{
-        "cronJob":{
+        "job":{
           "labels":[],
           "annotations":[
             {
-              "key":"kubesphere.io/description",
+              "key":"field.cattle.io/description",
               "value":undefined
             }
           ]
@@ -726,12 +715,16 @@
           "annotations":[]
         }
       },
+      // 拉取密文下拉列表
+      "imagePullSecrets":[],
+      // 命名空间下拉列表
+      "namespaces":[],
       // 记录当前容器点击的左侧标签位置
-      "containerIndex":"",
+      "containerIndex":"containerGeneral",
       // 记录当前pod点击的左侧标签位置
-      "selectPod":"",
-      // 记录当前depolyment点击的左侧标签位置
-      "selectCronJob":"",
+      "selectPod":"podLabel",
+      // 记录当前job点击的左侧标签位置
+      "selectJob":"jobLabel",
       // pod亲和度存储对象
       "freePod":[],
       // node亲和度存储对象
@@ -739,14 +732,20 @@
       // 节点调度方式
       "nodeAffinity":"none",
       // 是否显示yaml弹窗
-      "isShowYamlEditor":false
-
+      "isShowYamlEditor":false,
+      "namespaceId":undefined,
+      "selectTabIndex":"2"
     }
   })
 
   import { Select } from '@element-plus/icons-vue'
   import type { FormRules } from 'element-plus'
   import yaml from 'js-yaml'
+  import { addJob,nameSpaceList,nameIsExist,queryDetail} from "@/api/kubernetes/job"
+  import { secretOptionList} from "@/api/kubernetes/secret"
+  import { useRouter } from "vue-router";
+
+  const $route = useRouter();
 
   const handleTabsEdit = (
           targetName: string | number,
@@ -800,7 +799,7 @@
                 }
               }
             }
-    const containers = initData.value.spec.jobTemplate.spec.template.spec.containers
+    const containers = initData.value.spec.template.spec.containers
     const size = containers.length
     if (action === 'add') {
       container.name = "container-"+size
@@ -826,11 +825,17 @@
 
   }
 
+  // 查看yaml详情
+  const viewYaml = ()=>{
+    editYaml()
+    Object.assign(copyData.value,{readOnly:true})
+  }
+
   // 生成yaml所需Json
   const generateYamlJson = ()=>{
     // 处理标签 & 注解
     labelAnnotationHandle()
-    initData.value.spec.jobTemplate.metadata.namespace = initData.value.metadata.namespace
+    initData.value.metadata.namespace = initData.value.metadata.namespace
 
     copyData.value = _.cloneDeep(initData.value)
     delete copyData.value.option
@@ -842,8 +847,8 @@
     // 镜像拉取密文
     imageSecret();
     // 资源容忍度处理
-    if(copyData.value.spec.jobTemplate.spec.template.spec.tolerations.length == 0){
-      delete copyData.value.spec.jobTemplate.spec.template.spec.tolerations
+    if(copyData.value.spec.template.spec.tolerations.length == 0){
+      delete copyData.value.spec.template.spec.tolerations
     }
     //亲和度处理
     affinityHandle()
@@ -851,7 +856,7 @@
 
   // 镜像拉取密文
   const imageSecret = ()=>{
-    const specConfig = copyData.value.spec.jobTemplate.spec.template.spec
+    const specConfig = copyData.value.spec.template.spec
     const switchArr = []
 
     specConfig.imagePullSecrets.forEach(function(secret){
@@ -863,7 +868,7 @@
 
   // 网络设置
   const netSetting = ()=>{
-    const specConfig = copyData.value.spec.jobTemplate.spec.template.spec
+    const specConfig = copyData.value.spec.template.spec
 
     // 域名服务器、解析器、搜索域为空时删除dnsConfig
     if(specConfig.dnsConfig.nameservers.length == 0 && specConfig.dnsConfig.options.length == 0 && specConfig.dnsConfig.searches.length == 0 ){
@@ -904,8 +909,8 @@
   // 容器处理
   const containerHandle = ()=>{
     const saveContainer = []
-    for(const index in copyData.value.spec.jobTemplate.spec.template.spec.containers){
-      const container = copyData.value.spec.jobTemplate.spec.template.spec.containers[index]
+    for(const index in copyData.value.spec.template.spec.containers){
+      const container = copyData.value.spec.template.spec.containers[index]
       // 容器命令：标准输入选项
       stdinInit(container)
       resourceHandle(container)
@@ -985,7 +990,7 @@
       if(container._init == true){
         delete container._checkHealthItem
         delete container._init
-        copyData.value.spec.jobTemplate.spec.template.spec.initContainers.push(container)
+        copyData.value.spec.template.spec.initContainers.push(container)
       }else{
         delete container._checkHealthItem
         delete container._init
@@ -993,20 +998,20 @@
       }
     }
 
-    copyData.value.spec.jobTemplate.spec.template.spec.containers = []
+    copyData.value.spec.template.spec.containers = []
     
     saveContainer.forEach(function(container){
-      copyData.value.spec.jobTemplate.spec.template.spec.containers.push(container)
+      copyData.value.spec.template.spec.containers.push(container)
     })
   }
 
   // 亲和度处理
   const affinityHandle = ()=>{
-    delete copyData.value.spec.jobTemplate.spec.template.spec?.affinity
+    delete copyData.value.spec.template.spec?.affinity
 
     // 节点亲和度
     if(initData.value.option.freeNode.length > 0){
-      Object.assign(copyData.value.spec.jobTemplate.spec.template.spec,{
+      Object.assign(copyData.value.spec.template.spec,{
         "affinity": {
           "nodeAffinity": {"preferredDuringSchedulingIgnoredDuringExecution":[],"requiredDuringSchedulingIgnoredDuringExecution":[]}
         }
@@ -1015,14 +1020,14 @@
       initData.value.option.freeNode.forEach(function(node){
         // 首选
         if(node.nodeLevel == "0"){
-          copyData.value.spec.jobTemplate.spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution.push({
+          copyData.value.spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution.push({
             "weight":node.weight,
             "preference":node.preference
           })
 
           // 必须
         }else if(node?.nodeLevel == "1"){
-          copyData.value.spec.jobTemplate.spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.push({
+          copyData.value.spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.push({
             "nodeSelectorTerms":node.preference
           })
         }
@@ -1033,15 +1038,15 @@
 
     // pod亲和度
     if(initData.value.option.freePod.length > 0){
-      if(!copyData.value.spec.jobTemplate.spec.template.spec?.affinity ){
-        Object.assign(copyData.value.spec.jobTemplate.spec.template.spec,{  "affinity": {}  })
+      if(!copyData.value.spec.template.spec?.affinity ){
+        Object.assign(copyData.value.spec.template.spec,{  "affinity": {}  })
       }
 
       initData.value.option.freePod.forEach(function(pod){
         if(pod.podAffinity){
 
-          if(!copyData.value.spec.jobTemplate.spec.template.spec?.affinity?.podAffinity ){
-            Object.assign(copyData.value.spec.jobTemplate.spec.template.spec.affinity,{
+          if(!copyData.value.spec.template.spec?.affinity?.podAffinity ){
+            Object.assign(copyData.value.spec.template.spec.affinity,{
               "podAffinity":{
                 "preferredDuringSchedulingIgnoredDuringExecution":[],
                 "requiredDuringSchedulingIgnoredDuringExecution":[]
@@ -1051,7 +1056,7 @@
 
           // 首选
           if(pod.nodeLevel == "0"){
-            copyData.value.spec.jobTemplate.spec.template.spec.affinity.podAffinity.preferredDuringSchedulingIgnoredDuringExecution.push({
+            copyData.value.spec.template.spec.affinity.podAffinity.preferredDuringSchedulingIgnoredDuringExecution.push({
               "podAffinityTerm":{
                 "namespaces": pod.namespaces,
                 "labelSelector": pod.labelSelector,
@@ -1062,7 +1067,7 @@
 
             // 必须
           }else if(pod?.nodeLevel == "1"){
-            copyData.value.spec.jobTemplate.spec.template.spec.affinity.podAffinity.requiredDuringSchedulingIgnoredDuringExecution.push({
+            copyData.value.spec.template.spec.affinity.podAffinity.requiredDuringSchedulingIgnoredDuringExecution.push({
               "namespaces": pod.namespaces,
               "labelSelector":pod.labelSelector,
               "topologyKey": pod.topologyKey
@@ -1070,8 +1075,8 @@
           }
         }else if(!pod.podAffinity){
 
-          if(!copyData.value.spec.jobTemplate.spec.template.spec?.affinity?.podAntiAffinity ){
-            Object.assign(copyData.value.spec.jobTemplate.spec.template.spec.affinity,{
+          if(!copyData.value.spec.template.spec?.affinity?.podAntiAffinity ){
+            Object.assign(copyData.value.spec.template.spec.affinity,{
               "podAntiAffinity":{
                 "preferredDuringSchedulingIgnoredDuringExecution":[],
                 "requiredDuringSchedulingIgnoredDuringExecution":[]
@@ -1081,7 +1086,7 @@
 
           // 首选
           if(pod.nodeLevel == "0"){
-            copyData.value.spec.jobTemplate.spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution.push({
+            copyData.value.spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution.push({
               "podAffinityTerm":{
                 "namespaces": pod.namespaces,
                 "labelSelector": pod.labelSelector,
@@ -1092,7 +1097,7 @@
 
             // 必须
           }else if(pod?.nodeLevel == "1"){
-            copyData.value.spec.jobTemplate.spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution.push({
+            copyData.value.spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution.push({
               "namespaces": pod.namespaces,
               "labelSelector":pod.labelSelector,
               "topologyKey": pod.topologyKey
@@ -1108,13 +1113,13 @@
 
   // 处理标签 & 注解
   const labelAnnotationHandle = ()=>{
-    labelAnnotation2Json(initData.value.option.labelAnnotation.cronJob.labels , initData.value.metadata.labels)
-    labelAnnotation2Json(initData.value.option.labelAnnotation.pod.labels , initData.value.spec.jobTemplate.metadata.labels)
-    labelAnnotation2Json(initData.value.option.labelAnnotation.cronJob.annotations , initData.value.metadata.annotations)
-    labelAnnotation2Json(initData.value.option.labelAnnotation.pod.annotations , initData.value.spec.jobTemplate.metadata.annotations)
+    labelAnnotation2Json(initData.value.option.labelAnnotation.job.labels , initData.value.metadata.labels)
+    labelAnnotation2Json(initData.value.option.labelAnnotation.pod.labels , initData.value.spec.template.metadata.labels)
+    labelAnnotation2Json(initData.value.option.labelAnnotation.job.annotations , initData.value.metadata.annotations)
+    labelAnnotation2Json(initData.value.option.labelAnnotation.pod.annotations , initData.value.spec.template.metadata.annotations)
 
-    if(Object.keys(initData.value.spec.jobTemplate.metadata.labels).length == 0){
-      Object.assign(initData.value.spec.jobTemplate.metadata.labels,initData.value.metadata.labels)
+    if(!initData.value.spec.template.metadata.labels.length){
+      Object.assign(initData.value.spec.template.metadata.labels,initData.value.metadata.labels)
     }
 
   }
@@ -1152,8 +1157,9 @@
     const mapObject=new Map()
     for(const index in formValue){
       if((formValue[index].key != undefined && formValue[index].key != '')
-              &&
-              (formValue[index].value != undefined && formValue[index].value != '')){
+          &&
+          (formValue[index].value != undefined && formValue[index].value != '')
+        ){
 
         mapObject.set(formValue[index].key,formValue[index].value)
       }
@@ -1176,8 +1182,8 @@
     // 设置容器处理
     reverseContainerHandle()
     // 资源容忍度处理
-    if(!initData.value.spec.jobTemplate.spec.template.spec.tolerations){
-      Object.assign(initData.value.spec.jobTemplate.spec.template.spec,{tolerations:[]})
+    if(!initData.value.spec.template.spec.tolerations){
+      Object.assign(initData.value.spec.template.spec,{tolerations:[]})
     }
     // 设置网络处理
     reverseDnsConfigHandle()
@@ -1190,12 +1196,12 @@
 
   // 逆转 空数据处理
   const reverseEmptyDataHandle = ()=>{
-    if(!initData.value.spec.jobTemplate.spec.template.spec?.imagePullSecrets  || initData.value.spec.jobTemplate.spec.template.spec?.imagePullSecrets.length == 0){
-      Object.assign(initData.value.spec.jobTemplate.spec.template.spec,{"imagePullSecrets":[]})
+    if(!initData.value.spec.template.spec?.imagePullSecrets  || initData.value.spec.template.spec?.imagePullSecrets.length == 0){
+      Object.assign(initData.value.spec.template.spec,{"imagePullSecrets":[]})
     }
 
-    if(!initData.value.spec.jobTemplate.spec.template.spec?.securityContext ){
-      Object.assign(initData.value.spec.jobTemplate.spec.template.spec,{"securityContext":[]})
+    if(!initData.value.spec.template.spec?.securityContext ){
+      Object.assign(initData.value.spec.template.spec,{"securityContext":[]})
     }
 
     if(!initData.value.spec?.strategy ){
@@ -1213,8 +1219,8 @@
 
   // 逆转 设置网络处理
   const reverseDnsConfigHandle = ()=>{
-    if(!initData.value.spec.jobTemplate.spec.template.spec?.dnsConfig ){
-      Object.assign(initData.value.spec.jobTemplate.spec.template.spec,{
+    if(!initData.value.spec.template.spec?.dnsConfig ){
+      Object.assign(initData.value.spec.template.spec,{
         "dnsConfig": {
           "nameservers": [],
           "options": [],
@@ -1223,61 +1229,61 @@
       })
     }else{
       // 域名服务
-      if(!initData.value.spec.jobTemplate.spec.template.spec.dnsConfig?.nameservers ){
-        Object.assign(initData.value.spec.jobTemplate.spec.template.spec.dnsConfig,{nameservers:[]})
+      if(!initData.value.spec.template.spec.dnsConfig?.nameservers ){
+        Object.assign(initData.value.spec.template.spec.dnsConfig,{nameservers:[]})
       }else{
-        const nameServers = _.cloneDeep(initData.value.spec.jobTemplate.spec.template.spec.dnsConfig.nameservers)
-        initData.value.spec.jobTemplate.spec.template.spec.dnsConfig.nameservers.length = 0
+        const nameServers = _.cloneDeep(initData.value.spec.template.spec.dnsConfig.nameservers)
+        initData.value.spec.template.spec.dnsConfig.nameservers.length = 0
         nameServers.forEach(function(nameserver){
-          initData.value.spec.jobTemplate.spec.template.spec.dnsConfig.nameservers.push({value:nameserver})
+          initData.value.spec.template.spec.dnsConfig.nameservers.push({value:nameserver})
         })
       }
 
       // 解析器
-      if(!initData.value.spec.jobTemplate.spec.template.spec.dnsConfig?.options ){
-        Object.assign(initData.value.spec.jobTemplate.spec.template.spec.dnsConfig,{options:[]})
+      if(!initData.value.spec.template.spec.dnsConfig?.options ){
+        Object.assign(initData.value.spec.template.spec.dnsConfig,{options:[]})
       }
 
       // 搜索域
-      if(!initData.value.spec.jobTemplate.spec.template.spec.dnsConfig?.searches ){
-        Object.assign(initData.value.spec.jobTemplate.spec.template.spec.dnsConfig,{searches:[]})
+      if(!initData.value.spec.template.spec.dnsConfig?.searches ){
+        Object.assign(initData.value.spec.template.spec.dnsConfig,{searches:[]})
       }else{
-        const searches = _.cloneDeep(initData.value.spec.jobTemplate.spec.template.spec.dnsConfig.searches)
-        initData.value.spec.jobTemplate.spec.template.spec.dnsConfig.searches.length = 0
+        const searches = _.cloneDeep(initData.value.spec.template.spec.dnsConfig.searches)
+        initData.value.spec.template.spec.dnsConfig.searches.length = 0
         searches.forEach(function(searche){
-          initData.value.spec.jobTemplate.spec.template.spec.dnsConfig.searches.push({value:searche})
+          initData.value.spec.template.spec.dnsConfig.searches.push({value:searche})
         })
       }
     }
 
     // 主机别名设置
-    if(!initData.value.spec.jobTemplate.spec.template.spec?.hostAliases ){
-      Object.assign(initData.value.spec.jobTemplate.spec.template.spec,{
+    if(!initData.value.spec.template.spec?.hostAliases ){
+      Object.assign(initData.value.spec.template.spec,{
         "hostAliases": [
           // {"hostnames":[]}
         ]
       })
     }
 
-    if(!initData.value.spec.jobTemplate.spec.template.spec?.dnsPolicy ){
-      Object.assign(initData.value.spec.jobTemplate.spec.template.spec,{"dnsPolicy": undefined})
+    if(!initData.value.spec.template.spec?.dnsPolicy ){
+      Object.assign(initData.value.spec.template.spec,{"dnsPolicy": undefined})
     }
-    if(!initData.value.spec.jobTemplate.spec.template.spec?.hostNetwork ){
-      Object.assign(initData.value.spec.jobTemplate.spec.template.spec,{"hostNetwork": undefined})
+    if(!initData.value.spec.template.spec?.hostNetwork ){
+      Object.assign(initData.value.spec.template.spec,{"hostNetwork": undefined})
     }
-    if(!initData.value.spec.jobTemplate.spec.template.spec?.hostname ){
-      Object.assign(initData.value.spec.jobTemplate.spec.template.spec,{"hostname": undefined})
+    if(!initData.value.spec.template.spec?.hostname ){
+      Object.assign(initData.value.spec.template.spec,{"hostname": undefined})
     }
-    if(!initData.value.spec.jobTemplate.spec.template.spec?.subdomain ){
-      Object.assign(initData.value.spec.jobTemplate.spec.template.spec,{"subdomain": undefined})
+    if(!initData.value.spec.template.spec?.subdomain ){
+      Object.assign(initData.value.spec.template.spec,{"subdomain": undefined})
     }
 
   }
 
   // 逆转 容器处理
   const reverseContainerHandle = ()=>{
-    if(initData.value.spec.jobTemplate.spec.template.spec?.containers != undefined && initData.value.spec.jobTemplate.spec.template.spec.containers.length > 0 ){
-      initData.value.spec.jobTemplate.spec.template.spec.containers.forEach(function(container){
+    if(initData.value.spec.template.spec?.containers != undefined && initData.value.spec.template.spec.containers.length > 0 ){
+      initData.value.spec.template.spec.containers.forEach(function(container){
         Object.assign(container,{_init : false})
 
         // 资源分配
@@ -1297,9 +1303,9 @@
 
       })
     }
-    if(initData.value.spec.jobTemplate.spec.template.spec?.initContainers != undefined && initData.value.spec.jobTemplate.spec.template.spec.initContainers.length > 0 ){
-      for( const index in initData.value.spec.jobTemplate.spec.template.spec.initContainers){
-        const container = initData.value.spec.jobTemplate.spec.template.spec.initContainers[index]
+    if(initData.value.spec.template.spec?.initContainers != undefined && initData.value.spec.template.spec.initContainers.length > 0 ){
+      for( const index in initData.value.spec.template.spec.initContainers){
+        const container = initData.value.spec.template.spec.initContainers[index]
         Object.assign(container,{_init : true})
         // 资源分配
         reverseResourceHandle(container)
@@ -1316,11 +1322,11 @@
         // 环境变量配置
         reverseEnvHandle(container)
 
-        if(initData.value.spec.jobTemplate.spec.template.spec?.containers == undefined){
-          initData.value.spec.jobTemplate.spec.template.spec.containers = []
+        if(initData.value.spec.template.spec?.containers == undefined){
+          initData.value.spec.template.spec.containers = []
         }
-        initData.value.spec.jobTemplate.spec.template.spec.containers.push(_.cloneDeep(container))
-        initData.value.spec.jobTemplate.spec.template.spec.initContainers.splice(index, 1)
+        initData.value.spec.template.spec.containers.push(_.cloneDeep(container))
+        initData.value.spec.template.spec.initContainers.splice(index, 1)
       }
     }
 
@@ -1553,11 +1559,11 @@
     initData.value.option.freeNode.length = 0
     initData.value.option.freePod.length = 0
     // 节点亲和性
-    if(initData.value.spec.jobTemplate.spec.template.spec?.affinity?.nodeAffinity != undefined){
+    if(initData.value.spec.template.spec?.affinity?.nodeAffinity != undefined){
 
       // 必须
-      if(initData.value.spec.jobTemplate.spec.template.spec?.affinity?.nodeAffinity?.requiredDuringSchedulingIgnoredDuringExecution.length > 0){
-        initData.value.spec.jobTemplate.spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.forEach(function(required){
+      if(initData.value.spec.template.spec?.affinity?.nodeAffinity?.requiredDuringSchedulingIgnoredDuringExecution.length > 0){
+        initData.value.spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.forEach(function(required){
           const node = {
             "nodeLevel": "1",
             "weight": undefined,
@@ -1567,8 +1573,8 @@
         })
       }
       // 首选
-      if(initData.value.spec.jobTemplate.spec.template.spec?.affinity?.nodeAffinity?.preferredDuringSchedulingIgnoredDuringExecution.length > 0){
-        initData.value.spec.jobTemplate.spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution.forEach(function(preferred){
+      if(initData.value.spec.template.spec?.affinity?.nodeAffinity?.preferredDuringSchedulingIgnoredDuringExecution.length > 0){
+        initData.value.spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution.forEach(function(preferred){
           const node = {
             "nodeLevel": "0",
             "weight": preferred.weight,
@@ -1580,10 +1586,10 @@
 
     }
     // pod亲和性
-    if(initData.value.spec.jobTemplate.spec.template.spec?.affinity?.podAffinity != undefined){
+    if(initData.value.spec.template.spec?.affinity?.podAffinity != undefined){
       // 必须
-      if(initData.value.spec.jobTemplate.spec.template.spec?.affinity?.podAffinity?.requiredDuringSchedulingIgnoredDuringExecution?.length > 0){
-        initData.value.spec.jobTemplate.spec.template.spec.affinity.podAffinity.requiredDuringSchedulingIgnoredDuringExecution.forEach(function(requireds){
+      if(initData.value.spec.template.spec?.affinity?.podAffinity?.requiredDuringSchedulingIgnoredDuringExecution?.length > 0){
+        initData.value.spec.template.spec.affinity.podAffinity.requiredDuringSchedulingIgnoredDuringExecution.forEach(function(requireds){
           const pod = {
             "podAffinity":true,
             "namespaces":requireds.namespaces,
@@ -1599,8 +1605,8 @@
       }
 
       // 首选
-      if(initData.value.spec.jobTemplate.spec.template.spec?.affinity?.podAffinity?.preferredDuringSchedulingIgnoredDuringExecution?.length > 0){
-        initData.value.spec.jobTemplate.spec.template.spec.affinity.podAffinity.preferredDuringSchedulingIgnoredDuringExecution.forEach(function(preferred){
+      if(initData.value.spec.template.spec?.affinity?.podAffinity?.preferredDuringSchedulingIgnoredDuringExecution?.length > 0){
+        initData.value.spec.template.spec.affinity.podAffinity.preferredDuringSchedulingIgnoredDuringExecution.forEach(function(preferred){
           const pod = {
             "podAffinity":true,
             "namespaces":preferred.podAffinityTerm?.namespaces,
@@ -1616,11 +1622,11 @@
       }
     }
     // pod反亲和性
-    if(initData.value.spec.jobTemplate.spec.template.spec?.affinity?.podAntiAffinity != undefined){
+    if(initData.value.spec.template.spec?.affinity?.podAntiAffinity != undefined){
         // 必须
-        if(initData.value.spec.jobTemplate.spec.template.spec?.affinity?.podAntiAffinity?.requiredDuringSchedulingIgnoredDuringExecution != undefined){
-          if(initData.value.spec.jobTemplate.spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution?.length > 0){
-            initData.value.spec.jobTemplate.spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution.forEach(function(required){
+        if(initData.value.spec.template.spec?.affinity?.podAntiAffinity?.requiredDuringSchedulingIgnoredDuringExecution != undefined){
+          if(initData.value.spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution?.length > 0){
+            initData.value.spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution.forEach(function(required){
               const podAnti = {
                 "podAffinity":false,
                 "namespaces":required.namespaces,
@@ -1638,9 +1644,9 @@
         }
 
         // 首选
-        if(initData.value.spec.jobTemplate.spec.template.spec?.affinity?.podAntiAffinity?.preferredDuringSchedulingIgnoredDuringExecution != undefined){
-          if(initData.value.spec.jobTemplate.spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution?.length > 0){
-            initData.value.spec.jobTemplate.spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution.forEach(function(preferred){
+        if(initData.value.spec.template.spec?.affinity?.podAntiAffinity?.preferredDuringSchedulingIgnoredDuringExecution != undefined){
+          if(initData.value.spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution?.length > 0){
+            initData.value.spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution.forEach(function(preferred){
               const podAnti = {
                 "podAffinity":false,
                 "namespaces":preferred?.podAffinityTerm?.namespaces,
@@ -1661,7 +1667,7 @@
 
   // 内存&CPU限制处理
   const reverseResourceHandle = (container) =>{
-    if(!container?.resources  ){
+    if(!container?.resources?.requests){
       Object.assign(container,{
         "resources": {
           "requests": {
@@ -1690,10 +1696,10 @@
   const reverseLabelAnnotationHandle = ()=>{
     delete initData.value.option.labelAnnotation
     const cleanObj = {
-      cronJob:{
+      job:{
         labels:[],
         annotations:[
-          {key:"kubesphere.io/description",value:undefined}
+          {key:"field.cattle.io/description",value:undefined}
         ]
       },
       pod:{
@@ -1702,10 +1708,10 @@
       }
     }
     Object.assign(initData.value.option,{labelAnnotation:cleanObj})
-    json2labelAnnotation(initData.value.option.labelAnnotation.cronJob.labels , initData.value.metadata.labels)
-    json2labelAnnotation(initData.value.option.labelAnnotation.pod.labels , initData.value.spec.jobTemplate.metadata.labels)
-    json2labelAnnotation(initData.value.option.labelAnnotation.cronJob.annotations , initData.value.metadata.annotations)
-    json2labelAnnotation(initData.value.option.labelAnnotation.pod.annotations , initData.value.spec.jobTemplate.metadata.annotations)
+    json2labelAnnotation(initData.value.option.labelAnnotation.job.labels , initData.value.metadata.labels)
+    json2labelAnnotation(initData.value.option.labelAnnotation.pod.labels , initData.value.spec.template.metadata.labels)
+    json2labelAnnotation(initData.value.option.labelAnnotation.job.annotations , initData.value.metadata.annotations)
+    json2labelAnnotation(initData.value.option.labelAnnotation.pod.annotations , initData.value.spec.template.metadata.annotations)
 
   }
 
@@ -1717,7 +1723,7 @@
 
     const mapObject=new Map(Object.entries(yamlValues))
     for (const k of mapObject.keys()){
-      if(k == "kubesphere.io/description"){
+      if(k == "field.cattle.io/description"){
         values[0].value = mapObject.get(k)
       }else{
         values.push({
@@ -1728,11 +1734,36 @@
     }
   }
 
+  const cancel = ()=>{
+    $route.push({path : "/kubernetes/job/list/index"})
+  }
+
   const saveData = () => {
     ruleFormRef.value.validate((valid) => {
       if (valid) {
-        console.log(yaml.safeLoad(initData.value))
-      } else {
+        generateYamlJson()
+        const nameSpaceId = initData.value.option.namespaceId
+        const data =  _.cloneDeep(copyData.value)
+        data.option = undefined
+        const saveData = {
+          "id": $route.currentRoute.value.query.id,
+          "instanceCode": $route.currentRoute.value.query.instanceCode,
+          "namespace": initData.value.metadata.namespace,
+          "nameSpaceId": nameSpaceId,
+          "name": initData.value.metadata.name,
+          "kind": initData.value.kind,
+          "jsonBody": JSON.stringify(yaml.load(yaml.dump(data)))
+        }
+        addJob(saveData).then(res=>{
+          if(res.code == 200){
+            ElMessage({
+                type: 'success',
+                message: '保存成功',
+            })
+            $route.push({path : "/kubernetes/job/list/index"})
+          }
+        })
+     } else {
         ElMessage.error('请填写完整')
       }
     })
@@ -1744,18 +1775,81 @@
   const changePodSelectTab = (item) =>{
     initData.value.option.selectPod = item
   }
-  const changeCronJobSelectTab = (item) =>{
-    initData.value.option.selectCronJob = item
+  const changeJobSelectTab = (item) =>{
+    initData.value.option.selectJob = item
+  }
+
+  // 修改命名空间下拉框时修改id
+  const changeNameSpace = (name)=>{
+    for(const index in initData.value.option.namespaces){
+      if(name == initData.value.option.namespaces[index].label){
+        initData.value.option.namespaceId = initData.value.option.namespaces[index].value
+      }
+    }
+    secretOption()
+  }
+
+  const validName = (rule:any,value:any, callback:any)=>{
+    if($route.currentRoute.value.query.id != undefined){
+      callback()
+      return
+    }
+
+    nameIsExist($route.currentRoute.value.query.instanceCode,value).then((res)=>{
+        if(res.code == 200){
+          if(!res.data){
+            callback()
+            return
+          }else{
+            callback(new Error('名称已存在，请确认后修改'));
+          }
+        }
+    })
   }
 
   // 表单验证规则
   const rules = reactive<FormRules>({
-    'metadata.name' : [
+    "metadata.name" : [
       { required: true, message: "名称不能为空", trigger: "blur" },
       { min: 2, max: 20, message: '名称长度必须介于 2 和 20 之间', trigger: 'blur' },
-      { pattern: /^[-a-zA-Z0-9]*$/, message: '只可以输入字母、数字、中划线', trigger: 'blur' }
-    ],
+      { pattern: /^[-a-z0-9]*$/, message: '只可以输入小写字母、数字、中划线', trigger: 'blur' },
+      { validator: validName , trigger: 'blur' }
+    ]
   })
+
+  // 查询密文下拉列表
+  const secretOption = ()=>{
+    secretOptionList($route.currentRoute.value.query.instanceCode,initData.value.metadata.namespace).then((res)=>{
+        if(res.code == 200){
+          Object.assign(initData.value.option.imagePullSecrets,res.data);
+        }
+    })
+  }
+
+
+  // 初始化页面
+  const initPage = ()=>{
+    const id = $route.currentRoute.value.query.id
+    if(id != null){
+      queryDetail(id).then((res)=>{
+        if(res.code == 200){
+          setValue(yaml.load(res.data))
+        }
+      })
+    }
+
+    nameSpaceList($route.currentRoute.value.query.instanceCode).then((res)=>{
+      if(res.code == 200){
+        Object.assign(initData.value.option.namespaces,res.data);
+        changeNameSpace("default")
+      }
+    })
+
+    secretOption()
+
+  }
+
+  initPage();
 
 
 </script>
@@ -1767,27 +1861,23 @@
           <el-row :gutter="24">
             <el-col :span="8">
               <el-form-item label="命名空间">
-                <el-select v-model="initData.metadata.namespace" style="width: 100%;" placeholder="请选择">
-                  <el-option label="default" value="default"></el-option>
-                  <el-option label="my-project" value="my-project"></el-option>
+                <el-select v-model="initData.metadata.namespace" style="width: 100%;" placeholder="请选择" @change="changeNameSpace" 
+                    :disabled="$route.currentRoute.value.query.id != undefined">
+                  <el-option v-for="namespace in initData.option.namespaces"
+                    :key="namespace.value"
+                    :label="namespace.label"
+                    :value="namespace.label"/>
                 </el-select>
               </el-form-item>
-            </el-col>
+            </el-col> 
             <el-col :span="8">
               <el-form-item label="名称" prop="metadata.name">
-                <el-input v-model="initData.metadata.name" placeholder="请输入内容" prop="name" :rules="[
-                  { required: true, message: '名称不能为空', trigger: 'blur' } ]"></el-input>
+                <el-input v-model="initData.metadata.name" placeholder="请输入内容" :disabled="$route.currentRoute.value.query.id != undefined" />
               </el-form-item>
             </el-col>
             <el-col :span="8">
               <el-form-item label="描述">
-                <el-input v-model="initData.option.labelAnnotation.cronJob.annotations[0].value" placeholder="请输入可以描述该资源的文本"></el-input>
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="调度">
-                <el-input v-model="initData.spec.schedule" placeholder="0 * * * *" prop="schedule" :rules="[
-                  { required: true, message: '调度内容不能为空', trigger: 'blur' } ]"></el-input>
+                <el-input v-model="initData.option.labelAnnotation.job.annotations[0].value" placeholder="请输入可以描述该资源的文本"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
@@ -1795,7 +1885,7 @@
         <yt-card :title="'详细配置'">
           <div class="detail-content">
             <el-tabs
-                    v-model="selectTabIndex"
+                    v-model="initData.option.selectTabIndex"
                     class="top-tabs"
                     editable
                     type="card"
@@ -1804,113 +1894,73 @@
               <template #add-icon>
                 <el-icon><Select /></el-icon>
               </template>
-              <el-tab-pane name="CronJob" label="CronJob" closable="false">
+              <el-tab-pane name="Job" label="Job" closable="false">
                 <el-scrollbar>
                   <div class="tab-content">
                     <div class="left">
-                      <el-tabs :tab-position="'left'" @tab-change="changeCronJobSelectTab">
-                        <el-tab-pane label="标签注释" name="cronJobLabel" />
-                        <el-tab-pane label="扩缩容和升级策略" name="cronJobStrategy" />
+                      <el-tabs :tab-position="'left'" @tab-change="changeJobSelectTab">
+                        <el-tab-pane label="标签注释" name="jobLabel" />
+                        <el-tab-pane label="扩缩容和升级策略" name="jobStrategy" />
                       </el-tabs>
                     </div>
                     <div class="right">
-                      <div v-show="initData.option.selectCronJob === 'cronJobLabel'  ? true : false ">
-                        <H1>CronJob标签</H1>
-                        <el-row :gutter="24" v-for="(label,index) in initData.option.labelAnnotation.cronJob.labels" :key="index" style="margin-top:30px">
+                      <div v-show="initData.option.selectJob == 'jobLabel'  ? true : false ">
+                        <H1>Job标签</H1>
+                        <el-row :gutter="24" v-for="(label,index) in initData.option.labelAnnotation.job.labels" :key="index" style="margin-top:30px">
                           <el-col :span="6" >
                             <el-input label="键" placeholder="请输入键" v-model="label.key"></el-input>
                           </el-col>
                           <el-col :span="6" >
                             <el-input label="值" placeholder="请输入值" v-model="label.value" ></el-input>
                           </el-col>
-                          <el-button @click="removeJobLabel(index)" type="danger" >删除标签</el-button>
+                          <el-button @click="removeLabel(index)" type="danger" >删除标签</el-button>
                         </el-row>
                         <el-row :gutter="24" style="margin-top:10px;margin-left:2px">
-                          <el-button @click="addJobLabel" type="primary" plain>添加标签</el-button>
+                          <el-button @click="addLabel" type="primary" plain>添加标签</el-button>
                         </el-row>
                         <H1>注解</H1>
-                        <el-row :gutter="24" v-for="(annotation,index) in initData.option.labelAnnotation.cronJob.annotations" :key="index" style="margin-top:30px"
-                            v-show="annotation.key != 'kubesphere.io/description'">
+                        <el-row :gutter="24" v-for="(annotation,index) in initData.option.labelAnnotation.job.annotations" :key="index" style="margin-top:30px"
+                            v-show="annotation.key != 'field.cattle.io/description'">
                           <el-col :span="6" >
                             <el-input label="键" placeholder="请输入键" v-model="annotation.key"></el-input>
                           </el-col>
                           <el-col :span="6" >
                             <el-input label="值" placeholder="请输入值" v-model="annotation.value" ></el-input>
                           </el-col>
-                          <el-button @click="removeJobAnnotation(index)"  type="danger">删除注解</el-button>
+                          <el-button @click="removeAnnotation(index)"  type="danger">删除注解</el-button>
                         </el-row>
                         <el-row :gutter="24" style="margin-top:10px;margin-left:2px">
-                          <el-button @click="addJobAnnotation" type="primary" plain>添加标签</el-button>
+                          <el-button @click="addAnnotation" type="primary" plain>添加标签</el-button>
                         </el-row>
                       </div>
-                      <div v-show="initData.option.selectCronJob === 'cronJobStrategy'  ? true : false ">
+                      <div v-show="initData.option.selectJob == 'jobStrategy'  ? true : false ">
                         <H1>扩缩容和升级策略</H1>
-                        <el-row :gutter="24" style="margin-top:10px;margin-left:2px">
-                          <el-col :span="12">
-                            <el-form-item label="并发">
-                              <el-radio-group v-model="initData.spec.concurrencyPolicy" >
-                                <el-radio-button label="Allow">并发运行</el-radio-button>
-                                <el-radio-button label="Forbid">新建运行</el-radio-button>
-                                <el-radio-button label="Replace">替换运行</el-radio-button>
-                              </el-radio-group>
-                            </el-form-item>
-                          </el-col>
-                          <el-col :span="12">
-                            <el-form-item label="暂停">
-                              <el-radio-group v-model="initData.spec.suspend" >
-                                <el-radio-button label="true">是</el-radio-button>
-                                <el-radio-button label="false">否</el-radio-button>
-                              </el-radio-group>
-                            </el-form-item>
-                          </el-col>
-                        </el-row>
                         <el-row :gutter="24" style="margin-top:10px;margin-left:2px" >
                           <el-col :span="12">
                             <el-form-item label="完成job历史数">
-                              <el-input-number  placeholder="请输入数量" v-model="initData.spec.jobTemplate.spec.template.spec.completions"/>
+                              <el-input-number  placeholder="请输入数量" v-model="initData.spec.template.spec.completions"/>
                             </el-form-item>
                           </el-col>
                           <el-col :span="12">
                             <el-form-item label="并发数">
-                              <el-input-number placeholder="请输入数量" v-model="initData.spec.jobTemplate.spec.template.spec.parallelism" />
+                              <el-input-number placeholder="请输入数量" v-model="initData.spec.template.spec.parallelism" />
                             </el-form-item>
                           </el-col>
                           <el-col :span="12">
                             <el-form-item label="重试次数限制">
-                              <el-input-number  placeholder="请输入次数" v-model="initData.spec.jobTemplate.spec.template.spec.backoffLimit"/>
+                              <el-input-number  placeholder="请输入次数" v-model="initData.spec.template.spec.backoffLimit"/>
                             </el-form-item>
                           </el-col>
                           <el-col :span="12">
                             <el-form-item label="活动终止时间(秒)">
-                              <el-input-number  placeholder="请输入秒数" v-model="initData.spec.jobTemplate.spec.template.spec.activeDeadlineSeconds">
-                                <template #append>秒</template>
-                              </el-input-number>
-                            </el-form-item>
-                          </el-col>
-                          <el-col :span="12">
-                            <el-form-item label="成功Job历史数">
-                              <el-input-number  placeholder="请输入数量" v-model="initData.spec.jobTemplate.successfulJobsHistoryLimit">
-                                <template #append>秒</template>
-                              </el-input-number>
-                            </el-form-item>
-                          </el-col>
-                          <el-col :span="12">
-                            <el-form-item label="失败Job历史数">
-                              <el-input-number  placeholder="请输入数量" v-model="initData.spec.failedJobsHistoryLimit">
-                                <template #append>秒</template>
-                              </el-input-number>
-                            </el-form-item>
-                          </el-col>
-                          <el-col :span="12">
-                            <el-form-item label="运行Job的截止时间(秒)">
-                              <el-input-number  placeholder="请输入秒数" v-model="initData.spec.startingDeadlineSeconds">
+                              <el-input-number  placeholder="请输入秒数" v-model="initData.spec.template.spec.activeDeadlineSeconds">
                                 <template #append>秒</template>
                               </el-input-number>
                             </el-form-item>
                           </el-col>
                           <el-col :span="12">
                             <el-form-item label="判定pod是否活跃的截止时间(秒)">
-                              <el-input-number  placeholder="请输入秒数" v-model="initData.spec.jobTemplate.spec.template.spec.terminationGracePeriodSeconds">
+                              <el-input-number  placeholder="请输入秒数" v-model="initData.spec.template.spec.terminationGracePeriodSeconds">
                                 <template #append>秒</template>
                               </el-input-number>
                             </el-form-item>
@@ -1933,7 +1983,7 @@
                         <el-tab-pane label="资源" name="podResource" />
                         <el-tab-pane label="扩缩容和升级策略" name="podStrategy" />
                         <el-tab-pane label="安全性上下文" name="podContext" />
-                        <el-tab-pane label="存储" name="podVolumes" />
+                        <!-- <el-tab-pane label="存储" name="podVolumes" /> -->
                       </el-tabs>
                     </div>
                     <div class="right" >
@@ -1971,7 +2021,7 @@
                         <el-row :gutter="24">
                           <el-col :span="8">
                             <el-form-item label="网络模式">
-                              <el-select v-model="initData.spec.jobTemplate.spec.template.spec.hostNetwork" style="width: 100%;" placeholder="请选择">
+                              <el-select v-model="initData.spec.template.spec.hostNetwork" style="width: 100%;" placeholder="请选择">
                                 <el-option label="常规" :value=false></el-option>
                                 <el-option label="主机网络" :value=true></el-option>
                               </el-select>
@@ -1979,7 +2029,7 @@
                           </el-col>
                           <el-col :span="8">
                             <el-form-item label="DNS策略">
-                              <el-select v-model="initData.spec.jobTemplate.spec.template.spec.dnsPolicy" style="width: 100%;" placeholder="请选择">
+                              <el-select v-model="initData.spec.template.spec.dnsPolicy" style="width: 100%;" placeholder="请选择">
                                 <el-option label="默认" value="Default"></el-option>
                                 <el-option label="集群优先" value="ClusterFirst"></el-option>
                                 <el-option label="集群优先使用主机网络" value="ClusterFirstWithHostNet"></el-option>
@@ -1991,21 +2041,21 @@
                         <el-row :gutter="24">
                           <el-col :span="8">
                             <el-form-item label="主机名">
-                              <el-input  placeholder="请输入内容" v-model="initData.spec.jobTemplate.spec.template.spec.hostname"></el-input>
+                              <el-input  placeholder="请输入内容" v-model="initData.spec.template.spec.hostname"></el-input>
                             </el-form-item>
                           </el-col>
                           <el-col :span="8">
                             <el-form-item label="子域">
-                              <el-input  placeholder="请输入内容" v-model="initData.spec.jobTemplate.spec.template.spec.subdomain"></el-input>
+                              <el-input  placeholder="请输入内容" v-model="initData.spec.template.spec.subdomain"></el-input>
                             </el-form-item>
                           </el-col>
                         </el-row>
 
                         <H1>DNS</H1>
                         <H1>域名服务器</H1>
-                        <el-row :gutter="8" v-for="(nameServers,index) in initData.spec.jobTemplate.spec.template.spec.dnsConfig.nameservers" :key="nameServers" style="margin-top:15px">
+                        <el-row :gutter="8" v-for="(nameServers,index) in initData.spec.template.spec.dnsConfig.nameservers" :key="nameServers" style="margin-top:15px">
                           <el-col :span="8">
-                            <el-input   placeholder="请输入内容" v-model="initData.spec.jobTemplate.spec.template.spec.dnsConfig.nameservers[index].value"></el-input>
+                            <el-input   placeholder="请输入内容" v-model="initData.spec.template.spec.dnsConfig.nameservers[index].value"></el-input>
                           </el-col>
                           <el-button type="danger" @click="removeNameServer(index)">删除</el-button>
                         </el-row>
@@ -2013,9 +2063,9 @@
                           <el-button type="primary" style="margin-top:15px" @click="addNameServer" plain>添加域名服务器</el-button>
                         </el-row>
                         <H1>搜索域</H1>
-                        <el-row :gutter="8" v-for="(search,index) in initData.spec.jobTemplate.spec.template.spec.dnsConfig.searches" :key="search" style="margin-top:15px">
+                        <el-row :gutter="8" v-for="(search,index) in initData.spec.template.spec.dnsConfig.searches" :key="search" style="margin-top:15px">
                           <el-col :span="8">
-                            <el-input  placeholder="请输入内容" v-model="initData.spec.jobTemplate.spec.template.spec.dnsConfig.searches[index].value"></el-input>
+                            <el-input  placeholder="请输入内容" v-model="initData.spec.template.spec.dnsConfig.searches[index].value"></el-input>
                           </el-col>
                           <el-button type="danger" @click="removeSearch(index)">删除</el-button>
                         </el-row>
@@ -2025,15 +2075,15 @@
 
                         <div :span="8">
                           <H1>解析器选项</H1>
-                          <el-row :gutter="8" v-for="(option,index) in initData.spec.jobTemplate.spec.template.spec.dnsConfig.options" :key="option">
+                          <el-row :gutter="8" v-for="(option,index) in initData.spec.template.spec.dnsConfig.options" :key="option">
                             <el-col :span="8">
                               <el-form-item label="名称">
-                                <el-input  placeholder="请输入内容" v-model="initData.spec.jobTemplate.spec.template.spec.dnsConfig.options[index].name"></el-input>
+                                <el-input  placeholder="请输入内容" v-model="initData.spec.template.spec.dnsConfig.options[index].name"></el-input>
                               </el-form-item>
                             </el-col>
                             <el-col :span="8">
                               <el-form-item label="值">
-                                <el-input  placeholder="请输入内容" v-model="initData.spec.jobTemplate.spec.template.spec.dnsConfig.options[index].value"></el-input>
+                                <el-input  placeholder="请输入内容" v-model="initData.spec.template.spec.dnsConfig.options[index].value"></el-input>
                               </el-form-item>
                             </el-col>
                             <el-button type="danger" @click="removeOption(index)" style="margin-top:30px">删除</el-button>
@@ -2044,15 +2094,15 @@
                         </div>
                         <div :span="8">
                           <H1>主机别名</H1>
-                          <el-row :gutter="8" v-for="(hostAliase,index) in initData.spec.jobTemplate.spec.template.spec.hostAliases" :key="hostAliase">
+                          <el-row :gutter="8" v-for="(hostAliase,index) in initData.spec.template.spec.hostAliases" :key="hostAliase">
                             <el-col :span="8">
                               <el-form-item label="IP 地址">
-                                <el-input  placeholder="请输入内容" v-model="initData.spec.jobTemplate.spec.template.spec.hostAliases[index].ip"></el-input>
+                                <el-input  placeholder="请输入内容" v-model="initData.spec.template.spec.hostAliases[index].ip"></el-input>
                               </el-form-item>
                             </el-col>
                             <el-col :span="8">
                               <el-form-item label="主机名">
-                                <el-input  placeholder="请输入内容" v-model="initData.spec.jobTemplate.spec.template.spec.hostAliases[index].hostnames[0]"></el-input>
+                                <el-input  placeholder="请输入内容" v-model="initData.spec.template.spec.hostAliases[index].hostnames[0]"></el-input>
                               </el-form-item>
                             </el-col>
                             <el-button type="danger" @click="removeHostAlias(index)" style="margin-top:30px">删除</el-button>
@@ -2066,7 +2116,7 @@
                       <div v-show="initData.option.selectPod === 'podNode'  ? true : false ">
                         <H1>节点调度</H1>
                         <el-row :gutter="24" >
-                          <el-col :span="12">
+                          <el-col :span="24">
                             <el-radio-group v-model="initData.option.nodeAffinity" @change="nodeChange">
                               <el-radio-button
                                       v-for="item in nodeSelector"
@@ -2079,9 +2129,9 @@
                         <template v-if="initData.option.nodeAffinity == 'none'">
                         </template>
                         <template v-if="initData.option.nodeAffinity == 'nodeName'">
-                          <el-row>
+                          <el-row style="margin-top: 20px;">
                             <el-col>
-                              <el-select v-model="initData.spec.jobTemplate.spec.template.spec.nodeName" placeholder="请选择">
+                              <el-select v-model="initData.spec.template.spec.nodeName" placeholder="请选择">
                                 <el-option v-for="node in nodeData"
                                            :key="node.value"
                                            :label="node.label"
@@ -2103,7 +2153,7 @@
                               </el-col>
                               <el-col :span="6" v-if="node.nodeLevel == '0'">
                                 <el-form-item label="权重">
-                                  <el-input-number 
+                                  <el-input-number
                                             v-model="node.weight"/>
                                 </el-form-item>
                               </el-col>
@@ -2137,17 +2187,14 @@
                               </el-col>
                             </el-row>
                             <el-row>
-                              <el-col :span="12">
+                              <el-col :span="24">
                                 <el-button @click="addRule(node)" type="primary" plain>添加规则</el-button>
-                              </el-col>
-                            </el-row>
-                            <el-row>
-                              <el-col :span="12">
                                 <el-button @click="removeNode(nodeIndex)" type="danger" plain>删除节点调度</el-button>
+                                <el-button @click="addNode" type="primary" plain>添加节点调度</el-button>
                               </el-col>
                             </el-row>
                           </template>
-                          <el-button @click="addNode" type="primary" plain>添加节点调度</el-button>
+
                         </template>
                       </div>
 
@@ -2188,7 +2235,7 @@
                             </el-col>
                             <el-col :span="3" v-if="pod.nodeLevel == '0'">
                               <el-form-item label="权重">
-                                <el-input-number 
+                                <el-input-number
                                           v-model="pod.weight"/>
                               </el-form-item>
                             </el-col>
@@ -2256,16 +2303,16 @@
                         <el-row :gutter="24" >
                           <el-col :span="12">
                             <el-form-item label="优先级">
-                              <el-input v-model="initData.spec.jobTemplate.spec.template.spec.priority"/>
+                              <el-input v-model="initData.spec.template.spec.priority"/>
                             </el-form-item>
                           </el-col>
                           <el-col :span="12">
                             <el-form-item label="优先级名称">
-                              <el-input v-model="initData.spec.jobTemplate.spec.template.spec.priorityClassName"/>
+                              <el-input v-model="initData.spec.template.spec.priorityClassName"/>
                             </el-form-item>
                           </el-col>
                         </el-row>
-                        <el-row :gutter="24" v-for="(item,index) in initData.spec.jobTemplate.spec.template.spec.tolerations" :key="index">
+                        <el-row :gutter="24" v-for="(item,index) in initData.spec.template.spec.tolerations" :key="index">
                           <el-col :span="6" >
                             <el-form-item label="键">
                               <el-input v-model="item.key"/>
@@ -2313,72 +2360,32 @@
 
                       <div v-show="initData.option.selectPod === 'podStrategy'  ? true : false ">
                         <H1>扩缩容和升级策略</H1>
-                        <el-row :gutter="24" style="margin-top:10px;margin-left:2px">
-                          <el-col :span="12">
-                            <el-form-item label="并发">
-                              <el-radio-group v-model="initData.spec.concurrencyPolicy" >
-                                <el-radio-button label="Allow">并发运行</el-radio-button>
-                                <el-radio-button label="Forbid">新建运行</el-radio-button>
-                                <el-radio-button label="Replace">替换运行</el-radio-button>
-                              </el-radio-group>
-                            </el-form-item>
-                          </el-col>
-                          <el-col :span="12">
-                            <el-form-item label="暂停">
-                              <el-radio-group v-model="initData.spec.suspend" >
-                                <el-radio-button label="true">是</el-radio-button>
-                                <el-radio-button label="false">否</el-radio-button>
-                              </el-radio-group>
-                            </el-form-item>
-                          </el-col>
-                        </el-row>
                         <el-row :gutter="24" style="margin-top:10px;margin-left:2px" >
                           <el-col :span="12">
                             <el-form-item label="完成job历史数">
-                              <el-input-number  placeholder="请输入数量" v-model="initData.spec.jobTemplate.spec.template.spec.completions"/>
+                              <el-input-number  placeholder="请输入数量" v-model="initData.spec.template.spec.completions"/>
                             </el-form-item>
                           </el-col>
                           <el-col :span="12">
                             <el-form-item label="并发数">
-                              <el-input-number placeholder="请输入数量" v-model="initData.spec.jobTemplate.spec.template.spec.parallelism" />
+                              <el-input-number placeholder="请输入数量" v-model="initData.spec.template.spec.parallelism" />
                             </el-form-item>
                           </el-col>
                           <el-col :span="12">
                             <el-form-item label="重试次数限制">
-                              <el-input-number  placeholder="请输入次数" v-model="initData.spec.jobTemplate.spec.template.spec.backoffLimit"/>
+                              <el-input-number  placeholder="请输入次数" v-model="initData.spec.template.spec.backoffLimit"/>
                             </el-form-item>
                           </el-col>
                           <el-col :span="12">
                             <el-form-item label="活动终止时间(秒)">
-                              <el-input-number  placeholder="请输入秒数" v-model="initData.spec.jobTemplate.spec.template.spec.activeDeadlineSeconds">
-                                <template #append>秒</template>
-                              </el-input-number>
-                            </el-form-item>
-                          </el-col>
-                          <el-col :span="12">
-                            <el-form-item label="成功Job历史数">
-                              <el-input-number  placeholder="请输入数量" v-model="initData.spec.jobTemplate.successfulJobsHistoryLimit">
-                                <template #append>秒</template>
-                              </el-input-number>
-                            </el-form-item>
-                          </el-col>
-                          <el-col :span="12">
-                            <el-form-item label="失败Job历史数">
-                              <el-input-number  placeholder="请输入数量" v-model="initData.spec.failedJobsHistoryLimit">
-                                <template #append>秒</template>
-                              </el-input-number>
-                            </el-form-item>
-                          </el-col>
-                          <el-col :span="12">
-                            <el-form-item label="运行Job的截止时间(秒)">
-                              <el-input-number  placeholder="请输入秒数" v-model="initData.spec.startingDeadlineSeconds">
+                              <el-input-number  placeholder="请输入秒数" v-model="initData.spec.template.spec.activeDeadlineSeconds">
                                 <template #append>秒</template>
                               </el-input-number>
                             </el-form-item>
                           </el-col>
                           <el-col :span="12">
                             <el-form-item label="判定pod是否活跃的截止时间(秒)">
-                              <el-input-number  placeholder="请输入秒数" v-model="initData.spec.jobTemplate.spec.template.spec.terminationGracePeriodSeconds">
+                              <el-input-number  placeholder="请输入秒数" v-model="initData.spec.template.spec.terminationGracePeriodSeconds">
                                 <template #append>秒</template>
                               </el-input-number>
                             </el-form-item>
@@ -2391,7 +2398,7 @@
                         <el-row :gutter="24" >
                           <el-col :span="8">
                             <el-form-item label="Pod文件系统组"  >
-                              <el-input-number placeholder="请输入内容"  v-model="initData.spec.jobTemplate.spec.template.spec.securityContext.fsGroup" >
+                              <el-input-number placeholder="请输入内容"  v-model="initData.spec.template.spec.securityContext.fsGroup" >
                               </el-input-number>
                             </el-form-item>
                           </el-col>
@@ -2401,17 +2408,17 @@
                   </div>
                 </el-scrollbar>
               </el-tab-pane>
-              <el-tab-pane v-for="(container, index) in initData.spec.jobTemplate.spec.template.spec.containers" :name="index"
+              <el-tab-pane v-for="(container, index) in initData.spec.template.spec.containers" :name="index"
                            :key="index" :label="container.name" >
                 <el-scrollbar>
                   <div class="tab-content">
                     <div class="left">
-                      <el-tabs :tab-position="'left'" @tab-change="changeSelectTab">
+                      <el-tabs :tab-position="'left'" @tab-change="changeSelectTab" v-model="initData.option.containerIndex">
                         <el-tab-pane label="通用" name="containerGeneral" />
                         <el-tab-pane label="健康检查" name="containerCheckHealth"/>
                         <el-tab-pane label="资源" name="containerSource"/>
                         <el-tab-pane label="安全性上下文" name="containerSecurityContext" />
-                        <el-tab-pane label="存储" name="containerVolumes"/>
+                        <!-- <el-tab-pane label="存储" name="containerVolumes"/> -->
                       </el-tabs>
                     </div>
                     <div class="right">
@@ -2433,8 +2440,12 @@
                         <H1>镜像</H1>
                         <el-row :gutter="24" >
                           <el-col :span="8">
-                            <el-form-item label="容器镜像" :rules="[  { required: true, message: '容器镜像不能为空', trigger: 'blur' } ]" >
-                              <el-input placeholder="如：nginx:1.17.2" v-model="container.image" />
+                            <el-form-item label="容器镜像"  :prop="`spec.template.spec.containers[${index}][image]`"
+                              :rules="[
+                                { required: true, message: '容器镜像不能为空', trigger: 'blur' },
+                                { min: 2, max: 50, message: '名称长度必须介于 2 和 50 之间', trigger: 'blur' }
+                              ]">
+                              <el-input placeholder="如：nginx:1.17.2" v-model="container.image" ></el-input>
                             </el-form-item>
                           </el-col>
                           <el-col :span="8">
@@ -2448,9 +2459,11 @@
                           </el-col>
                           <el-col :span="8">
                             <el-form-item label="拉取密文">
-                              <el-select v-model="initData.spec.jobTemplate.spec.template.spec.imagePullSecrets" multiple style="width: 100%;" placeholder="请选择">
-                                <el-option label="harbor" value="harbor-login"></el-option>
-                                <el-option label="default" value="default"></el-option>
+                              <el-select v-model="initData.spec.template.spec.imagePullSecrets" style="width: 100%;" multiple placeholder="请选择">
+                                <el-option v-for="imagePullSecret in initData.option.imagePullSecrets"
+                                  :key="imagePullSecret.value"
+                                  :label="imagePullSecret.label"
+                                  :value="imagePullSecret.label"/>
                               </el-select>
                             </el-form-item>
                           </el-col>
@@ -2729,7 +2742,7 @@
                             <el-form-item label="Service Account 名称" >
                               <el-select
                                       class="search-select"
-                                      v-model="initData.spec.jobTemplate.spec.template.spec.serviceAccountName"
+                                      v-model="initData.spec.template.spec.serviceAccountName"
                                       placeholder="请选择名称"
                                       clearable
                               >
@@ -3598,14 +3611,20 @@
       </div>
     </el-form>
     <yt-bottom-operate>
-      <el-button @click="editYaml">编辑yaml</el-button>
-      <el-button type="primary" @click="saveData">保存</el-button>
+      <el-button @click="cancel">取消</el-button>
+      <el-button @click="editYaml" v-if="$route.currentRoute.value.query.id == undefined">编辑yaml</el-button>
+      <el-button @click="viewYaml" v-if="$route.currentRoute.value.query.id != undefined">查看yaml</el-button>
+      <el-button type="primary" @click="saveData" v-if="$route.currentRoute.value.query.id == undefined">保存</el-button>
     </yt-bottom-operate>
   </div>
   <yaml-editor :copy-data="copyData" v-model:visible="isShowYamlEditor" @setValue="setValue"></yaml-editor>
 </template>
 <style lang="scss" scoped>
   .detail-content {
+    ::v-deep(.el-tabs__new-tab) {
+      transform: scale(1.2);
+      transform-origin: right;
+    }
     ::v-deep(.el-tabs--card > .el-tabs__header) {
       margin-bottom: 0;
     }
@@ -3635,9 +3654,9 @@
     }
     .tab-content {
       display: flex;
-      height: 400px;
       overflow-x: hidden;
       padding-top: 16px;
+      height: calc(100vh - 512px);
       .left {
         background: var(--el-table-header-bg-color-my);
         ::v-deep(.el-tabs__content) {
@@ -3648,6 +3667,7 @@
         padding: 16px;
         box-sizing: border-box;
         flex: 1;
+        width: 100%;
       }
     }
   }

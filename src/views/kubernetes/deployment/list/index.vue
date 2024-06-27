@@ -1,10 +1,15 @@
 <script setup lang="ts">
   // @ts-nocheck
-  import { showStatusOperateFun , status , showStatusFun , addDateRange } from "@/utils/common"
+  import { showStatusOperateFun , status , showStatusFun , addDateRange, getStatusIcon } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
   import {  Edit } from '@element-plus/icons-vue'
-  import { pageList,nameSpaceList} from "@/api/kubernetes/deployment"
+  // import router from '@/router'
+  import { pageList,nameSpaceList,removeDeployment,changeStatus} from "@/api/kubernetes/deployment"
+  import { useRouter } from "vue-router";
+
+  const router = useRouter();
+
 
   const queryFormRef = ref(null);
 
@@ -12,10 +17,12 @@
   const queryParams = reactive({
     pageNum: 1,
     pageSize: 10,
+    beginTime: undefined,
+    endTime: undefined,
+    status: undefined,
     instanceCode:undefined,
-    nameSpace:undefined,
-    key: undefined,
-    value: undefined
+    nameSpaceId:undefined,
+    kind:"Deployment"
   })
 
   const defaultInstanceCode = ref('')
@@ -26,7 +33,8 @@
   const showSearch = ref(true)
   // 日期范围
   const dateRange = ref([])
-  const nameSpaces = ref([])
+  const nameSpaces = reactive([])
+  const nameSpaceMap =new Map()
 
 
   const total= ref(0)
@@ -58,6 +66,85 @@
     );
   }
 
+  const handleAdd = function(){
+    router.push({path : "/kubernetes/deployment/operate", query:{ instanceCode: defaultInstanceCode.value } })
+  }
+
+  const handleUpdate = function(id){
+    router.push({path : "/kubernetes/deployment/operate", query:{ instanceCode: defaultInstanceCode.value ,id: id} })
+  }
+
+  const handleDelete = function(row){
+    const name = row.name
+    let msg = ""
+    msg = '是否删除任务【"' + name + '"】的数据项？'
+
+    ElMessageBox.confirm(
+      msg,
+      'Warning',
+      {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    ).then(() => {
+      removeDeployment(row.id).then((res)=>{
+          if(res.code == 200){
+              // 重置查询表单,并进行查询
+              queryParams.pageNum=1
+              getList()
+              ElMessage({
+                type: 'success',
+                message: '删除成功',
+              })
+          }else{
+              ElMessage({
+                type: 'error',
+                message: '删除失败:'+res.msg,
+              })
+          }
+      })
+    })
+  }
+
+  const handleStatusChange = (row)=>{
+    const name = row.name
+    const status = row.status
+    let msg = ""
+    if(status == 1){
+      msg = '是否停用名称为"' + name + '"的数据项？'
+    }else{
+      msg = '是否启用名称为"' + name + '"的数据项？'
+    }
+
+    ElMessageBox.confirm(
+      msg,
+      'Warning',
+      {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    ).then(() => {
+        let tmpStatus;
+        if(status == 0){
+          tmpStatus = 1
+        }else{
+          tmpStatus = 0
+        }
+        changeStatus(row.id,tmpStatus).then((res)=>{
+            if(res.code == 200){
+                getList()
+                ElMessage({
+                  type: 'success',
+                  message: '操作成功',
+                })
+            }
+        })
+    })
+    .catch(() => { })
+  }
+
   // 处理搜索按钮
   const handleQuery = function(){
     getList()
@@ -65,19 +152,12 @@
 
   // 处理重置按钮
   const resetQuery = function(){
-    // queryFormRef.value.resetFields();
-    queryParams.value = undefined
-    queryParams.key = undefined
     queryParams.instanceCode = defaultInstanceCode.value;
     handleQuery();
   }
 
-  const map = new Map();
-
   const showNameSpace = function(id){
-    map.set(16,"命名空间")
-    map.get(16)
-
+    return nameSpaceMap.get(id)
   }
 
   // 多选框选中数据
@@ -85,15 +165,6 @@
 
   }
 
-  
-
-  const queryNameSpace = function(){
-    nameSpaceList().then((res) =>{
-      if(res.code == 200){
-        Object.assign(nameSpaces,res?.data)
-      }
-    })
-  }
 
   // 进入页面时,就初始化实例列表
   queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
@@ -102,9 +173,21 @@
       queryParams.instanceCode = pluginInstance[0].instanceCode
       defaultInstanceCode.value = pluginInstance[0].instanceCode
 
+      nameSpaceList(defaultInstanceCode.value).then((res) =>{
+        if(res.code == 200){
+          Object.assign(nameSpaces,res?.data)
+          nameSpaces.forEach(function(nameSpace){
+            nameSpaceMap.set(Number(nameSpace.value),nameSpace.label)
+          })
+        }
+      })
+      console.log(nameSpaceMap)
+      
       // 触发查询
       getList();
-      queryNameSpace();
+
+      
+
     }
   });
 </script>
@@ -131,16 +214,39 @@
             <el-form-item label="命名空间" prop="nameSpace">
               <el-select
                 class="search-select2"
-                v-model="queryParams.nameSpace"
-                placeholder="请选择资源"
-                style="width: 100px"
+                v-model="queryParams.nameSpaceId"
+                placeholder="请选择命名空间"
+                style="width: 240px"
                 clearable
               >
-                  <el-option v-for="item in nameSpaces"
-                          :key="item.value"
-                          :label="item.label"
-                          :value="item.value"/>
+                <el-option v-for="namespace in nameSpaces"
+                      :key="namespace.value"
+                      :label="namespace.label"
+                      :value="namespace.value"/>
               </el-select>
+            </el-form-item>
+            <el-form-item label="状态" prop="status">
+              <el-select
+                class="search-select"
+                v-model="queryParams.status"
+                placeholder="任务状态"
+                clearable
+              >
+                <el-option v-for="dict in status"
+                           :key="dict.value"
+                           :label="dict.label"
+                           :value="dict.value"/>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="创建时间">
+              <el-date-picker
+                v-model="dateRange"
+                value-format="YYYY-MM-DD"
+                type="daterange"
+                range-separator="-"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
+              ></el-date-picker>
             </el-form-item>
             <el-form-item>
               <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
@@ -149,25 +255,60 @@
       </el-form>
     </yt-card>
     <yt-card>
-
+        <div class="option-wrap">
+          <!-- <router-link :to="{ path: '/kubernetes/deployment/index', query: { timestamp: Date.now() }}" > -->
+            <el-button
+              type="primary"
+              plain
+              size="default"
+              @click="handleAdd" v-hasPerms="['/kubernetes/deployment/add']" ><el-icon><Plus /></el-icon>新增</el-button>
+          <!-- </router-link> -->
+        </div>
       <!--table  -->
       <div class="table-wrap">
         <el-table v-loading="loading" :data="tabelDataList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
           <el-table-column label="id" align="left" key="id" prop="id" v-if="false"/>
-          <el-table-column label="命名空间" align="left" key="nameSpace" prop="nameSpace" >
+          <el-table-column label="命名空间" align="left" key="nameSpace" prop="nameSpace" width="180">
             <template #default="scope">
               {{ showNameSpace(scope.row.nameSpaceId)   }}
             </template>
           </el-table-column>
-          <el-table-column label="部署种类" align="left" key="kind" prop="kind"  :show-overflow-tooltip="true"  />
-          <el-table-column label="应用名称" align="left" key="name" prop="name"  :show-overflow-tooltip="true"  />
+          <!-- <el-table-column label="部署种类" align="left" key="kind" prop="kind"  :show-overflow-tooltip="true" width="150" /> -->
+          <el-table-column label="应用名称" align="left" key="name" prop="name"  :show-overflow-tooltip="true" />
           <el-table-column label="实例编码" align="left" key="instanceCode" prop="instanceCode" :show-overflow-tooltip="true"   />
-          <el-table-column label="状态" align="left" key="isDel" prop="isDel" :show-overflow-tooltip="true"   />
-          <el-table-column label="操作" align="left" key="operation" prop="operation" :show-overflow-tooltip="true"   />
-          <el-table-column label="创建时间" align="left" prop="opTime"  width="180">
+          <el-table-column label="状态" align="left" key="status" prop="status" :show-overflow-tooltip="true" width="100"  >
+            <template #default="scope">
+              {{  showStatusFun(scope.row.status) }}
+            </template>
+          </el-table-column>
+          <el-table-column label="创建时间" align="left" prop="opTime"  width="200">
             <template #default="scope">
               {{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" align="left" key="operation" prop="operation" :show-overflow-tooltip="true" >
+            <template #default="scope">
+              <div class="action-btn">
+                <el-button
+                  size="small"
+                  icon="Edit"
+                  @click="handleUpdate(scope.row.id)"
+                  v-hasPerms="['/kubernetes/deployment/add']"
+                >修改</el-button>
+                <el-button
+                  size="small"
+                  :icon="getStatusIcon(scope.row)"
+                  @click="handleStatusChange(scope.row)"
+                  v-hasPerms="['/kubernetes/deployment/changeStatus/**']"
+                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
+                <el-button
+                  size="small"
+                  icon="Delete"
+                  @click="handleDelete(scope.row)"
+                  v-hasPerms="['/kubernetes/deployment/del/**']"
+                >删除</el-button>
+              </div>
             </template>
           </el-table-column>
         </el-table>

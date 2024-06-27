@@ -136,7 +136,7 @@
                            :value="dict.value"/>
               </el-select>
             </el-form-item> -->
-            <el-form-item label="创建时间">
+            <el-form-item label="任务时间">
               <el-date-picker
                 v-model="dateRange"
                 value-format="YYYY-MM-DD"
@@ -161,7 +161,7 @@
           <el-table-column label="构建编号" align="left" key="id" prop="id" v-if="false" />
           <el-table-column label="任务编号" align="left" key="jobId" prop="jobId" v-if="false" />
           <el-table-column label="任务名称" align="left" key="jobName" prop="jobName"  :show-overflow-tooltip="true" />
-          <el-table-column label="构建状态" align="left" key="buildStatus" prop="buildStatus"  >
+          <el-table-column label="构建状态" align="center" key="buildStatus" prop="buildStatus"  >
             <template #default="scope">
               {{  showBuildStatusFun(scope.row.buildStatus) }}
             </template>
@@ -177,21 +177,10 @@
               {{ dayjs(scope.row.endTime).format("YYYY-MM-DD HH:mm:ss")   }}
             </template>
           </el-table-column>
-
-          <el-table-column label="创建时间" align="left" prop="createTime" width="180">
-            <template #default="scope">
-              {{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}
-            </template>
-          </el-table-column>
-          <el-table-column label="更新时间" align="left" prop="updateTime" width="180">
-            <template #default="scope">
-              {{ dayjs(scope.row.updateTime).format("YYYY-MM-DD HH:mm:ss")   }}
-            </template>
-          </el-table-column>
           <el-table-column
             label="操作"
-            align="left"
-            width="280"
+            align="center"
+            width="200"
             flxed="right"
           >
             <template #default="scope">
@@ -208,15 +197,7 @@
         </el-table>
       </div>
       <div class="page-wrap">
-        <el-pagination
-          v-show="total>0"
-          :total="total"
-          :page-sizes=[10,20]
-          background layout="prev, pager, next"
-          v-model:current-page="queryParams.pageNum"
-          v-model:page-size="queryParams.pageSize"
-          @current-change="getList"
-        />
+        <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>
       </div>
     </yt-card>
 

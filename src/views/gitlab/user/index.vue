@@ -256,7 +256,8 @@
 <template>
   <div class="main-wrapp">
     <!--sousuo  -->
-    <el-form :model="queryParams" ref="queryForm"  :inline="true" v-show="showSearch" >
+    <yt-card>
+      <el-form :model="queryParams" ref="queryForm"  :inline="true" v-show="showSearch" >
           <el-form-item label="用户名称" prop="userName">
             <el-input
               v-model="queryParams.userName"
@@ -297,61 +298,64 @@
             <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
           </el-form-item>
     </el-form>
+    </yt-card>
 
-    <!--  option-->
-    <div class="option-wrap">
-      <!-- <el-button
-        type="primary"
-        plain
-        size="default"
-        @click="handleAdd" v-hasPerms="['/gitlab/user/add']" ><el-icon><Plus /></el-icon>新增</el-button> -->
-    </div>
+    <yt-card>
+      <!--  option-->
+      <div class="option-wrap">
+        <!-- <el-button
+          type="primary"
+          plain
+          size="default"
+          @click="handleAdd" v-hasPerms="['/gitlab/user/add']" ><el-icon><Plus /></el-icon>新增</el-button> -->
+      </div>
 
-    <!--table  -->
-    <div class="table-wrap">
-      <el-table v-loading="loading" :data="userRow">
-          <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="用户编号" align="left" key="id" prop="id" v-if="false"/>
-          <el-table-column label="用户名称" align="left" key="userName" prop="userName"  :show-overflow-tooltip="true"  />
-          <el-table-column label="用户昵称" align="left" key="nickName" prop="nickName"  :show-overflow-tooltip="true"  />
-          <el-table-column label="邮箱" align="left" key="email" prop="email"  :show-overflow-tooltip="true" />
-          <el-table-column label="状态" align="center" key="status" >
-            <template #default="scope">
-              {{  showStatusFun(scope.row.status) }}
-            </template>
-          </el-table-column>
-          <el-table-column label="创建时间" align="left" prop="createTime" width="180">
-            <template #default="scope">
-              {{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}
-            </template>
-          </el-table-column>
-          <!-- <el-table-column
-            label="操作"
-            align="left"
-            width="220"
-          >
-            <template #default="scope">
-             <div class="action-btn">
-              <el-button
-                size="small"
-                icon="Edit"
-                @click="handleUpdate(scope.row)"
-                v-hasPerms="['/gitlab/user/edit']"
-              >修改</el-button>
-              <el-button
-                size="small"
-                :icon="getStatusIcon(scope.row)"
-                @click="handleStatusChange(scope.row)"
-                v-hasPerms="['/gitlab/user/changeStatus']"
-              >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-             </div>
-            </template>
-          </el-table-column> -->
-    </el-table>
-    </div>
-    <div class="page-wrap">
-      <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>
-    </div>
+      <!--table  -->
+      <div class="table-wrap">
+        <el-table v-loading="loading" :data="userRow">
+            <el-table-column type="selection" width="60" align="center" />
+            <el-table-column label="用户编号" align="left" key="id" prop="id" v-if="false"/>
+            <el-table-column label="用户名称" align="left" key="userName" prop="userName"  :show-overflow-tooltip="true"  />
+            <el-table-column label="用户昵称" align="left" key="nickName" prop="nickName"  :show-overflow-tooltip="true"  />
+            <el-table-column label="邮箱" align="left" key="email" prop="email"  :show-overflow-tooltip="true" />
+            <el-table-column label="状态" align="center" key="status" >
+              <template #default="scope">
+                {{  showStatusFun(scope.row.status) }}
+              </template>
+            </el-table-column>
+            <el-table-column label="创建时间" align="left" prop="createTime" width="180">
+              <template #default="scope">
+                {{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}
+              </template>
+            </el-table-column>
+            <!-- <el-table-column
+              label="操作"
+              align="left"
+              width="220"
+            >
+              <template #default="scope">
+               <div class="action-btn">
+                <el-button
+                  size="small"
+                  icon="Edit"
+                  @click="handleUpdate(scope.row)"
+                  v-hasPerms="['/gitlab/user/edit']"
+                >修改</el-button>
+                <el-button
+                  size="small"
+                  :icon="getStatusIcon(scope.row)"
+                  @click="handleStatusChange(scope.row)"
+                  v-hasPerms="['/gitlab/user/changeStatus']"
+                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
+               </div>
+              </template>
+            </el-table-column> -->
+      </el-table>
+      </div>
+      <div class="page-wrap">
+        <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>
+      </div>
+    </yt-card>
 
 
     <!-- 添加或修改用户配置对话框 -->
@@ -416,8 +420,8 @@
         </el-form>
       </yt-card>
       <template #footer>
-        <el-button type="primary" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
+        <el-button type="primary" @click="submitForm">确 定</el-button>
       </template>
     </el-dialog>
   </div>

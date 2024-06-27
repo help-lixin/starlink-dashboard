@@ -163,7 +163,7 @@
           }
         }
       })
-      
+
     })
   }
 
@@ -328,20 +328,13 @@
           size="default"
           @click="handleAdd" v-hasPerms="['/system/plugin/definition/add']" ><el-icon><Plus /></el-icon>新增</el-button>
 
-
-        <el-button
-          type="success"
-          plain
-          size="default"
-          :disabled="single"
-          @click="handleUpdate" v-hasPerms="['/system/plugin/definition/edit']" ><el-icon><EditPen /></el-icon>修改</el-button>
       </div>
 
       <!--table  -->
       <div class="table-wrap">
         <el-table v-loading="loading" :data="dataList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="插件编码" align="left" key="pluginCode" prop="pluginCode"/>
+          <el-table-column label="插件编码" align="left" key="pluginCode" prop="pluginCode" :show-overflow-tooltip="true"/>
           <el-table-column label="插件名称" align="left" key="pluginName" prop="pluginName"  :show-overflow-tooltip="true"/>
           <el-table-column label="插件元数据" align="left" key="pluginMeta" prop="pluginMeta"  :show-overflow-tooltip="true"/>
           <el-table-column label="状态" align="center" key="status">
@@ -356,7 +349,7 @@
           </el-table-column>
           <el-table-column
             label="操作"
-            align="left"
+            align="center"
             width="250"
           >
             <template v-slot="scope">
@@ -367,7 +360,7 @@
                   @click="handleUpdate(scope.row)"
                   v-hasPerms="['/system/plugin/definition/edit']"
                 >修改</el-button>
-                
+
                 <el-button
                 size="small"
                 :icon="getStatusIcon(scope.row)"
@@ -435,8 +428,8 @@
         </el-form>
       </yt-card>
       <template #footer>
-        <el-button type="primary" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
+        <el-button type="primary" @click="submitForm">确 定</el-button>
       </template>
     </el-dialog>
   </div>

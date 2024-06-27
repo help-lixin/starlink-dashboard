@@ -62,6 +62,7 @@
   const rules = reactive<FormRules>({
       'sshInstanceCode' : [
         { required: true, message: "实例编码不能为空", trigger: "blur" },
+        { pattern: /^[-_a-zA-Z0-9]*$/, message: '实例编码只可以输入字母、数字、下划线及中划线', trigger: 'blur' },
         { validator: validInstanceCode , trigger: 'blur' }
       ],
       'serverName': [
@@ -127,7 +128,7 @@
             console.log(sshInstanceCodes)
           }
     })
-    
+
   }
 
   // 处理搜索按钮
@@ -137,7 +138,7 @@
 
   // 处理查询按钮
   const resetQuery = function(){
-    
+
     queryParams.serverName = undefined
     dateRange.value = [];
     queryFormRef.value.resetFields();
@@ -227,7 +228,7 @@
       addDialog.value = false;
       getList();
     });
-      
+
   }
 
   const handleDelete = function(row){
@@ -355,6 +356,7 @@
             </el-form-item>
       </el-form>
     </yt-card>
+
     <yt-card>
       <!--  option-->
       <div class="option-wrap">
@@ -392,48 +394,42 @@
           </el-table-column>
           <el-table-column
             label="操作"
-            align="left"
+            align="center"
+            width="220"
           >
-            <template #default="scope">
+            <template v-slot="scope">
               <div class="action-btn">
                 <el-button
                   size="small"
-                  :icon="getStatusIcon(scope.row)"
                   @click="handleStatusChange(scope.row)"
                   v-hasPerms="['/ansible/host/changeStatus/**']"
                 >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
+
+
                 <el-button
                   size="small"
-                  :icon="Edit"
                   @click="handleUpdate(scope.row)"
                   v-hasPerms="['/ansible/host/add']"
                 >修改</el-button>
+
                 <el-button
                   size="small"
-                  :icon="Delete"
                   @click="handleDelete(scope.row)"
                   v-hasPerms="['/ansible/host/del/*']"
                 >删除</el-button>
+
               </div>
             </template>
           </el-table-column>
         </el-table>
       </div>
       <div class="page-wrap">
-        <el-pagination
-          v-show="total>0"
-          :total="total"
-          :page-sizes=[10,20]
-          background layout="prev, pager, next"
-          v-model:current-page="queryParams.pageNum"
-          v-model:page-size="queryParams.pageSize"
-          @current-change="getList"
-        />
+        <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>
       </div>
     </yt-card>
 
     <!-- 新增对话框 -->
-    <el-dialog :title="title" v-model="addDialog" width="600px" append-to-body>
+    <el-dialog :title="title" v-model="addDialog" width="500px" append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="120px">
           <el-row>
@@ -444,6 +440,7 @@
                   v-model="form.sshInstanceCode"
                   placeholder="请选择插件实例"
                   @change="switchInstance"
+                  clearable
                   style="width: 240px"
                 >
                   <el-option v-for="item in sshInstanceCodes"
@@ -472,8 +469,8 @@
         </el-form>
       </yt-card>
       <template #footer>
-        <el-button type="primary" @click="submitForm(false)">确 定</el-button>
         <el-button @click="cancelAdd">取 消</el-button>
+        <el-button type="primary" @click="submitForm(false)">确 定</el-button>
       </template>
     </el-dialog>
 
@@ -481,48 +478,5 @@
 </template>
 
 <style lang="scss" scoped>
-.main-wrap {
-  height: 100%;
-  width: 100%;
-  box-sizing: border-box;
-  background: #fff;
-
-}
-
-.option-wrap {
-  margin-bottom: 8px;
-  .el-button {
-    // margin-right: 6px;
-  }
-}
-.table-wrap {
-  width: 100%;
-  box-sizing: border-box;
-  overflow-y: auto;
-  .action-btn {
-    display: flex;
-  }
-}
-
-.page-wrap {
-  padding: 20px 0;
-  .el-pagination {
-    display: flex;
-    align-items: center;
-    justify-content: end;
-  }
-
-}
-
-
-</style>
-<style>
- .el-form-item__label {
-  font-size: 14px;
- }
-
-.search-select .el-input {
-  --el-input-width: 240px;
-}
 
 </style>

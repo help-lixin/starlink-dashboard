@@ -59,6 +59,8 @@ function filter(userRoutes:RouteInfo[]):Set<string>{
         return component;
     }));
 
+    
+
     for(const sysRoute of dynamicRoutes){ // 遍历系统的路由表
         if(sysRoute.meta?.requiresAuth){
             if(!sysRoute.meta?.requiresAuth){ // 跳过不需要进行授权的页面
