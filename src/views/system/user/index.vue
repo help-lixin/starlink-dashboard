@@ -311,23 +311,26 @@ getList()
     <div class="main-wrapp">
       <yt-card>
         <el-form class="form-wrap" :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch">
-          <el-row>
+          <el-row :gutter="16">
+            <el-col :span="8">
               <el-form-item label="用户名称" prop="userName">
                 <el-input
                   v-model="queryParams.userName"
                   placeholder="请输入用户名称"
                   clearable
-                  style="width: 240px"
                 />
               </el-form-item>
+            </el-col>
+            <el-col :span="8">
               <el-form-item label="手机号码" prop="phonenumber">
                 <el-input
                   v-model="queryParams.phonenumber"
                   placeholder="请输入手机号码"
                   clearable
-                  style="width: 240px"
                 />
               </el-form-item>
+            </el-col>
+            <el-col :span="8">
               <el-form-item label="状态" prop="status">
                 <el-select
                   class="search-select"
@@ -342,6 +345,8 @@ getList()
                              :value="dict.value"/>
                 </el-select>
               </el-form-item>
+            </el-col>
+            <el-col :span="8">
               <el-form-item label="创建时间">
                 <el-date-picker
                   v-model="dateRange"
@@ -354,10 +359,13 @@ getList()
                   style="width: 240px"
                 ></el-date-picker>
               </el-form-item>
+            </el-col>
+            <el-col :span="8">
               <el-form-item>
                 <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
                 <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
               </el-form-item>
+            </el-col>
           </el-row>
         </el-form>
       </yt-card>

@@ -26,6 +26,22 @@ code {
 
 // 下面是全局样式
 .main-wrapp {
+  .form-wrap.el-form {
+    width: 100%;
+    .el-form-item {
+      margin-right: 0;
+      width: 100%;
+    }
+  }
+  .el-input {
+    width: 100%;
+  }
+  .el-select {
+    width: 100%;
+  }
+  .el-date-editor {
+    width: 100%;
+  }
   .option-wrap {
     text-align: right;
     margin-bottom: 16px;
