@@ -303,6 +303,7 @@
 <template>
   <div class="main-wrapp">
     <!--sousuo  -->
+    <yt-card :padding="'18px 18px 0'">
     <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" >
           <el-form-item label="插件实例" prop="instanceCode">
             <el-select
@@ -372,69 +373,71 @@
             <el-button  @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
           </el-form-item>
     </el-form>
+    </yt-card>
 
-    <!--  option-->
-    <div class="option-wrap">
-      <el-button
-        type="primary"
-        plain
-        size="default"
-        @click="handleAdd" v-hasPerms="['/gitlab/project/add']" ><el-icon><Plus /></el-icon>新增</el-button>
-    </div>
-
-    <!--table  -->
-    <div class="table-wrap">
-      <el-table v-loading="loading" :data="projectList" @selection-change="handleSelectionChange">
-          <el-table-column type="selection" width="60" align="left" />
-          <el-table-column label="项目编号" align="left" key="id" prop="id" v-if="false"/>
-          <el-table-column label="项目名称" align="left" key="projectName" prop="projectName"  :show-overflow-tooltip="true" />
-          <el-table-column label="项目标识符" align="left" key="path" prop="path" :show-overflow-tooltip="true" />
-          <el-table-column label="webUrl" align="left" key="webUrl" prop="webUrl" :show-overflow-tooltip="true"  />
-          <el-table-column label="sshUrl" align="left" key="sshUrl" prop="sshUrl" :show-overflow-tooltip="true" />
-          <el-table-column label="备注" align="left" key="remark" prop="remark" :show-overflow-tooltip="true" />
-          <el-table-column label="状态" align="center" key="status" prop="status">
-            <template #default="scope">
-              {{  showStatusFun(scope.row.status) }}
-            </template>
-          </el-table-column>
-          <el-table-column label="创建时间" align="left" prop="createTime" width="180">
-            <template #default="scope">
-              <span>{{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column
-            label="操作"
-            align="center"
-            width="240"
-          >
-            <template #default="scope">
-             <div class="action-btn">
-              <el-button
-                size="small"
-                icon="Edit"
-                @click="handleUpdate(scope.row)"
-                v-hasPerms="['/gitlab/project/add']"
-              >修改</el-button>
-              <el-button
-                size="small"
-                :icon="getStatusIcon(scope.row)"
-                @click="handleStatusChange(scope.row)"
-                v-hasPerms="['/gitlab/project/changeStatus']"
-              >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-              <el-button
-                size="small"
-                icon="Delete"
-                @click="handleDelete(scope.row)"
-                v-hasPerms="['/gitlab/project/changeStatus']"
-              >删除</el-button>
-             </div>
-            </template>
-          </el-table-column>
-    </el-table>
-    </div>
-    <div class="page-wrap">
-      <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>
-    </div>
+    <yt-card>
+      <!--  option-->
+      <div class="option-wrap">
+        <el-button
+          type="primary"
+          plain
+          size="default"
+          @click="handleAdd" v-hasPerms="['/gitlab/project/add']" ><el-icon><Plus /></el-icon>新增</el-button>
+      </div>
+      <!--table  -->
+      <div class="table-wrap">
+        <el-table v-loading="loading" :data="projectList" @selection-change="handleSelectionChange">
+            <el-table-column type="selection" width="60" align="left" />
+            <el-table-column label="项目编号" align="left" key="id" prop="id" v-if="false"/>
+            <el-table-column label="项目名称" align="left" key="projectName" prop="projectName"  :show-overflow-tooltip="true" />
+            <el-table-column label="项目标识符" align="left" key="path" prop="path" :show-overflow-tooltip="true" />
+            <el-table-column label="webUrl" align="left" key="webUrl" prop="webUrl" :show-overflow-tooltip="true"  />
+            <el-table-column label="sshUrl" align="left" key="sshUrl" prop="sshUrl" :show-overflow-tooltip="true" />
+            <el-table-column label="备注" align="left" key="remark" prop="remark" :show-overflow-tooltip="true" />
+            <el-table-column label="状态" align="center" key="status" prop="status">
+              <template #default="scope">
+                {{  showStatusFun(scope.row.status) }}
+              </template>
+            </el-table-column>
+            <el-table-column label="创建时间" align="left" prop="createTime" width="180">
+              <template #default="scope">
+                <span>{{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              label="操作"
+              align="center"
+              width="240"
+            >
+              <template #default="scope">
+               <div class="action-btn">
+                <el-button
+                  size="small"
+                  icon="Edit"
+                  @click="handleUpdate(scope.row)"
+                  v-hasPerms="['/gitlab/project/add']"
+                >修改</el-button>
+                <el-button
+                  size="small"
+                  :icon="getStatusIcon(scope.row)"
+                  @click="handleStatusChange(scope.row)"
+                  v-hasPerms="['/gitlab/project/changeStatus']"
+                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
+                <el-button
+                  size="small"
+                  icon="Delete"
+                  @click="handleDelete(scope.row)"
+                  v-hasPerms="['/gitlab/project/changeStatus']"
+                >删除</el-button>
+               </div>
+              </template>
+            </el-table-column>
+      </el-table>
+      </div>
+      <div class="page-wrap">
+        <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>
+      </div>
+    </yt-card>
 
 
     <!-- 添加或修改项目配置对话框 -->

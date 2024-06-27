@@ -313,7 +313,8 @@ import { assign } from 'lodash'
 <template>
   <div class="main-wrapp">
     <!--sousuo  -->
-    <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch"  >
+    <yt-card>
+      <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch"  >
 
           <el-form-item label="插件实例" prop="instanceCode">
             <el-select
@@ -383,69 +384,73 @@ import { assign } from 'lodash'
             <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
           </el-form-item>
     </el-form>
+    </yt-card>
 
-    <!--  option-->
-    <div class="option-wrap">
-      <el-button
-        type="primary"
-        plain
-        size="default"
-        @click="handleAdd" v-hasPerms="['/gitlab/group/member/add']" ><el-icon><Plus /></el-icon>新增</el-button>
-    </div>
 
-    <!--table  -->
-    <div class="table-wrap">
-      <el-table v-loading="loading" :data="dataList" @selection-change="handleSelectionChange">
-          <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="用户编号" align="left" key="userId" prop="userId" v-if="false"/>
-          <el-table-column label="成员编号" align="left" key="id" prop="id" v-if="false"/>
-          <el-table-column label="成员昵称" align="left" key="nickName" prop="nickName"  :show-overflow-tooltip="true" />
-          <el-table-column label="邮箱" align="left" key="email" prop="email"  :show-overflow-tooltip="true" />
-          <el-table-column label="成员名称" align="left" key="userName" prop="userName"  :show-overflow-tooltip="true" />
-          <el-table-column label="组" align="left" key="gitlabGroupName" prop="gitlabGroupName" :show-overflow-tooltip="true" />
-          <el-table-column label="状态" align="center" key="status" >
-            <template #default="scope">
-              {{  showStatusFun(scope.row.status) }}
-            </template>
-          </el-table-column>
-          <el-table-column label="创建时间" align="left" prop="createTime" width="200">
-            <template #default="scope">
-              <span>{{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column
-            label="操作"
-            align="center"
-            width="220"
-          >
-            <template #default="scope">
-             <div class="action-btn">
-               <el-button
-               size="small"
-               :icon="getStatusIcon(scope.row)"
-               @click="handleChangeStatus(scope.row)"
-               v-hasPerms="['/gitlab/group/member/changeStatus/**']"
-               >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-               <el-button
+    <yt-card>
+      <!--  option-->
+      <div class="option-wrap">
+        <el-button
+          type="primary"
+          plain
+          size="default"
+          @click="handleAdd" v-hasPerms="['/gitlab/group/member/add']" ><el-icon><Plus /></el-icon>新增</el-button>
+      </div>
+
+      <!--table  -->
+      <div class="table-wrap">
+        <el-table v-loading="loading" :data="dataList" @selection-change="handleSelectionChange">
+            <el-table-column type="selection" width="60" align="center" />
+            <el-table-column label="用户编号" align="left" key="userId" prop="userId" v-if="false"/>
+            <el-table-column label="成员编号" align="left" key="id" prop="id" v-if="false"/>
+            <el-table-column label="成员昵称" align="left" key="nickName" prop="nickName"  :show-overflow-tooltip="true" />
+            <el-table-column label="邮箱" align="left" key="email" prop="email"  :show-overflow-tooltip="true" />
+            <el-table-column label="成员名称" align="left" key="userName" prop="userName"  :show-overflow-tooltip="true" />
+            <el-table-column label="组" align="left" key="gitlabGroupName" prop="gitlabGroupName" :show-overflow-tooltip="true" />
+            <el-table-column label="状态" align="center" key="status" >
+              <template #default="scope">
+                {{  showStatusFun(scope.row.status) }}
+              </template>
+            </el-table-column>
+            <el-table-column label="创建时间" align="left" prop="createTime" width="200">
+              <template #default="scope">
+                <span>{{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              label="操作"
+              align="center"
+              width="220"
+            >
+              <template #default="scope">
+               <div class="action-btn">
+                 <el-button
                  size="small"
-                 icon="Delete"
-                 @click="handleDelete(scope.row)"
-                 v-hasPerms="['/gitlab/group/member/del']"
-               >删除</el-button>
-              <!-- <el-button
-                size="small"
-                icon="Edit"
-                @click="handleEdit(scope.row)"
-                v-hasPerms="['/gitlab/group/edit']"
-              >修改</el-button> -->
-             </div>
-            </template>
-          </el-table-column>
-    </el-table>
-    </div>
-    <div class="page-wrap">
-      <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>
-    </div>
+                 :icon="getStatusIcon(scope.row)"
+                 @click="handleChangeStatus(scope.row)"
+                 v-hasPerms="['/gitlab/group/member/changeStatus/**']"
+                 >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
+                 <el-button
+                   size="small"
+                   icon="Delete"
+                   @click="handleDelete(scope.row)"
+                   v-hasPerms="['/gitlab/group/member/del']"
+                 >删除</el-button>
+                <!-- <el-button
+                  size="small"
+                  icon="Edit"
+                  @click="handleEdit(scope.row)"
+                  v-hasPerms="['/gitlab/group/edit']"
+                >修改</el-button> -->
+               </div>
+              </template>
+            </el-table-column>
+      </el-table>
+      </div>
+      <div class="page-wrap">
+        <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>
+      </div>
+    </yt-card>
 
 
     <!-- 添加或修改成员配置对话框 -->
