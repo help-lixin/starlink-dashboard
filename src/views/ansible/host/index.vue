@@ -62,6 +62,7 @@
   const rules = reactive<FormRules>({
       'sshInstanceCode' : [
         { required: true, message: "实例编码不能为空", trigger: "blur" },
+        { pattern: /^[-_a-zA-Z0-9]*$/, message: '实例编码只可以输入字母、数字、下划线及中划线', trigger: 'blur' },
         { validator: validInstanceCode , trigger: 'blur' }
       ],
       'serverName': [

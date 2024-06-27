@@ -64,13 +64,14 @@
         { required: true, message: "插件类型不能为空", trigger: "blur" }
       ],
       name : [
-        { required: true,  message: "插件名称不能为空", trigger: "blur" },
-        { min: 2, max: 200, message: '插件名称长度必须介于 2 和 200 之间', trigger: 'blur' }
+        { required: true,  message: "别名不能为空", trigger: "blur" },
+        { pattern: /^[-_a-zA-Z0-9]*$/, message: '别名只可以输入字母、数字、下划线及中划线', trigger: 'blur' },
+        { min: 2, max: 200, message: '别名长度必须介于 2 和 200 之间', trigger: 'blur' }
       ],
       value : [
-        { required: true, message: "插件路径不能为空", trigger: "blur" },
+        { required: true, message: "PATH不能为空", trigger: "blur" },
         { required: true, validator: validHome,  trigger: "blur" },
-        { min: 2, max: 200, message: '插件路径长度必须介于 2 和 200 之间', trigger: 'blur' }
+        { min: 2, max: 200, message: 'PATH长度必须介于 2 和 200 之间', trigger: 'blur' }
       ],
   })
 

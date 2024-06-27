@@ -47,15 +47,15 @@
       ],
       'jobName': [
         { required: true, message: "任务名称不能为空", trigger: "blur" },
+        { pattern: /^[-_a-zA-Z0-9]*$/, message: '任务名称别名只可以输入字母、数字、下划线及中划线', trigger: 'blur' },
         { min: 2, max: 20, message: '任务名称长度必须介于 2 和 20 之间', trigger: 'blur' },
         { validator: validJobName , trigger: 'blur' }
       ],
       'scmType': [
-        { required: true, message: "仓库类型不能为空", trigger: "blur" },
-        { min: 2, max: 20, message: '任务名称长度必须介于 2 和 20 之间', trigger: 'blur' }
+        { required: true, message: "仓库类型不能为空", trigger: "blur" }
       ],
       'toolsType': [
-        { required: true, message: "语言不能为空", trigger: "blur" },
+        { required: true, message: "工具不能为空", trigger: "blur" },
       ],
       'jdkId' :[
         { required: true, message: "jdk不能为空", trigger: "blur" },
