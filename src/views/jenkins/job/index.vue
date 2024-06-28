@@ -586,7 +586,7 @@
           </el-col>
           <el-col :span="8">
             <el-form-item label="任务名" prop="queryParams.jobName">
-              <el-input v-model="queryParams.jobName" placeholder="请输入任务名" clearable style="width: 240px"/>
+              <el-input v-model="queryParams.jobName" placeholder="请输入任务名" clearable/>
             </el-form-item>
           </el-col>
           <el-col :span="8">
