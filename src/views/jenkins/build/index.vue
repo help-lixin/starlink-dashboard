@@ -106,6 +106,8 @@
     <!--sousuo  -->
     <yt-card :padding="'18px 18px 0'">
       <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch" >
+        <el-row :gutter="16">
+          <el-col :span="8">
             <el-form-item label="插件实例" prop="instanceCode">
               <el-select
                 class="search-select"
@@ -120,22 +122,13 @@
                            :value="item.instanceCode"/>
               </el-select>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="任务名" prop="queryParams.jobName">
               <el-input v-model="queryParams.jobName" placeholder="请输入任务名" clearable style="width: 240px"/>
             </el-form-item>
-            <!-- <el-form-item label="状态" prop="status">
-              <el-select
-                class="search-select"
-                v-model="queryParams.status"
-                placeholder="任务状态"
-                clearable
-              >
-                <el-option v-for="dict in status"
-                           :key="dict.value"
-                           :label="dict.label"
-                           :value="dict.value"/>
-              </el-select>
-            </el-form-item> -->
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="任务时间">
               <el-date-picker
                 v-model="dateRange"
@@ -146,10 +139,14 @@
                 end-placeholder="结束日期"
               ></el-date-picker>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item>
               <el-button type="primary"  @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
               <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
             </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
     </yt-card>
     <yt-card>

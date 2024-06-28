@@ -237,27 +237,35 @@
 
       <!-- 搜索处理 -->
       <el-form :model="queryParams" ref="queryForm"  :inline="true" v-show="showSearch">
-        <el-form-item label="菜单名称" prop="menuName">
-          <el-input
-            v-model="queryParams.menuName"
-            placeholder="请输入菜单名称"
-            clearable
-            style="width: 240px"
-          />
-        </el-form-item>
-        <el-form-item label="状态" prop="status">
-          <el-select v-model="queryParams.status" placeholder="菜单状态" clearable style="width: 240px">
-            <el-option v-for="dict in statusDicts"
-                       :key="dict.value"
-                       :label="dict.label"
-                       :value="dict.value"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary"  @click="handleQuery" v-hasPerms="['/system/menu/list']"><el-icon><Search /></el-icon>搜索</el-button>
-          <el-button   @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
-        </el-form-item>
+        <el-row :gutter="16">
+          <el-col :span="8">
+            <el-form-item label="菜单名称" prop="menuName">
+              <el-input
+                v-model="queryParams.menuName"
+                placeholder="请输入菜单名称"
+                clearable
+                style="width: 240px"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="状态" prop="status">
+              <el-select v-model="queryParams.status" placeholder="菜单状态" clearable style="width: 240px">
+                <el-option v-for="dict in statusDicts"
+                           :key="dict.value"
+                           :label="dict.label"
+                           :value="dict.value"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item>
+              <el-button type="primary"  @click="handleQuery" v-hasPerms="['/system/menu/list']"><el-icon><Search /></el-icon>搜索</el-button>
+              <el-button   @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
+            </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
     </yt-card>
     <yt-card>

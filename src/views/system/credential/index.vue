@@ -398,21 +398,25 @@
     <!--sousuo  -->
     <yt-card padding="18px 18px 0">
       <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch">
-            <el-form-item label="插件编码" prop="pluginCode">
-              <el-select
-                class="search-select"
-                v-model="queryParams.pluginCode"
-                placeholder="请选择插件编码"
-                @change="queryInstance"
-                clearable
-                style="width: 240px"
-              >
-                <el-option v-for="item in pluginCodes"
-                           :key="item.value"
-                           :label="item.label"
-                           :value="item.value"/>
-              </el-select>
-            </el-form-item>
+        <el-row :gutter="16">
+          <el-col :span="8">
+              <el-form-item label="插件编码" prop="pluginCode">
+                <el-select
+                  class="search-select"
+                  v-model="queryParams.pluginCode"
+                  placeholder="请选择插件编码"
+                  @change="queryInstance"
+                  clearable
+                  style="width: 240px"
+                >
+                  <el-option v-for="item in pluginCodes"
+                             :key="item.value"
+                             :label="item.label"
+                             :value="item.value"/>
+                </el-select>
+              </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="插件实例" prop="instanceCode">
               <el-select
                 class="search-select"
@@ -427,14 +431,18 @@
                            :value="item.instanceCode"/>
               </el-select>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="凭证别名" prop="credentialName">
               <el-input
                 v-model="queryParams.credentialName"
                 placeholder="请输入凭证别名"
                 clearable
-                style="width: 240px"
+                style="width: 210px"
               />
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="凭证名称" prop="credentialKey">
               <el-input
                 v-model="queryParams.credentialKey"
@@ -443,6 +451,8 @@
                 style="width: 240px"
               />
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="凭证类型" prop="credentialType">
               <el-select
                 class="search-select"
@@ -457,6 +467,8 @@
                            :value="item.value"/>
               </el-select>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="状态" prop="status">
               <el-select
                 class="search-select"
@@ -471,6 +483,8 @@
                            :value="dict.value"/>
               </el-select>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="创建时间">
               <el-date-picker
                 v-model="dateRange"
@@ -483,10 +497,14 @@
                 style="width: 240px"
               ></el-date-picker>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item>
               <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
               <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
             </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
     </yt-card>
 

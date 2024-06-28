@@ -183,22 +183,32 @@ getList()
     <!--sousuo  -->
     <yt-card padding="18px 18px 0">
       <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch">
-            <el-form-item label="流程定义key" prop="processDefinitionKey">
-              <el-input v-model="queryParams.processDefinitionKey" placeholder="请输入流程定义key" clearable style="width: 240px" />
+        <el-row :gutter="16">
+          <el-col :span="8">
+            <el-form-item label="流水线key" prop="processDefinitionKey">
+              <el-input v-model="queryParams.processDefinitionKey" placeholder="请输入流水线定义key" clearable style="width: 240px" />
             </el-form-item>
-            <el-form-item label="流程定义名称" prop="processDefinitionName">
-              <el-input v-model="queryParams.processDefinitionName" placeholder="请输入流程定义名称" clearable style="width: 240px"/>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="流水线名称" prop="processDefinitionName">
+              <el-input v-model="queryParams.processDefinitionName" placeholder="请输入流水线定义名称" clearable style="width: 240px"/>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="状态" prop="status">
               <el-select class="search-select" v-model="queryParams.status" placeholder="状态" clearable style="width: 240px">
                 <el-option v-for="dict in status" :key="dict.value" :label="dict.label" :value="dict.value" />
               </el-select>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="创建时间">
               <el-date-picker v-model="daterangeArray" value-format="YYYY-MM-DD" type="daterange"
                               range-separator="-" start-placeholder="开始日期" end-placeholder="结束日期"
                               clearable style="width: 240px"></el-date-picker>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item>
               <el-button type="primary" @click="handleQuery"><el-icon>
                 <Search />
@@ -207,6 +217,8 @@ getList()
                 <RefreshRight />
               </el-icon>重置</el-button>
             </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
     </yt-card>
 

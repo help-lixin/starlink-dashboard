@@ -461,24 +461,18 @@
     <el-dialog :title="title" v-model="addDialog" width="720px" append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
-          <el-row>
-            <el-col :span="24">
+          <el-row :gutter="16">
+            <el-col :span="8">
               <el-form-item label="标签key" prop="labelKey">
                 <el-input v-model="form.labelKey" placeholder="请输入标签key" maxlength="20" :disabled="form.id != undefined" style="width: 300px"/>
               </el-form-item>
             </el-col>
-          </el-row>
-
-          <el-row>
-            <el-col :span="24">
+            <el-col :span="8">
               <el-form-item label="标签名" prop="labelName">
                 <el-input v-model="form.labelName" placeholder="请输入标签名" maxlength="20" style="width: 300px"/>
               </el-form-item>
             </el-col>
-          </el-row>
-
-          <el-row>
-            <el-col :span="24">
+            <el-col :span="8">
               <el-form-item label="状态">
                 <el-radio-group v-model="form.status">
                   <el-radio
@@ -489,16 +483,12 @@
                 </el-radio-group>
               </el-form-item>
             </el-col>
-          </el-row>
-
-          <el-row>
-            <el-col :span="24">
+            <el-col :span="8">
               <el-form-item label="SSH实例">
                 <el-transfer v-model="form.inventorys" :data="formInstance"  :titles="[ '未关联' , '已关联']"/>
               </el-form-item>
             </el-col>
           </el-row>
-
         </el-form>
       </yt-card>
       <template #footer>
