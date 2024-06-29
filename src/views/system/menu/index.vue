@@ -327,7 +327,7 @@
 
 
     <!-- 添加/修改菜单 -->
-    <el-dialog :title="title" v-model="open" width="680px" append-to-body>
+    <el-dialog :title="title" v-model="open" width="var(--dialog-lg-w)"  append-to-body>
       <yt-card>
 
         <el-form ref="formRef" :model="menuForm" :rules="rules"  label-width="100px">

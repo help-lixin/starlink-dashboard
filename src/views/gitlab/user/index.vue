@@ -335,28 +335,6 @@
                 {{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}
               </template>
             </el-table-column>
-            <!-- <el-table-column
-              label="操作"
-              align="left"
-              width="220"
-            >
-              <template #default="scope">
-               <div class="action-btn">
-                <el-button
-                  size="small"
-                  icon="Edit"
-                  @click="handleUpdate(scope.row)"
-                  v-hasPerms="['/gitlab/user/edit']"
-                >修改</el-button>
-                <el-button
-                  size="small"
-                  :icon="getStatusIcon(scope.row)"
-                  @click="handleStatusChange(scope.row)"
-                  v-hasPerms="['/gitlab/user/changeStatus']"
-                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-               </div>
-              </template>
-            </el-table-column> -->
       </el-table>
       </div>
       <div class="page-wrap">
@@ -366,7 +344,7 @@
 
 
     <!-- 添加或修改用户配置对话框 -->
-    <el-dialog :title="title" v-model="open" width="600px" append-to-body>
+    <el-dialog :title="title" v-model="open" width="var(--dialog-lg-w)"  append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
           <el-row>

@@ -198,7 +198,7 @@
       </div>
     </yt-card>
 
-    <el-dialog :title="title" v-model="open" width="800px" append-to-body>
+    <el-dialog :title="title" v-model="open" width="var(--dialog-lg-w)"  append-to-body>
       <yt-card>
         <el-form-item >
             <el-input v-model="logInfo" type="textarea" rows="20" disabled="true"></el-input>

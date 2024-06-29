@@ -454,7 +454,7 @@
 
 
     <!-- 添加或修改项目配置对话框 -->
-    <el-dialog :title="title" v-model="open" width="800px" append-to-body>
+    <el-dialog :title="title" v-model="open" width="var(--dialog-lg-w)"  append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
           <el-row>

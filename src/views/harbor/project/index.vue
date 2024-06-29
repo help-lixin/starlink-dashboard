@@ -549,7 +549,7 @@
     </yt-card>
 
     <!-- 新增对话框 -->
-    <el-dialog :title="title" v-model="addDialog" width="600px" append-to-body>
+    <el-dialog :title="title" v-model="addDialog" width="var(--dialog-lg-w)"  append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
           <el-row>

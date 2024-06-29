@@ -462,7 +462,7 @@ import { assign } from 'lodash'
 
 
     <!-- 添加或修改成员配置对话框 -->
-    <el-dialog :title="title" v-model="open" width="600px" append-to-body>
+    <el-dialog :title="title" v-model="open" width="var(--dialog-lg-w)"  append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
           <el-row>
