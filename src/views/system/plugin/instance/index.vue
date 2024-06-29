@@ -344,7 +344,6 @@ const getList = ()=>{
                 @change="handlePlugin"
                 placeholder="请选择插件"
                 clearable
-                style="width: 240px"
               >
                 <el-option v-for="item in queryPlugins"
                            :key="item.value"
@@ -355,7 +354,7 @@ const getList = ()=>{
           </el-col>
           <el-col :span="8">
             <el-form-item label="插件名称" prop="instanceName">
-              <el-input v-model='queryParams.instanceName' placeholder='请输入插件实例名称' clearable style="width: 240px"/>
+              <el-input v-model='queryParams.instanceName' placeholder='请输入插件实例名称' clearable  />
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -365,7 +364,6 @@ const getList = ()=>{
                 v-model="queryParams.status"
                 placeholder="状态"
                 clearable
-                style="width: 240px"
               >
                 <el-option v-for="dict in status"
                            :key="dict.value"
@@ -384,7 +382,6 @@ const getList = ()=>{
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
                 clearable
-                style="width: 240px"
               ></el-date-picker>
             </el-form-item>
           </el-col>

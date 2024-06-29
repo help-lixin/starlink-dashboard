@@ -275,7 +275,6 @@
                   v-model="queryParams.pluginCode"
                   placeholder="请输入插件编码"
                   clearable
-                  style="width: 240px"
                 />
               </el-form-item>
             </el-col>
@@ -285,7 +284,6 @@
                   v-model="queryParams.pluginName"
                   placeholder="请输入插件名称"
                   clearable
-                  style="width: 240px"
                 />
               </el-form-item>
             </el-col>
@@ -296,7 +294,6 @@
                   v-model="queryParams.status"
                   placeholder="用户状态"
                   clearable
-                  style="width: 240px"
                 >
                   <el-option v-for="dict in status"
                              :key="dict.value"
@@ -315,7 +312,6 @@
                   start-placeholder="开始日期"
                   end-placeholder="结束日期"
                   clearable
-                  style="width: 240px"
                 ></el-date-picker>
               </el-form-item>
             </el-col>

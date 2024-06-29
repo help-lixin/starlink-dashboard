@@ -304,7 +304,7 @@
   <div class="main-wrapp">
     <!--sousuo  -->
     <yt-card :padding="'18px 18px 0'">
-    <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" >
+    <el-form class="form-wrap"  :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" >
       <el-row :gutter="16">
         <el-col :span="8">
             <el-form-item label="插件实例" prop="instanceCode">
@@ -313,7 +313,6 @@
                 v-model="queryParams.instanceCode"
                 @keyup.enter.native="handleQuery"
                 placeholder="请选择实例"
-                style="width: 240px"
               >
               <el-option v-for="item in pluginInstance"
                 :key="item.pluginCode"
@@ -329,7 +328,6 @@
                 v-model="queryParams.status"
                 placeholder="项目状态"
                 clearable
-                style="width: 240px"
               >
               <el-option v-for="dict in status"
                 :key="dict.value"
@@ -347,7 +345,6 @@
                 @keyup.enter.native="handleQuery"
                 placeholder="请选择可见性级别"
                 clearable
-                style="width: 240px"
               >
               <el-option v-for="item in visibilityArr"
                 :key="item"
@@ -363,7 +360,6 @@
                 v-model="queryParams.projectName"
                 placeholder="请输入项目名称"
                 clearable
-                style="width: 240px"
                 @keyup.enter.native="handleQuery"
               />
             </el-form-item>
@@ -373,7 +369,6 @@
             <el-form-item label="创建时间">
               <el-date-picker
                 v-model="dateRange"
-                style="width: 240px"
                 value-format="YYYY-MM-DD"
                 type="daterange"
                 range-separator="-"

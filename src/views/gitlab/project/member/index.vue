@@ -344,7 +344,7 @@ const handleChangeStatus = (row)=>{
   <div class="main-wrapp">
     <yt-card>
       <!--sousuo  -->
-      <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" >
+      <el-form class="form-wrap"  :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" >
         <el-row :gutter="16">
 
             <el-col :span="8">
@@ -353,7 +353,6 @@ const handleChangeStatus = (row)=>{
                   class="search-select"
                     v-model="queryParams.instanceCode"
                     @keyup.enter.native="handleQuery"
-                    style="width: 240px"
                     placeholder="请选择实例"
                   >
                   <el-option v-for="item in pluginInstance"
@@ -370,7 +369,6 @@ const handleChangeStatus = (row)=>{
                   v-model="queryParams.userName"
                   placeholder="请输入成员名称"
                   clearable
-                  style="width: 240px"
                   @keyup.enter.native="handleQuery"
                 />
               </el-form-item>
@@ -383,7 +381,6 @@ const handleChangeStatus = (row)=>{
                     v-model="queryParams.status"
                     placeholder="项目状态"
                     clearable
-                    style="width: 240px"
                   >
                   <el-option v-for="dict in status"
                     :key="dict.value"
@@ -400,7 +397,6 @@ const handleChangeStatus = (row)=>{
                     v-model="queryParams.projectId"
                     placeholder="请选择项目"
                     clearable
-                    style="width: 240px"
                   >
                   <el-option v-for="dict in projects"
                     :key="dict.projectName"
@@ -420,11 +416,10 @@ const handleChangeStatus = (row)=>{
                     start-placeholder="开始日期"
                     end-placeholder="结束日期"
                     clearable
-                    style="width: 240px"
                   ></el-date-picker>
                 </el-form-item>
             </el-col>
-          
+
             <el-col :span="8">
                 <el-form-item>
                   <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>

@@ -398,7 +398,7 @@
   <div class="main-wrapp">
     <!--sousuo  -->
     <yt-card padding="18px 18px 0">
-      <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch">
+      <el-form class="form-wrap"  :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch">
         <el-row :gutter="16">
           <el-col :span="8">
               <el-form-item label="插件编码" prop="pluginCode">
@@ -408,7 +408,6 @@
                   placeholder="请选择插件编码"
                   @change="queryInstance"
                   clearable
-                  style="width: 240px"
                 >
                   <el-option v-for="item in pluginCodes"
                              :key="item.value"
@@ -424,7 +423,6 @@
                 v-model="queryParams.instanceCode"
                 placeholder="请选择实例"
                 clearable
-                style="width: 240px"
               >
                 <el-option v-for="item in pluginInstance"
                            :key="item.pluginCode"
@@ -439,7 +437,6 @@
                 v-model="queryParams.credentialName"
                 placeholder="请输入凭证别名"
                 clearable
-                style="width: 210px"
               />
             </el-form-item>
           </el-col>
@@ -449,7 +446,6 @@
                 v-model="queryParams.credentialKey"
                 placeholder="请输入凭证唯一名称"
                 clearable
-                style="width: 240px"
               />
             </el-form-item>
           </el-col>
@@ -460,7 +456,6 @@
                 v-model="queryParams.credentialType"
                 placeholder="请选择插件类型"
                 clearable
-                style="width: 240px"
               >
                 <el-option v-for="item in credentialTypes"
                            :key="item.value"
@@ -476,7 +471,6 @@
                 v-model="queryParams.status"
                 placeholder="工具状态"
                 clearable
-                style="width: 240px"
               >
                 <el-option v-for="dict in status"
                            :key="dict.value"
@@ -495,7 +489,6 @@
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
                 clearable
-                style="width: 240px"
               ></el-date-picker>
             </el-form-item>
           </el-col>

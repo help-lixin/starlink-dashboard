@@ -234,9 +234,8 @@
 <template>
   <div class="app-container">
     <yt-card padding="18px 18px 0">
-
       <!-- 搜索处理 -->
-      <el-form :model="queryParams" ref="queryForm"  :inline="true" v-show="showSearch">
+      <el-form class="form-wrap"  :model="queryParams" ref="queryForm"  :inline="true" v-show="showSearch">
         <el-row :gutter="16">
           <el-col :span="8">
             <el-form-item label="菜单名称" prop="menuName">
@@ -244,13 +243,12 @@
                 v-model="queryParams.menuName"
                 placeholder="请输入菜单名称"
                 clearable
-                style="width: 240px"
               />
             </el-form-item>
           </el-col>
           <el-col :span="8">
             <el-form-item label="状态" prop="status">
-              <el-select v-model="queryParams.status" placeholder="菜单状态" clearable style="width: 240px">
+              <el-select v-model="queryParams.status" placeholder="菜单状态" clearable >
                 <el-option v-for="dict in statusDicts"
                            :key="dict.value"
                            :label="dict.label"

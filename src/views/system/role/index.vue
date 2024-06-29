@@ -356,8 +356,7 @@
               <el-select
                 v-model="queryParams.status"
                 placeholder="角色状态"
-                clearable
-                style="width: 240px">
+                clearable >
                 <el-option v-for="dict in statusDicts"
                            :key="dict.value"
                            :label="dict.label"
@@ -375,7 +374,6 @@
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
                 clearable
-                style="width: 240px"
               ></el-date-picker>
             </el-form-item>
           </el-col>

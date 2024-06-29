@@ -432,7 +432,7 @@
   <div class="main-wrapp">
     <!--sousuo  -->
     <yt-card>
-      <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch" >
+      <el-form class="form-wrap"  :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch" >
         <el-row :gutter="16">
           <el-col :span="8">
               <el-form-item label="插件实例" prop="instanceCode">
@@ -442,7 +442,6 @@
                   @keyup.enter.native="handleQuery"
                   placeholder="请选择实例"
                   clearable
-                  style="width: 240px"
                 >
                   <el-option v-for="item in pluginInstance"
                              :key="item.pluginCode"
@@ -453,7 +452,7 @@
           </el-col>
           <el-col :span="8">
             <el-form-item label="项目名" prop="queryParams.projectName">
-              <el-input v-model="queryParams.projectName" placeholder="请输入项目名" style="width: 240px" />
+              <el-input v-model="queryParams.projectName" placeholder="请输入项目名" />
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -463,7 +462,6 @@
                   v-model="queryParams.status"
                   placeholder="项目状态"
                   clearable
-                  style="width: 240px"
                 >
                   <el-option v-for="dict in status"
                              :key="dict.value"
@@ -481,7 +479,6 @@
                 range-separator="-"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
-                style="width: 240px"
               ></el-date-picker>
             </el-form-item>
           </el-col>

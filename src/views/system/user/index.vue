@@ -337,7 +337,6 @@ getList()
                   v-model="queryParams.status"
                   placeholder="用户状态"
                   clearable
-                  style="width: 240px"
                 >
                   <el-option v-for="dict in statusDicts"
                              :key="dict.value"
@@ -356,7 +355,6 @@ getList()
                   start-placeholder="开始日期"
                   end-placeholder="结束日期"
                   clearable
-                  style="width: 240px"
                 ></el-date-picker>
               </el-form-item>
             </el-col>

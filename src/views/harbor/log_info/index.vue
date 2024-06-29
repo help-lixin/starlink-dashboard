@@ -94,7 +94,7 @@
   <div class="main-wrapp">
     <!--sousuo  -->
     <yt-card>
-      <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch" >
+      <el-form  class="form-wrap"  :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch" >
         <el-row :gutter="16">
           <el-col :span="8">
             <el-form-item label="插件实例" prop="instanceCode">
@@ -103,7 +103,6 @@
                 @keyup.enter.native="handleQuery"
                 placeholder="请选择实例"
                 clearable
-                style="width: 240px"
               >
                 <el-option v-for="item in pluginInstance"
                            :key="item.pluginCode"
@@ -120,7 +119,6 @@
                     class="search-select2"
                     v-model="queryParams.key"
                     placeholder="请选择资源"
-                    style="width: 100px"
                     clearable
                   >
                       <el-option v-for="item in resources"

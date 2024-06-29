@@ -351,16 +351,16 @@ const handleDelete = function(row){
   <div class="main-wrapp">
     <!--sousuo  -->
     <yt-card>
-      <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch">
+      <el-form class="form-wrap"  :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch">
         <el-row :gutter="16">
           <el-col :span="8">
               <el-form-item label="标签key" prop="queryParams.labelKey">
-                <el-input v-model="queryParams.labelKey" placeholder="请输入标签key" clearable style="width: 240px"/>
+                <el-input v-model="queryParams.labelKey" placeholder="请输入标签key" clearable />
               </el-form-item>
           </el-col>
           <el-col :span="8">
               <el-form-item label="标签名" prop="queryParams.labelName">
-                <el-input v-model="queryParams.labelName" placeholder="请输入标签名" clearable style="width: 240px"/>
+                <el-input v-model="queryParams.labelName" placeholder="请输入标签名" clearable />
               </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -370,7 +370,6 @@ const handleDelete = function(row){
                   v-model="queryParams.status"
                   placeholder="项目状态"
                   clearable
-                  style="width: 240px"
                 >
                   <el-option v-for="dict in status"
                              :key="dict.value"
@@ -383,7 +382,6 @@ const handleDelete = function(row){
               <el-form-item label="创建时间">
                 <el-date-picker
                   v-model="dateRange"
-                  style="width: 240px"
                   value-format="YYYY-MM-DD"
                   type="daterange"
                   range-separator="-"

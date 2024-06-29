@@ -352,43 +352,53 @@
   <div class="main-wrapp">
     <!--sousuo  -->
     <yt-card>
-      <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch">
-            <el-form-item label="标签key" prop="queryParams.labelKey">
-              <el-input v-model="queryParams.labelKey" placeholder="请输入标签key" clearable style="width: 240px"/>
-            </el-form-item>
-            <el-form-item label="标签名" prop="queryParams.labelName">
-              <el-input v-model="queryParams.labelName" placeholder="请输入标签名" clearable style="width: 240px"/>
-            </el-form-item>
-            <el-form-item label="状态" prop="status">
-              <el-select
-                class="search-select"
-                v-model="queryParams.status"
-                placeholder="项目状态"
-                clearable
-                style="width: 240px"
-              >
-                <el-option v-for="dict in status"
-                           :key="dict.value"
-                           :label="dict.label"
-                           :value="dict.value"/>
-              </el-select>
-            </el-form-item>
-            <el-form-item label="创建时间">
-              <el-date-picker
-                v-model="dateRange"
-                style="width: 240px"
-                value-format="YYYY-MM-DD"
-                type="daterange"
-                range-separator="-"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期"
-                clearable
-              ></el-date-picker>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
-              <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
-            </el-form-item>
+      <el-form class="form-wrap"  :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch">
+        <el-row :gutter="16">
+          <el-col :span="8">
+              <el-form-item label="标签key" prop="queryParams.labelKey">
+                <el-input v-model="queryParams.labelKey" placeholder="请输入标签key" clearable />
+              </el-form-item>
+          </el-col>
+          <el-col :span="8">
+              <el-form-item label="标签名" prop="queryParams.labelName">
+                <el-input v-model="queryParams.labelName" placeholder="请输入标签名" clearable />
+              </el-form-item>
+          </el-col>
+          <el-col :span="8">
+              <el-form-item label="状态" prop="status">
+                <el-select
+                  class="search-select"
+                  v-model="queryParams.status"
+                  placeholder="项目状态"
+                  clearable
+                >
+                  <el-option v-for="dict in status"
+                             :key="dict.value"
+                             :label="dict.label"
+                             :value="dict.value"/>
+                </el-select>
+              </el-form-item>
+          </el-col>
+          <el-col :span="8">
+              <el-form-item label="创建时间">
+                <el-date-picker
+                  v-model="dateRange"
+                  value-format="YYYY-MM-DD"
+                  type="daterange"
+                  range-separator="-"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+                  clearable
+                ></el-date-picker>
+              </el-form-item>
+          </el-col>
+          <el-col :span="8">
+              <el-form-item>
+                <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
+                <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
+              </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
     </yt-card>
     <yt-card>

@@ -186,17 +186,17 @@ getList()
         <el-row :gutter="16">
           <el-col :span="8">
             <el-form-item label="流水线key" prop="processDefinitionKey">
-              <el-input v-model="queryParams.processDefinitionKey" placeholder="请输入流水线定义key" clearable style="width: 240px" />
+              <el-input v-model="queryParams.processDefinitionKey" placeholder="请输入流水线定义key" clearable />
             </el-form-item>
           </el-col>
           <el-col :span="8">
             <el-form-item label="流水线名称" prop="processDefinitionName">
-              <el-input v-model="queryParams.processDefinitionName" placeholder="请输入流水线定义名称" clearable style="width: 240px"/>
+              <el-input v-model="queryParams.processDefinitionName" placeholder="请输入流水线定义名称" clearable />
             </el-form-item>
           </el-col>
           <el-col :span="8">
             <el-form-item label="状态" prop="status">
-              <el-select class="search-select" v-model="queryParams.status" placeholder="状态" clearable style="width: 240px">
+              <el-select class="search-select" v-model="queryParams.status" placeholder="状态" clearable >
                 <el-option v-for="dict in status" :key="dict.value" :label="dict.label" :value="dict.value" />
               </el-select>
             </el-form-item>
@@ -205,7 +205,7 @@ getList()
             <el-form-item label="创建时间">
               <el-date-picker v-model="daterangeArray" value-format="YYYY-MM-DD" type="daterange"
                               range-separator="-" start-placeholder="开始日期" end-placeholder="结束日期"
-                              clearable style="width: 240px"></el-date-picker>
+                              clearable ></el-date-picker>
             </el-form-item>
           </el-col>
           <el-col :span="8">

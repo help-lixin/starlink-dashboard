@@ -257,7 +257,7 @@
   <div class="main-wrapp">
     <!--sousuo  -->
     <yt-card>
-      <el-form :model="queryParams" ref="queryForm"  :inline="true" v-show="showSearch" >
+      <el-form class="form-wrap"  :model="queryParams" ref="queryForm"  :inline="true" v-show="showSearch" >
         <el-row :gutter="16">
           <el-col :span="8">
               <el-form-item label="用户名称" prop="userName">
@@ -265,7 +265,6 @@
                   v-model="queryParams.userName"
                   placeholder="请输入用户名称"
                   clearable
-                  style="width: 240px"
                   @keyup.enter.native="handleQuery"
                 />
               </el-form-item>
@@ -277,7 +276,6 @@
                   v-model="queryParams.status"
                   placeholder="用户状态"
                   clearable
-                  style="width: 240px"
                 >
                 <el-option v-for="dict in status"
                   :key="dict.value"
@@ -296,7 +294,6 @@
                   start-placeholder="开始日期"
                   end-placeholder="结束日期"
                   clearable
-                  style="width: 240px"
                 ></el-date-picker>
               </el-form-item>
           </el-col>
