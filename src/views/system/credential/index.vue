@@ -5,6 +5,7 @@
   import { dayjs } from "@/utils/common-dayjs"
   import {sysCredentialList, addCredential, queryCredentialInfoById, checkKey , nameSpaceList,
     removeCredential,changeStatus ,credentialTypes,syncAllCredential} from "@/api/sys_credential/credential"
+  import { DeleteFilled } from "@element-plus/icons-vue";
 
   const queryFormRef = ref(null);
   //查询列表信息
@@ -582,14 +583,13 @@
     <el-dialog :title="title" v-model="open" width="600px" append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
-          <el-row>
+          <el-row :gutter="16">
             <el-col :span="12">
               <el-form-item label="插件编码" prop="pluginCode">
                 <el-select
                   class="search-select"
                   v-model="form.pluginCode"
                   placeholder="请选择插件编码"
-                  style="width: 240px"
                   @change="changeInstance"
                 >
                   <el-option v-for="item in formPluginCodes"
@@ -785,31 +785,35 @@
           </el-row>
 
           <div v-if="form.credentialType == 'OPAQUE'" >
-            <el-row  v-for="(label,index) in form.dataList" :key="index">
-              <el-col :span="12">
-                <el-form-item label="键" :prop="`dataList[${index}].key`" :rules="[
+            <div class="inline-card">
+              <el-form label-position="top">
+                <el-row :gutter="8" v-for="(label,index) in form.dataList" :key="index">
+                  <el-col :span="12">
+                    <el-form-item label="键" :prop="`dataList[${index}].key`" :rules="[
                     { required: true, message: '键名不能为空', trigger: 'blur' },
                     { min: 2, max: 255, message: '键名长度必须介于 2 和 255 之间', trigger: 'blur' } ]">
-                  <el-input v-model="label.key" placeholder="请输入键名" maxlength="255" />
-                </el-form-item>
-              </el-col>
+                      <el-input v-model="label.key" placeholder="请输入键名" maxlength="255" />
+                    </el-form-item>
+                  </el-col>
 
-              <el-col :span="10">
-                <el-form-item label="值" :prop="`dataList[${index}].value`" :rules="[
+                  <el-col :span="10">
+                    <el-form-item label="值" :prop="`dataList[${index}].value`" :rules="[
                     { required: true, message: '值不能为空', trigger: 'blur' },
                     { min: 2, max: 255, message: '值长度必须介于 2 和 255 之间', trigger: 'blur' } ]">
-                  <el-input v-model="label.value"  placeholder="请输入值" maxlength="255" />
-                </el-form-item>
-              </el-col>
-              <el-col :span="1">
-                <el-button type="danger" @click="deleteDataList(index)" icon="Delete"></el-button>
-              </el-col>
-            </el-row>
-            <el-row >
-              <el-col :span="12" style="margin: 0px 0px 10px 80px;">
+                      <el-input v-model="label.value"  placeholder="请输入值" maxlength="255" />
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="2">
+                    <div class="icon">
+                      <DeleteFilled  @click="deleteDataList(index)"></DeleteFilled>
+                    </div>
+                  </el-col>
+                </el-row>
+              </el-form>
+              <div class="operate">
                 <el-button type="primary" @click="addDataList">添加Opaque</el-button>
-              </el-col>
-            </el-row>
+              </div>
+            </div>
           </div>
 
           <el-row>

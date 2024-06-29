@@ -64,9 +64,9 @@ code {
 html.dark {
   /* 自定义深色背景颜色 */
   --el-bg-main-color: var(--el-bg-color-overlay);
-  --el-dialog-border-radius: 8px;
 }
 html {
+  --el-dialog-border-radius: 8px;
   /* 自定义浅色背景颜色 */
   --el-bg-main-color: #f6f6f7;
   --menu-bg-color: rgba(255, 255, 255, 1);
@@ -75,6 +75,9 @@ html {
   --el-header-height: 60px;
   --menu-width: 200px;
   --el-table-header-bg-color-my: #f9fafb;
+  //对话框大
+  --dialog-lg-w: 600px;
+  --dialog-md-w: 420px;
   .el-menu {
     --el-menu-hover-bg-color: var(--el-color-primary-light-8);
   }
@@ -106,4 +109,41 @@ html {
 
 #app .djs-palette {
   top: 60px;
+}
+
+.tip-label {
+  display: inline-flex;
+  align-items: center;
+  .el-icon {
+    color: var(--el-color-info);
+  }
+}
+.inline-card {
+  background-color: var(--el-bg-main-color);
+  padding: 16px;
+  margin: 16px 0;
+  border-radius: var(--el-border-radius-base);
+  .operate {
+    text-align: right;
+  }
+  .icon {
+    cursor: pointer;
+    padding: 6px;
+    box-sizing: border-box;
+    border: 1px solid var(--el-border-color);
+    border-radius: var(--el-border-radius-base);
+    width: 32px;
+    height: 32px;
+    vertical-align: middle;
+    position: absolute;
+    bottom: 18px;
+    right: 4px;
+    color: var(--el-color-error);
+    &:hover {
+      border-color: var(--el-color-error);
+    }
+  }
+}
+#app .formily-element-plus-form-item-feedback-layout-loose {
+  margin-bottom: 0;
 }

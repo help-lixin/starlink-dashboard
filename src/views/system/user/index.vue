@@ -393,11 +393,11 @@ getList()
         <!--table  -->
         <div class="table-wrap">
           <el-table v-loading="loading" :data="userList" @selection-change="handleSelectionChange">
-            <el-table-column type="selection" width="60" align="center" />
+            <el-table-column type="selection" width="60" align="center" fixed="left" />
             <el-table-column label="用户编号" align="left" key="userId" prop="userId"/>
             <el-table-column label="用户名称" align="left" key="userName" prop="userName"  :show-overflow-tooltip="true" />
             <el-table-column label="用户昵称" align="left" key="nickName" prop="nickName" :show-overflow-tooltip="true" />
-            <el-table-column label="手机号码" align="left" key="phonenumber" prop="phonenumber" />
+            <el-table-column label="手机号码" align="left" width="150" key="phonenumber" prop="phonenumber" />
             <el-table-column label="状态" align="center" key="status">
               <template #default="{row}">
                 <el-switch
@@ -421,7 +421,8 @@ getList()
             <el-table-column
               label="操作"
               align="center"
-              width="350"
+              fixed="right"
+              width="250"
             >
               <template v-slot="scope">
                 <div class="action-btn">
@@ -466,7 +467,7 @@ getList()
 
 
         <!-- 添加或修改用户配置对话框 -->
-        <el-dialog :title="title" v-model="open" width="600px" append-to-body>
+        <el-dialog :title="title" v-model="open" width="var(--dialog-lg-w)" append-to-body>
             <yt-card>
               <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
                 <el-row>
@@ -475,6 +476,7 @@ getList()
                       <el-input v-model="form.nickName" placeholder="请输入用户昵称" maxlength="30" />
                     </el-form-item>
                   </el-col>
+
                   <el-col :span="12">
                     <el-form-item label="角色">
                       <el-select v-model="form.roleIds" multiple placeholder="请选择角色">

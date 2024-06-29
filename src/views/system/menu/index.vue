@@ -375,12 +375,11 @@
 
             <el-col :span="12" v-if="menuForm.menuType != 'F'">
               <el-form-item prop="isFrame" label="是否外链">
-              <span slot="label">
-                <el-tooltip content="选择是外链则路由地址需要以`http(s)://`开头" placement="top">
-                <el-icon><QuestionFilled /></el-icon>
-                </el-tooltip>
-
-              </span>
+                <template v-slot:label>
+                  <span class="tip-label">是否外链<el-tooltip content="选择是外链则路由地址需要以`http(s)://`开头" placement="top">
+                  <el-icon><QuestionFilled /></el-icon>
+                  </el-tooltip></span>
+                </template>
                 <el-radio-group v-model="menuForm.isFrame">
                   <el-radio label="0">是</el-radio>
                   <el-radio label="1">否</el-radio>
@@ -389,82 +388,70 @@
             </el-col>
 
             <el-col :span="12" v-if="menuForm.menuType != 'F'">
-              <el-form-item prop="path" label="路由地址">
-                <div style="display:flex">
-                  <span slot="label">
-                  <el-tooltip content="访问的路由地址，如：`user`，如外网地址需内链访问则以`http(s)://`开头" placement="top">
+              <el-form-item prop="path" label-width="140">
+                <template v-slot:label>
+                  <span class="tip-label">路由地址<el-tooltip content="访问的路由地址，如：`user`，如外网地址需内链访问则以`http(s)://`开头" placement="top">
                   <el-icon><QuestionFilled /></el-icon>
-                  </el-tooltip>
-                </span>
+                  </el-tooltip></span>
+                </template>
                   <el-input v-model="menuForm.path"  placeholder="请输入路由地址"/>
-                </div>
               </el-form-item>
             </el-col>
 
             <el-col :span="12" v-if="menuForm.menuType == 'C'" >
               <el-form-item prop="component" label="组件路径">
-                <div style="display:flex">
-                <span slot="label">
-                  <el-tooltip content="访问的组件路径，如：`system/user/index`，默认在`views`目录下" placement="top">
+                <template v-slot:label>
+                  <span class="tip-label">组件路径<el-tooltip content="访问的组件路径，如：`system/user/index`，默认在`views`目录下" placement="top">
                   <el-icon><QuestionFilled /></el-icon>
-                  </el-tooltip>
-                </span>
+                  </el-tooltip></span>
+                </template>
                   <el-input v-model="menuForm.component" placeholder="请输入组件路径" />
-                </div>
               </el-form-item>
             </el-col>
 
             <el-col :span="12" v-if="menuForm.menuType != 'M'">
               <el-form-item prop="perms" label="权限字符">
-                <div style="display:flex" >
-                <span slot="label">
-                  <el-tooltip content="控制器中定义的权限字符，如：/system/user/addUser" placement="top">
+                <template v-slot:label>
+                  <span class="tip-label">权限字符<el-tooltip content="控制器中定义的权限字符，如：/system/user/addUser" placement="top">
                   <el-icon><QuestionFilled /></el-icon>
-                  </el-tooltip>
-                </span>
-                  <el-input v-model="menuForm.perms" placeholder="请输入权限标识" maxlength="100" />
-                </div>
+                  </el-tooltip></span>
+                </template>
+                <el-input v-model="menuForm.perms" placeholder="请输入权限标识" maxlength="100" />
               </el-form-item>
             </el-col>
 
             <el-col :span="12" v-if="menuForm.menuType == 'C'">
               <el-form-item prop="query" label="路由参数">
-                <div style="display:flex">
-                <span slot="label">
-                  <el-tooltip content='访问路由的默认传递参数，如：`{"id": 1, "name": "ry"}`' placement="top">
-                    <el-icon><QuestionFilled /></el-icon>
-                  </el-tooltip>
-                </span>
-                  <el-input v-model="menuForm.query" placeholder="请输入路由参数" maxlength="255" />
-                </div>
+                <template v-slot:label>
+                  <span class="tip-label">路由参数<el-tooltip content='访问路由的默认传递参数，如：{"id": 1, "name": "ry"}' placement="top">
+                  <el-icon><QuestionFilled /></el-icon>
+                  </el-tooltip></span>
+                </template>
+                <el-input v-model="menuForm.query" placeholder="请输入路由参数" maxlength="255" />
               </el-form-item>
             </el-col>
 
             <el-col :span="12" v-if="menuForm.menuType == 'C'">
               <el-form-item prop="isCache" label="是否缓存">
-                <div style="display:flex">
-                <span slot="label">
-                  <el-tooltip content="选择是则会被`keep-alive`缓存，需要匹配组件的`name`和地址保持一致" placement="top">
+                <template v-slot:label>
+                  <span class="tip-label">是否缓存<el-tooltip content='选择是则会被`keep-alive`缓存，需要匹配组件的`name`和地址保持一致' placement="top">
                   <el-icon><QuestionFilled /></el-icon>
-                  </el-tooltip>
-                </span>
-                  <el-radio-group v-model="menuForm.isCache">
-                    <el-radio label="0">缓存</el-radio>
-                    <el-radio label="1">不缓存</el-radio>
-                  </el-radio-group>
-                </div>
+                  </el-tooltip></span>
+                </template>
+                <el-radio-group v-model="menuForm.isCache">
+                  <el-radio label="0">缓存</el-radio>
+                  <el-radio label="1">不缓存</el-radio>
+                </el-radio-group>
               </el-form-item>
             </el-col>
 
             <el-col :span="12" v-if="menuForm.menuType != 'F'">
               <el-form-item prop="visible" label="显示状态">
-                <div style="display:flex">
-                <span slot="label">
-                  <el-tooltip content="选择隐藏则路由将不会出现在侧边栏，但仍然可以访问" placement="top">
+                <template v-slot:label>
+                  <span class="tip-label">显示状态<el-tooltip content='选择隐藏则路由将不会出现在侧边栏，但仍然可以访问' placement="top">
                   <el-icon><QuestionFilled /></el-icon>
-                  </el-tooltip>
-                </span>
-                </div>
+                  </el-tooltip></span>
+                </template>
                 <el-radio-group v-model="menuForm.visible">
                   <el-radio
                     v-for="dict in showStatus"
@@ -477,11 +464,11 @@
 
             <el-col :span="12" v-if="menuForm.menuType != 'F'">
               <el-form-item prop="status" label="菜单状态">
-              <span slot="label">
-                <el-tooltip content="选择停用则路由将不会出现在侧边栏，也不能被访问" placement="top">
+                <template v-slot:label>
+                  <span class="tip-label">菜单状态<el-tooltip content='选择停用则路由将不会出现在侧边栏，也不能被访问' placement="top">
                   <el-icon><QuestionFilled /></el-icon>
-                </el-tooltip>
-              </span>
+                  </el-tooltip></span>
+                </template>
                 <el-radio-group v-model="menuForm.status">
                   <el-radio
                     v-for="dict in menuStatus"
