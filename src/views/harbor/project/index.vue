@@ -387,6 +387,45 @@
     }
   });
 
+  // 按钮
+  const btnList = ref([
+    {
+      btnName: '详情',
+      permArray: ['/harbor/project/queryNodeList/**'],
+      isShow: () => true,
+      isDisable: false,
+      clickEvent: queryDetail
+    },
+    {
+      btnName: row => showStatusOperateFun(row.status),
+      permArray: ['/harbor/project/changeStatus/**'],
+      isShow: () => true,
+      isDisable: false,
+      clickEvent: handleStatusChange
+    },
+    {
+      btnName: row => showAccessLevelOperateFun(row.isPublic),
+      permArray: ['/harbor/project/changeAccessLevel/**'],
+      isShow: () => true,
+      isDisable: false,
+      clickEvent: handleChangeAccessLevel
+    },
+    {
+      btnName: '复制',
+      isShow: () => true,
+      isDisable: false,
+      clickEvent: copyPushCommand
+    },
+    {
+      btnName: '删除',
+      class: 'yt-color-error-hover',
+      permArray: ['/harbor/project/del/**'],
+      isShow: () => true,
+      isDisable: false,
+      clickEvent: handleDelete
+    },
+  ])
+
 </script>
 
 <template>
@@ -496,36 +535,12 @@
           <el-table-column
             label="操作"
             align="center"
-            width="420"
+            width="120"
             flixed="right"
           >
             <template #default="scope">
               <div class="action-btn">
-                <el-button
-                  size="small"
-                  icon="List"
-                  @click="queryDetail(scope.row)"
-                  v-hasPerms="['/harbor/project/queryNodeList/**']"
-                >详情</el-button>
-                <el-button
-                  size="small"
-                  :icon="getStatusIcon(scope.row)"
-                  @click="handleStatusChange(scope.row)"
-                  v-hasPerms="['/harbor/project/changeStatus/**']"
-                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-                <el-button size="small"
-                :icon="getAccessLevel(scope.row)"
-                @click="handleChangeAccessLevel(scope.row)"
-                  v-hasPerms="['/harbor/project/changeAccessLevel/**']">
-                  {{ showAccessLevelOperateFun(scope.row.isPublic)  }}
-                </el-button>
-                <el-button size="small" icon="CopyDocument" @click="copyPushCommand(scope.row)">复制push</el-button>
-                <el-button size="small"
-                icon="Delete"
-                @click="handleDelete(scope.row)"
-                  v-hasPerms="['/harbor/project/del/*']">
-                  删除
-                </el-button>
+                <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
               </div>
             </template>
           </el-table-column>

@@ -303,6 +303,25 @@
     reset();
   }
 
+  // 按钮
+  const btnList = ref([
+    {
+      btnName: '修改',
+      permArray: ['/system/role/edit'],
+      isShow: () => true,
+      isDisable: false,
+      clickEvent: handleUpdate
+    },
+    {
+      btnName: '删除',
+      class: 'yt-color-error-hover',
+      permArray: ['/harbor/row/del/**'],
+      isShow: () => true,
+      isDisable: false,
+      clickEvent: handleDelete
+    },
+  ])
+
   // 触发查询
   getList()
 </script>
@@ -417,21 +436,7 @@
             width="220"
           >
             <template v-slot="scope">
-              <div class="action-btn">
-                <el-button
-                  size="small"
-                  icon="Edit"
-                  @click="handleUpdate(scope.row)"
-                  v-hasPerms="['/system/role/edit']"
-                >修改</el-button>
-
-                <el-button
-                  size="small"
-                  icon="Delete"
-                  @click="handleDelete(scope.row)"
-                  v-hasPerms="['/system/role/del/*']"
-                >删除</el-button>
-              </div>
+              <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
             </template>
           </el-table-column>
         </el-table>
