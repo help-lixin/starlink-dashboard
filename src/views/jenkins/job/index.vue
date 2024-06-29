@@ -551,7 +551,7 @@
   <div class="main-wrapp">
     <!--sousuo  -->
     <yt-card :padding="'18px 18px 0'">
-      <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch" >
+      <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch" >
         <el-row :gutter="16">
           <el-col :span="8">
             <el-form-item label="插件实例" prop="instanceCode">
