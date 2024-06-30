@@ -99,6 +99,17 @@
     }
   });
 
+
+// 按钮
+const btnList = ref([
+  {
+    btnName: '查看日志',
+    permArray: ['/jenkins/job/buildJob'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: lookLogs
+  }
+])
 </script>
 
 <template>
@@ -177,19 +188,13 @@
           <el-table-column
             label="操作"
             align="center"
-            width="200"
+            width="220"
             flxed="right"
           >
-            <template #default="scope">
-              <div class="action-btn">
-                <el-button
-                  size="small"
-                  icon="Tickets"
-                  @click="lookLogs(scope.row)"
-                  v-hasPerms="['/jenkins/job/buildJob']"
-                >查看日志</el-button>
-              </div>
+            <template v-slot="scope">
+              <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
             </template>
+
           </el-table-column>
         </el-table>
       </div>
@@ -198,7 +203,7 @@
       </div>
     </yt-card>
 
-    <el-dialog :title="title" v-model="open" width="var(--dialog-lg-w)"  append-to-body>
+    <el-dialog :title="title" v-model="open" width="800px"  append-to-body>
       <yt-card>
         <el-form-item >
             <el-input v-model="logInfo" type="textarea" rows="20" disabled="true"></el-input>

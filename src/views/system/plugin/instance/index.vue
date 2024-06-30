@@ -328,6 +328,25 @@ const getList = ()=>{
       queryPlugins.value = res?.data;
     }
   })
+
+// 按钮
+const btnList = ref([
+{
+  btnName: '修改',
+  permArray: ['/system/plugin/instance/edit'],
+  isShow: () => true,
+  isDisable: false,
+  clickEvent: handleUpdate
+},
+{
+  btnName: row => showStatusOperateFun(row.status),
+  permArray: ['/system/plugin/instance/changeStatus/**'],
+  isShow: () => true,
+  isDisable: false,
+  clickEvent: handleDelete
+}
+])
+
 </script>
 
 <template>
@@ -424,29 +443,12 @@ const getList = ()=>{
             </template>
           </el-table-column>
           <el-table-column
-            label="操作"
-            align="center"
-            width="220"
+              label="操作"
+              align="center"
+              width="220"
           >
             <template v-slot="scope">
-              <div class="action-btn">
-                <el-button
-                  size="small"
-                  icon="Edit"
-                  @click="handleUpdate(scope.row)"
-                  v-hasPerms="['/system/plugin/instance/edit']"
-                >修改</el-button>
-
-                <el-button
-                  size="small"
-                  :icon="getStatusIcon(scope.row)"
-                  @click="handleDelete(scope.row)"
-                  v-hasPerms="['/system/plugin/instance/changeStatus/**']"
-                >
-                  {{ showStatusOperateFun(scope.row.status)  }}
-                </el-button>
-
-              </div>
+              <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
             </template>
           </el-table-column>
         </el-table>

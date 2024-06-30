@@ -280,6 +280,27 @@
 
     }
   });
+
+
+// 按钮
+const btnList = ref([
+  {
+    btnName: '修改',
+    permArray: ['/jenkins/systemConfig/add'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleUpdate
+  },
+  {
+    btnName: row => showStatusOperateFun(row.status),
+    permArray: ['/jenkins/systemConfig/changeStatus/**'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleStatusChange
+  }
+])
+
+
 </script>
 
 <template>
@@ -404,22 +425,27 @@
             align="center"
             width="220"
           >
-            <template #default="scope">
-              <div class="action-btn">
-                <el-button
-                  size="small"
-                  icon="Edit"
-                  @click="handleUpdate(scope.row)"
-                  v-hasPerms="['/jenkins/systemConfig/add']"
-                >修改</el-button>
-                <el-button
-                  size="small"
-                  :icon="getStatusIcon(scope.row)"
-                  @click="handleStatusChange(scope.row)"
-                  v-hasPerms="['/jenkins/systemConfig/changeStatus/**']"
-                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-              </div>
+
+            <template v-slot="scope">
+              <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
             </template>
+
+            <!--            <template #default="scope">-->
+<!--              <div class="action-btn">-->
+<!--                <el-button-->
+<!--                  size="small"-->
+<!--                  icon="Edit"-->
+<!--                  @click="handleUpdate(scope.row)"-->
+<!--                  v-hasPerms="['/jenkins/systemConfig/add']"-->
+<!--                >修改</el-button>-->
+<!--                <el-button-->
+<!--                  size="small"-->
+<!--                  :icon="getStatusIcon(scope.row)"-->
+<!--                  @click="handleStatusChange(scope.row)"-->
+<!--                  v-hasPerms="['/jenkins/systemConfig/changeStatus/**']"-->
+<!--                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>-->
+<!--              </div>-->
+<!--            </template>-->
           </el-table-column>
         </el-table>
       </div>

@@ -2,7 +2,7 @@
   <div class="btnMenuList">
     <div class="menuList">
       <span v-if="showBtnList.length === 0">--</span>
-      <template v-else-if="showBtnList.length < 3">
+      <template v-else-if="showBtnList.length < 6">
         <template v-for="(item, index) in showBtnList" :key="index">
           <span
             class="btnSpan"

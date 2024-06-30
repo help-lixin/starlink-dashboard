@@ -299,6 +299,33 @@
   // 触发查询
   getList();
 
+
+  // 按钮
+const btnList = ref([
+  {
+    btnName: '修改',
+    permArray: ['/ansible/host/add'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleUpdate
+  },
+  {
+    btnName: row => showStatusOperateFun(row.status),
+    permArray: ['/ansible/host/changeStatus/**'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleStatusChange
+  },
+  {
+    btnName: '删除',
+    class: 'yt-color-error-hover',
+    permArray: ['/ansible/host/del/*'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleDelete
+  },
+])
+
 </script>
 
 <template>
@@ -407,27 +434,7 @@
             width="220"
           >
             <template v-slot="scope">
-              <div class="action-btn">
-                <el-button
-                  size="small"
-                  @click="handleStatusChange(scope.row)"
-                  v-hasPerms="['/ansible/host/changeStatus/**']"
-                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-
-
-                <el-button
-                  size="small"
-                  @click="handleUpdate(scope.row)"
-                  v-hasPerms="['/ansible/host/add']"
-                >修改</el-button>
-
-                <el-button
-                  size="small"
-                  @click="handleDelete(scope.row)"
-                  v-hasPerms="['/ansible/host/del/*']"
-                >删除</el-button>
-
-              </div>
+              <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
             </template>
           </el-table-column>
         </el-table>

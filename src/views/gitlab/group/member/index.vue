@@ -286,6 +286,27 @@ import { assign } from 'lodash'
     }
   }
 
+
+  // 按钮
+  const btnList = ref([
+  {
+    btnName: row => showStatusOperateFun(row.status),
+    permArray: ['/gitlab/group/member/changeStatus/**'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleChangeStatus
+  },
+  {
+    btnName: '删除',
+    class: 'yt-color-error-hover',
+    permArray: ['/gitlab/group/member/del'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleDelete
+  },
+])
+
+
   const iniOption = ()=>{
     // 默认情况下:选择一个"实例"下的一个"组",进行查询
     queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
@@ -430,27 +451,8 @@ import { assign } from 'lodash'
               align="center"
               width="220"
             >
-              <template #default="scope">
-               <div class="action-btn">
-                 <el-button
-                 size="small"
-                 :icon="getStatusIcon(scope.row)"
-                 @click="handleChangeStatus(scope.row)"
-                 v-hasPerms="['/gitlab/group/member/changeStatus/**']"
-                 >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-                 <el-button
-                   size="small"
-                   icon="Delete"
-                   @click="handleDelete(scope.row)"
-                   v-hasPerms="['/gitlab/group/member/del']"
-                 >删除</el-button>
-                <!-- <el-button
-                  size="small"
-                  icon="Edit"
-                  @click="handleEdit(scope.row)"
-                  v-hasPerms="['/gitlab/group/edit']"
-                >修改</el-button> -->
-               </div>
+              <template v-slot="scope">
+                <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
               </template>
             </el-table-column>
       </el-table>

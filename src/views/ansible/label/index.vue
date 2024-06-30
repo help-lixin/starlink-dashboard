@@ -344,6 +344,32 @@
   //   reset();
   // }
 
+  // 按钮
+  const btnList = ref([
+  {
+    btnName: '修改',
+    permArray: ['/ansible/label/queryLabelDetail/*'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleUpdate
+  },
+  {
+    btnName: row => showStatusOperateFun(row.status),
+    permArray: ['/ansible/label/changeStatus/**'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleStatusChange
+  },
+  {
+    btnName: '删除',
+    class: 'yt-color-error-hover',
+    permArray: ['/ansible/label/del/*'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleDelete
+  },
+])
+
   // 触发查询
   getList();
 </script>
@@ -440,24 +466,8 @@
             align="center"
             width="220"
           >
-            <template #default="scope">
-              <div class="action-btn">
-                <el-button
-                  size="small"
-                  @click="handleStatusChange(scope.row)"
-                  v-hasPerms="['/ansible/label/changeStatus/**']"
-                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-                <el-button
-                  size="small"
-                  @click="handleUpdate(scope.row)"
-                  v-hasPerms="['/ansible/label/queryLabelDetail/*']"
-                >修改</el-button>
-                <el-button
-                  size="small"
-                  @click="handleDelete(scope.row)"
-                  v-hasPerms="['/ansible/label/del/*']"
-                >删除</el-button>
-              </div>
+            <template v-slot="scope">
+              <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
             </template>
           </el-table-column>
         </el-table>
@@ -468,21 +478,15 @@
     </yt-card>
 
     <!-- 新增/更新对话框 -->
-    <el-dialog :title="title" v-model="addDialog"  width="var(--dialog-lg-w)"  append-to-body>
+    <el-dialog :title="title" v-model="addDialog"  width="720px"  append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
-          <el-row :gutter="16">
-            <el-col :span="8">
               <el-form-item label="标签key" prop="labelKey">
-                <el-input v-model="form.labelKey" placeholder="请输入标签key" maxlength="20" :disabled="form.id != undefined" style="width: 300px"/>
+                <el-input v-model="form.labelKey" placeholder="请输入标签key" maxlength="20" :disabled="form.id != undefined" />
               </el-form-item>
-            </el-col>
-            <el-col :span="8">
               <el-form-item label="标签名" prop="labelName">
-                <el-input v-model="form.labelName" placeholder="请输入标签名" maxlength="20" style="width: 300px"/>
+                <el-input v-model="form.labelName" placeholder="请输入标签名" maxlength="20" />
               </el-form-item>
-            </el-col>
-            <el-col :span="8">
               <el-form-item label="状态">
                 <el-radio-group v-model="form.status">
                   <el-radio
@@ -492,13 +496,9 @@
                   >{{dict.label}}</el-radio>
                 </el-radio-group>
               </el-form-item>
-            </el-col>
-            <el-col :span="8">
               <el-form-item label="SSH实例">
                 <el-transfer v-model="form.inventorys" :data="formInstance"  :titles="[ '未关联' , '已关联']"/>
               </el-form-item>
-            </el-col>
-          </el-row>
         </el-form>
       </yt-card>
       <template #footer>

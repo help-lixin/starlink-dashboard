@@ -298,6 +298,35 @@
       // 触发查询
       getList();
   });
+
+
+
+// 按钮
+const btnList = ref([
+  {
+    btnName: '修改',
+    permArray: ['/gitlab/project/add'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleUpdate
+  },
+  {
+    btnName: row => showStatusOperateFun(row.status),
+    permArray: ['/gitlab/project/changeStatus'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleStatusChange
+  },
+  {
+    btnName: '删除',
+    class: 'yt-color-error-hover',
+    permArray: ['/gitlab/project/changeStatus'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleDelete
+  },
+])
+
 </script>
 
 <template>
@@ -420,29 +449,10 @@
             <el-table-column
               label="操作"
               align="center"
-              width="240"
+              width="220"
             >
-              <template #default="scope">
-               <div class="action-btn">
-                <el-button
-                  size="small"
-                  icon="Edit"
-                  @click="handleUpdate(scope.row)"
-                  v-hasPerms="['/gitlab/project/add']"
-                >修改</el-button>
-                <el-button
-                  size="small"
-                  :icon="getStatusIcon(scope.row)"
-                  @click="handleStatusChange(scope.row)"
-                  v-hasPerms="['/gitlab/project/changeStatus']"
-                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-                <el-button
-                  size="small"
-                  icon="Delete"
-                  @click="handleDelete(scope.row)"
-                  v-hasPerms="['/gitlab/project/changeStatus']"
-                >删除</el-button>
-               </div>
+              <template v-slot="scope">
+                <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
               </template>
             </el-table-column>
       </el-table>

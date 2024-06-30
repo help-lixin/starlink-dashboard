@@ -303,6 +303,32 @@ const cancel = ()=>{
     reset();
 }
 
+// 按钮
+const btnList = ref([
+  {
+    btnName: '修改',
+    permArray: ['/system/user/edit'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleUpdate
+  },
+  {
+    btnName: '删除',
+    class: 'yt-color-error-hover',
+    permArray: ['/system/user/del/*'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleDelete
+  },
+  {
+    btnName: '重置密码',
+    permArray: ['/system/user/resetPwd'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleResetPwd
+  }
+])
+
 // 触发查询
 getList()
 </script>
@@ -417,44 +443,12 @@ getList()
               </template>
             </el-table-column>
             <el-table-column
-              label="操作"
-              align="center"
-              fixed="right"
-              width="250"
+                label="操作"
+                align="center"
+                width="220"
             >
               <template v-slot="scope">
-                <div class="action-btn">
-                  <el-button
-                    size="small"
-                    icon="Edit"
-                    @click="handleUpdate(scope.row)"
-                    v-hasPerms="['/system/user/edit']"
-                  >修改</el-button>
-                  <el-button
-                    v-if="false"
-                    size="small"
-                    icon="Link"
-                    @click="contractAddress(scope.row)"
-                  >关联地址</el-button>
-                  <el-button
-                    size="small"
-                    icon="Delete"
-                    @click="handleDelete(scope.row)"
-                    v-hasPerms="['/system/user/del/*']"
-                  >删除</el-button>
-
-
-                  <el-dropdown size="default" @command="(command) => handleCommand(command, scope.row)" v-hasPerms="['/system/user/resetPwd', '/system/user/edit']">
-                    <el-button size="small" icon="More">更多</el-button>
-                    <template #dropdown>
-                      <el-dropdown-menu>
-                        <el-dropdown-item command="handleResetPwd" v-hasPerms="['/system/user/resetPwd']" >重置密码</el-dropdown-item>
-                        <!-- <el-dropdown-item command="handleAuthRole" v-hasPerms="['/system:user:edit']">分配角色</el-dropdown-item> -->
-                      </el-dropdown-menu>
-                    </template>
-                  </el-dropdown>
-
-                </div>
+                <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
               </template>
             </el-table-column>
           </el-table>

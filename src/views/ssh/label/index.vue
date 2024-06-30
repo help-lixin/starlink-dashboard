@@ -345,6 +345,33 @@ const handleDelete = function(row){
 
   // 触发查询
   getList();
+
+
+// 按钮
+const btnList = ref([
+  {
+    btnName: '修改',
+    permArray: ['/ssh/label/add'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleUpdate
+  },
+  {
+    btnName: row => showStatusOperateFun(row.status),
+    permArray: ['/ssh/label/changeStatus/**'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleStatusChange
+  },
+  {
+    btnName: '删除',
+    class: 'yt-color-error-hover',
+    permArray: ['/ssh/label/del/*'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleDelete
+  },
+])
 </script>
 
 <template>
@@ -439,25 +466,32 @@ const handleDelete = function(row){
             width="220"
             align="center"
           >
-            <template #default="scope">
-              <div class="action-btn">
-                <el-button
-                  size="small"
-                  @click="handleStatusChange(scope.row)"
-                  v-hasPerms="['/ssh/label/changeStatus/**']"
-                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-                <el-button
-                  size="small"
-                  @click="handleUpdate(scope.row)"
-                  v-hasPerms="['/ssh/label/add']"
-                >修改</el-button>
-                <el-button
-                  size="small"
-                  @click="handleDelete(scope.row)"
-                  v-hasPerms="['/ssh/label/del/*']"
-                >删除</el-button>
-              </div>
+
+            <template v-slot="scope">
+              <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
             </template>
+
+<!--            <template #default="scope">-->
+<!--              <div class="action-btn">-->
+<!--                <el-button-->
+<!--                  size="small"-->
+<!--                  @click="handleStatusChange(scope.row)"-->
+<!--                  v-hasPerms="['/ssh/label/changeStatus/**']"-->
+<!--                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>-->
+<!--                <el-button-->
+<!--                  size="small"-->
+<!--                  @click="handleUpdate(scope.row)"-->
+<!--                  v-hasPerms="['/ssh/label/add']"-->
+<!--                >修改</el-button>-->
+<!--                <el-button-->
+<!--                  size="small"-->
+<!--                  @click="handleDelete(scope.row)"-->
+<!--                  v-hasPerms="['/ssh/label/del/*']"-->
+<!--                >删除</el-button>-->
+<!--              </div>-->
+<!--            </template>-->
+
+
           </el-table-column>
         </el-table>
       </div>
@@ -467,33 +501,18 @@ const handleDelete = function(row){
     </yt-card>
 
     <!-- 新增/更新对话框 -->
-    <el-dialog :title="title" v-model="addDialog" width="var(--dialog-lg-w)"  append-to-body>
+    <el-dialog :title="title" v-model="addDialog" width="720px" append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
-          <el-row>
-            <el-col :span="12">
               <el-form-item label="标签key" prop="labelKey">
-                <el-input v-model="form.labelKey" placeholder="请输入标签key" maxlength="20" :disabled="form.id != undefined" style="width: 300px"/>
+                <el-input v-model="form.labelKey" placeholder="请输入标签key" maxlength="20" :disabled="form.id != undefined" />
               </el-form-item>
-            </el-col>
-          </el-row>
-
-          <el-row>
-            <el-col :span="12">
               <el-form-item label="标签名" prop="labelName">
-                <el-input v-model="form.labelName" placeholder="请输入标签名" maxlength="20" style="width: 300px"/>
+                <el-input v-model="form.labelName" placeholder="请输入标签名" maxlength="20" />
               </el-form-item>
-            </el-col>
-          </el-row>
-
-          <el-row>
-            <el-col>
               <el-form-item label="SSH实例" >
                 <el-transfer v-model="form.hosts" :data="formInstance"  :titles="[ '未关联' , '已关联']"/>
               </el-form-item>
-            </el-col>
-          </el-row>
-
         </el-form>
       </yt-card>
       <template #footer>

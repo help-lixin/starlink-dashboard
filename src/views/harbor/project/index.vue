@@ -532,7 +532,7 @@
           <el-table-column
             label="操作"
             align="center"
-            width="120"
+            width="250"
             flixed="right"
           >
             <template #default="scope">

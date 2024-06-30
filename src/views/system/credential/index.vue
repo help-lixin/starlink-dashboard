@@ -392,6 +392,32 @@
       }
     });
   }
+
+  // 按钮
+const btnList = ref([
+  {
+    btnName: '修改',
+    permArray: ['/credential/add'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleUpdate
+  },
+  {
+    btnName: row => showStatusOperateFun(row.status),
+    permArray: ['/credential/changeStatus/**'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleStatusChange
+  },
+  {
+    btnName: '删除',
+    class: 'yt-color-error-hover',
+    permArray: ['/credential/del/*'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleDelete
+  },
+])
 </script>
 
 <template>
@@ -539,29 +565,10 @@
           <el-table-column
             label="操作"
             align="center"
-            width="250"
+            width="220"
           >
-            <template #default="scope">
-              <div class="action-btn">
-                <el-button
-                  size="small"
-                  icon="Edit"
-                  @click="handleUpdate(scope.row)"
-                  v-hasPerms="['/credential/add']"
-                >修改</el-button>
-                <el-button
-                  size="small"
-                  :icon="getStatusIcon(scope.row)"
-                  @click="handleStatusChange(scope.row)"
-                  v-hasPerms="['/credential/changeStatus/**']"
-                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-                <el-button
-                  size="small"
-                  icon="Delete"
-                  @click="handleDelete(scope.row)"
-                  v-hasPerms="['/credential/del/*']"
-                >删除</el-button>
-              </div>
+            <template v-slot="scope">
+              <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
             </template>
           </el-table-column>
         </el-table>

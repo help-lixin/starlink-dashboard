@@ -315,7 +315,7 @@
     {
       btnName: '删除',
       class: 'yt-color-error-hover',
-      permArray: ['/harbor/row/del/**'],
+      permArray: ['/system/role/del/*'],
       isShow: () => true,
       isDisable: false,
       clickEvent: handleDelete

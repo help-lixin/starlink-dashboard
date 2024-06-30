@@ -174,6 +174,32 @@ const handleRunning = function (row) {
 }
 
 
+// 按钮
+const btnList = ref([
+{
+  btnName: '运行',
+  permArray: ['/workflow/instance/startById'],
+  isShow: () => true,
+  isDisable: false,
+  clickEvent: handleRunning
+},
+{
+  btnName: '修改',
+  permArray: ['/workflow/definition/operate'],
+  isShow: () => true,
+  isDisable: false,
+  clickEvent: handleUpdate
+},
+{
+  btnName: row =>  showStatusOperateFun(row.status),
+  class: 'yt-color-error-hover',
+  permArray: ['/workflow/definition/changeStatus/**'],
+  isShow: () => true,
+  isDisable: false,
+  clickEvent: handleDelete
+},
+])
+
 // 触发查询
 getList()
 </script>
@@ -250,23 +276,25 @@ getList()
           </el-table-column>
           <el-table-column label="操作" align="center" width="280">
             <template v-slot="scope">
-              <div class="action-btn">
-                <el-button size="small" @click="handleRunning(scope.row)"
-                            icon="VideoPlay"
-                           v-hasPerms="['/workflow/instance/startById']">运行</el-button>
-
-                <el-button size="small" @click="handleUpdate(scope.row)"
-                            icon="Edit"
-                           v-hasPerms="['/workflow/definition/operate']">修改</el-button>
-
-                <el-button size="small" @click="handleDelete(scope.row)"
-                            :icon="getStatusIcon(scope.row)"
-                           v-hasPerms="['/workflow/definition/changeStatus/**']">
-                  {{ showStatusOperateFun(scope.row.status) }}
-                </el-button>
-
-              </div>
+              <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
             </template>
+<!--            <template v-slot="scope">-->
+<!--              <div class="action-btn">-->
+<!--                <el-button size="small" @click="handleRunning(scope.row)"-->
+<!--                            icon="VideoPlay"-->
+<!--                           v-hasPerms="['/workflow/instance/startById']">运行</el-button>-->
+
+<!--                <el-button size="small" @click="handleUpdate(scope.row)"-->
+<!--                            icon="Edit"-->
+<!--                           v-hasPerms="['/workflow/definition/operate']">修改</el-button>-->
+
+<!--                <el-button size="small" @click="handleDelete(scope.row)"-->
+<!--                            :icon="getStatusIcon(scope.row)"-->
+<!--                           v-hasPerms="['/workflow/definition/changeStatus/**']">-->
+<!--                  {{ showStatusOperateFun(scope.row.status) }}-->
+<!--                </el-button>-->
+<!--              </div>-->
+<!--            </template>-->
           </el-table-column>
         </el-table>
       </div>
