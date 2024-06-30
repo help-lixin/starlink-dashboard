@@ -500,10 +500,10 @@ const btnList = ref([
     </yt-card>
 
     <!-- 添加或修改成员配置对话框 -->
-    <el-dialog :title="title" v-model="open" width="var(--dialog-lg-w)"  append-to-body>
+    <el-dialog :title="title" v-model="open" width="var(--dialog-md-w)"  append-to-body>
       <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
-        <el-row>
-          <el-col :span="12">
+        <el-row :gutter="16">
+          <el-col>
             <el-form-item label="实例" prop="instanceCode">
               <el-select
               class="search-select2"
@@ -520,53 +520,61 @@ const btnList = ref([
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+        </el-row>
+
+        <el-row :gutter="16">
+          <el-col>
             <el-form-item label="项目" prop="projectId">
               <el-select
-                class="search-select"
-                v-model="form.projectId"
-                placeholder="请选择项目"
-                clearable
+                  class="search-select"
+                  v-model="form.projectId"
+                  placeholder="请选择项目"
+                  clearable
               >
-              <el-option v-for="dict in projects"
-                :key="dict.projectName"
-                :label="dict.projectName"
-                :value="dict.id"/>
+                <el-option v-for="dict in projects"
+                           :key="dict.projectName"
+                           :label="dict.projectName"
+                           :value="dict.id"/>
               </el-select>
             </el-form-item>
           </el-col>
         </el-row>
-        <el-row>
-          <el-col :span="12">
-            <el-form-item label="成员" prop="userId">
-                  <el-select
-                        v-model="form.userId"
-                        filterable
-                        @input="queryMemberList"
-                        style="width: 190px"
-                  />
-                  <el-option v-for="user in users"
-                  :key="user.label"
-                  :label="user.label"
-                  :value="user.value"/>
+
+        <el-row  :gutter="16">
+            <el-col>
+              <el-form-item label="角色" prop="accessLevel">
+                <el-select
+                    class="search-select"
+                    v-model="form.accessLevel"
+                    placeholder="请选择角色"
+                    clearable
+                >
+                  <el-option v-for="accessLevel in accessLevels"
+                             :key="accessLevel.label"
+                             :label="accessLevel.label"
+                             :value="accessLevel.value"/>
+                </el-select>
               </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="角色" prop="accessLevel">
+            </el-col>
+        </el-row>
+
+        <el-row  :gutter="16">
+          <el-col>
+            <el-form-item label="成员" prop="userId">
               <el-select
-                class="search-select"
-                v-model="form.accessLevel"
-                placeholder="请选择角色"
-                clearable
-              >
-              <el-option v-for="accessLevel in accessLevels"
-                :key="accessLevel.label"
-                :label="accessLevel.label"
-                :value="accessLevel.value"/>
-              </el-select>
+                  v-model="form.userId"
+                  filterable
+                  @input="queryMemberList"
+                  style="width: 190px"
+              />
+              <el-option v-for="user in users"
+                         :key="user.label"
+                         :label="user.label"
+                         :value="user.value"/>
             </el-form-item>
           </el-col>
         </el-row>
+
       </el-form>
       <template #footer>
         <el-button @click="cancel">取 消</el-button>

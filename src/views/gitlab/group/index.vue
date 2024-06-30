@@ -455,10 +455,10 @@ const btnList = ref([
 
 
     <!-- 添加或修改组配置对话框 -->
-    <el-dialog :title="title" v-model="open"  width="var(--dialog-lg-w)"  append-to-body>
+    <el-dialog :title="title" v-model="open"  width="700px" append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
-          <el-row>
+          <el-row :gutter="16">
             <el-col :span="12">
               <el-form-item label="实例" prop="instanceCode">
                 <el-select
@@ -477,21 +477,26 @@ const btnList = ref([
               </el-form-item>
             </el-col>
           </el-row>
-          <el-row>
+
+          <el-row :gutter="16">
             <el-col :span="12">
               <el-form-item label="群组名称" prop="groupName">
                 <el-input v-model="form.groupName" placeholder="请输入群组名称" maxlength="30" />
               </el-form-item>
             </el-col>
           </el-row>
-          <el-row >
-              <el-form-item label="群组URL" prop="path">
-                <el-input v-model="form.path" placeholder="请输入群组URL" maxlength="30" clearable style="width: 435px">
-                  <template #prepend>{{ipAddr}}</template>
-                </el-input>
-              </el-form-item>
+
+          <el-row :gutter="16">
+            <el-col>
+                <el-form-item label="群组URL" prop="path">
+                  <el-input v-model="form.path" placeholder="请输入群组URL" maxlength="30" clearable style="width: 435px">
+                    <template #prepend>{{ipAddr}}</template>
+                  </el-input>
+                </el-form-item>
+            </el-col>
           </el-row>
-          <el-row>
+
+          <el-row :gutter="16">
             <el-col :span="12">
               <el-form-item label="可见性级别" prop="visibility">
               <el-select
@@ -509,15 +514,17 @@ const btnList = ref([
               </el-form-item>
             </el-col>
           </el-row>
-          <el-row>
-            <el-col :span="24">
+
+          <el-row :gutter="16">
+            <el-col>
               <el-form-item label="备注">
                 <el-input v-model="form.remark" type="textarea" placeholder="请输入内容"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
-          <el-row>
-            <el-col :span="12">
+
+          <el-row :gutter="16">
+            <el-col>
               <el-form-item label="状态">
                 <el-radio-group v-model="form.status">
                   <el-radio

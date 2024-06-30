@@ -445,11 +445,11 @@ const btnList = ref([
     </yt-card>
 
     <!-- 新增对话框 -->
-    <el-dialog :title="title" v-model="addDialog" width="var(--dialog-lg-w)"  append-to-body>
+    <el-dialog :title="title" v-model="addDialog" width="var(--dialog-md-w)"  append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="120px">
-          <el-row>
-            <el-col :span="15">
+          <el-row :gutter="16">
+            <el-col>
               <el-form-item label="插件实例" prop="sshInstanceCode">
                 <el-select
                   class="search-select"
@@ -467,15 +467,17 @@ const btnList = ref([
               </el-form-item>
             </el-col>
           </el-row>
-          <el-row>
-            <el-col :span="15">
+
+          <el-row :gutter="16">
+            <el-col>
               <el-form-item label="主机名称" prop="serverName">
                 <el-input v-model="form.serverName" placeholder="请输入主机名称" maxlength="20" />
               </el-form-item>
             </el-col>
           </el-row>
-          <el-row>
-            <el-col :span="15">
+
+          <el-row :gutter="16">
+            <el-col>
               <el-form-item label="inventory目录" prop="ansibleInventoryDir">
                 <el-input v-model="form.ansibleInventoryDir" placeholder="请输入目录路径"  />
               </el-form-item>

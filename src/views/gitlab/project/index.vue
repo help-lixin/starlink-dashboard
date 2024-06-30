@@ -464,10 +464,10 @@ const btnList = ref([
 
 
     <!-- 添加或修改项目配置对话框 -->
-    <el-dialog :title="title" v-model="open" width="var(--dialog-lg-w)"  append-to-body>
+    <el-dialog :title="title" v-model="open" width="800px"  append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
-          <el-row>
+          <el-row :gutter="16">
             <el-col :span="12">
               <el-form-item label="插件实例" prop="instanceCode">
                 <el-select
@@ -494,8 +494,8 @@ const btnList = ref([
             </el-col>
           </el-row>
 
-          <el-row>
-            <el-col :span="24">
+          <el-row :gutter="16">
+            <el-col>
               <el-form-item label="项目URL" prop="namespaceByGroup">
                 <el-input style="width:380px;" class="input-with-select" v-model="ipAddr" disabled >
                   <template #append>
@@ -519,9 +519,9 @@ const btnList = ref([
                 </el-form-item>
               </el-form-item>
             </el-col>
-
           </el-row>
-          <el-row>
+
+          <el-row :gutter="16">
             <el-col :span="12">
               <el-form-item label="可见性级别" prop="visibility">
               <el-select
@@ -541,7 +541,21 @@ const btnList = ref([
             </el-col>
           </el-row>
 
-          <el-row>
+          <el-row :gutter="16">
+            <el-col>
+              <el-form-item label="Readme" v-if="form.id == undefined">
+                <el-radio-group v-model="form.initiallizeWithReadme">
+                  <el-radio
+                      v-for="dict in enable"
+                      :key="dict.value"
+                      :label="dict.value"
+                  >{{dict.label}}</el-radio>
+                </el-radio-group>
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row :gutter="16">
             <el-col :span="12">
               <el-form-item label="状态">
                 <el-radio-group v-model="form.status">
@@ -553,21 +567,10 @@ const btnList = ref([
                 </el-radio-group>
               </el-form-item>
             </el-col>
-            <el-col :span="12">
-              <el-form-item label="ReadMe Init" v-if="form.id == undefined">
-                <el-radio-group v-model="form.initiallizeWithReadme">
-                  <el-radio
-                    v-for="dict in enable"
-                    :key="dict.value"
-                    :label="dict.value"
-                  >{{dict.label}}</el-radio>
-                </el-radio-group>
-              </el-form-item>
-            </el-col>
           </el-row>
 
-          <el-row>
-            <el-col :span="24">
+          <el-row :gutter="16">
+            <el-col>
               <el-form-item label="备注" prop="remark">
                 <el-input v-model="form.remark" type="textarea" placeholder="请输入备注信息" maxlength="255" />
               </el-form-item>

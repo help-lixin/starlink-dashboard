@@ -504,15 +504,28 @@ const btnList = ref([
     <el-dialog :title="title" v-model="addDialog" width="720px" append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
-              <el-form-item label="标签key" prop="labelKey">
-                <el-input v-model="form.labelKey" placeholder="请输入标签key" maxlength="20" :disabled="form.id != undefined" />
-              </el-form-item>
-              <el-form-item label="标签名" prop="labelName">
-                <el-input v-model="form.labelName" placeholder="请输入标签名" maxlength="20" />
-              </el-form-item>
-              <el-form-item label="SSH实例" >
-                <el-transfer v-model="form.hosts" :data="formInstance"  :titles="[ '未关联' , '已关联']"/>
-              </el-form-item>
+            <el-row :gutter="16">
+              <el-col>
+                <el-form-item label="标签key" prop="labelKey">
+                  <el-input v-model="form.labelKey" placeholder="请输入标签key" maxlength="20" :disabled="form.id != undefined"  style="width: 240px"/>
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+          <el-row :gutter="16">
+            <el-col>
+                <el-form-item label="标签名" prop="labelName">
+                  <el-input v-model="form.labelName" placeholder="请输入标签名" maxlength="20" style="width: 240px"/>
+                </el-form-item>
+              </el-col>
+          </el-row>
+          <el-row :gutter="16">
+            <el-col>
+                <el-form-item label="SSH实例" >
+                  <el-transfer v-model="form.hosts" :data="formInstance"  :titles="[ '未关联' , '已关联']"/>
+                </el-form-item>
+            </el-col>
+          </el-row>
         </el-form>
       </yt-card>
       <template #footer>

@@ -464,48 +464,65 @@ import { assign } from 'lodash'
 
 
     <!-- 添加或修改成员配置对话框 -->
-    <el-dialog :title="title" v-model="open" width="var(--dialog-lg-w)"  append-to-body>
+    <el-dialog :title="title" v-model="open" width="var(--dialog-md-w)" append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="实例" prop="instanceCode">
+          <el-row :gutter="16">
+              <el-col>
+                <el-form-item label="实例" prop="instanceCode">
+                  <el-select
+                  class="search-select2"
+                    v-model="form.instanceCode"
+                    @change="formSwitchInstance"
+                    placeholder="请选择实例"
+                  >
+                  <el-option v-for="item in pluginInstance"
+                    :key="item.pluginCode"
+                    :label="item.instanceName"
+                    :value="item.instanceCode"/>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+          <el-row :gutter="16">
+                <el-col>
+                  <el-form-item label="成员组" prop="groupId">
+                    <el-select
+                      class="search-select"
+                      v-model="form.groupId"
+                      placeholder="请选择成员组"
+                      @change="queryMemberList"
+                    >
+                    <el-option v-for="dict in groups"
+                      :key="dict.id"
+                      :label="dict.gitlabGroupName"
+                      :value="dict.id"/>
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+            </el-row>
+
+          <el-row :gutter="16">
+            <el-col>
+              <el-form-item label="角色" prop="accessLevel">
                 <el-select
-                class="search-select2"
-                  v-model="form.instanceCode"
-                  @change="formSwitchInstance"
-                  placeholder="请选择实例"
-                  style="width: 240px"
+                    class="search-select"
+                    v-model="form.accessLevel"
+                    placeholder="请选择角色"
+                    clearable
                 >
-                <el-option v-for="item in pluginInstance"
-                  :key="item.pluginCode"
-                  :label="item.instanceName"
-                  :value="item.instanceCode"/>
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="成员组" prop="groupId">
-                <el-select
-                  class="search-select"
-                  v-model="form.groupId"
-                  placeholder="请选择成员组"
-                  @change="queryMemberList"
-                  style="width: 240px"
-                >
-                <el-option v-for="dict in groups"
-                  :key="dict.id"
-                  :label="dict.gitlabGroupName"
-                  :value="dict.id"/>
+                  <el-option v-for="accessLevel in accessLevels"
+                             :key="accessLevel.label"
+                             :label="accessLevel.label"
+                             :value="accessLevel.value"/>
                 </el-select>
               </el-form-item>
             </el-col>
           </el-row>
 
-
-
-          <el-row>
-            <el-col :span="12">
+          <el-row :gutter="16">
+            <el-col>
               <el-form-item label="成员" prop="userIds">
                   <el-select
                         v-model="form.userId"
@@ -516,27 +533,11 @@ import { assign } from 'lodash'
                         :remote-method="queryMemberList"
                         style="width: 190px"
                   >
-                  <el-option v-for="item in users"
-                  :key="item.label"
-                  :label="item.label"
-                  :value="item.value"/>
+                    <el-option v-for="item in users"
+                    :key="item.label"
+                    :label="item.label"
+                    :value="item.value"/>
                   </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="角色" prop="accessLevel">
-                <el-select
-                  class="search-select"
-                  v-model="form.accessLevel"
-                  placeholder="请选择角色"
-                  style="width: 240px"
-                  clearable
-                >
-                <el-option v-for="accessLevel in accessLevels"
-                  :key="accessLevel.label"
-                  :label="accessLevel.label"
-                  :value="accessLevel.value"/>
-                </el-select>
               </el-form-item>
             </el-col>
           </el-row>

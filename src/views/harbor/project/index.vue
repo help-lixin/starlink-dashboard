@@ -549,11 +549,11 @@
     </yt-card>
 
     <!-- 新增对话框 -->
-    <el-dialog :title="title" v-model="addDialog" width="var(--dialog-lg-w)"  append-to-body>
+    <el-dialog :title="title" v-model="addDialog" width="var(--dialog-md-w)"  append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
-          <el-row>
-            <el-col :span="24">
+          <el-row :gutter="16">
+            <el-col>
               <el-form-item label="插件实例" prop="instanceCode">
                 <el-select
                   class="search-select"
@@ -568,15 +568,20 @@
                              :value="item.instanceCode"/>
                 </el-select>
               </el-form-item>
+            </el-col>
+          </el-row>
 
+
+          <el-row :gutter="16">
+            <el-col>
               <el-form-item label="项目名称" prop="projectName">
                 <el-input v-model="form.projectName" placeholder="请输入项目名称" maxlength="20" style="width: 240px"/>
               </el-form-item>
-
             </el-col>
           </el-row>
-          <el-row>
-            <el-col :span="24">
+
+          <el-row :gutter="16">
+            <el-col>
               <el-form-item label="存储容量" prop="capacity">
                 <el-input v-model="form.capacity" placeholder="请输入容量" style="width: 240px" maxlength="5">
                     <template #append>
@@ -594,6 +599,11 @@
                     </template>
                 </el-input>
               </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row :gutter="16">
+            <el-col>
               <el-form-item label="访问级别" prop="isPublic">
                 <el-radio-group v-model="form.isPublic">
                   <el-radio
@@ -606,6 +616,7 @@
               </el-form-item>
             </el-col>
           </el-row>
+
         </el-form>
       </yt-card>
       <template #footer>

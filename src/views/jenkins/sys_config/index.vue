@@ -457,12 +457,12 @@ const btnList = ref([
 
 
     <!-- 添加或修改工具配置对话框 -->
-    <el-dialog :title="title" v-model="open"  width="var(--dialog-lg-w)" append-to-body>
+    <el-dialog :title="title" v-model="open"  width="var(--dialog-md-w)" append-to-body>
       <yt-card>
 
         <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
-          <el-row>
-            <el-col :span="24">
+          <el-row :gutter="16">
+            <el-col>
               <el-form-item label="插件实例" prop="instanceCode">
                 <el-select
                   class="search-select2"
@@ -476,29 +476,37 @@ const btnList = ref([
                              :value="item.instanceCode"/>
                 </el-select>
               </el-form-item>
+            </el-col>
+          </el-row>
 
-              <el-form-item label="工具类型" prop="pluginType">
-                <el-select
-                    class="search-select"
-                    v-model="form.pluginType"
-                    placeholder="请选择工具类型"
-                    style="width: 240px"
-                >
-                  <el-option v-for="item in tools"
-                             :key="item.value"
-                             :label="item.label"
-                             :value="item.value"/>
-                </el-select>
+          <el-row :gutter="16">
+            <el-col>
+                <el-form-item label="工具类型" prop="pluginType">
+                  <el-select
+                      class="search-select"
+                      v-model="form.pluginType"
+                      placeholder="请选择工具类型"
+                      style="width: 240px"
+                  >
+                    <el-option v-for="item in tools"
+                               :key="item.value"
+                               :label="item.label"
+                               :value="item.value"/>
+                  </el-select>
+                </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row :gutter="16">
+            <el-col>
+              <el-form-item label="别名" prop="name">
+                <el-input v-model="form.name" placeholder="请输入别名" maxlength="200" style="width: 240px"/>
               </el-form-item>
             </el-col>
           </el-row>
 
-          <el-row>
-            <el-col :span="24">
-              <el-form-item label="别名" prop="name">
-                <el-input v-model="form.name" placeholder="请输入别名" maxlength="200" style="width: 240px"/>
-              </el-form-item>
-
+          <el-row :gutter="16">
+            <el-col>
               <el-form-item label="PATH" prop="value">
                 <el-input v-model="form.value" placeholder="请输入Path路径" maxlength="200" style="width: 240px"/>
               </el-form-item>
@@ -506,8 +514,8 @@ const btnList = ref([
           </el-row>
 
 
-          <el-row>
-            <el-col :span="24">
+          <el-row :gutter="16">
+            <el-col>
               <el-form-item label="状态">
                 <el-radio-group v-model="form.status">
                   <el-radio
@@ -519,6 +527,7 @@ const btnList = ref([
               </el-form-item>
             </el-col>
           </el-row>
+
         </el-form>
       </yt-card>
       <template #footer>

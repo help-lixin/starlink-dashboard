@@ -704,36 +704,6 @@ const btnList = ref([
             <template v-slot="scope">
               <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
             </template>
-
-<!--            <template #default="scope">-->
-<!--              <div class="action-btn">-->
-<!--                <el-button-->
-<!--                  size="small"-->
-<!--                  icon="Edit"-->
-<!--                  @click="handleUpdate(scope.row)"-->
-<!--                  v-hasPerms="['/jenkins/job/add']"-->
-<!--                >修改</el-button>-->
-<!--                <el-button-->
-<!--                  size="small"-->
-<!--                  icon="SwitchButton"-->
-<!--                  @click="build(scope.row,true)"-->
-<!--                  v-hasPerms="['/jenkins/job/buildJob']"-->
-<!--                >构建</el-button>-->
-<!--                <el-button-->
-<!--                  size="small"-->
-<!--                  :icon="getStatusIcon(scope.row)"-->
-<!--                  @click="handleStatusChange(scope.row)"-->
-<!--                  v-hasPerms="['/jenkins/job/changeStatus/**']"-->
-<!--                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>-->
-<!--                <el-button-->
-<!--                  size="small"-->
-<!--                  icon="Delete"-->
-<!--                  @click="handleDelete(scope.row)"-->
-<!--                  v-hasPerms="['/jenkins/job/del/*']"-->
-<!--                >删除</el-button>-->
-<!--              </div>-->
-<!--            </template>-->
-<!--            -->
           </el-table-column>
         </el-table>
       </div>
