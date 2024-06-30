@@ -635,7 +635,7 @@ const btnList = ref([
             </el-col>
           </el-row>
 
-          <el-row>
+          <el-row :gutter="16">
             <el-col :span="12">
               <el-form-item label="凭证类型" prop="credentialType">
                 <el-select
@@ -666,15 +666,15 @@ const btnList = ref([
             </el-col>
           </el-row>
 
-        <el-row v-if="form.pluginCode == 'k8s'">
-          <el-col :span="12">
+        <el-row v-if="form.pluginCode == 'k8s'" :gutter="16">
+          <el-col>
             <el-form-item label="命名空间" prop="nameSpace" :rules="[
                 { required: true, message: '命名空间不能为空', trigger: 'blur' }]">
                 <el-select
                     class="search-select"
                     v-model="form.nameSpace"
                     placeholder="请选择凭证类型"
-                    style="width: 240px"
+                    style="width: 180px"
                   >
                     <el-option v-for="item in nameSpaces"
                              :key="item.value"
@@ -683,9 +683,10 @@ const btnList = ref([
                 </el-select>
             </el-form-item>
           </el-col>
+
         </el-row>
 
-          <el-row v-if="form.credentialType == 'SECRET'">
+          <el-row v-if="form.credentialType == 'SECRET'" :gutter="16">
             <el-col :span="24">
               <el-form-item label="密钥" prop="secret" :rules="[
                   { required: true, message: '密钥不能为空', trigger: 'blur' }]">
@@ -695,43 +696,49 @@ const btnList = ref([
 
           </el-row>
 
-          <el-row v-if="form.credentialType == 'SSH'">
-            <el-col :span="12">
+          <el-row v-if="form.credentialType == 'SSH'" :gutter="16">
+            <el-col>
               <el-form-item label="用户名" prop="userName" :rules="[
                   { required: true, message: '用户名不能为空', trigger: 'blur' },
                   { min: 2, max: 50, message: '用户名长度必须介于 2 和 50 之间', trigger: 'blur' } ]">
-                <el-input v-model="form.userName" placeholder="请输入用户名" maxlength="50" />
+                <el-input v-model="form.userName" placeholder="请输入用户名" maxlength="50" style="width: 180px"/>
               </el-form-item>
             </el-col>
+          </el-row>
 
-            <el-col :span="12">
+          <el-row v-if="form.credentialType == 'SSH'" :gutter="16">
+            <el-col>
               <el-form-item label="公钥" prop="publicKey" :rules="[
                   { required: true, message: '公钥不能为空', trigger: 'blur' },
                   { min: 2, max: 2000, message: '公钥长度必须介于 2 和 2000 之间', trigger: 'blur' } ]">
                 <el-input v-model="form.publicKey" placeholder="请输入公钥" type="textarea" maxlength="2000"/>
               </el-form-item>
             </el-col>
-            <el-col :span="12">
+          </el-row>
+
+          <el-row v-if="form.credentialType == 'SSH'" :gutter="16">
+            <el-col>
               <el-form-item label="私钥" prop="privateKey" :rules="[
                   { required: true, message: '私钥不能为空', trigger: 'blur' },
                   { min: 2, max: 2000, message: '私钥长度必须介于 2 和 2000 之间', trigger: 'blur' } ]">
                 <el-input v-model="form.privateKey" placeholder="请输入私钥" type="textarea" maxlength="2000"/>
               </el-form-item>
             </el-col>
-
-            <el-col :span="12">
-              <el-form-item label="密钥" prop="passphrase" >
-                <el-input v-model="form.passphrase" placeholder="请输入密钥" maxlength="2000" />
+          </el-row>
+          <el-row v-if="form.credentialType == 'SSH'" :gutter="16">
+            <el-col>
+              <el-form-item label="私钥密钥" prop="passphrase" >
+                <el-input v-model="form.passphrase" placeholder="请输入私钥密钥" type="textarea" maxlength="2000" />
               </el-form-item>
             </el-col>
           </el-row>
 
-          <el-row v-if="form.credentialType == 'USERNAME_PASSWORD'">
+          <el-row v-if="form.credentialType == 'USERNAME_PASSWORD'" :gutter="16">
             <el-col :span="12">
               <el-form-item label="用户名" prop="userName" :rules="[
                   { required: true, message: '用户名不能为空', trigger: 'blur' },
                   { min: 2, max: 50, message: '用户名长度必须介于 2 和 50 之间', trigger: 'blur' } ]">
-                <el-input v-model="form.userName" placeholder="请输入用户名" maxlength="50" />
+                <el-input v-model="form.userName" placeholder="请输入用户名" maxlength="50"/>
               </el-form-item>
             </el-col>
 
@@ -743,48 +750,53 @@ const btnList = ref([
               </el-form-item>
             </el-col>
 
-            <el-col :span="12">
+            <el-col :span="12" v-if="form.pluginCode == 'k8s'">
               <el-form-item label="域名" prop="imgDomain" >
                 <el-input v-model="form.imgDomain"  placeholder="如：https://starlink.lixin.help" maxlength="1024" />
               </el-form-item>
             </el-col>
           </el-row>
 
-          <el-row v-if="form.credentialType == 'TOKEN'">
-            <el-col :span="12">
+          <el-row v-if="form.credentialType == 'TOKEN'" :gutter="16">
+            <el-col>
               <el-form-item label="用户名" prop="userName" >
-                <el-input v-model="form.userName" placeholder="请输入用户名" maxlength="50" />
+                <el-input v-model="form.userName" placeholder="请输入用户名" maxlength="50" style="width: 180px"/>
               </el-form-item>
             </el-col>
+          </el-row>
 
-            <el-col :span="12">
+          <el-row v-if="form.credentialType == 'TOKEN'" :gutter="16">
+            <el-col>
               <el-form-item label="token" prop="token" :rules="[
                   { required: true, message: 'token不能为空', trigger: 'blur' },
                   { min: 2, max: 2000, message: 'token长度必须介于 2 和 2000 之间', trigger: 'blur' } ]">
-                <el-input v-model="form.token"  placeholder="请输入token" maxlength="2000" />
+                <el-input v-model="form.token" type="textarea"   placeholder="请输入token" maxlength="2000" />
               </el-form-item>
             </el-col>
           </el-row>
 
-          <el-row v-if="form.credentialType == 'TLS'">
-            <el-col :span="12">
+
+          <el-row v-if="form.credentialType == 'TLS'" :gutter="16">
+            <el-col>
               <el-form-item label="证书" prop="certificate" :rules="[
                   { required: true, message: '证书不能为空', trigger: 'blur' },
                   { min: 2, max: 2000, message: '证书长度必须介于 2 和 2000 之间', trigger: 'blur' } ]">
-                <el-input v-model="form.certificate" placeholder="请输入证书" maxlength="2000" />
-              </el-form-item>
-            </el-col>
-
-            <el-col :span="12">
-              <el-form-item label="私钥" prop="privateKey" :rules="[
-                  { required: true, message: '私钥不能为空', trigger: 'blur' },
-                  { min: 2, max: 2000, message: '私钥长度必须介于 2 和 2000 之间', trigger: 'blur' } ]">
-                <el-input v-model="form.privateKey"  placeholder="请输入私钥" maxlength="2000" />
+                <el-input v-model="form.certificate" type="textarea"  placeholder="请输入证书" maxlength="2000" />
               </el-form-item>
             </el-col>
           </el-row>
 
-          <div v-if="form.credentialType == 'OPAQUE'" >
+          <el-row v-if="form.credentialType == 'TLS'" :gutter="16">
+            <el-col >
+              <el-form-item label="私钥" prop="privateKey" :rules="[
+                  { required: true, message: '私钥不能为空', trigger: 'blur' },
+                  { min: 2, max: 2000, message: '私钥长度必须介于 2 和 2000 之间', trigger: 'blur' } ]">
+                <el-input v-model="form.privateKey" type="textarea"   placeholder="请输入私钥" maxlength="2000" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <div v-if="form.credentialType == 'OPAQUE'">
             <div class="inline-card">
               <el-form label-position="top">
                 <el-row :gutter="8" v-for="(label,index) in form.dataList" :key="index">
