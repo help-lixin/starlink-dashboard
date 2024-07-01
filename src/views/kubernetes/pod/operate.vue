@@ -702,10 +702,14 @@
           "annotations":[]
         }
       },
+      // 拉取密文下拉列表
+      "imagePullSecrets":[],
+      // 命名空间下拉列表
+      "namespaces":[],
       // 记录当前容器点击的左侧标签位置
-      "containerIndex":"",
+      "containerIndex":"containerGeneral",
       // 记录当前pod点击的左侧标签位置
-      "selectPod":"",
+      "selectPod":"podLabel",
       // pod亲和度存储对象
       "freePod":[],
       // node亲和度存储对象
@@ -713,14 +717,20 @@
       // 节点调度方式
       "nodeAffinity":"none",
       // 是否显示yaml弹窗
-      "isShowYamlEditor":false
-
+      "isShowYamlEditor":false,
+      "namespaceId":undefined,
+      "selectTabIndex":"2"
     }
   })
 
   import { Select } from '@element-plus/icons-vue'
   import type { FormRules } from 'element-plus'
   import yaml from 'js-yaml'
+  import { addPod,nameSpaceList,nameIsExist,queryDetail} from "@/api/kubernetes/pod"
+  import { secretOptionList} from "@/api/kubernetes/secret"
+  import { useRouter } from "vue-router";
+
+  const $route = useRouter();
 
   const handleTabsEdit = (
           targetName: string | number,
@@ -798,6 +808,12 @@
     isShowYamlEditor.value = true
     generateYamlJson()
 
+  }
+
+  // 查看yaml详情
+  const viewYaml = ()=>{
+    editYaml()
+    Object.assign(copyData.value,{readOnly:true})
   }
 
   // 生成yaml所需Json
@@ -1628,7 +1644,7 @@
 
   // 内存&CPU限制处理
   const reverseResourceHandle = (container) =>{
-    if(!container?.resources  ){
+    if(!container?.resources?.requests){
       Object.assign(container,{
         "resources": {
           "requests": {
@@ -1695,11 +1711,36 @@
     }
   }
 
+  const cancel = ()=>{
+    $route.push({path : "/kubernetes/pod/list/index"})
+  }
+
   const saveData = () => {
     ruleFormRef.value.validate((valid) => {
       if (valid) {
-        console.log(yaml.safeLoad(initData.value))
-      } else {
+        generateYamlJson()
+        const nameSpaceId = initData.value.option.namespaceId
+        const data =  _.cloneDeep(copyData.value)
+        data.option = undefined
+        const saveData = {
+          "id": $route.currentRoute.value.query.id,
+          "instanceCode": $route.currentRoute.value.query.instanceCode,
+          "namespace": initData.value.metadata.namespace,
+          "nameSpaceId": nameSpaceId,
+          "name": initData.value.metadata.name,
+          "kind": initData.value.kind,
+          "jsonBody": JSON.stringify(yaml.load(yaml.dump(data)))
+        }
+        addPod(saveData).then(res=>{
+          if(res.code == 200){
+            ElMessage({
+                type: 'success',
+                message: '保存成功',
+            })
+            $route.push({path : "/kubernetes/pod/list/index"})
+          }
+        })
+     } else {
         ElMessage.error('请填写完整')
       }
     })
@@ -1711,14 +1752,79 @@
   const changePodSelectTab = (item) =>{
     initData.value.option.selectPod = item
   }
-// 表单验证规则
-const rules = reactive<FormRules>({
-  'metadata.name' : [
-    { required: true, message: "名称不能为空", trigger: "blur" },
-    { min: 2, max: 20, message: '名称长度必须介于 2 和 20 之间', trigger: 'blur' },
-    { pattern: /^[-a-zA-Z0-9]*$/, message: '只可以输入字母、数字、中划线', trigger: 'blur' }
-  ],
-})
+
+  // 修改命名空间下拉框时修改id
+  const changeNameSpace = (name)=>{
+    for(const index in initData.value.option.namespaces){
+      if(name == initData.value.option.namespaces[index].label){
+        initData.value.option.namespaceId = initData.value.option.namespaces[index].value
+      }
+    }
+    secretOption()
+  }
+
+  const validName = (rule:any,value:any, callback:any)=>{
+    if($route.currentRoute.value.query.id != undefined){
+      callback()
+      return
+    }
+
+    nameIsExist($route.currentRoute.value.query.instanceCode,value).then((res)=>{
+        if(res.code == 200){
+          if(!res.data){
+            callback()
+            return
+          }else{
+            callback(new Error('名称已存在，请确认后修改'));
+          }
+        }
+    })
+  }
+
+  // 表单验证规则
+  const rules = reactive<FormRules>({
+    "metadata.name" : [
+      { required: true, message: "名称不能为空", trigger: "blur" },
+      { min: 2, max: 20, message: '名称长度必须介于 2 和 20 之间', trigger: 'blur' },
+      { pattern: /^[-a-z0-9]*$/, message: '只可以输入小写字母、数字、中划线', trigger: 'blur' },
+      { validator: validName , trigger: 'blur' }
+    ]
+  })
+
+  // 查询密文下拉列表
+  const secretOption = ()=>{
+    secretOptionList($route.currentRoute.value.query.instanceCode,initData.value.metadata.namespace).then((res)=>{
+        if(res.code == 200){
+          Object.assign(initData.value.option.imagePullSecrets,res.data);
+        }
+    })
+  }
+
+
+  // 初始化页面
+  const initPage = ()=>{
+    const id = $route.currentRoute.value.query.id
+    if(id != null){
+      queryDetail(id).then((res)=>{
+        if(res.code == 200){
+          setValue(yaml.load(res.data))
+        }
+      })
+    }
+
+    nameSpaceList($route.currentRoute.value.query.instanceCode).then((res)=>{
+      if(res.code == 200){
+        Object.assign(initData.value.option.namespaces,res.data);
+        changeNameSpace("default")
+      }
+    })
+
+    secretOption()
+
+  }
+
+  initPage();
+
 
 </script>
 <template>
@@ -1729,16 +1835,18 @@ const rules = reactive<FormRules>({
           <el-row :gutter="24">
             <el-col :span="8">
               <el-form-item label="命名空间">
-                <el-select v-model="initData.metadata.namespace" style="width: 100%;" placeholder="请选择">
-                  <el-option label="default" value="default"></el-option>
-                  <el-option label="my-project" value="my-project"></el-option>
+                <el-select v-model="initData.metadata.namespace" style="width: 100%;" placeholder="请选择" @change="changeNameSpace" 
+                    :disabled="$route.currentRoute.value.query.id != undefined">
+                  <el-option v-for="namespace in initData.option.namespaces"
+                    :key="namespace.value"
+                    :label="namespace.label"
+                    :value="namespace.label"/>
                 </el-select>
               </el-form-item>
             </el-col> 
             <el-col :span="8">
               <el-form-item label="名称" prop="metadata.name">
-                <el-input v-model="initData.metadata.name" placeholder="请输入内容" prop="name" :rules="[
-                  { required: true, message: '名称不能为空', trigger: 'blur' } ]"></el-input>
+                <el-input v-model="initData.metadata.name" placeholder="请输入内容" :disabled="$route.currentRoute.value.query.id != undefined" />
               </el-form-item>
             </el-col>
             <el-col :span="8">
@@ -1751,7 +1859,7 @@ const rules = reactive<FormRules>({
         <yt-card :title="'详细配置'">
           <div class="detail-content">
             <el-tabs
-                    v-model="selectTabIndex"
+                    v-model="initData.option.selectTabIndex"
                     class="top-tabs"
                     editable
                     type="card"
@@ -1780,12 +1888,16 @@ const rules = reactive<FormRules>({
                         <H1>Pod标签</H1>
                         <el-row :gutter="24" v-for="(label,index) in initData.option.labelAnnotation.pod.labels" :key="index" style="margin-top:30px">
                           <el-col :span="6" >
-                            <el-input label="键" placeholder="请输入键" v-model="label.key"></el-input>
+                            <el-form-item label="键">
+                              <el-input label="键" placeholder="请输入键" v-model="label.key"></el-input>
+                            </el-form-item>
                           </el-col>
                           <el-col :span="6" >
-                            <el-input label="值" placeholder="请输入值" v-model="label.value" ></el-input>
+                            <el-form-item label="值">
+                              <el-input label="值" placeholder="请输入值" v-model="label.value" ></el-input>
+                            </el-form-item>
                           </el-col>
-                          <el-button @click="removePodLabel(index)" type="danger" >删除标签</el-button>
+                          <el-button @click="removePodLabel(index)" style="margin-top:30px" type="danger" >删除标签</el-button>
                         </el-row>
                         <el-row :gutter="24" style="margin-top:10px;margin-left:2px">
                           <el-button @click="addPodLabel" type="primary" plain>添加标签</el-button>
@@ -1793,12 +1905,16 @@ const rules = reactive<FormRules>({
                         <H1>注解</H1>
                         <el-row :gutter="24" v-for="(annotation,index) in initData.option.labelAnnotation.pod.annotations" :key="index" style="margin-top:30px">
                           <el-col :span="6" >
-                            <el-input label="键" placeholder="请输入键" v-model="annotation.key"></el-input>
+                            <el-form-item label="键">
+                              <el-input label="键" placeholder="请输入键" v-model="annotation.key"></el-input>
+                            </el-form-item>
                           </el-col>
                           <el-col :span="6" >
-                            <el-input label="值" placeholder="请输入值" v-model="annotation.value" ></el-input>
+                            <el-form-item label="值">
+                              <el-input label="值" placeholder="请输入值" v-model="annotation.value" ></el-input>
+                            </el-form-item>
                           </el-col>
-                          <el-button @click="removePodAnnotation(index)"  type="danger">删除注解</el-button>
+                          <el-button @click="removePodAnnotation(index)" style="margin-top:30px" type="danger">删除注解</el-button>
                         </el-row>
                         <el-row :gutter="24" style="margin-top:10px;margin-left:2px">
                           <el-button @click="addPodAnnotation" type="primary" plain>添加标签</el-button>
@@ -1844,7 +1960,9 @@ const rules = reactive<FormRules>({
                         <H1>域名服务器</H1>
                         <el-row :gutter="8" v-for="(nameServers,index) in initData.spec.dnsConfig.nameservers" :key="nameServers" style="margin-top:15px">
                           <el-col :span="8">
-                            <el-input   placeholder="请输入内容" v-model="initData.spec.dnsConfig.nameservers[index].value"></el-input>
+                            <el-form-item label="域名">
+                              <el-input   placeholder="请输入内容" v-model="initData.spec.dnsConfig.nameservers[index].value"></el-input>
+                            </el-form-item>
                           </el-col>
                           <el-button type="danger" @click="removeNameServer(index)">删除</el-button>
                         </el-row>
@@ -1854,9 +1972,11 @@ const rules = reactive<FormRules>({
                         <H1>搜索域</H1>
                         <el-row :gutter="8" v-for="(search,index) in initData.spec.dnsConfig.searches" :key="search" style="margin-top:15px">
                           <el-col :span="8">
-                            <el-input  placeholder="请输入内容" v-model="initData.spec.dnsConfig.searches[index].value"></el-input>
+                            <el-form-item label="域名">
+                              <el-input  placeholder="请输入内容" v-model="initData.spec.dnsConfig.searches[index].value"></el-input>
+                            </el-form-item>
                           </el-col>
-                          <el-button type="danger" @click="removeSearch(index)">删除</el-button>
+                          <el-button type="danger" style="margin-top:30px" @click="removeSearch(index)">删除</el-button>
                         </el-row>
                         <el-row :gutter="8">
                           <el-button type="primary" style="margin-top:15px" @click="addSearch" plain>添加搜索域</el-button>
@@ -1905,7 +2025,7 @@ const rules = reactive<FormRules>({
                       <div v-show="initData.option.selectPod === 'podNode'  ? true : false ">
                         <H1>节点调度</H1>
                         <el-row :gutter="24" >
-                          <el-col :span="12">
+                          <el-col :span="24">
                             <el-radio-group v-model="initData.option.nodeAffinity" @change="nodeChange">
                               <el-radio-button
                                       v-for="item in nodeSelector"
@@ -1918,7 +2038,7 @@ const rules = reactive<FormRules>({
                         <template v-if="initData.option.nodeAffinity == 'none'">
                         </template>
                         <template v-if="initData.option.nodeAffinity == 'nodeName'">
-                          <el-row>
+                          <el-row style="margin-top: 20px;">
                             <el-col>
                               <el-select v-model="initData.spec.nodeName" placeholder="请选择">
                                 <el-option v-for="node in nodeData"
@@ -1976,17 +2096,14 @@ const rules = reactive<FormRules>({
                               </el-col>
                             </el-row>
                             <el-row>
-                              <el-col :span="12">
+                              <el-col :span="24">
                                 <el-button @click="addRule(node)" type="primary" plain>添加规则</el-button>
-                              </el-col>
-                            </el-row>
-                            <el-row>
-                              <el-col :span="12">
                                 <el-button @click="removeNode(nodeIndex)" type="danger" plain>删除节点调度</el-button>
+                                <el-button @click="addNode" type="primary" plain>添加节点调度</el-button>
                               </el-col>
                             </el-row>
                           </template>
-                          <el-button @click="addNode" type="primary" plain>添加节点调度</el-button>
+
                         </template>
                       </div>
 
@@ -2183,7 +2300,7 @@ const rules = reactive<FormRules>({
                 <el-scrollbar>
                   <div class="tab-content">
                     <div class="left">
-                      <el-tabs :tab-position="'left'" @tab-change="changeSelectTab">
+                      <el-tabs :tab-position="'left'" @tab-change="changeSelectTab" v-model="initData.option.containerIndex">
                         <el-tab-pane label="通用" name="containerGeneral" />
                         <el-tab-pane label="健康检查" name="containerCheckHealth"/>
                         <el-tab-pane label="资源" name="containerSource"/>
@@ -2210,7 +2327,10 @@ const rules = reactive<FormRules>({
                         <H1>镜像</H1>
                         <el-row :gutter="24" >
                           <el-col :span="8">
-                            <el-form-item label="容器镜像" :rules="[  { required: true, message: '容器镜像不能为空', trigger: 'blur' } ]" >
+                            <el-form-item label="容器镜像" :prop="`spec.template.spec.containers[${index}][image]`" :rules="[
+                                { required: true, message: '容器镜像不能为空', trigger: 'blur' },
+                                { min: 2, max: 50, message: '名称长度必须介于 2 和 50 之间', trigger: 'blur' }
+                              ]">
                               <el-input placeholder="如：nginx:1.17.2" v-model="container.image" />
                             </el-form-item>
                           </el-col>
@@ -3375,14 +3495,20 @@ const rules = reactive<FormRules>({
       </div>
     </el-form>
     <yt-bottom-operate>
-      <el-button @click="editYaml">编辑yaml</el-button>
-      <el-button type="primary" @click="saveData">保存</el-button>
+      <el-button @click="cancel">取消</el-button>
+      <el-button @click="editYaml" v-if="$route.currentRoute.value.query.id == undefined">编辑yaml</el-button>
+      <el-button @click="viewYaml" v-if="$route.currentRoute.value.query.id != undefined">查看yaml</el-button>
+      <el-button type="primary" @click="saveData" v-if="$route.currentRoute.value.query.id == undefined">保存</el-button>
     </yt-bottom-operate>
   </div>
   <yaml-editor :copy-data="copyData" v-model:visible="isShowYamlEditor" @setValue="setValue"></yaml-editor>
 </template>
 <style lang="scss" scoped>
   .detail-content {
+    ::v-deep(.el-tabs__new-tab) {
+      transform: scale(1.2);
+      transform-origin: right;
+    }
     ::v-deep(.el-tabs--card > .el-tabs__header) {
       margin-bottom: 0;
     }
@@ -3412,9 +3538,9 @@ const rules = reactive<FormRules>({
     }
     .tab-content {
       display: flex;
-      height: 400px;
       overflow-x: hidden;
       padding-top: 16px;
+      height: calc(100vh - 512px);
       .left {
         background: var(--el-table-header-bg-color-my);
         ::v-deep(.el-tabs__content) {
@@ -3425,6 +3551,7 @@ const rules = reactive<FormRules>({
         padding: 16px;
         box-sizing: border-box;
         flex: 1;
+        width: 100%;
       }
     }
   }
