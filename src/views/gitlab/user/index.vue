@@ -256,106 +256,95 @@
 <template>
   <div class="main-wrapp">
     <!--sousuo  -->
-    <el-form :model="queryParams" ref="queryForm"  :inline="true" v-show="showSearch" >
-          <el-form-item label="用户名称" prop="userName">
-            <el-input
-              v-model="queryParams.userName"
-              placeholder="请输入用户名称"
-              clearable
-              style="width: 240px"
-              @keyup.enter.native="handleQuery"
-            />
-          </el-form-item>
-          <el-form-item label="状态" prop="status">
-            <el-select
-            class="search-select"
-              v-model="queryParams.status"
-              placeholder="用户状态"
-              clearable
-              style="width: 240px"
-            >
-            <el-option v-for="dict in status"
-              :key="dict.value"
-              :label="dict.label"
-              :value="dict.value"/>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="创建时间">
-            <el-date-picker
-              v-model="dateRange"
-              value-format="YYYY-MM-DD"
-              type="daterange"
-              range-separator="-"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              clearable
-              style="width: 240px"
-            ></el-date-picker>
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
-            <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
-          </el-form-item>
+    <yt-card>
+      <el-form class="form-wrap"  :model="queryParams" ref="queryForm"  :inline="true" v-show="showSearch" >
+        <el-row :gutter="16">
+          <el-col :span="8">
+              <el-form-item label="用户名称" prop="userName">
+                <el-input
+                  v-model="queryParams.userName"
+                  placeholder="请输入用户名称"
+                  clearable
+                  @keyup.enter.native="handleQuery"
+                />
+              </el-form-item>
+          </el-col>
+          <el-col :span="8">
+              <el-form-item label="状态" prop="status">
+                <el-select
+                class="search-select"
+                  v-model="queryParams.status"
+                  placeholder="用户状态"
+                  clearable
+                >
+                <el-option v-for="dict in status"
+                  :key="dict.value"
+                  :label="dict.label"
+                  :value="dict.value"/>
+                </el-select>
+              </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="创建时间">
+                <el-date-picker
+                  v-model="dateRange"
+                  value-format="YYYY-MM-DD"
+                  type="daterange"
+                  range-separator="-"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+                  clearable
+                ></el-date-picker>
+              </el-form-item>
+          </el-col>
+          <el-col :span="8">
+              <el-form-item>
+                <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
+                <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
+              </el-form-item>
+          </el-col>
+        </el-row>
     </el-form>
+    </yt-card>
 
-    <!--  option-->
-    <div class="option-wrap">
-      <!-- <el-button
-        type="primary"
-        plain
-        size="default"
-        @click="handleAdd" v-hasPerms="['/gitlab/user/add']" ><el-icon><Plus /></el-icon>新增</el-button> -->
-    </div>
+    <yt-card>
+      <!--  option-->
+      <div class="option-wrap">
+        <!-- <el-button
+          type="primary"
+          plain
+          size="default"
+          @click="handleAdd" v-hasPerms="['/gitlab/user/add']" ><el-icon><Plus /></el-icon>新增</el-button> -->
+      </div>
 
-    <!--table  -->
-    <div class="table-wrap">
-      <el-table v-loading="loading" :data="userRow">
-          <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="用户编号" align="left" key="id" prop="id" v-if="false"/>
-          <el-table-column label="用户名称" align="left" key="userName" prop="userName"  :show-overflow-tooltip="true"  />
-          <el-table-column label="用户昵称" align="left" key="nickName" prop="nickName"  :show-overflow-tooltip="true"  />
-          <el-table-column label="邮箱" align="left" key="email" prop="email"  :show-overflow-tooltip="true" />
-          <el-table-column label="状态" align="center" key="status" >
-            <template #default="scope">
-              {{  showStatusFun(scope.row.status) }}
-            </template>
-          </el-table-column>
-          <el-table-column label="创建时间" align="left" prop="createTime" width="180">
-            <template #default="scope">
-              {{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}
-            </template>
-          </el-table-column>
-          <!-- <el-table-column
-            label="操作"
-            align="left"
-            width="220"
-          >
-            <template #default="scope">
-             <div class="action-btn">
-              <el-button
-                size="small"
-                icon="Edit"
-                @click="handleUpdate(scope.row)"
-                v-hasPerms="['/gitlab/user/edit']"
-              >修改</el-button>
-              <el-button
-                size="small"
-                :icon="getStatusIcon(scope.row)"
-                @click="handleStatusChange(scope.row)"
-                v-hasPerms="['/gitlab/user/changeStatus']"
-              >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-             </div>
-            </template>
-          </el-table-column> -->
-    </el-table>
-    </div>
-    <div class="page-wrap">
-      <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>
-    </div>
+      <!--table  -->
+      <div class="table-wrap">
+        <el-table v-loading="loading" :data="userRow">
+            <el-table-column type="selection" width="60" align="center" />
+            <el-table-column label="用户编号" align="left" key="id" prop="id" v-if="false"/>
+            <el-table-column label="用户名称" align="left" key="userName" prop="userName"  :show-overflow-tooltip="true"  />
+            <el-table-column label="用户昵称" align="left" key="nickName" prop="nickName"  :show-overflow-tooltip="true"  />
+            <el-table-column label="邮箱" align="left" key="email" prop="email"  :show-overflow-tooltip="true" />
+            <el-table-column label="状态" align="center" key="status" >
+              <template #default="scope">
+                {{  showStatusFun(scope.row.status) }}
+              </template>
+            </el-table-column>
+            <el-table-column label="创建时间" align="left" prop="createTime" width="180">
+              <template #default="scope">
+                {{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}
+              </template>
+            </el-table-column>
+      </el-table>
+      </div>
+      <div class="page-wrap">
+        <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>
+      </div>
+    </yt-card>
 
 
     <!-- 添加或修改用户配置对话框 -->
-    <el-dialog :title="title" v-model="open" width="600px" append-to-body>
+    <el-dialog :title="title" v-model="open" width="var(--dialog-lg-w)"  append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
           <el-row>

@@ -107,7 +107,7 @@
 
   // 处理查询按钮
   const resetQuery = function(){
-    
+
     dateRange.value = [];
     queryParams.labelKey = undefined;
     queryParams.labelName = undefined;
@@ -219,7 +219,7 @@
           loading.value = false;
           throw response?.msg;
         }
-        
+
         addDialog.value = false;
         getList();
       });
@@ -242,8 +242,8 @@
       })
     }
 
-    
-      
+
+
   }
 
   const handleDelete = function(row){
@@ -286,7 +286,7 @@
     labelKey.value = row.labelKey
     form.labelKey = row.labelKey
     form.labelName = row.labelName
-    
+
     queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
         if(res.code == 200){
           const data = res.data;
@@ -296,7 +296,7 @@
                 key:v.instanceCode
               })
           })
-          
+
         }
     });
 
@@ -344,6 +344,32 @@
   //   reset();
   // }
 
+  // 按钮
+  const btnList = ref([
+  {
+    btnName: '修改',
+    permArray: ['/ansible/label/queryLabelDetail/*'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleUpdate
+  },
+  {
+    btnName: row => showStatusOperateFun(row.status),
+    permArray: ['/ansible/label/changeStatus/**'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleStatusChange
+  },
+  {
+    btnName: '删除',
+    class: 'yt-color-error-hover',
+    permArray: ['/ansible/label/del/*'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleDelete
+  },
+])
+
   // 触发查询
   getList();
 </script>
@@ -352,43 +378,53 @@
   <div class="main-wrapp">
     <!--sousuo  -->
     <yt-card>
-      <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch">
-            <el-form-item label="标签key" prop="queryParams.labelKey">
-              <el-input v-model="queryParams.labelKey" placeholder="请输入标签key" clearable style="width: 240px"/>
-            </el-form-item>
-            <el-form-item label="标签名" prop="queryParams.labelName">
-              <el-input v-model="queryParams.labelName" placeholder="请输入标签名" clearable style="width: 240px"/>
-            </el-form-item>
-            <el-form-item label="状态" prop="status">
-              <el-select
-                class="search-select"
-                v-model="queryParams.status"
-                placeholder="项目状态"
-                clearable
-                style="width: 240px"
-              >
-                <el-option v-for="dict in status"
-                           :key="dict.value"
-                           :label="dict.label"
-                           :value="dict.value"/>
-              </el-select>
-            </el-form-item>
-            <el-form-item label="创建时间">
-              <el-date-picker
-                v-model="dateRange"
-                style="width: 240px"
-                value-format="YYYY-MM-DD"
-                type="daterange"
-                range-separator="-"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期"
-                clearable
-              ></el-date-picker>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
-              <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
-            </el-form-item>
+      <el-form class="form-wrap"  :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch">
+        <el-row :gutter="16">
+          <el-col :span="8">
+              <el-form-item label="标签key" prop="queryParams.labelKey">
+                <el-input v-model="queryParams.labelKey" placeholder="请输入标签key" clearable />
+              </el-form-item>
+          </el-col>
+          <el-col :span="8">
+              <el-form-item label="标签名" prop="queryParams.labelName">
+                <el-input v-model="queryParams.labelName" placeholder="请输入标签名" clearable />
+              </el-form-item>
+          </el-col>
+          <el-col :span="8">
+              <el-form-item label="状态" prop="status">
+                <el-select
+                  class="search-select"
+                  v-model="queryParams.status"
+                  placeholder="项目状态"
+                  clearable
+                >
+                  <el-option v-for="dict in status"
+                             :key="dict.value"
+                             :label="dict.label"
+                             :value="dict.value"/>
+                </el-select>
+              </el-form-item>
+          </el-col>
+          <el-col :span="8">
+              <el-form-item label="创建时间">
+                <el-date-picker
+                  v-model="dateRange"
+                  value-format="YYYY-MM-DD"
+                  type="daterange"
+                  range-separator="-"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+                  clearable
+                ></el-date-picker>
+              </el-form-item>
+          </el-col>
+          <el-col :span="8">
+              <el-form-item>
+                <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
+                <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
+              </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
     </yt-card>
     <yt-card>
@@ -427,84 +463,60 @@
           </el-table-column>
           <el-table-column
             label="操作"
-            align="left"
+            align="center"
+            width="220"
           >
-            <template #default="scope">
-              <div class="action-btn">
-                <el-button
-                  size="small"
-                  :icon="getStatusIcon(scope.row)"
-                  @click="handleStatusChange(scope.row)"
-                  v-hasPerms="['/ansible/label/changeStatus/**']"
-                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-                <el-button
-                  size="small"
-                  icon="Edit"
-                  @click="handleUpdate(scope.row)"
-                  v-hasPerms="['/ansible/label/queryLabelDetail/*']"
-                >修改</el-button>
-                <el-button
-                  size="small"
-                  icon="Delete"
-                  @click="handleDelete(scope.row)"
-                  v-hasPerms="['/ansible/label/del/*']"
-                >删除</el-button>
-              </div>
+            <template v-slot="scope">
+              <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
             </template>
           </el-table-column>
         </el-table>
       </div>
       <div class="page-wrap">
-        <el-pagination
-          v-show="total>0"
-          :total="total"
-          :page-sizes=[10,20]
-          background layout="prev, pager, next"
-          v-model:current-page="queryParams.pageNum"
-          v-model:page-size="queryParams.pageSize"
-          @current-change="getList"
-        />
+        <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>
       </div>
     </yt-card>
 
     <!-- 新增/更新对话框 -->
-    <el-dialog :title="title" v-model="addDialog" width="600px" append-to-body>
+    <el-dialog :title="title" v-model="addDialog"  width="720px"  append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="标签key" prop="labelKey">
-                <el-input v-model="form.labelKey" placeholder="请输入标签key" maxlength="20" :disabled="form.id != undefined"/>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="标签名" prop="labelName">
-                <el-input v-model="form.labelName" placeholder="请输入标签名" maxlength="20" />
-              </el-form-item>
-            </el-col>
-          </el-row>
-
-          <el-row>
+          <el-row :gutter="16">
             <el-col>
-              <el-transfer v-model="form.inventorys" :data="formInstance"
-              :titles="[ '未关联' , '已关联']"/>
-            </el-col>
-          </el-row>
-
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="状态">
-                <el-radio-group v-model="form.status">
-                  <el-radio
-                    v-for="dict in status"
-                    :key="dict.value"
-                    :label="dict.value"
-                  >{{dict.label}}</el-radio>
-                </el-radio-group>
+              <el-form-item label="标签key" prop="labelKey">
+                <el-input v-model="form.labelKey" placeholder="请输入标签key" maxlength="20" :disabled="form.id != undefined" style="width: 280px"/>
               </el-form-item>
             </el-col>
           </el-row>
 
+          <el-row :gutter="16">
+            <el-col>
+                <el-form-item label="标签名" prop="labelName">
+                  <el-input v-model="form.labelName" placeholder="请输入标签名" maxlength="20" style="width: 280px"/>
+                </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row :gutter="16">
+            <el-col>
+                <el-form-item label="状态">
+                  <el-radio-group v-model="form.status">
+                    <el-radio
+                        v-for="dict in status"
+                        :key="dict.value"
+                        :label="dict.value"
+                    >{{dict.label}}</el-radio>
+                  </el-radio-group>
+                </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row :gutter="16">
+            <el-col>
+                <el-form-item label="SSH实例">
+                  <el-transfer v-model="form.inventorys" :data="formInstance"  :titles="[ '未关联' , '已关联']"/>
+                </el-form-item>
+            </el-col>
+          </el-row>
         </el-form>
       </yt-card>
       <template #footer>
@@ -512,99 +524,10 @@
         <el-button type="primary" @click="submitForm(false)">确 定</el-button>
       </template>
     </el-dialog>
-
-    <!-- 更新对话框
-    <el-dialog :title="title" v-model="updateDialog" width="600px" append-to-body>
-      <yt-card>
-        <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="标签key" prop="labelKey">
-                <el-input v-model="form.labelKey" placeholder="请输入标签key" maxlength="20" disabled="true"/>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="标签名" prop="labelName">
-                <el-input v-model="form.labelName" placeholder="请输入标签名" maxlength="20" />
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row>
-            <el-input v-model="form.id" v-if="false" />
-            <el-col>
-              <el-transfer v-model="form.inventorys" :data="formInstance"
-              :titles="[ '未关联' , '已关联']"/>
-            </el-col>
-          </el-row>
-
-        </el-form>
-      </yt-card>
-      <template #footer>
-        <el-button type="primary" @click="updateForm">确 定</el-button>
-        <el-button @click="cancelUpdate">取 消</el-button>
-      </template>
-    </el-dialog> -->
-
   </div>
 </template>
 
 <style lang="scss" scoped>
-.main-wrap {
-  height: 100%;
-  width: 100%;
-  box-sizing: border-box;
-  background: #fff;
 
-}
-
-.option-wrap {
-  margin-bottom: 8px;
-  .el-button {
-    // margin-right: 6px;
-  }
-}
-.table-wrap {
-  width: 100%;
-  box-sizing: border-box;
-  overflow-y: auto;
-  .action-btn {
-    display: flex;
-  }
-}
-
-.page-wrap {
-  padding: 20px 0;
-  .el-pagination {
-    display: flex;
-    align-items: center;
-    justify-content: end;
-  }
-
-}
-
-
-</style>
-<style>
- .el-form-item__label {
-  font-size: 14px;
- }
-
-.search-select .el-input {
-  --el-input-width: 240px;
-}
-
-.el-transfer__buttons{
-  width: 80px;
-  padding: 0px;
-  margin-left: 20px;
-}
-.el-transfer__buttons .el-button{
-  width: 50px;
-  padding: 0px;
-  margin-left: 5px;
-}
-.el-transfer-panel{
-  width: 217px;
-}
 </style>
 

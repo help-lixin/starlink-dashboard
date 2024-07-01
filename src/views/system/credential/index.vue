@@ -5,6 +5,7 @@
   import { dayjs } from "@/utils/common-dayjs"
   import {sysCredentialList, addCredential, queryCredentialInfoById, checkKey , nameSpaceList,
     removeCredential,changeStatus ,credentialTypes,syncAllCredential} from "@/api/sys_credential/credential"
+  import { DeleteFilled } from "@element-plus/icons-vue";
 
   const queryFormRef = ref(null);
   //查询列表信息
@@ -394,35 +395,63 @@
       }
     });
   }
+
+  // 按钮
+const btnList = ref([
+  {
+    btnName: '修改',
+    permArray: ['/credential/add'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleUpdate
+  },
+  {
+    btnName: row => showStatusOperateFun(row.status),
+    permArray: ['/credential/changeStatus/**'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleStatusChange
+  },
+  {
+    btnName: '删除',
+    class: 'yt-color-error-hover',
+    permArray: ['/credential/del/*'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleDelete
+  },
+])
 </script>
 
 <template>
   <div class="main-wrapp">
     <!--sousuo  -->
     <yt-card padding="18px 18px 0">
-      <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch">
-            <el-form-item label="插件编码" prop="pluginCode">
-              <el-select
-                class="search-select"
-                v-model="queryParams.pluginCode"
-                placeholder="请选择插件编码"
-                @change="queryInstance"
-                clearable
-                style="width: 240px"
-              >
-                <el-option v-for="item in pluginCodes"
-                           :key="item.value"
-                           :label="item.label"
-                           :value="item.value"/>
-              </el-select>
-            </el-form-item>
+      <el-form class="form-wrap"  :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch">
+        <el-row :gutter="16">
+          <el-col :span="8">
+              <el-form-item label="插件编码" prop="pluginCode">
+                <el-select
+                  class="search-select"
+                  v-model="queryParams.pluginCode"
+                  placeholder="请选择插件编码"
+                  @change="queryInstance"
+                  clearable
+                >
+                  <el-option v-for="item in pluginCodes"
+                             :key="item.value"
+                             :label="item.label"
+                             :value="item.value"/>
+                </el-select>
+              </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="插件实例" prop="instanceCode">
               <el-select
                 class="search-select"
                 v-model="queryParams.instanceCode"
                 placeholder="请选择实例"
                 clearable
-                style="width: 240px"
               >
                 <el-option v-for="item in pluginInstance"
                            :key="item.pluginCode"
@@ -430,29 +459,32 @@
                            :value="item.instanceCode"/>
               </el-select>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="凭证别名" prop="credentialName">
               <el-input
                 v-model="queryParams.credentialName"
                 placeholder="请输入凭证别名"
                 clearable
-                style="width: 240px"
               />
             </el-form-item>
-            <el-form-item label="凭证唯一名称" prop="credentialKey">
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="凭证名称" prop="credentialKey">
               <el-input
                 v-model="queryParams.credentialKey"
                 placeholder="请输入凭证唯一名称"
                 clearable
-                style="width: 240px"
               />
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="凭证类型" prop="credentialType">
               <el-select
                 class="search-select"
                 v-model="queryParams.credentialType"
                 placeholder="请选择插件类型"
                 clearable
-                style="width: 240px"
               >
                 <el-option v-for="item in credentialTypes"
                            :key="item.value"
@@ -460,13 +492,14 @@
                            :value="item.value"/>
               </el-select>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="状态" prop="status">
               <el-select
                 class="search-select"
                 v-model="queryParams.status"
                 placeholder="工具状态"
                 clearable
-                style="width: 240px"
               >
                 <el-option v-for="dict in status"
                            :key="dict.value"
@@ -474,6 +507,8 @@
                            :value="dict.value"/>
               </el-select>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="创建时间">
               <el-date-picker
                 v-model="dateRange"
@@ -483,13 +518,16 @@
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
                 clearable
-                style="width: 240px"
               ></el-date-picker>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item>
               <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
               <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
             </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
     </yt-card>
 
@@ -529,30 +567,11 @@
           </el-table-column>
           <el-table-column
             label="操作"
-            align="left"
-            width="250"
+            align="center"
+            width="220"
           >
-            <template #default="scope">
-              <div class="action-btn">
-                <el-button
-                  size="small"
-                  icon="Edit"
-                  @click="handleUpdate(scope.row)"
-                  v-hasPerms="['/credential/add']"
-                >修改</el-button>
-                <el-button
-                  size="small"
-                  :icon="getStatusIcon(scope.row)"
-                  @click="handleStatusChange(scope.row)"
-                  v-hasPerms="['/credential/changeStatus/**']"
-                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-                <el-button
-                  size="small"
-                  icon="Delete"
-                  @click="handleDelete(scope.row)"
-                  v-hasPerms="['/credential/del/*']"
-                >删除</el-button>
-              </div>
+            <template v-slot="scope">
+              <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
             </template>
           </el-table-column>
         </el-table>
@@ -564,17 +583,16 @@
 
 
     <!-- 添加或修改工具配置对话框 -->
-    <el-dialog :title="title" v-model="open" width="600px" append-to-body>
+    <el-dialog :title="title" v-model="open" width="var(--dialog-lg-w)"  append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
-          <el-row>
+          <el-row :gutter="16">
             <el-col :span="12">
               <el-form-item label="插件编码" prop="pluginCode">
                 <el-select
                   class="search-select"
                   v-model="form.pluginCode"
                   placeholder="请选择插件编码"
-                  style="width: 240px"
                   @change="changeInstance"
                 >
                   <el-option v-for="item in formPluginCodes"
@@ -620,7 +638,7 @@
             </el-col>
           </el-row>
 
-          <el-row>
+          <el-row :gutter="16">
             <el-col :span="12">
               <el-form-item label="凭证类型" prop="credentialType">
                 <el-select
@@ -651,15 +669,15 @@
             </el-col>
           </el-row>
 
-        <el-row v-if="form.pluginCode == 'k8s'">
-          <el-col :span="12">
+        <el-row v-if="form.pluginCode == 'k8s'" :gutter="16">
+          <el-col>
             <el-form-item label="命名空间" prop="nameSpace" :rules="[
                 { required: true, message: '命名空间不能为空', trigger: 'blur' }]">
                 <el-select
                     class="search-select"
                     v-model="form.nameSpace"
                     placeholder="请选择凭证类型"
-                    style="width: 240px"
+                    style="width: 180px"
                   >
                     <el-option v-for="item in nameSpaces"
                              :key="item.value"
@@ -668,9 +686,10 @@
                 </el-select>
             </el-form-item>
           </el-col>
+
         </el-row>
 
-          <el-row v-if="form.credentialType == 'SECRET'">
+          <el-row v-if="form.credentialType == 'SECRET'" :gutter="16">
             <el-col :span="24">
               <el-form-item label="密钥" prop="secret" :rules="[
                   { required: true, message: '密钥不能为空', trigger: 'blur' }]">
@@ -680,43 +699,49 @@
 
           </el-row>
 
-          <el-row v-if="form.credentialType == 'SSH'">
-            <el-col :span="12">
+          <el-row v-if="form.credentialType == 'SSH'" :gutter="16">
+            <el-col>
               <el-form-item label="用户名" prop="userName" :rules="[
                   { required: true, message: '用户名不能为空', trigger: 'blur' },
                   { min: 2, max: 50, message: '用户名长度必须介于 2 和 50 之间', trigger: 'blur' } ]">
-                <el-input v-model="form.userName" placeholder="请输入用户名" maxlength="50" />
+                <el-input v-model="form.userName" placeholder="请输入用户名" maxlength="50" style="width: 180px"/>
               </el-form-item>
             </el-col>
+          </el-row>
 
-            <el-col :span="12">
+          <el-row v-if="form.credentialType == 'SSH'" :gutter="16">
+            <el-col>
               <el-form-item label="公钥" prop="publicKey" :rules="[
                   { required: true, message: '公钥不能为空', trigger: 'blur' },
                   { min: 2, max: 2000, message: '公钥长度必须介于 2 和 2000 之间', trigger: 'blur' } ]">
                 <el-input v-model="form.publicKey" placeholder="请输入公钥" type="textarea" maxlength="2000"/>
               </el-form-item>
             </el-col>
-            <el-col :span="12">
+          </el-row>
+
+          <el-row v-if="form.credentialType == 'SSH'" :gutter="16">
+            <el-col>
               <el-form-item label="私钥" prop="privateKey" :rules="[
                   { required: true, message: '私钥不能为空', trigger: 'blur' },
                   { min: 2, max: 2000, message: '私钥长度必须介于 2 和 2000 之间', trigger: 'blur' } ]">
                 <el-input v-model="form.privateKey" placeholder="请输入私钥" type="textarea" maxlength="2000"/>
               </el-form-item>
             </el-col>
-
-            <el-col :span="12">
-              <el-form-item label="密钥" prop="passphrase" >
-                <el-input v-model="form.passphrase" placeholder="请输入密钥" maxlength="2000" />
+          </el-row>
+          <el-row v-if="form.credentialType == 'SSH'" :gutter="16">
+            <el-col>
+              <el-form-item label="私钥密钥" prop="passphrase" >
+                <el-input v-model="form.passphrase" placeholder="请输入私钥密钥" type="textarea" maxlength="2000" />
               </el-form-item>
             </el-col>
           </el-row>
 
-          <el-row v-if="form.credentialType == 'USERNAME_PASSWORD'">
+          <el-row v-if="form.credentialType == 'USERNAME_PASSWORD'" :gutter="16">
             <el-col :span="12">
               <el-form-item label="用户名" prop="userName" :rules="[
                   { required: true, message: '用户名不能为空', trigger: 'blur' },
                   { min: 2, max: 50, message: '用户名长度必须介于 2 和 50 之间', trigger: 'blur' } ]">
-                <el-input v-model="form.userName" placeholder="请输入用户名" maxlength="50" />
+                <el-input v-model="form.userName" placeholder="请输入用户名" maxlength="50"/>
               </el-form-item>
             </el-col>
 
@@ -728,77 +753,86 @@
               </el-form-item>
             </el-col>
 
-            <el-col :span="12">
-              <el-form-item label="镜像域名" prop="imgDomain" >
+            <el-col :span="12" v-if="form.pluginCode == 'k8s'">
+              <el-form-item label="域名" prop="imgDomain" >
                 <el-input v-model="form.imgDomain"  placeholder="如：https://starlink.lixin.help" maxlength="1024" />
               </el-form-item>
             </el-col>
           </el-row>
 
-          <el-row v-if="form.credentialType == 'TOKEN'">
-            <el-col :span="12">
+          <el-row v-if="form.credentialType == 'TOKEN'" :gutter="16">
+            <el-col>
               <el-form-item label="用户名" prop="userName" >
-                <el-input v-model="form.userName" placeholder="请输入用户名" maxlength="50" />
+                <el-input v-model="form.userName" placeholder="请输入用户名" maxlength="50" style="width: 180px"/>
               </el-form-item>
             </el-col>
+          </el-row>
 
-            <el-col :span="12">
+          <el-row v-if="form.credentialType == 'TOKEN'" :gutter="16">
+            <el-col>
               <el-form-item label="token" prop="token" :rules="[
                   { required: true, message: 'token不能为空', trigger: 'blur' },
                   { min: 2, max: 2000, message: 'token长度必须介于 2 和 2000 之间', trigger: 'blur' } ]">
-                <el-input v-model="form.token"  placeholder="请输入token" maxlength="2000" />
+                <el-input v-model="form.token" type="textarea"   placeholder="请输入token" maxlength="2000" />
               </el-form-item>
             </el-col>
           </el-row>
 
-          <el-row v-if="form.credentialType == 'TLS'">
-            <el-col :span="12">
+
+          <el-row v-if="form.credentialType == 'TLS'" :gutter="16">
+            <el-col>
               <el-form-item label="证书" prop="certificate" :rules="[
                   { required: true, message: '证书不能为空', trigger: 'blur' },
                   { min: 2, max: 2000, message: '证书长度必须介于 2 和 2000 之间', trigger: 'blur' } ]">
-                <el-input v-model="form.certificate" placeholder="请输入证书" maxlength="2000" />
-              </el-form-item>
-            </el-col>
-
-            <el-col :span="12">
-              <el-form-item label="私钥" prop="privateKey" :rules="[
-                  { required: true, message: '私钥不能为空', trigger: 'blur' },
-                  { min: 2, max: 2000, message: '私钥长度必须介于 2 和 2000 之间', trigger: 'blur' } ]">
-                <el-input v-model="form.privateKey"  placeholder="请输入私钥" maxlength="2000" />
+                <el-input v-model="form.certificate" type="textarea"  placeholder="请输入证书" maxlength="2000" />
               </el-form-item>
             </el-col>
           </el-row>
 
-          <div v-if="form.credentialType == 'OPAQUE'" >
-            <el-row  v-for="(label,index) in form.dataList" :key="index">
-              <el-col :span="12">
-                <el-form-item label="键" :prop="`dataList[${index}].key`" :rules="[
+          <el-row v-if="form.credentialType == 'TLS'" :gutter="16">
+            <el-col >
+              <el-form-item label="私钥" prop="privateKey" :rules="[
+                  { required: true, message: '私钥不能为空', trigger: 'blur' },
+                  { min: 2, max: 2000, message: '私钥长度必须介于 2 和 2000 之间', trigger: 'blur' } ]">
+                <el-input v-model="form.privateKey" type="textarea"   placeholder="请输入私钥" maxlength="2000" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <div v-if="form.credentialType == 'OPAQUE'">
+            <div class="inline-card">
+              <el-form label-position="top">
+                <el-row :gutter="8" v-for="(label,index) in form.dataList" :key="index">
+                  <el-col :span="12">
+                    <el-form-item label="键" :prop="`dataList[${index}].key`" :rules="[
                     { required: true, message: '键名不能为空', trigger: 'blur' },
                     { min: 2, max: 255, message: '键名长度必须介于 2 和 255 之间', trigger: 'blur' } ]">
-                  <el-input v-model="label.key" placeholder="请输入键名" maxlength="255" />
-                </el-form-item>
-              </el-col>
+                      <el-input v-model="label.key" placeholder="请输入键名" maxlength="255" />
+                    </el-form-item>
+                  </el-col>
 
-              <el-col :span="10">
-                <el-form-item label="值" :prop="`dataList[${index}].value`" :rules="[
+                  <el-col :span="10">
+                    <el-form-item label="值" :prop="`dataList[${index}].value`" :rules="[
                     { required: true, message: '值不能为空', trigger: 'blur' },
                     { min: 2, max: 255, message: '值长度必须介于 2 和 255 之间', trigger: 'blur' } ]">
-                  <el-input v-model="label.value"  placeholder="请输入值" maxlength="255" />
-                </el-form-item>
-              </el-col>
-              <el-col :span="1">
-                <el-button type="danger" @click="deleteDataList(index)" icon="Delete"></el-button>
-              </el-col>
-            </el-row>
-            <el-row >
-              <el-col :span="12" style="margin: 0px 0px 10px 80px;">
+                      <el-input v-model="label.value"  placeholder="请输入值" maxlength="255" />
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="2">
+                    <div class="icon">
+                      <DeleteFilled  @click="deleteDataList(index)"></DeleteFilled>
+                    </div>
+                  </el-col>
+                </el-row>
+              </el-form>
+              <div class="operate">
                 <el-button type="primary" @click="addDataList">添加Opaque</el-button>
-              </el-col>
-            </el-row>
+              </div>
+            </div>
           </div>
 
           <el-row>
-            <el-col :span="12">
+            <el-col :span="24">
               <el-form-item label="备注" prop="remark">
                 <el-input v-model="form.remark" type="textarea" placeholder="请输入备注" maxlength="200" />
               </el-form-item>

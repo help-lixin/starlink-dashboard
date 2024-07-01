@@ -178,7 +178,7 @@
         }
       })
     })
-    
+
   }
 
   // 表单提交处理
@@ -291,82 +291,119 @@
       Object.assign(pluginInstance,res?.data)
     }
   });
+
+
+  // 按钮
+const btnList = ref([
+  {
+    btnName: '修改',
+    permArray: ['/gitlab/group/add'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleUpdate
+  },
+  {
+    btnName: row => showStatusOperateFun(row.status),
+    permArray: ['/gitlab/group/changeStatus/**'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleStatusChange
+  },
+  {
+    btnName: '删除',
+    class: 'yt-color-error-hover',
+    permArray: ['/gitlab/group/del/*'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleDelete
+  },
+])
+
 </script>
 
 <template>
   <div class="main-wrapp">
     <!--sousuo  -->
     <yt-card>
-      <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch">
-        <el-form-item label="插件实例" prop="instanceCode">
-          <el-select
-            class="search-select"
-            v-model="queryParams.instanceCode"
-            @keyup.enter.native="handleQuery"
-            placeholder="请选择实例"
-            clearable
-            style="width: 240px"
-          >
-            <el-option v-for="item in pluginInstance"
-              :key="item.pluginCode"
-              :label="item.instanceName"
-              :value="item.instanceCode"/>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="组名称" prop="groupName">
-            <el-input
-              v-model="queryParams.groupName"
-              placeholder="请输入组名称"
-              clearable
-              style="width: 240px"
-              @keyup.enter.native="handleQuery"
-            />
-          </el-form-item>
-          <el-form-item label="可见性级别" prop="visibility">
-            <el-select
-            class="search-select"
-              v-model="queryParams.visibility"
-              @keyup.enter.native="handleQuery"
-              placeholder="请选择可见性级别"
-              clearable
-              style="width: 240px"
-            >
-            <el-option v-for="item in visibilityArr"
-                       :key="item"
-                       :label="item"
-                       :value="item"/>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="状态" prop="status">
-          <el-select
-            class="search-select"
-            v-model="queryParams.status"
-            placeholder="组状态"
-            clearable
-            style="width: 240px"
-          >
-            <el-option v-for="dict in status"
-                       :key="dict.value"
-                       :label="dict.label"
-                       :value="dict.value"/>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="创建时间">
-          <el-date-picker
-            v-model="dateRange"
-            style="width: 240px"
-            value-format="YYYY-MM-DD"
-            type="daterange"
-            range-separator="-"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            clearable
-          ></el-date-picker>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
-          <el-button  @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
-        </el-form-item>
+      <el-form class="form-wrap"  :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch">
+        <el-row :gutter="16">
+          <el-col :span="8">
+            <el-form-item label="插件实例" prop="instanceCode">
+              <el-select
+                class="search-select"
+                v-model="queryParams.instanceCode"
+                @keyup.enter.native="handleQuery"
+                placeholder="请选择实例"
+                clearable
+              >
+                <el-option v-for="item in pluginInstance"
+                  :key="item.pluginCode"
+                  :label="item.instanceName"
+                  :value="item.instanceCode"/>
+                </el-select>
+              </el-form-item>
+          </el-col>
+          <el-col :span="8">
+              <el-form-item label="组名称" prop="groupName">
+                <el-input
+                  v-model="queryParams.groupName"
+                  placeholder="请输入组名称"
+                  clearable
+                  @keyup.enter.native="handleQuery"
+                />
+              </el-form-item>
+          </el-col>
+          <el-col :span="8">
+              <el-form-item label="可见性级别" prop="visibility">
+                <el-select
+                class="search-select"
+                  v-model="queryParams.visibility"
+                  @keyup.enter.native="handleQuery"
+                  placeholder="请选择可见性级别"
+                  clearable
+                >
+                <el-option v-for="item in visibilityArr"
+                           :key="item"
+                           :label="item"
+                           :value="item"/>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+          <el-form-item label="状态" prop="status">
+              <el-select
+                class="search-select"
+                v-model="queryParams.status"
+                placeholder="组状态"
+                clearable
+              >
+                <el-option v-for="dict in status"
+                           :key="dict.value"
+                           :label="dict.label"
+                           :value="dict.value"/>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+              <el-form-item label="创建时间">
+                <el-date-picker
+                  v-model="dateRange"
+                  value-format="YYYY-MM-DD"
+                  type="daterange"
+                  range-separator="-"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+                  clearable
+                ></el-date-picker>
+              </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item>
+              <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
+              <el-button  @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
+            </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
     </yt-card>
     <yt-card>
@@ -401,30 +438,11 @@
           </el-table-column>
           <el-table-column
             label="操作"
-            align="left"
+            align="center"
             width="240"
           >
-            <template #default="scope">
-              <div class="action-btn">
-                <el-button
-                  size="small"
-                  icon="Edit"
-                  @click="handleUpdate(scope.row)"
-                  v-hasPerms="['/gitlab/group/add']"
-                >修改</el-button>
-                <el-button
-                  size="small"
-                  :icon="getStatusIcon(scope.row)"
-                  @click="handleStatusChange(scope.row)"
-                  v-hasPerms="['/gitlab/group/changeStatus/**']"
-                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-                <el-button
-                  size="small"
-                  icon="Delete"
-                  @click="handleDelete(scope.row)"
-                  v-hasPerms="['/gitlab/group/del/*']"
-                >删除</el-button>
-              </div>
+            <template v-slot="scope">
+              <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
             </template>
           </el-table-column>
         </el-table>
@@ -437,10 +455,10 @@
 
 
     <!-- 添加或修改组配置对话框 -->
-    <el-dialog :title="title" v-model="open" width="600px" append-to-body>
+    <el-dialog :title="title" v-model="open"  width="700px" append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
-          <el-row>
+          <el-row :gutter="16">
             <el-col :span="12">
               <el-form-item label="实例" prop="instanceCode">
                 <el-select
@@ -459,21 +477,26 @@
               </el-form-item>
             </el-col>
           </el-row>
-          <el-row>
+
+          <el-row :gutter="16">
             <el-col :span="12">
               <el-form-item label="群组名称" prop="groupName">
                 <el-input v-model="form.groupName" placeholder="请输入群组名称" maxlength="30" />
               </el-form-item>
             </el-col>
           </el-row>
-          <el-row >
-              <el-form-item label="群组URL" prop="path">
-                <el-input v-model="form.path" placeholder="请输入群组URL" maxlength="30" clearable style="width: 435px">
-                  <template #prepend>{{ipAddr}}</template>
-                </el-input>
-              </el-form-item>
+
+          <el-row :gutter="16">
+            <el-col>
+                <el-form-item label="群组URL" prop="path">
+                  <el-input v-model="form.path" placeholder="请输入群组URL" maxlength="30" clearable style="width: 435px">
+                    <template #prepend>{{ipAddr}}</template>
+                  </el-input>
+                </el-form-item>
+            </el-col>
           </el-row>
-          <el-row>
+
+          <el-row :gutter="16">
             <el-col :span="12">
               <el-form-item label="可见性级别" prop="visibility">
               <el-select
@@ -491,15 +514,17 @@
               </el-form-item>
             </el-col>
           </el-row>
-          <el-row>
-            <el-col :span="24">
+
+          <el-row :gutter="16">
+            <el-col>
               <el-form-item label="备注">
                 <el-input v-model="form.remark" type="textarea" placeholder="请输入内容"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
-          <el-row>
-            <el-col :span="12">
+
+          <el-row :gutter="16">
+            <el-col>
               <el-form-item label="状态">
                 <el-radio-group v-model="form.status">
                   <el-radio

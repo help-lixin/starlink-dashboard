@@ -47,15 +47,15 @@
       ],
       'jobName': [
         { required: true, message: "任务名称不能为空", trigger: "blur" },
+        { pattern: /^[-_a-zA-Z0-9]*$/, message: '任务名称别名只可以输入字母、数字、下划线及中划线', trigger: 'blur' },
         { min: 2, max: 20, message: '任务名称长度必须介于 2 和 20 之间', trigger: 'blur' },
         { validator: validJobName , trigger: 'blur' }
       ],
       'scmType': [
-        { required: true, message: "仓库类型不能为空", trigger: "blur" },
-        { min: 2, max: 20, message: '任务名称长度必须介于 2 和 20 之间', trigger: 'blur' }
+        { required: true, message: "仓库类型不能为空", trigger: "blur" }
       ],
       'toolsType': [
-        { required: true, message: "语言不能为空", trigger: "blur" },
+        { required: true, message: "工具不能为空", trigger: "blur" },
       ],
       'jdkId' :[
         { required: true, message: "jdk不能为空", trigger: "blur" },
@@ -545,13 +545,50 @@
       Object.assign(pluginInstance,res?.data)
     }
   });
+
+// 按钮
+const btnList = ref([
+  {
+    btnName: '修改',
+    permArray: ['/jenkins/job/add'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleUpdate
+  },
+  {
+    btnName: '构建',
+    permArray: ['/jenkins/job/buildJob'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleUpdate
+  },
+  {
+    btnName: row => showStatusOperateFun(row.status),
+    permArray: ['/jenkins/job/changeStatus/**'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleStatusChange
+  },
+  {
+    btnName: '删除',
+    class: 'yt-color-error-hover',
+    permArray: ['/jenkins/job/del/*'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleDelete
+  },
+])
+
+
 </script>
 
 <template>
   <div class="main-wrapp">
     <!--sousuo  -->
     <yt-card :padding="'18px 18px 0'">
-      <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch" >
+      <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch" >
+        <el-row :gutter="16">
+          <el-col :span="8">
             <el-form-item label="插件实例" prop="instanceCode">
               <el-select
                 class="search-select"
@@ -566,6 +603,8 @@
                            :value="item.instanceCode"/>
               </el-select>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="工具类型" prop="queryParams.tools">
               <el-select
                 class="search-select"
@@ -579,9 +618,13 @@
                            :value="tool.value"/>
               </el-select>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="任务名" prop="queryParams.jobName">
-              <el-input v-model="queryParams.jobName" placeholder="请输入任务名" clearable style="width: 240px"/>
+              <el-input v-model="queryParams.jobName" placeholder="请输入任务名" clearable/>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="状态" prop="status">
               <el-select
                 class="search-select"
@@ -595,6 +638,8 @@
                            :value="dict.value"/>
               </el-select>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="创建时间">
               <el-date-picker
                 v-model="dateRange"
@@ -605,10 +650,14 @@
                 end-placeholder="结束日期"
               ></el-date-picker>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item>
               <el-button type="primary"  @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
               <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
             </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
     </yt-card>
     <yt-card>
@@ -634,11 +683,7 @@
               {{  showStatusFun(scope.row.status) }}
             </template>
           </el-table-column>
-          <!-- <el-table-column label="最后成功时间" align="center" key="lastSuccess" prop="lastSuccess" :show-overflow-tooltip="true" width="180"/> -->
-          <!-- <el-table-column label="最后失败时间" align="center" key="lastFailure" prop="lastFailure" :show-overflow-tooltip="true"   width="180"/> -->
-          <!-- <el-table-column label="最后构建所需时间" align="center" key="lastDuration" prop="lastDuration" :show-overflow-tooltip="true"  width="180"/> -->
-          <!-- <el-table-column label="聚合状态" align="center" key="aggregatedStatus" prop="aggregatedStatus" :show-overflow-tooltip="true" /> -->
-          <el-table-column label="构建状态" align="left" key="buildStatus" prop="buildStatus" :show-overflow-tooltip="true"  width="120"/>
+<!--          <el-table-column label="构建状态" align="left" key="buildStatus" prop="buildStatus" :show-overflow-tooltip="true"  width="120"/>-->
           <el-table-column label="备注" align="left" key="remark" prop="remark" :show-overflow-tooltip="true"  />
           <el-table-column label="创建时间" align="left" prop="createTime" width="180">
             <template #default="scope">
@@ -652,37 +697,12 @@
           </el-table-column>
           <el-table-column
             label="操作"
-            align="left"
-            width="320"
+            align="center"
+            width="220"
             flxed="right"
           >
-            <template #default="scope">
-              <div class="action-btn">
-                <el-button
-                  size="small"
-                  icon="Edit"
-                  @click="handleUpdate(scope.row)"
-                  v-hasPerms="['/jenkins/job/add']"
-                >修改</el-button>
-                <el-button
-                  size="small"
-                  icon="SwitchButton"
-                  @click="build(scope.row,true)"
-                  v-hasPerms="['/jenkins/job/buildJob']"
-                >构建</el-button>
-                <el-button
-                  size="small"
-                  :icon="getStatusIcon(scope.row)"
-                  @click="handleStatusChange(scope.row)"
-                  v-hasPerms="['/jenkins/job/changeStatus/**']"
-                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-                <el-button
-                  size="small"
-                  icon="Delete"
-                  @click="handleDelete(scope.row)"
-                  v-hasPerms="['/jenkins/job/del/*']"
-                >删除</el-button>
-              </div>
+            <template v-slot="scope">
+              <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
             </template>
           </el-table-column>
         </el-table>
@@ -702,7 +722,7 @@
 
 
     <!-- 添加或修改组配置对话框 -->
-    <el-dialog :title="title" v-model="open" width="600px" append-to-body>
+    <el-dialog :title="title" v-model="open" width="var(--dialog-lg-w)"  append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
           <el-row>
@@ -777,11 +797,11 @@
 
           <el-row>
             <el-col :span="12">
-              <el-form-item label="语言选择" prop="toolsType">
+              <el-form-item label="工具" prop="toolsType">
                 <el-select
                   class="search-select2"
                   v-model="form.toolsType"
-                  placeholder="请选择语言"
+                  placeholder="请选择工具"
                   clearable
                   style="width: 240px"
                   @change="switchLanguage"
@@ -818,7 +838,7 @@
             <template
               v-for="(item, index) in form.setups">
               <el-col :span="12">
-                <el-form-item label="maven版本选择" :prop="`setups.${index}.mavenId`" :rules="[  { required: true, message: 'maven版本是必选项', trigger: 'change' } ]" >
+                <el-form-item label="maven" :prop="`setups.${index}.mavenId`" :rules="[  { required: true, message: 'maven版本是必选项', trigger: 'change' } ]" >
                   <el-select
                     class="search-select2"
                     v-model="item.mavenId"
@@ -848,7 +868,7 @@
             <template
               v-for="(item, index) in form.setups">
               <el-col :span="12">
-                <el-form-item label="go版本" :prop="`setups.${index}.goId`" :rules="[  { required: true, message: 'go版本是必选项', trigger: 'change' } ]" >
+                <el-form-item label="go" :prop="`setups.${index}.goId`" :rules="[  { required: true, message: 'go版本是必选项', trigger: 'change' } ]" >
                   <el-select
                     class="search-select2"
                     v-model="item.goId"
@@ -890,7 +910,7 @@
             <template
               v-for="(item, index) in form.setups">
               <el-col :span="12">
-                <el-form-item label="ant版本" :prop="`setups.${index}.antId`" :rules="[  { required: true, message: 'ant版本是必选项', trigger: 'change' } ]" >
+                <el-form-item label="ant" :prop="`setups.${index}.antId`" :rules="[  { required: true, message: 'ant版本是必选项', trigger: 'change' } ]" >
                   <el-select
                     class="search-select2"
                     v-model="item.antId"
@@ -919,7 +939,7 @@
             <template
               v-for="(item, index) in form.setups">
               <el-col :span="12">
-                <el-form-item label="gradle版本" :prop="`setups.${index}.gradleId`" :rules="[  { required: true, message: 'gradle版本是必选项', trigger: 'change' } ]" >
+                <el-form-item label="gradle" :prop="`setups.${index}.gradleId`" :rules="[  { required: true, message: 'gradle版本是必选项', trigger: 'change' } ]" >
                   <el-select
                     class="search-select2"
                     v-model="item.gradleId"
@@ -948,7 +968,7 @@
             <template
               v-for="(item, index) in form.setups">
               <el-col :span="12">
-                <el-form-item label="nodejs版本" :prop="`setups.${index}.nodejsId`" :rules="[  { required: true, message: 'nodejs版本是必选项', trigger: 'change' } ]" >
+                <el-form-item label="nodejs" :prop="`setups.${index}.nodejsId`" :rules="[  { required: true, message: 'nodejs版本是必选项', trigger: 'change' } ]" >
                   <el-select
                     class="search-select2"
                     v-model="item.nodejsId"
@@ -977,7 +997,7 @@
             <template
               v-for="(item, index) in form.setups">
               <el-col :span="12">
-                <el-form-item label="python版本" :prop="`setups.${index}.pythonId`" :rules="[  { required: true, message: 'python版本是必选项', trigger: 'change' } ]" >
+                <el-form-item label="python" :prop="`setups.${index}.pythonId`" :rules="[  { required: true, message: 'python版本是必选项', trigger: 'change' } ]" >
                   <el-select
                     class="search-select2"
                     v-model="item.pythonId"
@@ -1046,7 +1066,7 @@
               </el-form-item>
             </el-col>
             <el-col :span="24">
-              <el-form-item label="任务备注">
+              <el-form-item label="备注">
                 <el-input v-model="form.remark" type="textarea" placeholder="请输入内容"></el-input>
               </el-form-item>
             </el-col>

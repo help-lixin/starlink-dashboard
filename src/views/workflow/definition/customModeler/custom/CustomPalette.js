@@ -1,11 +1,11 @@
-// @ts-nocheck  
+// @ts-nocheck
 
 /**
  * 定义BPMNJB中左侧的工具栏
  */
 
 import { useActionMetasStore } from "@/stores/plugin";
-import {STARLINK_SERVICE} from "@/utils/env"
+import {STARLINK_SERVICE,ICON_SERVICE} from "@/utils/env"
 
 
 import mockFile from "@/api/mock/formilyjs/ssh-docker-build"
@@ -121,8 +121,8 @@ PaletteProvider.prototype.getPaletteEntries = function (element) {
 		// const pluginItem = deserialize(mockFile)
 
 		const pluginItem = deserialize(value)
-		const pluginMeta = { 
-			"plugin": key 
+		const pluginMeta = {
+			"plugin": key
 		};
 
 		if(pluginItem?.name){
@@ -148,7 +148,16 @@ PaletteProvider.prototype.getPaletteEntries = function (element) {
 		}
 
 		if(pluginMeta?.pluginIcon){
-			paletteObj[key]["imageUrl"] = pluginMeta?.pluginIcon
+			if(!pluginMeta?.pluginIcon.startsWith("http")){ // 不是http或https
+				var tempIcon = pluginMeta?.pluginIcon
+				if(!tempIcon.startsWith("/")){
+					tempIcon = "/" + tempIcon;
+				}
+				tempIcon = ICON_SERVICE + tempIcon;
+				paletteObj[key]["imageUrl"] = tempIcon
+			}else{
+				paletteObj[key]["imageUrl"] = pluginMeta?.pluginIcon
+			}
 		}
 
 		if(pluginItem?.className){

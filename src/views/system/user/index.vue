@@ -303,6 +303,32 @@ const cancel = ()=>{
     reset();
 }
 
+// 按钮
+const btnList = ref([
+  {
+    btnName: '修改',
+    permArray: ['/system/user/edit'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleUpdate
+  },
+  {
+    btnName: '删除',
+    class: 'yt-color-error-hover',
+    permArray: ['/system/user/del/*'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleDelete
+  },
+  {
+    btnName: '重置密码',
+    permArray: ['/system/user/resetPwd'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleResetPwd
+  }
+])
+
 // 触发查询
 getList()
 </script>
@@ -311,30 +337,32 @@ getList()
     <div class="main-wrapp">
       <yt-card>
         <el-form class="form-wrap" :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch">
-          <el-row>
+          <el-row :gutter="16">
+            <el-col :span="8">
               <el-form-item label="用户名称" prop="userName">
                 <el-input
                   v-model="queryParams.userName"
                   placeholder="请输入用户名称"
                   clearable
-                  style="width: 240px"
                 />
               </el-form-item>
+            </el-col>
+            <el-col :span="8">
               <el-form-item label="手机号码" prop="phonenumber">
                 <el-input
                   v-model="queryParams.phonenumber"
                   placeholder="请输入手机号码"
                   clearable
-                  style="width: 240px"
                 />
               </el-form-item>
+            </el-col>
+            <el-col :span="8">
               <el-form-item label="状态" prop="status">
                 <el-select
                   class="search-select"
                   v-model="queryParams.status"
                   placeholder="用户状态"
                   clearable
-                  style="width: 240px"
                 >
                   <el-option v-for="dict in statusDicts"
                              :key="dict.value"
@@ -342,6 +370,8 @@ getList()
                              :value="dict.value"/>
                 </el-select>
               </el-form-item>
+            </el-col>
+            <el-col :span="8">
               <el-form-item label="创建时间">
                 <el-date-picker
                   v-model="dateRange"
@@ -351,13 +381,15 @@ getList()
                   start-placeholder="开始日期"
                   end-placeholder="结束日期"
                   clearable
-                  style="width: 240px"
                 ></el-date-picker>
               </el-form-item>
+            </el-col>
+            <el-col :span="8">
               <el-form-item>
                 <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
                 <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
               </el-form-item>
+            </el-col>
           </el-row>
         </el-form>
       </yt-card>
@@ -373,14 +405,6 @@ getList()
             size="default"
             @click="handleAdd" v-hasPerms="['/system/user/add']" ><el-icon><Plus /></el-icon>新增</el-button>
 
-
-          <el-button
-            type="success"
-            plain
-            size="default"
-            :disabled="single"
-            @click="handleUpdate" v-hasPerms="['/system/user/edit']" ><el-icon><EditPen /></el-icon>修改</el-button>
-
           <el-button
             type="danger"
             plain
@@ -393,11 +417,11 @@ getList()
         <!--table  -->
         <div class="table-wrap">
           <el-table v-loading="loading" :data="userList" @selection-change="handleSelectionChange">
-            <el-table-column type="selection" width="60" align="center" />
+            <el-table-column type="selection" width="60" align="center" fixed="left" />
             <el-table-column label="用户编号" align="left" key="userId" prop="userId"/>
             <el-table-column label="用户名称" align="left" key="userName" prop="userName"  :show-overflow-tooltip="true" />
             <el-table-column label="用户昵称" align="left" key="nickName" prop="nickName" :show-overflow-tooltip="true" />
-            <el-table-column label="手机号码" align="left" key="phonenumber" prop="phonenumber" />
+            <el-table-column label="手机号码" align="left" width="150" key="phonenumber" prop="phonenumber" />
             <el-table-column label="状态" align="center" key="status">
               <template #default="{row}">
                 <el-switch
@@ -419,43 +443,12 @@ getList()
               </template>
             </el-table-column>
             <el-table-column
-              label="操作"
-              align="left"
-              width="350"
+                label="操作"
+                align="center"
+                width="220"
             >
               <template v-slot="scope">
-                <div class="action-btn">
-                  <el-button
-                    size="small"
-                    icon="Edit"
-                    @click="handleUpdate(scope.row)"
-                    v-hasPerms="['/system/user/edit']"
-                  >修改</el-button>
-                  <el-button
-                    v-if="false"
-                    size="small"
-                    icon="Link"
-                    @click="contractAddress(scope.row)"
-                  >关联地址</el-button>
-                  <el-button
-                    size="small"
-                    icon="Delete"
-                    @click="handleDelete(scope.row)"
-                    v-hasPerms="['/system/user/del/*']"
-                  >删除</el-button>
-
-
-                  <el-dropdown size="default" @command="(command) => handleCommand(command, scope.row)" v-hasPerms="['/system/user/resetPwd', '/system/user/edit']">
-                    <el-button size="small" icon="More">更多</el-button>
-                    <template #dropdown>
-                      <el-dropdown-menu>
-                        <el-dropdown-item command="handleResetPwd" v-hasPerms="['/system/user/resetPwd']" >重置密码</el-dropdown-item>
-                        <!-- <el-dropdown-item command="handleAuthRole" v-hasPerms="['/system:user:edit']">分配角色</el-dropdown-item> -->
-                      </el-dropdown-menu>
-                    </template>
-                  </el-dropdown>
-
-                </div>
+                <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
               </template>
             </el-table-column>
           </el-table>
@@ -466,7 +459,7 @@ getList()
 
 
         <!-- 添加或修改用户配置对话框 -->
-        <el-dialog :title="title" v-model="open" width="600px" append-to-body>
+        <el-dialog :title="title" v-model="open" width="var(--dialog-lg-w)" append-to-body>
             <yt-card>
               <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
                 <el-row>
@@ -475,6 +468,7 @@ getList()
                       <el-input v-model="form.nickName" placeholder="请输入用户昵称" maxlength="30" />
                     </el-form-item>
                   </el-col>
+
                   <el-col :span="12">
                     <el-form-item label="角色">
                       <el-select v-model="form.roleIds" multiple placeholder="请选择角色">
@@ -548,8 +542,8 @@ getList()
               </el-form>
             </yt-card>
             <template v-slot:footer>
-              <el-button type="primary" @click="submitForm">确 定</el-button>
               <el-button @click="cancel">取 消</el-button>
+              <el-button type="primary" @click="submitForm">确 定</el-button>
             </template>
         </el-dialog>
     </div>

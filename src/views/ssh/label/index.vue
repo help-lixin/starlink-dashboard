@@ -42,6 +42,7 @@
       'labelKey' : [
         { required: true, message: "标签key不能为空", trigger: "blur" },
         { min: 2, max: 20, message: '标签key长度必须介于 2 和 20 之间', trigger: 'blur' },
+        { pattern: /^[-_a-zA-Z0-9]*$/, message: '标签key只可以输入字母、数字、下划线及中划线', trigger: 'blur' },
         { validator: validKey , trigger: 'blur' }
       ],
       'labelName': [
@@ -107,7 +108,7 @@
 
   // 处理查询按钮
   const resetQuery = function(){
-    
+
     dateRange.value = [];
     queryParams.labelKey = undefined;
     queryParams.labelName = undefined;
@@ -218,7 +219,7 @@
           loading.value = false;
           throw response?.msg;
         }
-        
+
         addDialog.value = false;
         getList();
       });
@@ -283,7 +284,7 @@ const handleDelete = function(row){
     labelKey.value = row.labelKey
     form.labelKey = row.labelKey
     form.labelName = row.labelName
-    
+
     queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
         if(res.code == 200){
           const data = res.data;
@@ -293,7 +294,7 @@ const handleDelete = function(row){
                 key:v.instanceCode
               })
           })
-          
+
         }
     });
 
@@ -344,49 +345,86 @@ const handleDelete = function(row){
 
   // 触发查询
   getList();
+
+
+// 按钮
+const btnList = ref([
+  {
+    btnName: '修改',
+    permArray: ['/ssh/label/add'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleUpdate
+  },
+  {
+    btnName: row => showStatusOperateFun(row.status),
+    permArray: ['/ssh/label/changeStatus/**'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleStatusChange
+  },
+  {
+    btnName: '删除',
+    class: 'yt-color-error-hover',
+    permArray: ['/ssh/label/del/*'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleDelete
+  },
+])
 </script>
 
 <template>
   <div class="main-wrapp">
     <!--sousuo  -->
     <yt-card>
-      <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch">
-            <el-form-item label="标签key" prop="queryParams.labelKey">
-              <el-input v-model="queryParams.labelKey" placeholder="请输入标签key" clearable style="width: 240px"/>
-            </el-form-item>
-            <el-form-item label="标签名" prop="queryParams.labelName">
-              <el-input v-model="queryParams.labelName" placeholder="请输入标签名" clearable style="width: 240px"/>
-            </el-form-item>
-            <el-form-item label="状态" prop="status">
-              <el-select
-                class="search-select"
-                v-model="queryParams.status"
-                placeholder="项目状态"
-                clearable
-                style="width: 240px"
-              >
-                <el-option v-for="dict in status"
-                           :key="dict.value"
-                           :label="dict.label"
-                           :value="dict.value"/>
-              </el-select>
-            </el-form-item>
-            <el-form-item label="创建时间">
-              <el-date-picker
-                v-model="dateRange"
-                style="width: 240px"
-                value-format="YYYY-MM-DD"
-                type="daterange"
-                range-separator="-"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期"
-                clearable
-              ></el-date-picker>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
-              <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
-            </el-form-item>
+      <el-form class="form-wrap"  :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch">
+        <el-row :gutter="16">
+          <el-col :span="8">
+              <el-form-item label="标签key" prop="queryParams.labelKey">
+                <el-input v-model="queryParams.labelKey" placeholder="请输入标签key" clearable />
+              </el-form-item>
+          </el-col>
+          <el-col :span="8">
+              <el-form-item label="标签名" prop="queryParams.labelName">
+                <el-input v-model="queryParams.labelName" placeholder="请输入标签名" clearable />
+              </el-form-item>
+          </el-col>
+          <el-col :span="8">
+              <el-form-item label="状态" prop="status">
+                <el-select
+                  class="search-select"
+                  v-model="queryParams.status"
+                  placeholder="项目状态"
+                  clearable
+                >
+                  <el-option v-for="dict in status"
+                             :key="dict.value"
+                             :label="dict.label"
+                             :value="dict.value"/>
+                </el-select>
+              </el-form-item>
+          </el-col>
+          <el-col :span="8">
+              <el-form-item label="创建时间">
+                <el-date-picker
+                  v-model="dateRange"
+                  value-format="YYYY-MM-DD"
+                  type="daterange"
+                  range-separator="-"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+                  clearable
+                ></el-date-picker>
+              </el-form-item>
+          </el-col>
+          <el-col :span="8">
+              <el-form-item>
+                <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
+                <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
+              </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
     </yt-card>
     <yt-card>
@@ -425,70 +463,69 @@ const handleDelete = function(row){
           </el-table-column>
           <el-table-column
             label="操作"
-            align="left"
+            width="220"
+            align="center"
           >
-            <template #default="scope">
-              <div class="action-btn">
-                <el-button
-                  size="small"
-                  :icon="getStatusIcon(scope.row)"
-                  @click="handleStatusChange(scope.row)"
-                  v-hasPerms="['/ssh/label/changeStatus/**']"
-                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-                <el-button
-                  size="small"
-                  icon="Edit"
-                  @click="handleUpdate(scope.row)"
-                  v-hasPerms="['/ssh/label/add']"
-                >修改</el-button>
-                <el-button
-                  size="small"
-                  icon="Delete"
-                  @click="handleDelete(scope.row)"
-                  v-hasPerms="['/ssh/label/del/*']"
-                >删除</el-button>
-              </div>
+
+            <template v-slot="scope">
+              <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
             </template>
+
+<!--            <template #default="scope">-->
+<!--              <div class="action-btn">-->
+<!--                <el-button-->
+<!--                  size="small"-->
+<!--                  @click="handleStatusChange(scope.row)"-->
+<!--                  v-hasPerms="['/ssh/label/changeStatus/**']"-->
+<!--                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>-->
+<!--                <el-button-->
+<!--                  size="small"-->
+<!--                  @click="handleUpdate(scope.row)"-->
+<!--                  v-hasPerms="['/ssh/label/add']"-->
+<!--                >修改</el-button>-->
+<!--                <el-button-->
+<!--                  size="small"-->
+<!--                  @click="handleDelete(scope.row)"-->
+<!--                  v-hasPerms="['/ssh/label/del/*']"-->
+<!--                >删除</el-button>-->
+<!--              </div>-->
+<!--            </template>-->
+
+
           </el-table-column>
         </el-table>
       </div>
       <div class="page-wrap">
-        <el-pagination
-          v-show="total>0"
-          :total="total"
-          :page-sizes=[10,20]
-          background layout="prev, pager, next"
-          v-model:current-page="queryParams.pageNum"
-          v-model:page-size="queryParams.pageSize"
-          @current-change="getList"
-        />
+        <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>
       </div>
     </yt-card>
 
     <!-- 新增/更新对话框 -->
-    <el-dialog :title="title" v-model="addDialog" width="600px" append-to-body>
+    <el-dialog :title="title" v-model="addDialog" width="720px" append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="标签key" prop="labelKey">
-                <el-input v-model="form.labelKey" placeholder="请输入标签key" maxlength="20" :disabled="form.id != undefined"/>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="标签名" prop="labelName">
-                <el-input v-model="form.labelName" placeholder="请输入标签名" maxlength="20" />
-              </el-form-item>
-            </el-col>
-          </el-row>
+            <el-row :gutter="16">
+              <el-col>
+                <el-form-item label="标签key" prop="labelKey">
+                  <el-input v-model="form.labelKey" placeholder="请输入标签key" maxlength="20" :disabled="form.id != undefined"  style="width: 240px"/>
+                </el-form-item>
+              </el-col>
+            </el-row>
 
-          <el-row>
+          <el-row :gutter="16">
             <el-col>
-              <el-transfer v-model="form.hosts" :data="formInstance"
-              :titles="[ '未关联' , '已关联']"/>
+                <el-form-item label="标签名" prop="labelName">
+                  <el-input v-model="form.labelName" placeholder="请输入标签名" maxlength="20" style="width: 240px"/>
+                </el-form-item>
+              </el-col>
+          </el-row>
+          <el-row :gutter="16">
+            <el-col>
+                <el-form-item label="SSH实例" >
+                  <el-transfer v-model="form.hosts" :data="formInstance"  :titles="[ '未关联' , '已关联']"/>
+                </el-form-item>
             </el-col>
           </el-row>
-
         </el-form>
       </yt-card>
       <template #footer>
@@ -533,63 +570,5 @@ const handleDelete = function(row){
 </template>
 
 <style lang="scss" scoped>
-.main-wrap {
-  height: 100%;
-  width: 100%;
-  box-sizing: border-box;
-  background: #fff;
-
-}
-
-.option-wrap {
-  margin-bottom: 8px;
-  .el-button {
-    // margin-right: 6px;
-  }
-}
-.table-wrap {
-  width: 100%;
-  box-sizing: border-box;
-  overflow-y: auto;
-  .action-btn {
-    display: flex;
-  }
-}
-
-.page-wrap {
-  padding: 20px 0;
-  .el-pagination {
-    display: flex;
-    align-items: center;
-    justify-content: end;
-  }
-
-}
-
 
 </style>
-<style>
- .el-form-item__label {
-  font-size: 14px;
- }
-
-.search-select .el-input {
-  --el-input-width: 240px;
-}
-
-.el-transfer__buttons{
-  width: 80px;
-  padding: 0px;
-  margin-left: 20px;
-}
-.el-transfer__buttons .el-button{
-  width: 50px;
-  padding: 0px;
-  margin-left: 5px;
-}
-.el-transfer-panel{
-  width: 217px;
-}
-</style>
-
-@/api/ssh/label

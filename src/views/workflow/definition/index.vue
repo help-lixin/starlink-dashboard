@@ -174,6 +174,32 @@ const handleRunning = function (row) {
 }
 
 
+// 按钮
+const btnList = ref([
+{
+  btnName: '运行',
+  permArray: ['/workflow/instance/startById'],
+  isShow: () => true,
+  isDisable: false,
+  clickEvent: handleRunning
+},
+{
+  btnName: '修改',
+  permArray: ['/workflow/definition/operate'],
+  isShow: () => true,
+  isDisable: false,
+  clickEvent: handleUpdate
+},
+{
+  btnName: row =>  showStatusOperateFun(row.status),
+  class: 'yt-color-error-hover',
+  permArray: ['/workflow/definition/changeStatus/**'],
+  isShow: () => true,
+  isDisable: false,
+  clickEvent: handleDelete
+},
+])
+
 // 触发查询
 getList()
 </script>
@@ -183,22 +209,32 @@ getList()
     <!--sousuo  -->
     <yt-card padding="18px 18px 0">
       <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch">
-            <el-form-item label="流程定义key" prop="processDefinitionKey">
-              <el-input v-model="queryParams.processDefinitionKey" placeholder="请输入流程定义key" clearable style="width: 240px" />
+        <el-row :gutter="16">
+          <el-col :span="8">
+            <el-form-item label="流水线key" prop="processDefinitionKey">
+              <el-input v-model="queryParams.processDefinitionKey" placeholder="请输入流水线定义key" clearable />
             </el-form-item>
-            <el-form-item label="流程定义名称" prop="processDefinitionName">
-              <el-input v-model="queryParams.processDefinitionName" placeholder="请输入流程定义名称" clearable style="width: 240px"/>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="流水线名称" prop="processDefinitionName">
+              <el-input v-model="queryParams.processDefinitionName" placeholder="请输入流水线定义名称" clearable />
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="状态" prop="status">
-              <el-select class="search-select" v-model="queryParams.status" placeholder="状态" clearable style="width: 240px">
+              <el-select class="search-select" v-model="queryParams.status" placeholder="状态" clearable >
                 <el-option v-for="dict in status" :key="dict.value" :label="dict.label" :value="dict.value" />
               </el-select>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="创建时间">
               <el-date-picker v-model="daterangeArray" value-format="YYYY-MM-DD" type="daterange"
                               range-separator="-" start-placeholder="开始日期" end-placeholder="结束日期"
-                              clearable style="width: 240px"></el-date-picker>
+                              clearable ></el-date-picker>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item>
               <el-button type="primary" @click="handleQuery"><el-icon>
                 <Search />
@@ -207,6 +243,8 @@ getList()
                 <RefreshRight />
               </el-icon>重置</el-button>
             </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
     </yt-card>
 
@@ -217,21 +255,15 @@ getList()
                    v-hasPerms="['/workflow/definition/operate']"><el-icon>
           <Plus />
         </el-icon>新增</el-button>
-
-        <el-button type="success" plain size="default" :disabled="single" @click="handleUpdate"
-                   v-hasPerms="['/workflow/definition/operate']"><el-icon>
-          <EditPen />
-        </el-icon>修改</el-button>
       </div>
 
       <!--table  -->
       <div class="table-wrap">
         <el-table v-loading="loading" :data="dataList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="流水线名称" key="processDefinitionName" prop="processDefinitionName"
-                           :show-overflow-tooltip="true" />
-          <el-table-column label="流水线定义key" key="processDefinitionKey" prop="processDefinitionKey" width="180"/>
-          <el-table-column label="流水线版本" key="processDefinitionVersion" prop="processDefinitionVersion" />
+          <el-table-column label="流水线名称" key="processDefinitionName" prop="processDefinitionName" :show-overflow-tooltip="true" />
+          <el-table-column label="流水线定义key" key="processDefinitionKey" prop="processDefinitionKey" width="180" :show-overflow-tooltip="true"/>
+          <el-table-column label="流水线版本" align="right" key="processDefinitionVersion" prop="processDefinitionVersion" />
           <el-table-column label="状态" align="center" key="status" width="100">
             <template v-slot="scope">
               {{ showStatusFun(scope.row.status) }}
@@ -244,23 +276,25 @@ getList()
           </el-table-column>
           <el-table-column label="操作" align="center" width="280">
             <template v-slot="scope">
-              <div class="action-btn">
-                <el-button size="small" @click="handleRunning(scope.row)"
-                            icon="VideoPlay"
-                           v-hasPerms="['/workflow/instance/startById']">运行</el-button>
-
-                <el-button size="small" @click="handleUpdate(scope.row)"
-                            icon="Edit"
-                           v-hasPerms="['/workflow/definition/operate']">修改</el-button>
-
-                <el-button size="small" @click="handleDelete(scope.row)"
-                            :icon="getStatusIcon(scope.row)"
-                           v-hasPerms="['/workflow/definition/changeStatus/**']">
-                  {{ showStatusOperateFun(scope.row.status) }}
-                </el-button>
-
-              </div>
+              <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
             </template>
+<!--            <template v-slot="scope">-->
+<!--              <div class="action-btn">-->
+<!--                <el-button size="small" @click="handleRunning(scope.row)"-->
+<!--                            icon="VideoPlay"-->
+<!--                           v-hasPerms="['/workflow/instance/startById']">运行</el-button>-->
+
+<!--                <el-button size="small" @click="handleUpdate(scope.row)"-->
+<!--                            icon="Edit"-->
+<!--                           v-hasPerms="['/workflow/definition/operate']">修改</el-button>-->
+
+<!--                <el-button size="small" @click="handleDelete(scope.row)"-->
+<!--                            :icon="getStatusIcon(scope.row)"-->
+<!--                           v-hasPerms="['/workflow/definition/changeStatus/**']">-->
+<!--                  {{ showStatusOperateFun(scope.row.status) }}-->
+<!--                </el-button>-->
+<!--              </div>-->
+<!--            </template>-->
           </el-table-column>
         </el-table>
       </div>

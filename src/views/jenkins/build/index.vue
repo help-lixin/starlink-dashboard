@@ -99,13 +99,26 @@
     }
   });
 
+
+// 按钮
+const btnList = ref([
+  {
+    btnName: '查看日志',
+    permArray: ['/jenkins/job/buildJob'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: lookLogs
+  }
+])
 </script>
 
 <template>
   <div class="main-wrapp">
     <!--sousuo  -->
     <yt-card :padding="'18px 18px 0'">
-      <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch" >
+      <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch" >
+        <el-row :gutter="16">
+          <el-col :span="8">
             <el-form-item label="插件实例" prop="instanceCode">
               <el-select
                 class="search-select"
@@ -120,23 +133,14 @@
                            :value="item.instanceCode"/>
               </el-select>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="任务名" prop="queryParams.jobName">
-              <el-input v-model="queryParams.jobName" placeholder="请输入任务名" clearable style="width: 240px"/>
+              <el-input v-model="queryParams.jobName" placeholder="请输入任务名" clearable />
             </el-form-item>
-            <!-- <el-form-item label="状态" prop="status">
-              <el-select
-                class="search-select"
-                v-model="queryParams.status"
-                placeholder="任务状态"
-                clearable
-              >
-                <el-option v-for="dict in status"
-                           :key="dict.value"
-                           :label="dict.label"
-                           :value="dict.value"/>
-              </el-select>
-            </el-form-item> -->
-            <el-form-item label="创建时间">
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="任务时间">
               <el-date-picker
                 v-model="dateRange"
                 value-format="YYYY-MM-DD"
@@ -146,10 +150,14 @@
                 end-placeholder="结束日期"
               ></el-date-picker>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item>
               <el-button type="primary"  @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
               <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
             </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
     </yt-card>
     <yt-card>
@@ -161,7 +169,7 @@
           <el-table-column label="构建编号" align="left" key="id" prop="id" v-if="false" />
           <el-table-column label="任务编号" align="left" key="jobId" prop="jobId" v-if="false" />
           <el-table-column label="任务名称" align="left" key="jobName" prop="jobName"  :show-overflow-tooltip="true" />
-          <el-table-column label="构建状态" align="left" key="buildStatus" prop="buildStatus"  >
+          <el-table-column label="构建状态" align="center" key="buildStatus" prop="buildStatus"  >
             <template #default="scope">
               {{  showBuildStatusFun(scope.row.buildStatus) }}
             </template>
@@ -177,50 +185,25 @@
               {{ dayjs(scope.row.endTime).format("YYYY-MM-DD HH:mm:ss")   }}
             </template>
           </el-table-column>
-
-          <el-table-column label="创建时间" align="left" prop="createTime" width="180">
-            <template #default="scope">
-              {{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}
-            </template>
-          </el-table-column>
-          <el-table-column label="更新时间" align="left" prop="updateTime" width="180">
-            <template #default="scope">
-              {{ dayjs(scope.row.updateTime).format("YYYY-MM-DD HH:mm:ss")   }}
-            </template>
-          </el-table-column>
           <el-table-column
             label="操作"
-            align="left"
-            width="280"
+            align="center"
+            width="220"
             flxed="right"
           >
-            <template #default="scope">
-              <div class="action-btn">
-                <el-button
-                  size="small"
-                  icon="Tickets"
-                  @click="lookLogs(scope.row)"
-                  v-hasPerms="['/jenkins/job/buildJob']"
-                >查看日志</el-button>
-              </div>
+            <template v-slot="scope">
+              <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
             </template>
+
           </el-table-column>
         </el-table>
       </div>
       <div class="page-wrap">
-        <el-pagination
-          v-show="total>0"
-          :total="total"
-          :page-sizes=[10,20]
-          background layout="prev, pager, next"
-          v-model:current-page="queryParams.pageNum"
-          v-model:page-size="queryParams.pageSize"
-          @current-change="getList"
-        />
+        <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>
       </div>
     </yt-card>
 
-    <el-dialog :title="title" v-model="open" width="800px" append-to-body>
+    <el-dialog :title="title" v-model="open" width="800px"  append-to-body>
       <yt-card>
         <el-form-item >
             <el-input v-model="logInfo" type="textarea" rows="20" disabled="true"></el-input>

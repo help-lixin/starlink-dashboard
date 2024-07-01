@@ -163,7 +163,7 @@
           }
         }
       })
-      
+
     })
   }
 
@@ -259,6 +259,33 @@
     reset();
   }
 
+  // 按钮
+  const btnList = ref([
+    {
+      btnName: '修改',
+      permArray: ['/system/plugin/definition/edit'],
+      isShow: () => true,
+      isDisable: false,
+      clickEvent: handleUpdate
+    },
+    {
+      btnName: row => showStatusOperateFun(row.status),
+      permArray: ['/system/plugin/definition/changeStatus/**'],
+      isShow: () => true,
+      isDisable: false,
+      clickEvent: handleChangeStatus
+    },
+    {
+      btnName: '删除',
+      class: 'yt-color-error-hover',
+      permArray: ['/system/plugin/definition/del/*'],
+      isShow: () => true,
+      isDisable: false,
+      clickEvent: handleDelete
+    },
+  ])
+
+
   // 触发查询
   getList()
 </script>
@@ -268,53 +295,59 @@
     <yt-card  padding="18px 18px 0">
       <!--sousuo  -->
       <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch">
-        <el-row>
-            <el-form-item label="插件编码" prop="pluginCode">
-              <el-input
-                v-model="queryParams.pluginCode"
-                placeholder="请输入插件编码"
-                clearable
-                style="width: 240px"
-              />
-            </el-form-item>
-            <el-form-item label="插件名称" prop="pluginName">
-              <el-input
-                v-model="queryParams.pluginName"
-                placeholder="请输入插件名称"
-                clearable
-                style="width: 240px"
-              />
-            </el-form-item>
-            <el-form-item label="状态" prop="status">
-              <el-select
-                class="search-select"
-                v-model="queryParams.status"
-                placeholder="用户状态"
-                clearable
-                style="width: 240px"
-              >
-                <el-option v-for="dict in status"
-                           :key="dict.value"
-                           :label="dict.label"
-                           :value="dict.value"/>
-              </el-select>
-            </el-form-item>
-            <el-form-item label="创建时间">
-              <el-date-picker
-                v-model="daterangeArray"
-                value-format="YYYY-MM-DD"
-                type="daterange"
-                range-separator="-"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期"
-                clearable
-                style="width: 240px"
-              ></el-date-picker>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
-              <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
-            </el-form-item>
+          <el-row :gutter="16">
+            <el-col :span="8">
+              <el-form-item label="插件编码" prop="pluginCode">
+                <el-input
+                  v-model="queryParams.pluginCode"
+                  placeholder="请输入插件编码"
+                  clearable
+                />
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="插件名称" prop="pluginName">
+                <el-input
+                  v-model="queryParams.pluginName"
+                  placeholder="请输入插件名称"
+                  clearable
+                />
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="状态" prop="status">
+                <el-select
+                  class="search-select"
+                  v-model="queryParams.status"
+                  placeholder="用户状态"
+                  clearable
+                >
+                  <el-option v-for="dict in status"
+                             :key="dict.value"
+                             :label="dict.label"
+                             :value="dict.value"/>
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="创建时间">
+                <el-date-picker
+                  v-model="daterangeArray"
+                  value-format="YYYY-MM-DD"
+                  type="daterange"
+                  range-separator="-"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+                  clearable
+                ></el-date-picker>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item>
+                <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
+                <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
+              </el-form-item>
+            </el-col>
         </el-row>
       </el-form>
     </yt-card>
@@ -328,20 +361,13 @@
           size="default"
           @click="handleAdd" v-hasPerms="['/system/plugin/definition/add']" ><el-icon><Plus /></el-icon>新增</el-button>
 
-
-        <el-button
-          type="success"
-          plain
-          size="default"
-          :disabled="single"
-          @click="handleUpdate" v-hasPerms="['/system/plugin/definition/edit']" ><el-icon><EditPen /></el-icon>修改</el-button>
       </div>
 
       <!--table  -->
       <div class="table-wrap">
         <el-table v-loading="loading" :data="dataList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="插件编码" align="left" key="pluginCode" prop="pluginCode"/>
+          <el-table-column label="插件编码" align="left" key="pluginCode" prop="pluginCode" :show-overflow-tooltip="true"/>
           <el-table-column label="插件名称" align="left" key="pluginName" prop="pluginName"  :show-overflow-tooltip="true"/>
           <el-table-column label="插件元数据" align="left" key="pluginMeta" prop="pluginMeta"  :show-overflow-tooltip="true"/>
           <el-table-column label="状态" align="center" key="status">
@@ -355,35 +381,12 @@
             </template>
           </el-table-column>
           <el-table-column
-            label="操作"
-            align="left"
-            width="250"
+              label="操作"
+              align="center"
+              width="220"
           >
             <template v-slot="scope">
-              <div class="action-btn">
-                <el-button
-                  size="small"
-                  icon="Edit"
-                  @click="handleUpdate(scope.row)"
-                  v-hasPerms="['/system/plugin/definition/edit']"
-                >修改</el-button>
-                
-                <el-button
-                size="small"
-                :icon="getStatusIcon(scope.row)"
-                @click="handleChangeStatus(scope.row)"
-                v-hasPerms="['/system/plugin/definition/changeStatus/**']"
-                >
-                {{ showStatusOperateFun(scope.row.status)  }}
-              </el-button>
-              <el-button
-                size="small"
-                icon="Delete"
-                @click="handleDelete(scope.row)"
-                v-hasPerms="['/system/plugin/definition/del/*']"
-              >删除</el-button>
-
-              </div>
+              <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
             </template>
           </el-table-column>
         </el-table>
@@ -395,7 +398,7 @@
 
 
     <!-- 添加或修改用户配置对话框 -->
-    <el-dialog :title="title" v-model="open" width="600px" append-to-body>
+    <el-dialog :title="title" v-model="open" width="var(--dialog-lg-w)"  append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
           <el-row>

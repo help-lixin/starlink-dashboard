@@ -328,6 +328,25 @@ const getList = ()=>{
       queryPlugins.value = res?.data;
     }
   })
+
+// 按钮
+const btnList = ref([
+{
+  btnName: '修改',
+  permArray: ['/system/plugin/instance/edit'],
+  isShow: () => true,
+  isDisable: false,
+  clickEvent: handleUpdate
+},
+{
+  btnName: row => showStatusOperateFun(row.status),
+  permArray: ['/system/plugin/instance/changeStatus/**'],
+  isShow: () => true,
+  isDisable: false,
+  clickEvent: handleDelete
+}
+])
+
 </script>
 
 <template>
@@ -335,6 +354,8 @@ const getList = ()=>{
     <!--sousuo  -->
     <yt-card padding="18px 18px 0">
       <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch">
+        <el-row :gutter="16">
+          <el-col :span="8">
             <el-form-item label="请选择插件" prop="pluginCode">
               <el-select
                 class="search-select"
@@ -342,7 +363,6 @@ const getList = ()=>{
                 @change="handlePlugin"
                 placeholder="请选择插件"
                 clearable
-                style="width: 240px"
               >
                 <el-option v-for="item in queryPlugins"
                            :key="item.value"
@@ -350,16 +370,19 @@ const getList = ()=>{
                            :value="item.value"/>
               </el-select>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="插件名称" prop="instanceName">
-              <el-input v-model='queryParams.instanceName' placeholder='请输入插件实例名称' clearable style="width: 240px"/>
+              <el-input v-model='queryParams.instanceName' placeholder='请输入插件实例名称' clearable  />
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="状态" prop="status">
               <el-select
                 class="search-select"
                 v-model="queryParams.status"
                 placeholder="状态"
                 clearable
-                style="width: 240px"
               >
                 <el-option v-for="dict in status"
                            :key="dict.value"
@@ -367,6 +390,8 @@ const getList = ()=>{
                            :value="dict.value"/>
               </el-select>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="创建时间">
               <el-date-picker
                 v-model="daterangeArray"
@@ -376,13 +401,16 @@ const getList = ()=>{
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
                 clearable
-                style="width: 240px"
               ></el-date-picker>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item>
               <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
               <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
             </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
     </yt-card>
 
@@ -395,21 +423,14 @@ const getList = ()=>{
           size="default"
           @click="handleAdd" v-hasPerms="['/system/plugin/instance/add']" ><el-icon><Plus /></el-icon>新增</el-button>
 
-
-        <el-button
-          type="success"
-          plain
-          size="default"
-          :disabled="single"
-          @click="handleUpdate" v-hasPerms="['/system/plugin/instance/edit']" ><el-icon><EditPen /></el-icon>修改</el-button>
       </div>
 
       <!--table  -->
       <div class="table-wrap">
         <el-table v-loading="loading" :data="dataList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="插件编码" align="left" key="pluginCode" prop="pluginCode"/>
-          <el-table-column label="实例编码" align="left" key="instanceCode" prop="instanceCode"/>
+          <el-table-column label="插件编码" align="left" key="pluginCode" prop="pluginCode" :show-overflow-tooltip="true"/>
+          <el-table-column label="实例编码" align="left" key="instanceCode" prop="instanceCode" :show-overflow-tooltip="true"/>
           <el-table-column label="实例名称" align="left" key="instanceName" prop="instanceName"  :show-overflow-tooltip="true" />
           <el-table-column label="状态" align="center" key="status"  width="100">
             <template v-slot="scope">
@@ -422,29 +443,12 @@ const getList = ()=>{
             </template>
           </el-table-column>
           <el-table-column
-            label="操作"
-            align="left"
-            width="220"
+              label="操作"
+              align="center"
+              width="220"
           >
             <template v-slot="scope">
-              <div class="action-btn">
-                <el-button
-                  size="small"
-                  icon="Edit"
-                  @click="handleUpdate(scope.row)"
-                  v-hasPerms="['/system/plugin/instance/edit']"
-                >修改</el-button>
-
-                <el-button
-                  size="small"
-                  :icon="getStatusIcon(scope.row)"
-                  @click="handleDelete(scope.row)"
-                  v-hasPerms="['/system/plugin/instance/changeStatus/**']"
-                >
-                  {{ showStatusOperateFun(scope.row.status)  }}
-                </el-button>
-
-              </div>
+              <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
             </template>
           </el-table-column>
         </el-table>
@@ -456,7 +460,7 @@ const getList = ()=>{
     </yt-card>
 
     <!-- 添加或修改用户配置对话框 -->
-    <el-dialog :title="title" v-model="open" width="600px" append-to-body>
+    <el-dialog :title="title" v-model="open" width="var(--dialog-lg-w)"  append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
           <el-row>

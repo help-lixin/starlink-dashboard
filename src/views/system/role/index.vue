@@ -303,6 +303,25 @@
     reset();
   }
 
+  // 按钮
+  const btnList = ref([
+    {
+      btnName: '修改',
+      permArray: ['/system/role/edit'],
+      isShow: () => true,
+      isDisable: false,
+      clickEvent: handleUpdate
+    },
+    {
+      btnName: '删除',
+      class: 'yt-color-error-hover',
+      permArray: ['/system/role/del/*'],
+      isShow: () => true,
+      isDisable: false,
+      clickEvent: handleDelete
+    },
+  ])
+
   // 触发查询
   getList()
 </script>
@@ -313,35 +332,39 @@
 
       <!--sousuo  -->
       <el-form class="form-wrap" :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch">
-        <el-row>
+        <el-row :gutter="16">
+          <el-col :span="8">
             <el-form-item label="角色名称" prop="roleName">
               <el-input
                 v-model="queryParams.roleName"
                 placeholder="请输入角色名称"
                 clearable
-                style="width: 240px"
               />
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="权限字符" prop="roleKey">
               <el-input
                 v-model="queryParams.roleKey"
                 placeholder="请输入权限字符"
                 clearable
-                style="width: 240px"
               />
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="状态" prop="status">
               <el-select
                 v-model="queryParams.status"
                 placeholder="角色状态"
-                clearable
-                style="width: 240px">
+                clearable >
                 <el-option v-for="dict in statusDicts"
                            :key="dict.value"
                            :label="dict.label"
                            :value="dict.value"/>
               </el-select>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="创建时间">
               <el-date-picker
                 v-model="dateRange"
@@ -351,16 +374,19 @@
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
                 clearable
-                style="width: 240px"
               ></el-date-picker>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item>
               <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
               <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
             </el-form-item>
+          </el-col>
         </el-row>
       </el-form>
     </yt-card>
+
     <yt-card>
       <!--  option-->
       <div class="option-wrap">
@@ -369,14 +395,6 @@
           plain
           size="default"
           @click="handleAdd" v-hasPerms="['/system/role/add']" ><el-icon><Plus /></el-icon>新增</el-button>
-
-
-        <el-button
-          type="success"
-          plain
-          size="default"
-          :disabled="single"
-          @click="handleUpdate" v-hasPerms="['/system/role/edit']" ><el-icon><EditPen /></el-icon>修改</el-button>
 
         <el-button
           type="danger"
@@ -412,25 +430,11 @@
           </el-table-column>
           <el-table-column
             label="操作"
-            align="left"
+            align="center"
             width="220"
           >
             <template v-slot="scope">
-              <div class="action-btn">
-                <el-button
-                  size="small"
-                  icon="Edit"
-                  @click="handleUpdate(scope.row)"
-                  v-hasPerms="['/system/role/edit']"
-                >修改</el-button>
-
-                <el-button
-                  size="small"
-                  icon="Delete"
-                  @click="handleDelete(scope.row)"
-                  v-hasPerms="['/system/role/del/*']"
-                >删除</el-button>
-              </div>
+              <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
             </template>
           </el-table-column>
         </el-table>
@@ -443,49 +447,50 @@
 
 
     <!-- 添加或修改用户配置对话框 -->
-    <el-dialog :title="title" v-model="open" width="600px" append-to-body>
+    <el-dialog :title="title" v-model="open" width="var(--dialog-lg-w)" append-to-body>
       <yt-card>
-
-        <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
-          <el-form-item label="角色名称" prop="roleName">
-            <el-input v-model="form.roleName" placeholder="请输入角色名称" />
-          </el-form-item>
-          <el-form-item label="权限字符" prop="roleKey">
-            <el-input v-model="form.roleKey" placeholder="请输入权限字符" />
-          </el-form-item>
-          <el-form-item label="角色顺序" prop="roleSort">
-            <el-input-number v-model="form.roleSort" controls-position="right" :min="0" />
-          </el-form-item>
-          <el-form-item label="状态">
-            <el-radio-group v-model="form.status">
-              <el-radio
-                v-for="dict in statusDicts"
-                :key="dict.value"
-                :label="dict.value"
-              >{{dict.label}}</el-radio>
-            </el-radio-group>
-          </el-form-item>
-          <el-form-item label="菜单权限">
-            <el-checkbox v-model="menuExpand" @change="handleCheckedTreeExpand($event, 'menu')">展开/折叠</el-checkbox>
-            <el-checkbox v-model="menuNodeAll" @change="handleCheckedTreeNodeAll($event, 'menu')">全选/全不选</el-checkbox>
-            <el-checkbox v-model="form.menuCheckStrictly" @change="handleCheckedTreeConnect($event, 'menu')">父子联动</el-checkbox>
-          </el-form-item>
-          <el-form-item label="">
-            <el-tree
-              class="tree-border"
-              :data="menuOptions"
-              show-checkbox
-              ref="menuRef"
-              node-key="id"
-              :check-strictly="!form.menuCheckStrictly"
-              empty-text="加载中，请稍候"
-              :props="defaultProps"
-            ></el-tree>
-          </el-form-item>
-          <el-form-item label="备注">
-            <el-input v-model="form.remark" type="textarea" placeholder="请输入内容"></el-input>
-          </el-form-item>
-        </el-form>
+        <el-scrollbar>
+          <el-form style="height: 60vh" ref="formRef" :model="form" :rules="rules" label-width="100px">
+            <el-form-item label="角色名称" prop="roleName">
+              <el-input v-model="form.roleName" placeholder="请输入角色名称" />
+            </el-form-item>
+            <el-form-item label="权限字符" prop="roleKey">
+              <el-input v-model="form.roleKey" placeholder="请输入权限字符" />
+            </el-form-item>
+            <el-form-item label="角色顺序" prop="roleSort">
+              <el-input-number v-model="form.roleSort" controls-position="right" :min="0" />
+            </el-form-item>
+            <el-form-item label="状态">
+              <el-radio-group v-model="form.status">
+                <el-radio
+                  v-for="dict in statusDicts"
+                  :key="dict.value"
+                  :label="dict.value"
+                >{{dict.label}}</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="菜单权限">
+              <el-checkbox v-model="menuExpand" @change="handleCheckedTreeExpand($event, 'menu')">展开/折叠</el-checkbox>
+              <el-checkbox v-model="menuNodeAll" @change="handleCheckedTreeNodeAll($event, 'menu')">全选/全不选</el-checkbox>
+              <el-checkbox v-model="form.menuCheckStrictly" @change="handleCheckedTreeConnect($event, 'menu')">父子联动</el-checkbox>
+            </el-form-item>
+            <el-form-item label="">
+              <el-tree
+                class="tree-border"
+                :data="menuOptions"
+                show-checkbox
+                ref="menuRef"
+                node-key="id"
+                :check-strictly="!form.menuCheckStrictly"
+                empty-text="加载中，请稍候"
+                :props="defaultProps"
+              ></el-tree>
+            </el-form-item>
+            <el-form-item label="备注">
+              <el-input v-model="form.remark" type="textarea" placeholder="请输入内容"></el-input>
+            </el-form-item>
+          </el-form>
+        </el-scrollbar>
       </yt-card>
       <template #footer>
         <el-button @click="cancel">取 消</el-button>

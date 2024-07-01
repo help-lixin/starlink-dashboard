@@ -53,7 +53,7 @@ const confirm = () => {
 }
 </script>
 <template>
-  <div class="yamlDemo">
+  <div class="yamlDemo-dialog">
     <el-dialog :width="'80vw'" :model-value="visible" @close="closeDialog">
       <template #title>
         <span>YAML编辑器</span>

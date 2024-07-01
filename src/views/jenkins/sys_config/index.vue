@@ -64,13 +64,14 @@
         { required: true, message: "插件类型不能为空", trigger: "blur" }
       ],
       name : [
-        { required: true,  message: "插件名称不能为空", trigger: "blur" },
-        { min: 2, max: 200, message: '插件名称长度必须介于 2 和 200 之间', trigger: 'blur' }
+        { required: true,  message: "别名不能为空", trigger: "blur" },
+        { pattern: /^[-_a-zA-Z0-9]*$/, message: '别名只可以输入字母、数字、下划线及中划线', trigger: 'blur' },
+        { min: 2, max: 200, message: '别名长度必须介于 2 和 200 之间', trigger: 'blur' }
       ],
       value : [
-        { required: true, message: "插件路径不能为空", trigger: "blur" },
+        { required: true, message: "PATH不能为空", trigger: "blur" },
         { required: true, validator: validHome,  trigger: "blur" },
-        { min: 2, max: 200, message: '插件路径长度必须介于 2 和 200 之间', trigger: 'blur' }
+        { min: 2, max: 200, message: 'PATH长度必须介于 2 和 200 之间', trigger: 'blur' }
       ],
   })
 
@@ -279,21 +280,41 @@
 
     }
   });
+
+
+// 按钮
+const btnList = ref([
+  {
+    btnName: '修改',
+    permArray: ['/jenkins/systemConfig/add'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleUpdate
+  },
+  {
+    btnName: row => showStatusOperateFun(row.status),
+    permArray: ['/jenkins/systemConfig/changeStatus/**'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleStatusChange
+  }
+])
+
+
 </script>
 
 <template>
   <div class="main-wrapp">
     <yt-card>
-
-      <!--sousuo  -->
-      <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch" >
+      <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch" >
+        <el-row :gutter="16">
+          <el-col :span="8">
             <el-form-item label="插件实例" prop="instanceCode">
               <el-select
                 class="search-select"
                 v-model="queryParams.instanceCode"
                 @keyup.enter.native="handleQuery"
                 placeholder="请选择实例"
-                style="width: 240px"
               >
                 <el-option v-for="item in pluginInstance"
                            :key="item.pluginCode"
@@ -301,15 +322,18 @@
                            :value="item.instanceCode"/>
               </el-select>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="名称" prop="name">
               <el-input
                 v-model="queryParams.name"
                 placeholder="请输入名称"
                 clearable
-                style="width: 240px"
                 @keyup.enter.native="handleQuery"
               />
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="插件类型" prop="pluginType">
               <el-select
                 class="search-select"
@@ -317,7 +341,6 @@
                 @keyup.enter.native="handleQuery"
                 placeholder="请选择插件类型"
                 clearable
-                style="width: 240px"
               >
                 <el-option v-for="item in tools"
                            :key="item.value"
@@ -325,13 +348,14 @@
                            :value="item.value"/>
               </el-select>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="状态" prop="status">
               <el-select
                 class="search-select"
                 v-model="queryParams.status"
                 placeholder="工具状态"
                 clearable
-                style="width: 240px"
               >
                 <el-option v-for="dict in status"
                            :key="dict.value"
@@ -339,10 +363,11 @@
                            :value="dict.value"/>
               </el-select>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="创建时间">
               <el-date-picker
                 v-model="dateRange"
-                style="width: 240px"
                 value-format="YYYY-MM-DD"
                 type="daterange"
                 range-separator="-"
@@ -351,11 +376,17 @@
                 clearable
               ></el-date-picker>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item>
               <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
               <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
             </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
+      <!--sousuo  -->
+
     </yt-card>
     <yt-card>
       <!--  option-->
@@ -391,50 +422,47 @@
           </el-table-column>
           <el-table-column
             label="操作"
-            align="left"
+            align="center"
             width="220"
           >
-            <template #default="scope">
-              <div class="action-btn">
-                <el-button
-                  size="small"
-                  icon="Edit"
-                  @click="handleUpdate(scope.row)"
-                  v-hasPerms="['/jenkins/systemConfig/add']"
-                >修改</el-button>
-                <el-button
-                  size="small"
-                  :icon="getStatusIcon(scope.row)"
-                  @click="handleStatusChange(scope.row)"
-                  v-hasPerms="['/jenkins/systemConfig/changeStatus/**']"
-                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-              </div>
+
+            <template v-slot="scope">
+              <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
             </template>
+
+            <!--            <template #default="scope">-->
+<!--              <div class="action-btn">-->
+<!--                <el-button-->
+<!--                  size="small"-->
+<!--                  icon="Edit"-->
+<!--                  @click="handleUpdate(scope.row)"-->
+<!--                  v-hasPerms="['/jenkins/systemConfig/add']"-->
+<!--                >修改</el-button>-->
+<!--                <el-button-->
+<!--                  size="small"-->
+<!--                  :icon="getStatusIcon(scope.row)"-->
+<!--                  @click="handleStatusChange(scope.row)"-->
+<!--                  v-hasPerms="['/jenkins/systemConfig/changeStatus/**']"-->
+<!--                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>-->
+<!--              </div>-->
+<!--            </template>-->
           </el-table-column>
         </el-table>
       </div>
       <div class="page-wrap">
-        <el-pagination
-          v-show="total>0"
-          :total="total"
-          :page-sizes=[10,20]
-          background layout="prev, pager, next"
-          v-model:current-page="queryParams.pageNum"
-          v-model:page-size="queryParams.pageSize"
-          @current-change="getList"
-        />
+        <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>
       </div>
 
     </yt-card>
 
 
     <!-- 添加或修改工具配置对话框 -->
-    <el-dialog :title="title" v-model="open" width="600px" append-to-body>
+    <el-dialog :title="title" v-model="open"  width="var(--dialog-md-w)" append-to-body>
       <yt-card>
 
         <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
-          <el-row>
-            <el-col :span="12">
+          <el-row :gutter="16">
+            <el-col>
               <el-form-item label="插件实例" prop="instanceCode">
                 <el-select
                   class="search-select2"
@@ -449,35 +477,45 @@
                 </el-select>
               </el-form-item>
             </el-col>
-            <el-col :span="12">
-              <el-form-item label="插件类型" prop="pluginType">
-                <el-select
-                  class="search-select"
-                  v-model="form.pluginType"
-                  placeholder="请选择插件类型"
-                  style="width: 240px"
-                >
-                  <el-option v-for="item in tools"
-                             :key="item.value"
-                             :label="item.label"
-                             :value="item.value"/>
-                </el-select>
-              </el-form-item>
+          </el-row>
+
+          <el-row :gutter="16">
+            <el-col>
+                <el-form-item label="工具类型" prop="pluginType">
+                  <el-select
+                      class="search-select"
+                      v-model="form.pluginType"
+                      placeholder="请选择工具类型"
+                      style="width: 240px"
+                  >
+                    <el-option v-for="item in tools"
+                               :key="item.value"
+                               :label="item.label"
+                               :value="item.value"/>
+                  </el-select>
+                </el-form-item>
             </el-col>
-            <el-col :span="12">
+          </el-row>
+
+          <el-row :gutter="16">
+            <el-col>
               <el-form-item label="别名" prop="name">
-                <el-input v-model="form.name" placeholder="请输入别名" maxlength="200" />
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="PATH" prop="value">
-                <el-input v-model="form.value" placeholder="请输入Path路径" maxlength="200" />
+                <el-input v-model="form.name" placeholder="请输入别名" maxlength="200" style="width: 240px"/>
               </el-form-item>
             </el-col>
           </el-row>
 
-          <el-row>
-            <el-col :span="12">
+          <el-row :gutter="16">
+            <el-col>
+              <el-form-item label="PATH" prop="value">
+                <el-input v-model="form.value" placeholder="请输入Path路径" maxlength="200" style="width: 240px"/>
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+
+          <el-row :gutter="16">
+            <el-col>
               <el-form-item label="状态">
                 <el-radio-group v-model="form.status">
                   <el-radio
@@ -489,6 +527,7 @@
               </el-form-item>
             </el-col>
           </el-row>
+
         </el-form>
       </yt-card>
       <template #footer>

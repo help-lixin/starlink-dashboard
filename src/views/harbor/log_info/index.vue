@@ -94,14 +94,15 @@
   <div class="main-wrapp">
     <!--sousuo  -->
     <yt-card>
-      <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch" >
+      <el-form  class="form-wrap"  :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch" >
+        <el-row :gutter="16">
+          <el-col :span="8">
             <el-form-item label="插件实例" prop="instanceCode">
               <el-select
                 v-model="queryParams.instanceCode"
                 @keyup.enter.native="handleQuery"
                 placeholder="请选择实例"
                 clearable
-                style="width: 240px"
               >
                 <el-option v-for="item in pluginInstance"
                            :key="item.pluginCode"
@@ -109,6 +110,8 @@
                            :value="item.instanceCode"/>
               </el-select>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="资源" prop="instanceCode">
               <el-input v-model="queryParams.value" placeholder="请输入内容" clearable style="width: 240px">
                 <template #prepend>
@@ -116,7 +119,6 @@
                     class="search-select2"
                     v-model="queryParams.key"
                     placeholder="请选择资源"
-                    style="width: 100px"
                     clearable
                   >
                       <el-option v-for="item in resources"
@@ -127,10 +129,14 @@
                 </template>
               </el-input>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item>
               <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
               <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
             </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
     </yt-card>
     <yt-card>
@@ -152,15 +158,7 @@
         </el-table>
       </div>
       <div class="page-wrap">
-        <el-pagination
-          v-show="total>0"
-          :total="total"
-          :page-sizes=[10,20]
-          background layout="prev, pager, next"
-          v-model:current-page="queryParams.pageNum"
-          v-model:page-size="queryParams.pageSize"
-          @current-change="getList"
-        />
+        <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>
       </div>
     </yt-card>
 

@@ -286,6 +286,27 @@ import { assign } from 'lodash'
     }
   }
 
+
+  // 按钮
+  const btnList = ref([
+  {
+    btnName: row => showStatusOperateFun(row.status),
+    permArray: ['/gitlab/group/member/changeStatus/**'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleChangeStatus
+  },
+  {
+    btnName: '删除',
+    class: 'yt-color-error-hover',
+    permArray: ['/gitlab/group/member/del'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleDelete
+  },
+])
+
+
   const iniOption = ()=>{
     // 默认情况下:选择一个"实例"下的一个"组",进行查询
     queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
@@ -313,154 +334,16 @@ import { assign } from 'lodash'
 <template>
   <div class="main-wrapp">
     <!--sousuo  -->
-    <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch"  >
-
-          <el-form-item label="插件实例" prop="instanceCode">
-            <el-select
-            class="search-select"
-              v-model="queryParams.instanceCode"
-              :change="listSwitchInstance()"
-              placeholder="请选择实例"
-              style="width: 240px"
-            >
-            <el-option v-for="item in pluginInstance"
-              :key="item.pluginCode"
-              :label="item.instanceName"
-              :value="item.instanceCode"/>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="成员组" prop="groupId">
-            <el-select
-            class="search-select"
-              v-model="queryParams.groupId"
-              placeholder="成员组"
-              clearable
-              style="width: 240px"
-            >
-            <el-option v-for="dict in groups"
-              :key="dict.id"
-              :label="dict.gitlabGroupName"
-              :value="dict.id"/>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="成员名称" prop="userName">
-            <el-input
-              v-model="queryParams.userName"
-              placeholder="请输入成员名称"
-              clearable
-              style="width: 240px"
-              @keyup.enter.native="handleQuery"
-            />
-          </el-form-item>
-          <el-form-item label="状态" prop="status">
-            <el-select
-            class="search-select"
-              v-model="queryParams.status"
-              placeholder="成员状态"
-              clearable
-              style="width: 240px"
-            >
-            <el-option v-for="dict in status"
-              :key="dict.value"
-              :label="dict.label"
-              :value="dict.value"/>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="创建时间">
-            <el-date-picker
-              v-model="dateRange"
-              style="width: 240px"
-              value-format="YYYY-MM-DD"
-              type="daterange"
-              range-separator="-"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              clearable
-            ></el-date-picker>
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
-            <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
-          </el-form-item>
-    </el-form>
-
-    <!--  option-->
-    <div class="option-wrap">
-      <el-button
-        type="primary"
-        plain
-        size="default"
-        @click="handleAdd" v-hasPerms="['/gitlab/group/member/add']" ><el-icon><Plus /></el-icon>新增</el-button>
-    </div>
-
-    <!--table  -->
-    <div class="table-wrap">
-      <el-table v-loading="loading" :data="dataList" @selection-change="handleSelectionChange">
-          <el-table-column type="selection" width="60" align="center" />
-          <el-table-column label="用户编号" align="left" key="userId" prop="userId" v-if="false"/>
-          <el-table-column label="成员编号" align="left" key="id" prop="id" v-if="false"/>
-          <el-table-column label="成员昵称" align="left" key="nickName" prop="nickName"  :show-overflow-tooltip="true" />
-          <el-table-column label="邮箱" align="left" key="email" prop="email"  :show-overflow-tooltip="true" />
-          <el-table-column label="成员名称" align="left" key="userName" prop="userName"  :show-overflow-tooltip="true" />
-          <el-table-column label="组" align="left" key="gitlabGroupName" prop="gitlabGroupName" />
-          <el-table-column label="状态" align="center" key="status" >
-            <template #default="scope">
-              {{  showStatusFun(scope.row.status) }}
-            </template>
-          </el-table-column>
-          <el-table-column label="创建时间" align="left" prop="createTime" width="200">
-            <template #default="scope">
-              <span>{{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column
-            label="操作"
-            align="left"
-            width="220"
-          >
-            <template #default="scope">
-             <div class="action-btn">
-               <el-button
-               size="small"
-               :icon="getStatusIcon(scope.row)"
-               @click="handleChangeStatus(scope.row)"
-               v-hasPerms="['/gitlab/group/member/changeStatus/**']"
-               >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-               <el-button
-                 size="small"
-                 icon="Delete"
-                 @click="handleDelete(scope.row)"
-                 v-hasPerms="['/gitlab/group/member/del']"
-               >删除</el-button>
-              <!-- <el-button
-                size="small"
-                icon="Edit"
-                @click="handleEdit(scope.row)"
-                v-hasPerms="['/gitlab/group/edit']"
-              >修改</el-button> -->
-             </div>
-            </template>
-          </el-table-column>
-    </el-table>
-    </div>
-    <div class="page-wrap">
-      <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>
-    </div>
-
-
-    <!-- 添加或修改成员配置对话框 -->
-    <el-dialog :title="title" v-model="open" width="600px" append-to-body>
-      <yt-card>
-        <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="实例" prop="instanceCode">
+    <yt-card>
+      <el-form class="form-wrap"  :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch"  >
+        <el-row :gutter="16">
+          <el-col :span="8">
+              <el-form-item label="插件实例" prop="instanceCode">
                 <el-select
-                class="search-select2"
-                  v-model="form.instanceCode"
-                  @change="formSwitchInstance"
+                class="search-select"
+                  v-model="queryParams.instanceCode"
+                  :change="listSwitchInstance()"
                   placeholder="请选择实例"
-                  style="width: 240px"
                 >
                 <el-option v-for="item in pluginInstance"
                   :key="item.pluginCode"
@@ -468,15 +351,14 @@ import { assign } from 'lodash'
                   :value="item.instanceCode"/>
                 </el-select>
               </el-form-item>
-            </el-col>
-            <el-col :span="12">
+          </el-col>
+          <el-col :span="8">
               <el-form-item label="成员组" prop="groupId">
                 <el-select
-                  class="search-select"
-                  v-model="form.groupId"
-                  placeholder="请选择成员组"
-                  @change="queryMemberList"
-                  style="width: 240px"
+                class="search-select"
+                  v-model="queryParams.groupId"
+                  placeholder="成员组"
+                  clearable
                 >
                 <el-option v-for="dict in groups"
                   :key="dict.id"
@@ -484,13 +366,163 @@ import { assign } from 'lodash'
                   :value="dict.id"/>
                 </el-select>
               </el-form-item>
+          </el-col>
+          <el-col :span="8">
+              <el-form-item label="成员名称" prop="userName">
+                <el-input
+                  v-model="queryParams.userName"
+                  placeholder="请输入成员名称"
+                  clearable
+                  @keyup.enter.native="handleQuery"
+                />
+              </el-form-item>
+          </el-col>
+          <el-col :span="8">
+              <el-form-item label="状态" prop="status">
+                <el-select
+                class="search-select"
+                  v-model="queryParams.status"
+                  placeholder="成员状态"
+                  clearable
+                >
+                <el-option v-for="dict in status"
+                  :key="dict.value"
+                  :label="dict.label"
+                  :value="dict.value"/>
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+                <el-form-item label="创建时间">
+                <el-date-picker
+                  v-model="dateRange"
+                  value-format="YYYY-MM-DD"
+                  type="daterange"
+                  range-separator="-"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+                  clearable
+                ></el-date-picker>
+              </el-form-item>
+          </el-col>
+          <el-col :span="8">
+              <el-form-item>
+                <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
+                <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
+              </el-form-item>
+          </el-col>
+        </el-row>
+    </el-form>
+    </yt-card>
+
+
+    <yt-card>
+      <!--  option-->
+      <div class="option-wrap">
+        <el-button
+          type="primary"
+          plain
+          size="default"
+          @click="handleAdd" v-hasPerms="['/gitlab/group/member/add']" ><el-icon><Plus /></el-icon>新增</el-button>
+      </div>
+
+      <!--table  -->
+      <div class="table-wrap">
+        <el-table v-loading="loading" :data="dataList" @selection-change="handleSelectionChange">
+            <el-table-column type="selection" width="60" align="center" />
+            <el-table-column label="用户编号" align="left" key="userId" prop="userId" v-if="false"/>
+            <el-table-column label="成员编号" align="left" key="id" prop="id" v-if="false"/>
+            <el-table-column label="成员昵称" align="left" key="nickName" prop="nickName"  :show-overflow-tooltip="true" />
+            <el-table-column label="邮箱" align="left" key="email" prop="email"  :show-overflow-tooltip="true" />
+            <el-table-column label="成员名称" align="left" key="userName" prop="userName"  :show-overflow-tooltip="true" />
+            <el-table-column label="组" align="left" key="gitlabGroupName" prop="gitlabGroupName" :show-overflow-tooltip="true" />
+            <el-table-column label="状态" align="center" key="status" >
+              <template #default="scope">
+                {{  showStatusFun(scope.row.status) }}
+              </template>
+            </el-table-column>
+            <el-table-column label="创建时间" align="left" prop="createTime" width="200">
+              <template #default="scope">
+                <span>{{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              label="操作"
+              align="center"
+              width="220"
+            >
+              <template v-slot="scope">
+                <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
+              </template>
+            </el-table-column>
+      </el-table>
+      </div>
+      <div class="page-wrap">
+        <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>
+      </div>
+    </yt-card>
+
+
+    <!-- 添加或修改成员配置对话框 -->
+    <el-dialog :title="title" v-model="open" width="var(--dialog-md-w)" append-to-body>
+      <yt-card>
+        <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
+          <el-row :gutter="16">
+              <el-col>
+                <el-form-item label="实例" prop="instanceCode">
+                  <el-select
+                  class="search-select2"
+                    v-model="form.instanceCode"
+                    @change="formSwitchInstance"
+                    placeholder="请选择实例"
+                  >
+                  <el-option v-for="item in pluginInstance"
+                    :key="item.pluginCode"
+                    :label="item.instanceName"
+                    :value="item.instanceCode"/>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+          <el-row :gutter="16">
+                <el-col>
+                  <el-form-item label="成员组" prop="groupId">
+                    <el-select
+                      class="search-select"
+                      v-model="form.groupId"
+                      placeholder="请选择成员组"
+                      @change="queryMemberList"
+                    >
+                    <el-option v-for="dict in groups"
+                      :key="dict.id"
+                      :label="dict.gitlabGroupName"
+                      :value="dict.id"/>
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+            </el-row>
+
+          <el-row :gutter="16">
+            <el-col>
+              <el-form-item label="角色" prop="accessLevel">
+                <el-select
+                    class="search-select"
+                    v-model="form.accessLevel"
+                    placeholder="请选择角色"
+                    clearable
+                >
+                  <el-option v-for="accessLevel in accessLevels"
+                             :key="accessLevel.label"
+                             :label="accessLevel.label"
+                             :value="accessLevel.value"/>
+                </el-select>
+              </el-form-item>
             </el-col>
           </el-row>
 
-
-
-          <el-row>
-            <el-col :span="12">
+          <el-row :gutter="16">
+            <el-col>
               <el-form-item label="成员" prop="userIds">
                   <el-select
                         v-model="form.userId"
@@ -501,27 +533,11 @@ import { assign } from 'lodash'
                         :remote-method="queryMemberList"
                         style="width: 190px"
                   >
-                  <el-option v-for="item in users"
-                  :key="item.label"
-                  :label="item.label"
-                  :value="item.value"/>
+                    <el-option v-for="item in users"
+                    :key="item.label"
+                    :label="item.label"
+                    :value="item.value"/>
                   </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="角色" prop="accessLevel">
-                <el-select
-                  class="search-select"
-                  v-model="form.accessLevel"
-                  placeholder="请选择角色"
-                  style="width: 240px"
-                  clearable
-                >
-                <el-option v-for="accessLevel in accessLevels"
-                  :key="accessLevel.label"
-                  :label="accessLevel.label"
-                  :value="accessLevel.value"/>
-                </el-select>
               </el-form-item>
             </el-col>
           </el-row>

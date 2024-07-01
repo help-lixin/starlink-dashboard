@@ -62,6 +62,7 @@
   const rules = reactive<FormRules>({
       'sshInstanceCode' : [
         { required: true, message: "实例编码不能为空", trigger: "blur" },
+        { pattern: /^[-_a-zA-Z0-9]*$/, message: '实例编码只可以输入字母、数字、下划线及中划线', trigger: 'blur' },
         { validator: validInstanceCode , trigger: 'blur' }
       ],
       'serverName': [
@@ -127,7 +128,7 @@
             console.log(sshInstanceCodes)
           }
     })
-    
+
   }
 
   // 处理搜索按钮
@@ -137,7 +138,7 @@
 
   // 处理查询按钮
   const resetQuery = function(){
-    
+
     queryParams.serverName = undefined
     dateRange.value = [];
     queryFormRef.value.resetFields();
@@ -227,7 +228,7 @@
       addDialog.value = false;
       getList();
     });
-      
+
   }
 
   const handleDelete = function(row){
@@ -298,13 +299,42 @@
   // 触发查询
   getList();
 
+
+  // 按钮
+const btnList = ref([
+  {
+    btnName: '修改',
+    permArray: ['/ansible/host/add'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleUpdate
+  },
+  {
+    btnName: row => showStatusOperateFun(row.status),
+    permArray: ['/ansible/host/changeStatus/**'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleStatusChange
+  },
+  {
+    btnName: '删除',
+    class: 'yt-color-error-hover',
+    permArray: ['/ansible/host/del/*'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleDelete
+  },
+])
+
 </script>
 
 <template>
   <div class="main-wrapp">
     <!--sousuo  -->
     <yt-card>
-      <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch">
+      <el-form class="form-wrap"  :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch">
+        <el-row :gutter="16">
+          <el-col :span="8">
             <el-form-item label="插件实例" prop="sshInstanceCode">
               <el-select
                 class="search-select"
@@ -312,7 +342,6 @@
                 @keyup.enter.native="handleQuery"
                 placeholder="请选择实例"
                 clearable
-                style="width: 240px"
               >
                 <el-option v-for="item in sshInstanceCodes"
                            :key="item.instanceCode"
@@ -320,16 +349,19 @@
                            :value="item.instanceCode"/>
               </el-select>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="主机名" prop="queryParams.serverName">
-              <el-input v-model="queryParams.serverName" placeholder="请输入主机名" clearable  style="width: 240px"/>
+              <el-input v-model="queryParams.serverName" placeholder="请输入主机名" clearable />
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="状态" prop="status">
               <el-select
                 class="search-select"
                 v-model="queryParams.status"
                 placeholder="项目状态"
                 clearable
-                style="width: 240px"
               >
                 <el-option v-for="dict in status"
                            :key="dict.value"
@@ -337,10 +369,11 @@
                            :value="dict.value"/>
               </el-select>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="创建时间">
               <el-date-picker
                 v-model="dateRange"
-                style="width: 240px"
                 value-format="YYYY-MM-DD"
                 type="daterange"
                 range-separator="-"
@@ -349,12 +382,17 @@
                 clearable
               ></el-date-picker>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item>
               <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
               <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
             </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
     </yt-card>
+
     <yt-card>
       <!--  option-->
       <div class="option-wrap">
@@ -392,58 +430,33 @@
           </el-table-column>
           <el-table-column
             label="操作"
-            align="left"
+            align="center"
+            width="220"
           >
-            <template #default="scope">
-              <div class="action-btn">
-                <el-button
-                  size="small"
-                  :icon="getStatusIcon(scope.row)"
-                  @click="handleStatusChange(scope.row)"
-                  v-hasPerms="['/ansible/host/changeStatus/**']"
-                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-                <el-button
-                  size="small"
-                  :icon="Edit"
-                  @click="handleUpdate(scope.row)"
-                  v-hasPerms="['/ansible/host/add']"
-                >修改</el-button>
-                <el-button
-                  size="small"
-                  :icon="Delete"
-                  @click="handleDelete(scope.row)"
-                  v-hasPerms="['/ansible/host/del/*']"
-                >删除</el-button>
-              </div>
+            <template v-slot="scope">
+              <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
             </template>
           </el-table-column>
         </el-table>
       </div>
       <div class="page-wrap">
-        <el-pagination
-          v-show="total>0"
-          :total="total"
-          :page-sizes=[10,20]
-          background layout="prev, pager, next"
-          v-model:current-page="queryParams.pageNum"
-          v-model:page-size="queryParams.pageSize"
-          @current-change="getList"
-        />
+        <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>
       </div>
     </yt-card>
 
     <!-- 新增对话框 -->
-    <el-dialog :title="title" v-model="addDialog" width="600px" append-to-body>
+    <el-dialog :title="title" v-model="addDialog" width="var(--dialog-md-w)"  append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="120px">
-          <el-row>
-            <el-col :span="15">
+          <el-row :gutter="16">
+            <el-col>
               <el-form-item label="插件实例" prop="sshInstanceCode">
                 <el-select
                   class="search-select"
                   v-model="form.sshInstanceCode"
                   placeholder="请选择插件实例"
                   @change="switchInstance"
+                  clearable
                   style="width: 240px"
                 >
                   <el-option v-for="item in sshInstanceCodes"
@@ -454,15 +467,17 @@
               </el-form-item>
             </el-col>
           </el-row>
-          <el-row>
-            <el-col :span="15">
+
+          <el-row :gutter="16">
+            <el-col>
               <el-form-item label="主机名称" prop="serverName">
                 <el-input v-model="form.serverName" placeholder="请输入主机名称" maxlength="20" />
               </el-form-item>
             </el-col>
           </el-row>
-          <el-row>
-            <el-col :span="15">
+
+          <el-row :gutter="16">
+            <el-col>
               <el-form-item label="inventory目录" prop="ansibleInventoryDir">
                 <el-input v-model="form.ansibleInventoryDir" placeholder="请输入目录路径"  />
               </el-form-item>
@@ -481,48 +496,5 @@
 </template>
 
 <style lang="scss" scoped>
-.main-wrap {
-  height: 100%;
-  width: 100%;
-  box-sizing: border-box;
-  background: #fff;
-
-}
-
-.option-wrap {
-  margin-bottom: 8px;
-  .el-button {
-    // margin-right: 6px;
-  }
-}
-.table-wrap {
-  width: 100%;
-  box-sizing: border-box;
-  overflow-y: auto;
-  .action-btn {
-    display: flex;
-  }
-}
-
-.page-wrap {
-  padding: 20px 0;
-  .el-pagination {
-    display: flex;
-    align-items: center;
-    justify-content: end;
-  }
-
-}
-
-
-</style>
-<style>
- .el-form-item__label {
-  font-size: 14px;
- }
-
-.search-select .el-input {
-  --el-input-width: 240px;
-}
 
 </style>

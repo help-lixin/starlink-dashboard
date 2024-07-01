@@ -6,7 +6,7 @@
   import { dayjs } from "@/utils/common-dayjs"
   import {  Edit, List, CopyDocument, Unlock, Lock } from '@element-plus/icons-vue'
   import { handleTree } from "@/utils/common"
-  import { changeStatus, pageList, queryNodeList, addProject, projectNameIsExist, 
+  import { changeStatus, pageList, queryNodeList, addProject, projectNameIsExist,
     units, pullCommand, pushCommand, showIsPublicFun, changeAccessLevel, showAccessLevelOperateFun, isPublic, removeProject} from "@/api/harbor/project"
 
   const queryFormRef = ref(null);
@@ -387,45 +387,90 @@
     }
   });
 
+  // 按钮
+  const btnList = ref([
+    {
+      btnName: '详情',
+      permArray: ['/harbor/project/queryNodeList/**'],
+      isShow: () => true,
+      isDisable: false,
+      clickEvent: queryDetail
+    },
+    {
+      btnName: row => showStatusOperateFun(row.status),
+      permArray: ['/harbor/project/changeStatus/**'],
+      isShow: () => true,
+      isDisable: false,
+      clickEvent: handleStatusChange
+    },
+    {
+      btnName: row => showAccessLevelOperateFun(row.isPublic),
+      permArray: ['/harbor/project/changeAccessLevel/**'],
+      isShow: () => true,
+      isDisable: false,
+      clickEvent: handleChangeAccessLevel
+    },
+    {
+      btnName: '复制',
+      isShow: () => true,
+      isDisable: false,
+      clickEvent: copyPushCommand
+    },
+    {
+      btnName: '删除',
+      class: 'yt-color-error-hover',
+      permArray: ['/harbor/project/del/**'],
+      isShow: () => true,
+      isDisable: false,
+      clickEvent: handleDelete
+    },
+  ])
+
 </script>
 
 <template>
   <div class="main-wrapp">
     <!--sousuo  -->
     <yt-card>
-      <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch" >
-            <el-form-item label="插件实例" prop="instanceCode">
-              <el-select
-                class="search-select"
-                v-model="queryParams.instanceCode"
-                @keyup.enter.native="handleQuery"
-                placeholder="请选择实例"
-                clearable
-                style="width: 240px"
-              >
-                <el-option v-for="item in pluginInstance"
-                           :key="item.pluginCode"
-                           :label="item.instanceName"
-                           :value="item.instanceCode"/>
-              </el-select>
-            </el-form-item>
+      <el-form class="form-wrap"  :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch" >
+        <el-row :gutter="16">
+          <el-col :span="8">
+              <el-form-item label="插件实例" prop="instanceCode">
+                <el-select
+                  class="search-select"
+                  v-model="queryParams.instanceCode"
+                  @keyup.enter.native="handleQuery"
+                  placeholder="请选择实例"
+                  clearable
+                >
+                  <el-option v-for="item in pluginInstance"
+                             :key="item.pluginCode"
+                             :label="item.instanceName"
+                             :value="item.instanceCode"/>
+                </el-select>
+              </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="项目名" prop="queryParams.projectName">
-              <el-input v-model="queryParams.projectName" placeholder="请输入项目名" style="width: 240px" />
+              <el-input v-model="queryParams.projectName" placeholder="请输入项目名" />
             </el-form-item>
-            <el-form-item label="状态" prop="status">
-              <el-select
-                class="search-select"
-                v-model="queryParams.status"
-                placeholder="项目状态"
-                clearable
-                style="width: 240px"
-              >
-                <el-option v-for="dict in status"
-                           :key="dict.value"
-                           :label="dict.label"
-                           :value="dict.value"/>
-              </el-select>
-            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+              <el-form-item label="状态" prop="status">
+                <el-select
+                  class="search-select"
+                  v-model="queryParams.status"
+                  placeholder="项目状态"
+                  clearable
+                >
+                  <el-option v-for="dict in status"
+                             :key="dict.value"
+                             :label="dict.label"
+                             :value="dict.value"/>
+                </el-select>
+              </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="创建时间">
               <el-date-picker
                 v-model="dateRange"
@@ -434,13 +479,16 @@
                 range-separator="-"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
-                style="width: 240px"
               ></el-date-picker>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item>
               <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
               <el-button  @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
             </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
     </yt-card>
     <yt-card>
@@ -459,7 +507,6 @@
           <el-table-column type="selection" width="60" align="center" />
           <el-table-column label="项目编号" align="left" key="id" prop="id" v-if="false"/>
           <el-table-column label="项目名称" align="left" key="projectName" prop="projectName"  :show-overflow-tooltip="true"  />
-          <!-- <el-table-column label="容量" align="center" key="capacity" prop="capacity" :show-overflow-tooltip="true"   /> -->
           <el-table-column label="访问级别" align="center" key="isPublic" prop="isPublic" :show-overflow-tooltip="true"   >
             <template #default="scope">
               {{  showIsPublicFun(scope.row.isPublic) }}
@@ -484,61 +531,29 @@
           </el-table-column>
           <el-table-column
             label="操作"
-            align="left"
-            width="420"
+            align="center"
+            width="250"
             flixed="right"
           >
             <template #default="scope">
               <div class="action-btn">
-                <el-button
-                  size="small"
-                  icon="List"
-                  @click="queryDetail(scope.row)"
-                  v-hasPerms="['/harbor/project/queryNodeList/**']"
-                >详情</el-button>
-                <el-button
-                  size="small"
-                  :icon="getStatusIcon(scope.row)"
-                  @click="handleStatusChange(scope.row)"
-                  v-hasPerms="['/harbor/project/changeStatus/**']"
-                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-                <el-button size="small"
-                :icon="getAccessLevel(scope.row)" 
-                @click="handleChangeAccessLevel(scope.row)" 
-                  v-hasPerms="['/harbor/project/changeAccessLevel/**']">
-                  {{ showAccessLevelOperateFun(scope.row.isPublic)  }}
-                </el-button>
-                <el-button size="small" icon="CopyDocument" @click="copyPushCommand(scope.row)">复制push</el-button>
-                <el-button size="small"
-                icon="Delete" 
-                @click="handleDelete(scope.row)" 
-                  v-hasPerms="['/harbor/project/del/*']">
-                  删除
-                </el-button>
+                <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
               </div>
             </template>
           </el-table-column>
         </el-table>
       </div>
       <div class="page-wrap">
-        <el-pagination
-          v-show="total>0"
-          :total="total"
-          :page-sizes=[10,20]
-          background layout="prev, pager, next"
-          v-model:current-page="queryParams.pageNum"
-          v-model:page-size="queryParams.pageSize"
-          @current-change="getList"
-        />
+        <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>
       </div>
     </yt-card>
 
     <!-- 新增对话框 -->
-    <el-dialog :title="title" v-model="addDialog" width="600px" append-to-body>
+    <el-dialog :title="title" v-model="addDialog" width="var(--dialog-md-w)"  append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
-          <el-row>
-            <el-col :span="12">
+          <el-row :gutter="16">
+            <el-col>
               <el-form-item label="插件实例" prop="instanceCode">
                 <el-select
                   class="search-select"
@@ -554,16 +569,21 @@
                 </el-select>
               </el-form-item>
             </el-col>
-            <el-col :span="12">
+          </el-row>
+
+
+          <el-row :gutter="16">
+            <el-col>
               <el-form-item label="项目名称" prop="projectName">
-                <el-input v-model="form.projectName" placeholder="请输入项目名称" maxlength="20" />
+                <el-input v-model="form.projectName" placeholder="请输入项目名称" maxlength="20" style="width: 240px"/>
               </el-form-item>
             </el-col>
           </el-row>
-          <el-row>
-            <el-col :span="12">
+
+          <el-row :gutter="16">
+            <el-col>
               <el-form-item label="存储容量" prop="capacity">
-                <el-input v-model="form.capacity" placeholder="请输入容量" style="width: 200px" maxlength="5">
+                <el-input v-model="form.capacity" placeholder="请输入容量" style="width: 240px" maxlength="5">
                     <template #append>
                         <el-select
                           class="search-select"
@@ -580,13 +600,16 @@
                 </el-input>
               </el-form-item>
             </el-col>
-            <el-col :span="12">
+          </el-row>
+
+          <el-row :gutter="16">
+            <el-col>
               <el-form-item label="访问级别" prop="isPublic">
                 <el-radio-group v-model="form.isPublic">
                   <el-radio
-                    v-for="item in isPublic"
-                    :key="item.value"
-                    :label="item.value"
+                      v-for="item in isPublic"
+                      :key="item.value"
+                      :label="item.value"
                   >{{item.label}}
                   </el-radio>
                 </el-radio-group>
