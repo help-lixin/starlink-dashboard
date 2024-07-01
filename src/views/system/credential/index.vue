@@ -232,15 +232,18 @@
     formPluginInstance.splice(0,formPluginInstance.length)
     queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
       Object.assign(formPluginInstance,res?.data)
-    })
 
-    if(pluginCode == "k8s"){
-      nameSpaceList().then((res)=>{
-        Object.assign(nameSpaces ,res.data)
-      })
-    }else{
-      Object.assign(nameSpaces ,[])
-    }
+      console.log(nameSpaces)
+      if(pluginCode == "k8s"){
+        nameSpaceList(formPluginInstance[0].instanceCode).then((res)=>{
+          Object.assign(nameSpaces ,res.data)
+        })
+      }else{
+        console.log("=========")
+        nameSpaces.splice(0,nameSpaces.length)
+      }
+    })
+    
   }
 
 
