@@ -2,18 +2,19 @@
   <div class="btnMenuList">
     <div class="menuList">
       <span v-if="showBtnList.length === 0">--</span>
-      <template v-else-if="showBtnList.length < 6">
-        <template v-for="(item, index) in showBtnList" :key="index">
+      <template v-else-if="showRowList">
+        <template v-for="(item, index) in showRowList" :key="index">
           <span
             class="btnSpan"
             :class="item.class + (item.isDisable ? ' disabled' : '')"
             @click.stop="clickItem(item)"
             >{{ typeof item.btnName === 'function' ? item.btnName(rowData) : item.btnName }}</span
           >
-          <span class="spliceSpan" v-if="index < showBtnList.length - 1">|</span>
+          <span class="spliceSpan" v-if="index < showRowList.length - 1">|</span>
         </template>
       </template>
-      <template v-else>
+      <template v-if="otherRowList.length">
+        <span class="spliceSpan">|</span>
         <el-dropdown
           overlayClassName="btnMenus-overlay"
           placement="bottom"
@@ -23,7 +24,7 @@
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item
-                v-for="(item, index) in showBtnList"
+                v-for="(item, index) in otherRowList"
                 :key="index"
                 :disabled="item.isDisable"
                 @click="clickItem(item)"
@@ -69,6 +70,12 @@ export default {
     }
   },
   computed: {
+    showRowList() {
+        return this.btnList.slice(0, 2)
+    },
+    otherRowList() {
+      return this.btnList.slice(2)
+    },
     computedRowData() {
       return { ...this.rowData, _isList: true }
     },
