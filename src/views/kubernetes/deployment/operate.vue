@@ -730,6 +730,9 @@
       "imagePullSecrets":[],
       // 命名空间下拉列表
       "namespaces":[],
+      "pluginCode":"k8s",
+      "pluginInstance":[],
+      "instanceCode":"",
       // 记录当前容器点击的左侧标签位置
       "containerIndex":"containerGeneral",
       // 记录当前pod点击的左侧标签位置
@@ -756,6 +759,7 @@
   import router from "@/router";
   import { addDeployment,nameSpaceList,nameIsExist,queryDetail} from "@/api/kubernetes/deployment"
   import { secretOptionList} from "@/api/kubernetes/secret"
+  import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { useRouter } from "vue-router";
 
   const $route = useRouter();
@@ -1583,7 +1587,7 @@
     if(initData.value.spec.template.spec?.affinity?.nodeAffinity != undefined){
 
       // 必须
-      if(initData.value.spec.template.spec?.affinity?.nodeAffinity?.requiredDuringSchedulingIgnoredDuringExecution.length > 0){
+      if(initData.value.spec.template.spec?.affinity?.nodeAffinity?.requiredDuringSchedulingIgnoredDuringExecution != undefined){
         initData.value.spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.forEach(function(required){
           const node = {
             "nodeLevel": "1",
@@ -1594,7 +1598,7 @@
         })
       }
       // 首选
-      if(initData.value.spec.template.spec?.affinity?.nodeAffinity?.preferredDuringSchedulingIgnoredDuringExecution.length > 0){
+      if(initData.value.spec.template.spec?.affinity?.nodeAffinity?.preferredDuringSchedulingIgnoredDuringExecution != undefined){
         initData.value.spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution.forEach(function(preferred){
           const node = {
             "nodeLevel": "0",
@@ -1609,7 +1613,7 @@
     // pod亲和性
     if(initData.value.spec.template.spec?.affinity?.podAffinity != undefined){
       // 必须
-      if(initData.value.spec.template.spec?.affinity?.podAffinity?.requiredDuringSchedulingIgnoredDuringExecution?.length > 0){
+      if(initData.value.spec.template.spec?.affinity?.podAffinity?.requiredDuringSchedulingIgnoredDuringExecution != undefined){
         initData.value.spec.template.spec.affinity.podAffinity.requiredDuringSchedulingIgnoredDuringExecution.forEach(function(requireds){
           const pod = {
             "podAffinity":true,
@@ -1626,7 +1630,7 @@
       }
 
       // 首选
-      if(initData.value.spec.template.spec?.affinity?.podAffinity?.preferredDuringSchedulingIgnoredDuringExecution?.length > 0){
+      if(initData.value.spec.template.spec?.affinity?.podAffinity?.preferredDuringSchedulingIgnoredDuringExecution != undefined){
         initData.value.spec.template.spec.affinity.podAffinity.preferredDuringSchedulingIgnoredDuringExecution.forEach(function(preferred){
           const pod = {
             "podAffinity":true,
@@ -1666,7 +1670,7 @@
 
       // 首选
       if(initData.value.spec.template.spec?.affinity?.podAntiAffinity?.preferredDuringSchedulingIgnoredDuringExecution != undefined){
-        if(initData.value.spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution?.length > 0){
+        if(initData.value.spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution != undefined){
           initData.value.spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution.forEach(function(preferred){
             const podAnti = {
               "podAffinity":false,
@@ -1865,12 +1869,24 @@
       })
     }
 
-    nameSpaceList($route.currentRoute.value.query.instanceCode).then((res)=>{
+    queryInstanceInfoByPluginCode(initData.value.option.pluginCode).then((res)=>{
       if(res.code == 200){
-        Object.assign(initData.value.option.namespaces,res.data);
-        changeNameSpace("default")
+        const defaultInstanceCode = res?.data[0].instanceCode
+        Object.assign(initData.value.option.pluginInstance,res?.data)
+        if(!$route.currentRoute.value.query.instanceCode){
+          initData.value.option.instanceCode = $route.currentRoute.value.query.instanceCode
+        }else{
+          initData.value.option.instanceCode = defaultInstanceCode
+        }
+
+        nameSpaceList(defaultInstanceCode).then((res)=>{
+          if(res.code == 200){
+            Object.assign(initData.value.option.namespaces,res.data);
+            changeNameSpace("default")
+          }
+        })
       }
-    })
+    });
 
     secretOption()
 
@@ -1895,6 +1911,21 @@
                     :value="namespace.label"/>
                 </el-select>
               </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="插件实例" prop="instanceCode">
+                <el-select
+                  v-model="initData.option.instanceCode"
+                  @keyup.enter.native="handleQuery"
+                  placeholder="请选择实例"
+                  style="width: 100%;"
+                >
+                  <el-option v-for="item in initData.option.pluginInstance"
+                            :key="item.pluginCode"
+                            :label="item.instanceName"
+                            :value="item.instanceCode"/>
+                </el-select>
+              </el-form-item>  
             </el-col>
             <el-col :span="8">
               <el-form-item label="名称" prop="metadata.name" >
@@ -2458,7 +2489,7 @@
                           <el-form-item label="容器镜像" :prop="`spec.template.spec.containers[${index}][image]`"
                                         :rules="[
                                 { required: true, message: '容器镜像不能为空', trigger: 'blur' },
-                                { min: 2, max: 50, message: '名称长度必须介于 2 和 50 之间', trigger: 'blur' }
+                                { min: 2, max: 200, message: '名称长度必须介于 2 和 200 之间', trigger: 'blur' }
                               ]">
                             <el-input placeholder="如：nginx:1.17.2" v-model="container.image" ></el-input>
                           </el-form-item>

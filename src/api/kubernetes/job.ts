@@ -75,7 +75,7 @@ export function removeJob(jobId:number) {
 }
 
 // 重新运行
-export function restrat(jobId:number) {
+export function restart(jobId:number) {
     return request({
       url: STARLINK_SERVICE + '/kubernetes/job/restart/' + jobId ,
       method: 'put'

@@ -154,3 +154,13 @@ export function syncAllSysConfig(){
           return res?.data;
     });
 }
+
+// 删除系统配置
+export function deleteConfig(id:number){
+    return request({
+        url: STARLINK_SERVICE + '/jenkins/systemConfig/del/'+id,
+        method: 'delete'
+      }).then((res)=>{
+          return res?.data;
+    });
+}

@@ -5,7 +5,7 @@
   import { dayjs } from "@/utils/common-dayjs"
   import {  Edit } from '@element-plus/icons-vue'
   // import router from '@/router'
-  import { pageList,nameSpaceList,removeJob,changeStatus,restrat} from "@/api/kubernetes/job"
+  import { pageList,nameSpaceList,removeJob,changeStatus,restart} from "@/api/kubernetes/job"
   import { useRouter } from "vue-router";
 
   const router = useRouter();
@@ -70,8 +70,8 @@
     router.push({path : "/kubernetes/job/operate", query:{ instanceCode: defaultInstanceCode.value } })
   }
 
-  const handleDetail = function(id){
-    router.push({path : "/kubernetes/job/operate", query:{ instanceCode: defaultInstanceCode.value ,id: id} })
+  const handleDetail = function(row){
+    router.push({path : "/kubernetes/job/operate", query:{ instanceCode: defaultInstanceCode.value ,id: row.id} })
   }
 
   const handleDelete = function(row){
@@ -146,7 +146,7 @@
   }
 
   // 重新运行任务
-  const restratHandle = function(row){
+  const restartHandle = function(row){
 
     let msg = "是否重新运行任务["+row.name+"]"
 
@@ -159,7 +159,7 @@
         type: 'warning',
       }
     ).then(() => {
-      restrat(row.id).then((res)=>{
+      restart(row.id).then((res)=>{
         if(res.code == 200){
           getList();
           ElMessage({
@@ -192,6 +192,37 @@
 
   }
 
+  // 按钮
+  const btnList = ref([
+    {
+      btnName: '查看',
+      permArray: ['/kubernetes/job/detail/*'],
+      isShow: () => true,
+      isDisable: false,
+      clickEvent: handleDetail
+    },
+    {
+      btnName: row => showStatusOperateFun(row.status),
+      permArray: ['/kubernetes/job/changeStatus/**'],
+      isShow: () => true,
+      isDisable: false,
+      clickEvent: handleStatusChange
+    },
+    {
+      btnName: '重新运行',
+      permArray: ['/kubernetes/job/restart/*'],
+      isShow: () => true,
+      isDisable: false,
+      clickEvent: restartHandle
+    },
+    {
+      btnName: '删除',
+      permArray: ['/kubernetes/job/del/*'],
+      isShow: () => true,
+      isDisable: false,
+      clickEvent: handleDelete
+    }
+  ])
 
   // 进入页面时,就初始化实例列表
   queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
@@ -210,9 +241,6 @@
       })
       // 触发查询
       getList();
-
-      
-
     }
   });
 </script>
@@ -292,7 +320,7 @@
         <el-table v-loading="loading" :data="tabelDataList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
           <el-table-column label="id" align="left" key="id" prop="id" v-if="false"/>
-          <el-table-column label="命名空间" align="left" key="nameSpace" prop="nameSpace" width="180">
+          <el-table-column label="命名空间" align="left" key="nameSpace" prop="nameSpace" width="180" :show-overflow-tooltip="true">
             <template #default="scope">
               {{ showNameSpace(scope.row.nameSpaceId)   }}
             </template>
@@ -310,7 +338,7 @@
             </template>
           </el-table-column>
           <el-table-column label="操作" align="left" key="operation" prop="operation" :show-overflow-tooltip="true" width="350"  >
-            <template #default="scope">
+            <!-- <template #default="scope">
               <div class="action-btn">
                 <el-button
                   size="small"
@@ -327,7 +355,7 @@
                 <el-button
                   size="small"
                   icon="Refresh"
-                  @click="restratHandle(scope.row)"
+                  @click="restartHandle(scope.row)"
                   v-hasPerms="['/kubernetes/job/restart/*']"
                 >重新运行</el-button>
                 <el-button
@@ -337,20 +365,15 @@
                   v-hasPerms="['/kubernetes/job/del/**']"
                 >删除</el-button>
               </div>
+            </template> -->
+            <template v-slot="scope">
+              <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
             </template>
           </el-table-column>
         </el-table>
       </div>
       <div class="page-wrap">
-        <el-pagination
-          v-show="total>0"
-          :total="total"
-          :page-sizes=[10,20]
-          background layout="prev, pager, next"
-          v-model:current-page="queryParams.pageNum"
-          v-model:page-size="queryParams.pageSize"
-          @current-change="getList"
-        />
+        <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>
       </div>
     </yt-card>
 

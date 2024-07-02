@@ -22,7 +22,7 @@ const initData = ref({
       "sessionAffinity": undefined,
       "sessionAffinityConfig": {
         "clientIP":{
-          "timeoutSeconds": undefined
+          "timeoutSeconds": 0
         }
       }
     },
@@ -43,10 +43,11 @@ const initData = ref({
           "labels":[]
         }
       },
+      "pluginCode":"k8s",
       // 命名空间下拉列表
       "namespaces":[],
       "pluginInstance":[],
-      "instanceCode":undefined,
+      "instanceCode":"",
       // 记录当前点击的左侧标签位置
       "curPoint":"servicePort",
       "sessionRetention":false,
@@ -123,6 +124,17 @@ const $route = useRouter();
 
     // 设置标签 & 注解
     reverseLabelAnnotationHandle()
+
+    if(initData.value.spec?.sessionAffinityConfig?.clientIP.timeoutSeconds == undefined){
+      Object.assign(initData.value.spec,{
+        "sessionAffinityConfig": {
+          "clientIP":{
+            "timeoutSeconds": 0
+          }
+        }
+      })
+      Object.assign(initData.value.spec,{sessionAffinity:undefined})
+    }
   }
 
   // 标签 & 注解从yaml逆向回来
@@ -339,11 +351,15 @@ const $route = useRouter();
       })
     }
 
-    queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
+    queryInstanceInfoByPluginCode(initData.value.option.pluginCode).then((res)=>{
       if(res.code == 200){
         const defaultInstanceCode = res?.data[0].instanceCode
         Object.assign(initData.value.option.pluginInstance,res?.data)
-        Object.assign(initData.value.option.instanceCode,defaultInstanceCode)
+        if(!$route.currentRoute.value.query.instanceCode){
+          initData.value.option.instanceCode = $route.currentRoute.value.query.instanceCode
+        }else{
+          initData.value.option.instanceCode = defaultInstanceCode
+        }
 
         nameSpaceList(defaultInstanceCode).then((res)=>{
           if(res.code == 200){
@@ -381,14 +397,13 @@ const $route = useRouter();
                 </el-select>
               </el-form-item>
             </el-col>
-            <el-col>
+            <el-col :span="8">
               <el-form-item label="插件实例" prop="instanceCode">
                 <el-select
                   v-model="initData.option.instanceCode"
                   @keyup.enter.native="handleQuery"
                   placeholder="请选择实例"
-                  clearable
-                  style="width: 240px"
+                  style="width: 100%;"
                 >
                   <el-option v-for="item in initData.option.pluginInstance"
                             :key="item.pluginCode"

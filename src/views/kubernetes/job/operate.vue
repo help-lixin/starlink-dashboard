@@ -719,6 +719,9 @@
       "imagePullSecrets":[],
       // 命名空间下拉列表
       "namespaces":[],
+      "pluginCode":"k8s",
+      "pluginInstance":[],
+      "instanceCode":"",
       // 记录当前容器点击的左侧标签位置
       "containerIndex":"containerGeneral",
       // 记录当前pod点击的左侧标签位置
@@ -743,6 +746,7 @@
   import yaml from 'js-yaml'
   import { addJob,nameSpaceList,nameIsExist,queryDetail} from "@/api/kubernetes/job"
   import { secretOptionList} from "@/api/kubernetes/secret"
+  import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { useRouter } from "vue-router";
 
   const $route = useRouter();
@@ -1838,12 +1842,24 @@
       })
     }
 
-    nameSpaceList($route.currentRoute.value.query.instanceCode).then((res)=>{
+    queryInstanceInfoByPluginCode(initData.value.option.pluginCode).then((res)=>{
       if(res.code == 200){
-        Object.assign(initData.value.option.namespaces,res.data);
-        changeNameSpace("default")
+        const defaultInstanceCode = res?.data[0].instanceCode
+        Object.assign(initData.value.option.pluginInstance,res?.data)
+        if(!$route.currentRoute.value.query.instanceCode){
+          initData.value.option.instanceCode = $route.currentRoute.value.query.instanceCode
+        }else{
+          initData.value.option.instanceCode = defaultInstanceCode
+        }
+
+        nameSpaceList(defaultInstanceCode).then((res)=>{
+          if(res.code == 200){
+            Object.assign(initData.value.option.namespaces,res.data);
+            changeNameSpace("default")
+          }
+        })
       }
-    })
+    });
 
     secretOption()
 
@@ -1870,6 +1886,21 @@
                 </el-select>
               </el-form-item>
             </el-col> 
+            <el-col :span="8">
+              <el-form-item label="插件实例" prop="instanceCode">
+                <el-select
+                  v-model="initData.option.instanceCode"
+                  @keyup.enter.native="handleQuery"
+                  placeholder="请选择实例"
+                  style="width: 100%;"
+                >
+                  <el-option v-for="item in initData.option.pluginInstance"
+                            :key="item.pluginCode"
+                            :label="item.instanceName"
+                            :value="item.instanceCode"/>
+                </el-select>
+              </el-form-item>  
+            </el-col>
             <el-col :span="8">
               <el-form-item label="名称" prop="metadata.name">
                 <el-input v-model="initData.metadata.name" placeholder="请输入内容" :disabled="$route.currentRoute.value.query.id != undefined" />

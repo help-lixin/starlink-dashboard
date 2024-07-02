@@ -2,10 +2,9 @@
   // @ts-nocheck
   import { showStatusOperateFun , status , showStatusFun , addDateRange, getStatusIcon } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
-  import {  Edit } from '@element-plus/icons-vue'
   import { dayjs } from "@/utils/common-dayjs"
-  import {sysConfigList,addConfig,queryConfigInfoById,changeConfigStatus,sysConfigSelectOption,
-    checkHome,checkName,toolsSelectOption,tools,pluginTypeSelectOption,syncAllSysConfig} from "@/api/jenkins/sys_config"
+  import {sysConfigList,addConfig,queryConfigInfoById,changeConfigStatus,
+    checkHome,tools,syncAllSysConfig,deleteConfig} from "@/api/jenkins/sys_config"
 
   const queryFormRef = ref(null);
   //查询列表信息
@@ -18,8 +17,6 @@
     instanceCode:undefined,
     name: undefined
   })
-
-
 
   const loading = ref(false)
 
@@ -222,6 +219,40 @@
 
   }
 
+  // 删除系统配置
+  const handleDelete = function(row){
+    const configName = row.jobName
+    let msg = ""
+    msg = '是否删除系统配置【"' + configName + '"】的数据项？'
+
+    ElMessageBox.confirm(
+      msg,
+      'Warning',
+      {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    ).then(() => {
+      deleteConfig(row.id).then((res)=>{
+          if(res.code == 200){
+              // 重置查询表单,并进行查询
+              queryParams.pageNum=1
+              getList()
+              ElMessage({
+                type: 'success',
+                message: '删除成功',
+              })
+          }else{
+              ElMessage({
+                type: 'error',
+                message: '删除失败:'+res.msg,
+              })
+          }
+      })
+    })
+  }
+
   const handleStatusChange = (row)=>{
     const id = row.id
     const status = row.status
@@ -297,6 +328,13 @@ const btnList = ref([
     isShow: () => true,
     isDisable: false,
     clickEvent: handleStatusChange
+  },
+  {
+    btnName: '删除',
+    permArray: ['/jenkins/systemConfig/del/*'],
+    isShow: () => true,
+    isDisable: false,
+    clickEvent: handleDelete
   }
 ])
 
@@ -430,22 +468,22 @@ const btnList = ref([
               <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
             </template>
 
-            <!--            <template #default="scope">-->
-<!--              <div class="action-btn">-->
-<!--                <el-button-->
-<!--                  size="small"-->
-<!--                  icon="Edit"-->
-<!--                  @click="handleUpdate(scope.row)"-->
-<!--                  v-hasPerms="['/jenkins/systemConfig/add']"-->
-<!--                >修改</el-button>-->
-<!--                <el-button-->
-<!--                  size="small"-->
-<!--                  :icon="getStatusIcon(scope.row)"-->
-<!--                  @click="handleStatusChange(scope.row)"-->
-<!--                  v-hasPerms="['/jenkins/systemConfig/changeStatus/**']"-->
-<!--                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>-->
-<!--              </div>-->
-<!--            </template>-->
+            <!-- <template #default="scope">
+             <div class="action-btn">
+               <el-button>
+                 size="small"
+                 icon="Edit"
+                 @click="handleUpdate(scope.row)"
+                 v-hasPerms="['/jenkins/systemConfig/add']"
+               >修改</el-button>
+               <el-button
+                 size="small"
+                 :icon="getStatusIcon(scope.row)"
+                 @click="handleStatusChange(scope.row)"
+                 v-hasPerms="['/jenkins/systemConfig/changeStatus/**']"
+               >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
+             </div>
+           </template> -->
           </el-table-column>
         </el-table>
       </div>

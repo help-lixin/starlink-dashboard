@@ -103,7 +103,7 @@ export function syncAllCredential(){
 
 export function nameSpaceList(instanceCode:string){
     return request({
-      url: STARLINK_SERVICE + '/'+instanceCode+'/credential/nameSpace/list',
+      url: STARLINK_SERVICE + '/credential/'+instanceCode+'/nameSpace/list',
       method: 'get'
     }).then((res)=>{
         return res?.data;

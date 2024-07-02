@@ -70,8 +70,8 @@
     router.push({path : "/kubernetes/service/operate", query:{ instanceCode: defaultInstanceCode.value } })
   }
 
-  const handleDetail = function(id){
-    router.push({path : "/kubernetes/service/operate", query:{ instanceCode: defaultInstanceCode.value ,id: id} })
+  const handleDetail = function(row){
+    router.push({path : "/kubernetes/service/operate", query:{ instanceCode: defaultInstanceCode.value ,id: row.id} })
   }
 
   const handleDelete = function(row){
@@ -192,6 +192,30 @@
 
   }
 
+   // 按钮
+   const btnList = ref([
+    {
+      btnName: '查看',
+      permArray: ['/kubernetes/service/detail/*'],
+      isShow: () => true,
+      isDisable: false,
+      clickEvent: handleDetail
+    },
+    {
+      btnName: row => showStatusOperateFun(row.status),
+      permArray: ['/kubernetes/service/changeStatus/**'],
+      isShow: () => true,
+      isDisable: false,
+      clickEvent: handleStatusChange
+    },
+    {
+      btnName: '删除',
+      permArray: ['/kubernetes/service/del/**'],
+      isShow: () => true,
+      isDisable: false,
+      clickEvent: handleDelete
+    }
+  ])
 
   // 进入页面时,就初始化实例列表
   queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
@@ -289,7 +313,7 @@
         <el-table v-loading="loading" :data="tabelDataList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
           <el-table-column label="id" align="left" key="id" prop="id" v-if="false"/>
-          <el-table-column label="命名空间" align="left" key="nameSpace" prop="nameSpace" width="180">
+          <el-table-column label="命名空间" align="left" key="nameSpace" prop="nameSpace" width="180" :show-overflow-tooltip="true">
             <template #default="scope">
               {{ showNameSpace(scope.row.nameSpaceId)   }}
             </template>
@@ -307,7 +331,7 @@
             </template>
           </el-table-column>
           <el-table-column label="操作" align="left" key="operation" prop="operation" :show-overflow-tooltip="true" width="350"  >
-            <template #default="scope">
+            <!-- <template #default="scope">
               <div class="action-btn">
                 <el-button
                   size="small"
@@ -323,31 +347,20 @@
                 >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
                 <el-button
                   size="small"
-                  icon="Refresh"
-                  @click="restratHandle(scope.row)"
-                  v-hasPerms="['/kubernetes/service/restart/*']"
-                >重新运行</el-button>
-                <el-button
-                  size="small"
                   icon="Delete"
                   @click="handleDelete(scope.row)"
                   v-hasPerms="['/kubernetes/service/del/**']"
                 >删除</el-button>
               </div>
+            </template> -->
+            <template v-slot="scope">
+              <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
             </template>
           </el-table-column>
         </el-table>
       </div>
       <div class="page-wrap">
-        <el-pagination
-          v-show="total>0"
-          :total="total"
-          :page-sizes=[10,20]
-          background layout="prev, pager, next"
-          v-model:current-page="queryParams.pageNum"
-          v-model:page-size="queryParams.pageSize"
-          @current-change="getList"
-        />
+        <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>
       </div>
     </yt-card>
 

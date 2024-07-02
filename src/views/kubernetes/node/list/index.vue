@@ -3,13 +3,7 @@
   import { showStatusOperateFun , status , showStatusFun , addDateRange, getStatusIcon } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
-  import {  Edit } from '@element-plus/icons-vue'
-  // import router from '@/router'
-  import { pageList,nameSpaceList,removeCronJob,changeStatus} from "@/api/kubernetes/cronjob"
-  import { useRouter } from "vue-router";
-
-  const router = useRouter();
-
+  import { pageList,changeStatus} from "@/api/kubernetes/node"
 
   const queryFormRef = ref(null);
 
@@ -22,7 +16,7 @@
     status: undefined,
     instanceCode:undefined,
     nameSpaceId:undefined,
-    kind: "CronJob"
+    kind: "Node"
   })
 
   const defaultInstanceCode = ref('')
@@ -33,7 +27,6 @@
   const showSearch = ref(true)
   // 日期范围
   const dateRange = ref([])
-  const nameSpaces = reactive([])
   const nameSpaceMap =new Map()
 
 
@@ -67,11 +60,11 @@
   }
 
   const handleAdd = function(){
-    router.push({path : "/kubernetes/cronjob/operate", query:{ instanceCode: defaultInstanceCode.value } })
+    router.push({path : "/kubernetes/node/operate", query:{ instanceCode: defaultInstanceCode.value } })
   }
 
-  const handleUpdate = function(row){
-    router.push({path : "/kubernetes/cronjob/operate", query:{ instanceCode: defaultInstanceCode.value ,id: row.id} })
+  const handleDetail = function(id){
+    router.push({path : "/kubernetes/node/operate", query:{ instanceCode: defaultInstanceCode.value ,id: id} })
   }
 
   const handleDelete = function(row){
@@ -88,7 +81,7 @@
         type: 'warning',
       }
     ).then(() => {
-      removeCronJob(row.id).then((res)=>{
+      removeNode(row.id).then((res)=>{
           if(res.code == 200){
               // 重置查询表单,并进行查询
               queryParams.pageNum=1
@@ -112,9 +105,9 @@
     const status = row.status
     let msg = ""
     if(status == 1){
-      msg = '是否停用名称为"' + name + '"的数据项？(停用后任务会暂停运行)'
+      msg = '是否停用名称为"' + name + '"的数据项？'
     }else{
-      msg = '是否启用名称为"' + name + '"的数据项？(启用后任务会重新运行)'
+      msg = '是否启用名称为"' + name + '"的数据项？'
     }
 
     ElMessageBox.confirm(
@@ -145,6 +138,7 @@
     .catch(() => { })
   }
 
+
   // 处理搜索按钮
   const handleQuery = function(){
     getList()
@@ -168,25 +162,11 @@
   // 按钮
   const btnList = ref([
     {
-      btnName: '修改',
-      permArray: ['/kubernetes/cronjob/add'],
-      isShow: () => true,
-      isDisable: false,
-      clickEvent: handleUpdate
-    },
-    {
       btnName: row => showStatusOperateFun(row.status),
-      permArray: ['/kubernetes/cronjob/changeStatus/**'],
+      permArray: ['/kubernetes/node/changeStatus/**'],
       isShow: () => true,
       isDisable: false,
       clickEvent: handleStatusChange
-    },
-    {
-      btnName: '删除',
-      permArray: ['/kubernetes/cronjob/del/*'],
-      isShow: () => true,
-      isDisable: false,
-      clickEvent: handleDelete
     }
   ])
 
@@ -197,16 +177,6 @@
       queryParams.instanceCode = pluginInstance[0].instanceCode
       defaultInstanceCode.value = pluginInstance[0].instanceCode
 
-      nameSpaceList(defaultInstanceCode.value).then((res) =>{
-        if(res.code == 200){
-          Object.assign(nameSpaces,res?.data)
-          nameSpaces.forEach(function(nameSpace){
-            nameSpaceMap.set(Number(nameSpace.value),nameSpace.label)
-          })
-        }
-      })
-      console.log(nameSpaceMap)
-      
       // 触发查询
       getList();
     }
@@ -230,20 +200,6 @@
                            :key="item.pluginCode"
                            :label="item.instanceName"
                            :value="item.instanceCode"/>
-              </el-select>
-            </el-form-item>
-            <el-form-item label="命名空间" prop="nameSpace">
-              <el-select
-                class="search-select2"
-                v-model="queryParams.nameSpaceId"
-                placeholder="请选择命名空间"
-                style="width: 240px"
-                clearable
-              >
-                <el-option v-for="namespace in nameSpaces"
-                      :key="namespace.value"
-                      :label="namespace.label"
-                      :value="namespace.value"/>
               </el-select>
             </el-form-item>
             <el-form-item label="状态" prop="status">
@@ -276,24 +232,12 @@
       </el-form>
     </yt-card>
     <yt-card>
-        <div class="option-wrap">
-          <el-button
-            type="primary"
-            plain
-            size="default"
-            @click="handleAdd" v-hasPerms="['/kubernetes/cronjob/add']" ><el-icon><Plus /></el-icon>新增</el-button>
-        </div>
       <!--table  -->
       <div class="table-wrap">
         <el-table v-loading="loading" :data="tabelDataList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
           <el-table-column label="id" align="left" key="id" prop="id" v-if="false"/>
-          <el-table-column label="命名空间" align="left" key="nameSpace" prop="nameSpace" width="180" :show-overflow-tooltip="true">
-            <template #default="scope">
-              {{ showNameSpace(scope.row.nameSpaceId)   }}
-            </template>
-          </el-table-column>
-          <el-table-column label="应用名称" align="left" key="name" prop="name"  :show-overflow-tooltip="true" />
+          <el-table-column label="主机名称" align="left" key="name" prop="name"  :show-overflow-tooltip="true" />
           <el-table-column label="实例编码" align="left" key="instanceCode" prop="instanceCode" :show-overflow-tooltip="true"   />
           <el-table-column label="状态" align="left" key="status" prop="status" :show-overflow-tooltip="true" width="100"  >
             <template #default="scope">
@@ -305,27 +249,15 @@
               {{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}
             </template>
           </el-table-column>
-          <el-table-column label="操作" align="left" key="operation" prop="operation" :show-overflow-tooltip="true" >
+          <el-table-column label="操作" align="left" key="operation" prop="operation" :show-overflow-tooltip="true" width="350"  >
             <!-- <template #default="scope">
               <div class="action-btn">
                 <el-button
                   size="small"
-                  icon="Edit"
-                  @click="handleUpdate(scope.row.id)"
-                  v-hasPerms="['/kubernetes/cronjob/add']"
-                >修改</el-button>
-                <el-button
-                  size="small"
                   :icon="getStatusIcon(scope.row)"
                   @click="handleStatusChange(scope.row)"
-                  v-hasPerms="['/kubernetes/cronjob/changeStatus/**']"
+                  v-hasPerms="['/kubernetes/node/changeStatus/**']"
                 >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-                <el-button
-                  size="small"
-                  icon="Delete"
-                  @click="handleDelete(scope.row)"
-                  v-hasPerms="['/kubernetes/cronjob/del/**']"
-                >删除</el-button>
               </div>
             </template> -->
             <template v-slot="scope">
@@ -337,7 +269,6 @@
       <div class="page-wrap">
         <yt-page :total="total" v-model="queryParams" @change="getList"></yt-page>
       </div>
-
     </yt-card>
 
 

@@ -34,6 +34,7 @@ export const navigation = new Map<string,string[]>([
     [ "/kubernetes/job/list/index" ,  ["kubernetes管理","Job"] ],
     [ "/kubernetes/pod/list/index" ,  ["kubernetes管理","Pod"] ],
     [ "/kubernetes/service/list/index" ,  ["kubernetes管理","Service"] ],
+    [ "/kubernetes/node/list/index" ,  ["kubernetes管理","Node"] ],
 
     [ "/kubernetes/deployment/operate" ,  ["kubernetes管理","Deployment","编辑页面"] ],
     [ "/kubernetes/daemonset/operate" ,  ["kubernetes管理","Daemonset","编辑页面"] ],
