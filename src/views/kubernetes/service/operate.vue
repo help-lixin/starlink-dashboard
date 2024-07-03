@@ -387,17 +387,6 @@ const $route = useRouter();
         <yt-card :title="'公共配置'">
           <el-row :gutter="24">
             <el-col :span="8">
-              <el-form-item label="命名空间">
-                <el-select v-model="initData.metadata.namespace" style="width: 100%;" placeholder="请选择" @change="changeNameSpace"
-                    :disabled="$route.currentRoute.value.query.id != undefined">
-                  <el-option v-for="namespace in initData.option.namespaces"
-                    :key="namespace.value"
-                    :label="namespace.label"
-                    :value="namespace.label"/>
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
               <el-form-item label="插件实例" prop="instanceCode">
                 <el-select
                   v-model="initData.option.instanceCode"
@@ -411,6 +400,17 @@ const $route = useRouter();
                             :value="item.instanceCode"/>
                 </el-select>
               </el-form-item>  
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="命名空间">
+                <el-select v-model="initData.metadata.namespace" style="width: 100%;" placeholder="请选择" @change="changeNameSpace"
+                    :disabled="$route.currentRoute.value.query.id != undefined">
+                  <el-option v-for="namespace in initData.option.namespaces"
+                    :key="namespace.value"
+                    :label="namespace.label"
+                    :value="namespace.label"/>
+                </el-select>
+              </el-form-item>
             </el-col>
             <el-col :span="8">
               <el-form-item label="Service">
@@ -442,7 +442,6 @@ const $route = useRouter();
                     type="card"
             >
               <el-tab-pane name="Service" label="Service" closable="false">
-                <el-scrollbar>
                   <div class="tab-content">
                     <div class="left">
                       <el-tabs :tab-position="'left'" @tab-change="changeSelectTab" v-model="initData.option.curPoint">
@@ -587,7 +586,6 @@ const $route = useRouter();
                       </div>
                     </div>
                   </div>
-                </el-scrollbar>
               </el-tab-pane>
             </el-tabs>
           </div>
@@ -604,6 +602,9 @@ const $route = useRouter();
   <yaml-editor :copy-data="copyData" v-model:visible="initData.option.isShowYamlEditor" @setValue="setValue"></yaml-editor>
 </template>
 <style lang="scss" scoped>
+  .yamlDemo {
+    padding-bottom: 50px;
+  }
   .detail-content {
     ::v-deep(.el-tabs__new-tab) {
       transform: scale(1.2);
@@ -638,7 +639,7 @@ const $route = useRouter();
     }
     .tab-content {
       display: flex;
-      height: 400px;
+      min-height: calc(100vh - 512px);
       overflow-x: hidden;
       padding-top: 16px;
       .left {
@@ -651,6 +652,7 @@ const $route = useRouter();
         padding: 16px;
         box-sizing: border-box;
         flex: 1;
+        width: 100%;
       }
     }
   }

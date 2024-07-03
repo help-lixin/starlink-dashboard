@@ -1827,6 +1827,7 @@
   const secretOption = ()=>{
     secretOptionList($route.currentRoute.value.query.instanceCode,initData.value.metadata.namespace).then((res)=>{
         if(res.code == 200){
+          initData.value.option.imagePullSecrets.splice(0,initData.value.option.imagePullSecrets.length);
           Object.assign(initData.value.option.imagePullSecrets,res.data);
         }
     })
@@ -1878,17 +1879,6 @@
         <yt-card :title="'公共配置'">
           <el-row :gutter="24">
             <el-col :span="8">
-              <el-form-item label="命名空间">
-                <el-select v-model="initData.metadata.namespace" style="width: 100%;" placeholder="请选择" @change="changeNameSpace" 
-                    :disabled="$route.currentRoute.value.query.id != undefined">
-                  <el-option v-for="namespace in initData.option.namespaces"
-                    :key="namespace.value"
-                    :label="namespace.label"
-                    :value="namespace.label"/>
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
               <el-form-item label="插件实例" prop="instanceCode">
                 <el-select
                   v-model="initData.option.instanceCode"
@@ -1902,6 +1892,17 @@
                             :value="item.instanceCode"/>
                 </el-select>
               </el-form-item>  
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="命名空间">
+                <el-select v-model="initData.metadata.namespace" style="width: 100%;" placeholder="请选择" @change="changeNameSpace" 
+                    :disabled="$route.currentRoute.value.query.id != undefined">
+                  <el-option v-for="namespace in initData.option.namespaces"
+                    :key="namespace.value"
+                    :label="namespace.label"
+                    :value="namespace.label"/>
+                </el-select>
+              </el-form-item>
             </el-col>
             <el-col :span="8">
               <el-form-item label="名称" prop="metadata.name">
@@ -1933,7 +1934,6 @@
                 <el-icon><Select /></el-icon>
               </template>
               <el-tab-pane name="CronJob" label="CronJob" closable="false">
-                <el-scrollbar>
                   <div class="tab-content">
                     <div class="left">
                       <el-tabs :tab-position="'left'" @tab-change="changeCronJobSelectTab">
@@ -2047,10 +2047,8 @@
                       </div>
                     </div>
                   </div>
-                </el-scrollbar>
               </el-tab-pane>
               <el-tab-pane name="Pod" label="Pod">
-                <el-scrollbar>
                   <div class="tab-content">
                     <div class="left">
                       <el-tabs :tab-position="'left'" @tab-change="changePodSelectTab">
@@ -2527,11 +2525,9 @@
                       </div>
                     </div>
                   </div>
-                </el-scrollbar>
               </el-tab-pane>
               <el-tab-pane v-for="(container, index) in initData.spec.jobTemplate.spec.template.spec.containers" :name="index"
                            :key="index" :label="container.name" >
-                <el-scrollbar>
                   <div class="tab-content">
                     <div class="left">
                       <el-tabs :tab-position="'left'" @tab-change="changeSelectTab">
@@ -3724,7 +3720,6 @@
                       </div>
                     </div>
                   </div>
-                </el-scrollbar>
               </el-tab-pane>
             </el-tabs>
           </div>
@@ -3740,6 +3735,9 @@
   <yaml-editor :copy-data="copyData" v-model:visible="isShowYamlEditor" @setValue="setValue"></yaml-editor>
 </template>
 <style lang="scss" scoped>
+  .yamlDemo {
+    padding-bottom: 50px;
+  }
   .detail-content {
     ::v-deep(.el-tabs__new-tab) {
       transform: scale(1.2);
@@ -3774,7 +3772,7 @@
     }
     .tab-content {
       display: flex;
-      height: calc(100vh - 512px);
+      min-height: calc(100vh - 512px);
       overflow-x: hidden;
       padding-top: 16px;
       .left {

@@ -5,7 +5,7 @@
   import { dayjs } from "@/utils/common-dayjs"
   import {  Edit } from '@element-plus/icons-vue'
   // import router from '@/router'
-  import { pageList,nameSpaceList,removeJob,changeStatus,restart} from "@/api/kubernetes/job"
+  import { pageList,nameSpaceList,removeNameSpace,changeStatus} from "@/api/kubernetes/namespace"
   import { useRouter } from "vue-router";
 
   const router = useRouter();
@@ -22,7 +22,7 @@
     status: undefined,
     instanceCode:undefined,
     nameSpaceId:undefined,
-    kind: "Job"
+    kind:"NameSpace"
   })
 
   const defaultInstanceCode = ref('')
@@ -67,17 +67,17 @@
   }
 
   const handleAdd = function(){
-    router.push({path : "/kubernetes/job/operate", query:{ instanceCode: defaultInstanceCode.value } })
+    router.push({path : "/kubernetes/nameSpace/operate", query:{ instanceCode: defaultInstanceCode.value } })
   }
 
-  const handleDetail = function(row){
-    router.push({path : "/kubernetes/job/operate", query:{ instanceCode: defaultInstanceCode.value ,id: row.id} })
+  const handleUpdate = function(row){
+    router.push({path : "/kubernetes/nameSpace/operate", query:{ instanceCode: defaultInstanceCode.value ,id: row.id} })
   }
 
   const handleDelete = function(row){
     const name = row.name
     let msg = ""
-    msg = '是否删除任务【"' + name + '"】的数据项？'
+    msg = '是否删除命名空间【"' + name + '"】的数据项？'
 
     ElMessageBox.confirm(
       msg,
@@ -88,7 +88,7 @@
         type: 'warning',
       }
     ).then(() => {
-      removeJob(row.id).then((res)=>{
+      removeNameSpace(row.id).then((res)=>{
           if(res.code == 200){
               // 重置查询表单,并进行查询
               queryParams.pageNum=1
@@ -145,33 +145,6 @@
     .catch(() => { })
   }
 
-  // 重新运行任务
-  const restartHandle = function(row){
-
-    let msg = "是否重新运行任务["+row.name+"]"
-
-    ElMessageBox.confirm(
-      msg,
-      'Warning',
-      {
-        confirmButtonText: '确认',
-        cancelButtonText: '取消',
-        type: 'warning',
-      }
-    ).then(() => {
-      restart(row.id).then((res)=>{
-        if(res.code == 200){
-          getList();
-          ElMessage({
-            type: 'success',
-            message: '正在重新运行...',
-          })
-        }
-      })
-    })
-    .catch(() => { })
-  }
-
   // 处理搜索按钮
   const handleQuery = function(){
     getList()
@@ -195,29 +168,15 @@
   // 按钮
   const btnList = ref([
     {
-      btnName: '查看',
-      permArray: ['/kubernetes/job/detail/*'],
-      isShow: () => true,
-      isDisable: false,
-      clickEvent: handleDetail
-    },
-    {
       btnName: row => showStatusOperateFun(row.status),
-      permArray: ['/kubernetes/job/changeStatus/**'],
+      permArray: ['/kubernetes/nameSpace/changeStatus/**'],
       isShow: () => true,
       isDisable: false,
       clickEvent: handleStatusChange
     },
     {
-      btnName: '重新运行',
-      permArray: ['/kubernetes/job/restart/*'],
-      isShow: () => true,
-      isDisable: false,
-      clickEvent: restartHandle
-    },
-    {
       btnName: '删除',
-      permArray: ['/kubernetes/job/del/*'],
+      permArray: ['/kubernetes/nameSpace/del/*'],
       isShow: () => true,
       isDisable: false,
       clickEvent: handleDelete
@@ -239,6 +198,7 @@
           })
         }
       })
+      
       // 触发查询
       getList();
     }
@@ -319,11 +279,13 @@
     </yt-card>
     <yt-card>
         <div class="option-wrap">
-          <el-button
-            type="primary"
-            plain
-            size="default"
-            @click="handleAdd" v-hasPerms="['/kubernetes/job/add']" ><el-icon><Plus /></el-icon>新增</el-button>
+          <!-- <router-link :to="{ path: '/kubernetes/nameSpace/index', query: { timestamp: Date.now() }}" > -->
+            <el-button
+              type="primary"
+              plain
+              size="default"
+              @click="handleAdd" v-hasPerms="['/kubernetes/nameSpace/add']" ><el-icon><Plus /></el-icon>新增</el-button>
+          <!-- </router-link> -->
         </div>
       <!--table  -->
       <div class="table-wrap">
@@ -335,6 +297,7 @@
               {{ showNameSpace(scope.row.nameSpaceId)   }}
             </template>
           </el-table-column>
+          <!-- <el-table-column label="部署种类" align="left" key="kind" prop="kind"  :show-overflow-tooltip="true" width="150" /> -->
           <el-table-column label="应用名称" align="left" key="name" prop="name"  :show-overflow-tooltip="true" />
           <el-table-column label="实例编码" align="left" key="instanceCode" prop="instanceCode" :show-overflow-tooltip="true"   />
           <el-table-column label="状态" align="left" key="status" prop="status" :show-overflow-tooltip="true" width="100"  >
@@ -347,32 +310,26 @@
               {{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}
             </template>
           </el-table-column>
-          <el-table-column label="操作" align="left" key="operation" prop="operation" :show-overflow-tooltip="true" width="350"  >
+          <el-table-column label="操作" align="left" key="operation" prop="operation" :show-overflow-tooltip="true" >
             <!-- <template #default="scope">
               <div class="action-btn">
                 <el-button
                   size="small"
-                  icon="View"
-                  @click="handleDetail(scope.row.id)"
-                  v-hasPerms="['/kubernetes/job/detail/*']"
-                >查看</el-button>
+                  icon="Edit"
+                  @click="handleUpdate(scope.row.id)"
+                  v-hasPerms="['/kubernetes/nameSpace/add']"
+                >修改</el-button>
                 <el-button
                   size="small"
                   :icon="getStatusIcon(scope.row)"
                   @click="handleStatusChange(scope.row)"
-                  v-hasPerms="['/kubernetes/job/changeStatus/**']"
+                  v-hasPerms="['/kubernetes/nameSpace/changeStatus/**']"
                 >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-                <el-button
-                  size="small"
-                  icon="Refresh"
-                  @click="restartHandle(scope.row)"
-                  v-hasPerms="['/kubernetes/job/restart/*']"
-                >重新运行</el-button>
                 <el-button
                   size="small"
                   icon="Delete"
                   @click="handleDelete(scope.row)"
-                  v-hasPerms="['/kubernetes/job/del/**']"
+                  v-hasPerms="['/kubernetes/nameSpace/del/**']"
                 >删除</el-button>
               </div>
             </template> -->

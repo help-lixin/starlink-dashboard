@@ -187,14 +187,15 @@
   <div class="main-wrapp">
     <!--sousuo  -->
     <yt-card>
-      <el-form :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch" >
+      <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch" >
+        <el-row :gutter="24">
+          <el-col :span="8">
             <el-form-item label="插件实例" prop="instanceCode">
               <el-select
                 v-model="queryParams.instanceCode"
                 @keyup.enter.native="handleQuery"
                 placeholder="请选择实例"
                 clearable
-                style="width: 240px"
               >
                 <el-option v-for="item in pluginInstance"
                            :key="item.pluginCode"
@@ -202,6 +203,8 @@
                            :value="item.instanceCode"/>
               </el-select>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="状态" prop="status">
               <el-select
                 class="search-select"
@@ -215,6 +218,8 @@
                            :value="dict.value"/>
               </el-select>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="创建时间">
               <el-date-picker
                 v-model="dateRange"
@@ -225,10 +230,14 @@
                 end-placeholder="结束日期"
               ></el-date-picker>
             </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item>
               <el-button type="primary" @click="handleQuery"><el-icon><Search /></el-icon>搜索</el-button>
               <el-button @click="resetQuery"><el-icon><RefreshRight /></el-icon>重置</el-button>
             </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
     </yt-card>
     <yt-card>

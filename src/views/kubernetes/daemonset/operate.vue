@@ -1848,6 +1848,7 @@
   // 查询密文下拉列表
   const secretOption = ()=>{
     secretOptionList($route.currentRoute.value.query.instanceCode,initData.value.metadata.namespace).then((res)=>{
+        initData.value.option.imagePullSecrets.splice(0,initData.value.option.imagePullSecrets.length);
         if(res.code == 200){
           Object.assign(initData.value.option.imagePullSecrets,res.data);
         }
@@ -1895,10 +1896,24 @@
 </script>
 <template>
   <div class="yamlDemo">
-    <el-form :label-position="'top'" label-width="auto" :rules="rules" :model="initData" ref="ruleFormRef">
+    <el-form class="form-wrap" :label-position="'top'" label-width="auto" :rules="rules" :model="initData" ref="ruleFormRef">
       <div class="top">
         <yt-card :title="'公共配置'">
           <el-row :gutter="24">
+            <el-col :span="8">
+              <el-form-item label="插件实例" prop="instanceCode">
+                <el-select
+                  v-model="initData.option.instanceCode"
+                  @keyup.enter.native="handleQuery"
+                  placeholder="请选择实例"
+                >
+                  <el-option v-for="item in initData.option.pluginInstance"
+                            :key="item.pluginCode"
+                            :label="item.instanceName"
+                            :value="item.instanceCode"/>
+                </el-select>
+              </el-form-item>  
+            </el-col>
             <el-col :span="8">
               <el-form-item label="命名空间">
                 <el-select v-model="initData.metadata.namespace" style="width: 100%;" placeholder="请选择" @change="changeNameSpace" 
@@ -1909,21 +1924,6 @@
                     :value="namespace.label"/>
                 </el-select>
               </el-form-item>
-            </el-col> 
-            <el-col :span="8">
-              <el-form-item label="插件实例" prop="instanceCode">
-                <el-select
-                  v-model="initData.option.instanceCode"
-                  @keyup.enter.native="handleQuery"
-                  placeholder="请选择实例"
-                  style="width: 100%;"
-                >
-                  <el-option v-for="item in initData.option.pluginInstance"
-                            :key="item.pluginCode"
-                            :label="item.instanceName"
-                            :value="item.instanceCode"/>
-                </el-select>
-              </el-form-item>  
             </el-col>
             <el-col :span="8">
               <el-form-item label="名称" prop="metadata.name">
@@ -1951,7 +1951,6 @@
                 <el-icon><Select /></el-icon>
               </template>
               <el-tab-pane name="DaemonSet" label="DaemonSet" closable="false">
-                <el-scrollbar>
                   <div class="tab-content">
                     <div class="left">
                       <el-tabs :tab-position="'left'" @tab-change="changeDaemonSetSelectTab">
@@ -2023,10 +2022,8 @@
                       </div>
                     </div>
                   </div>
-                </el-scrollbar>
               </el-tab-pane>
               <el-tab-pane name="Pod" label="Pod">
-                <el-scrollbar>
                   <div class="tab-content">
                     <div class="left">
                       <el-tabs :tab-position="'left'" @tab-change="changePodSelectTab">
@@ -2438,11 +2435,9 @@
                       </div>
                     </div>
                   </div>
-                </el-scrollbar>
               </el-tab-pane>
               <el-tab-pane v-for="(container, index) in initData.spec.template.spec.containers" :name="index"
                            :key="index" :label="container.name" >
-                <el-scrollbar>
                   <div class="tab-content">
                     <div class="left">
                       <el-tabs :tab-position="'left'" @tab-change="changeSelectTab" v-model="initData.option.containerIndex">
@@ -3635,7 +3630,6 @@
                       </div>
                     </div>
                   </div>
-                </el-scrollbar>
               </el-tab-pane>
             </el-tabs>
           </div>
@@ -3652,7 +3646,14 @@
   <yaml-editor :copy-data="copyData" v-model:visible="isShowYamlEditor" @setValue="setValue"></yaml-editor>
 </template>
 <style lang="scss" scoped>
+  .yamlDemo {
+    padding-bottom: 50px;
+  }
   .detail-content {
+    ::v-deep(.el-tabs__new-tab) {
+      transform: scale(1.2);
+      transform-origin: right;
+    }
     ::v-deep(.el-tabs--card > .el-tabs__header) {
       margin-bottom: 0;
     }
@@ -3682,9 +3683,9 @@
     }
     .tab-content {
       display: flex;
+      min-height: calc(100vh - 512px);
       overflow-x: hidden;
       padding-top: 16px;
-      height: calc(100vh - 512px);
       .left {
         background: var(--el-table-header-bg-color-my);
         ::v-deep(.el-tabs__content) {

@@ -283,6 +283,14 @@ export const dynamicRoutes = [
     }
   },
   {
+    path: '/kubernetes/namespace/list/index',
+    name: 'kubernetes-namespace',
+    component: () => import('../views/kubernetes/namespace/list/index.vue'),
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
     path: '/system/credential/index',
     name: 'sys-credential',
     component: () => import('../views/system/credential/index.vue'),
