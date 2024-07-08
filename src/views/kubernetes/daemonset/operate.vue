@@ -1906,6 +1906,7 @@
                   v-model="initData.option.instanceCode"
                   @keyup.enter.native="handleQuery"
                   placeholder="请选择实例"
+                  style="width: 100%;"
                 >
                   <el-option v-for="item in initData.option.pluginInstance"
                             :key="item.pluginCode"
@@ -1963,10 +1964,14 @@
                         <H1>DaemonSet标签</H1>
                         <el-row :gutter="24" v-for="(label,index) in initData.option.labelAnnotation.daemonSet.labels" :key="index" style="margin-top:30px">
                           <el-col :span="6" >
-                            <el-input label="键" placeholder="请输入键" v-model="label.key"></el-input>
+                            <el-form-item label="键">
+                              <el-input label="键" placeholder="请输入键" v-model="label.key"></el-input>
+                            </el-form-item>
                           </el-col>
                           <el-col :span="6" >
-                            <el-input label="值" placeholder="请输入值" v-model="label.value" ></el-input>
+                            <el-form-item label="值">
+                              <el-input label="值" placeholder="请输入值" v-model="label.value" ></el-input>
+                            </el-form-item>
                           </el-col>
                           <el-button @click="removeDeployLabel(index)" type="danger" >删除标签</el-button>
                         </el-row>
@@ -1977,10 +1982,14 @@
                         <el-row :gutter="24" v-for="(annotation,index) in initData.option.labelAnnotation.daemonSet.annotations" :key="index" style="margin-top:30px"
                           v-show="annotation.key != 'field.cattle.io/description'">
                           <el-col :span="6" >
-                            <el-input label="键" placeholder="请输入键" v-model="annotation.key"></el-input>
+                            <el-form-item label="键">
+                              <el-input label="键" placeholder="请输入键" v-model="annotation.key"></el-input>
+                            </el-form-item>
                           </el-col>
                           <el-col :span="6" >
-                            <el-input label="值" placeholder="请输入值" v-model="annotation.value" ></el-input>
+                            <el-form-item label="值">
+                              <el-input label="值" placeholder="请输入值" v-model="annotation.value" ></el-input>
+                            </el-form-item>
                           </el-col>
                           <el-button @click="removeDeployAnnotation(index)"  type="danger">删除注解</el-button>
                         </el-row>

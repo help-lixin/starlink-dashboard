@@ -156,10 +156,6 @@
     handleQuery();
   }
 
-  const showNameSpace = function(id){
-    return nameSpaceMap.get(id)
-  }
-
   // 多选框选中数据
   const handleSelectionChange = function(selection){
 
@@ -297,9 +293,6 @@
           <el-table-column type="selection" width="60" align="center" />
           <el-table-column label="id" align="left" key="id" prop="id" v-if="false"/>
           <el-table-column label="命名空间" align="left" key="nameSpace" prop="nameSpace" width="180" :show-overflow-tooltip="true">
-            <template #default="scope">
-              {{ showNameSpace(scope.row.nameSpaceId)   }}
-            </template>
           </el-table-column>
           <el-table-column label="应用名称" align="left" key="name" prop="name"  :show-overflow-tooltip="true" />
           <el-table-column label="实例编码" align="left" key="instanceCode" prop="instanceCode" :show-overflow-tooltip="true"   />
@@ -314,28 +307,6 @@
             </template>
           </el-table-column>
           <el-table-column label="操作" align="left" key="operation" prop="operation" :show-overflow-tooltip="true" width="350"  >
-            <!-- <template #default="scope">
-              <div class="action-btn">
-                <el-button
-                  size="small"
-                  icon="View"
-                  @click="handleDetail(scope.row.id)"
-                  v-hasPerms="['/kubernetes/daemonset/detail/*']"
-                >查看</el-button>
-                <el-button
-                  size="small"
-                  :icon="getStatusIcon(scope.row)"
-                  @click="handleStatusChange(scope.row)"
-                  v-hasPerms="['/kubernetes/daemonset/changeStatus/**']"
-                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-                <el-button
-                  size="small"
-                  icon="Delete"
-                  @click="handleDelete(scope.row)"
-                  v-hasPerms="['/kubernetes/daemonset/del/**']"
-                >删除</el-button>
-              </div>
-            </template> -->
             <template v-slot="scope">
               <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
             </template>

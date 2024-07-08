@@ -150,10 +150,6 @@
     handleQuery();
   }
 
-  const showNameSpace = function(id){
-    return nameSpaceMap.get(id)
-  }
-
   // 多选框选中数据
   const handleSelectionChange = function(selection){
 
@@ -259,16 +255,6 @@
             </template>
           </el-table-column>
           <el-table-column label="操作" align="left" key="operation" prop="operation" :show-overflow-tooltip="true" width="350"  >
-            <!-- <template #default="scope">
-              <div class="action-btn">
-                <el-button
-                  size="small"
-                  :icon="getStatusIcon(scope.row)"
-                  @click="handleStatusChange(scope.row)"
-                  v-hasPerms="['/kubernetes/node/changeStatus/**']"
-                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>
-              </div>
-            </template> -->
             <template v-slot="scope">
               <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
             </template>

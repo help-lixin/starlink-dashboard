@@ -2138,7 +2138,7 @@
                         <H1>Pod调度</H1>
                         <template v-for="(pod,podIndex) in initData.option.freePod" :key="podIndex" >
                           <el-row :gutter="24" style="margin-top:30px">
-                            <el-col :span="8">
+                            <el-col :span="12">
                               <el-radio-group v-model="pod.podAffinity" >
                                 <el-radio-button :label=true>亲和性</el-radio-button>
                                 <el-radio-button :label=false>反亲和性</el-radio-button>
