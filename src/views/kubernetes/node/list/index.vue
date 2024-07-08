@@ -150,6 +150,10 @@
     handleQuery();
   }
 
+  const showNameSpace = function(id){
+    return nameSpaceMap.get(id)
+  }
+
   // 多选框选中数据
   const handleSelectionChange = function(selection){
 
@@ -184,7 +188,7 @@
     <!--sousuo  -->
     <yt-card>
       <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch" >
-        <el-row :gutter="24">
+        <el-row :gutter="16">
           <el-col :span="8">
             <el-form-item label="插件实例" prop="instanceCode">
               <el-select
@@ -254,11 +258,11 @@
               {{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}
             </template>
           </el-table-column>
-          <el-table-column label="操作" align="left" key="operation" prop="operation" :show-overflow-tooltip="true" width="350"  >
-            <template v-slot="scope">
-              <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
-            </template>
-          </el-table-column>
+<!--          <el-table-column label="操作" align="left" key="operation" prop="operation" :show-overflow-tooltip="true" width="220" >-->
+<!--            <template v-slot="scope">-->
+<!--              <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>-->
+<!--            </template>-->
+<!--          </el-table-column>-->
         </el-table>
       </div>
       <div class="page-wrap">

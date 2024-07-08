@@ -156,6 +156,10 @@
     handleQuery();
   }
 
+  const showNameSpace = function(id){
+    return nameSpaceMap.get(id)
+  }
+
   // 多选框选中数据
   const handleSelectionChange = function(selection){
 
@@ -201,7 +205,7 @@
           })
         }
       })
-      
+
       // 触发查询
       getList();
     }
@@ -213,7 +217,7 @@
     <!--sousuo  -->
     <yt-card>
       <el-form class="form-wrap" :model="queryParams" ref="queryFormRef" :inline="true" v-show="showSearch" >
-        <el-row :gutter="24">
+        <el-row :gutter="16">
           <el-col :span="8">
             <el-form-item label="插件实例" prop="instanceCode">
               <el-select
@@ -282,22 +286,22 @@
     </yt-card>
     <yt-card>
         <div class="option-wrap">
-          <!-- <router-link :to="{ path: '/kubernetes/deployment/index', query: { timestamp: Date.now() }}" > -->
             <el-button
               type="primary"
               plain
               size="default"
               @click="handleAdd" v-hasPerms="['/kubernetes/deployment/add']" ><el-icon><Plus /></el-icon>新增</el-button>
-          <!-- </router-link> -->
         </div>
       <!--table  -->
       <div class="table-wrap">
         <el-table v-loading="loading" :data="tabelDataList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
           <el-table-column label="id" align="left" key="id" prop="id" v-if="false"/>
-          <el-table-column label="命名空间" align="left" key="nameSpace" prop="nameSpace" width="180" :show-overflow-tooltip="true">
+          <el-table-column label="命名空间" align="left" key="nameSpace" prop="nameSpace"  :show-overflow-tooltip="true">
+            <template #default="scope">
+              {{ showNameSpace(scope.row.nameSpaceId)   }}
+            </template>
           </el-table-column>
-          <!-- <el-table-column label="部署种类" align="left" key="kind" prop="kind"  :show-overflow-tooltip="true" width="150" /> -->
           <el-table-column label="应用名称" align="left" key="name" prop="name"  :show-overflow-tooltip="true" />
           <el-table-column label="实例编码" align="left" key="instanceCode" prop="instanceCode" :show-overflow-tooltip="true"   />
           <el-table-column label="状态" align="left" key="status" prop="status" :show-overflow-tooltip="true" width="100"  >
@@ -310,7 +314,7 @@
               {{ dayjs(scope.row.createTime).format("YYYY-MM-DD HH:mm:ss")   }}
             </template>
           </el-table-column>
-          <el-table-column label="操作" align="left" key="operation" prop="operation" :show-overflow-tooltip="true" >
+          <el-table-column label="操作" align="center" key="operation" prop="operation" :show-overflow-tooltip="true" width="220" >
             <template v-slot="scope">
               <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
             </template>
