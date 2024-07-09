@@ -33,7 +33,7 @@
     const port = {
       'name': undefined,
       'expose': undefined,
-      'protocol': undefined,
+      'protocol': "TCP",
       'containerPort': 80,
       'hostPort': undefined,
       'hostIP': undefined,
@@ -310,10 +310,10 @@
   const serviceAccountNames = [{label:"default",value:"default"},{label:"Ken",value:"Ken"}]
   const checkHealthTypes = [
     {label:"无",value:""},
-    {label:"HTTP请求返回成功的状态",value:"HTTP"},
-    {label:"HTTPS请求返回成功的状态",value:"HTTPS"},
+    {label:"HTTP",value:"HTTP"},
+    {label:"HTTPS",value:"HTTPS"},
     {label:"命令",value:"exec"},
-    {label:"成功启动TCP连接",value:"tcpSocket"}
+    {label:"TCP",value:"tcpSocket"}
   ]
   const capabilities = [
     {label:"ALL",value:"ALL"},
@@ -1944,24 +1944,26 @@
                     <div class="right">
                       <div v-show="initData.option.selectCronJob === 'cronJobLabel'  ? true : false ">
                         <H1>CronJob标签</H1>
-                        <el-row :gutter="24" v-for="(label,index) in initData.option.labelAnnotation.cronJob.labels" :key="index" style="margin-top:30px">
-                          <el-col :span="6" >
-                            <el-form-item label="键" >
-                              <el-input label="键" placeholder="请输入键" v-model="label.key"></el-input>
-                            </el-form-item>
-                          </el-col>
-                          <el-col :span="6" >
-                            <el-form-item label="值" >
-                              <el-input label="值" placeholder="请输入值" v-model="label.value" ></el-input>
-                            </el-form-item>
-                          </el-col>
-                          <el-button @click="removeJobLabel(index)" type="danger" >删除标签</el-button>
+                        <el-row :gutter="14" v-for="(label,index) in initData.option.labelAnnotation.cronJob.labels" :key="index" style="margin-top:30px">
+                            <el-col :span="6" >
+                              <el-form-item label="键" >
+                                <el-input label="键" placeholder="请输入键" v-model="label.key"></el-input>
+                              </el-form-item>
+                            </el-col>
+                            <el-col :span="6" >
+                              <el-form-item label="值" >
+                                <el-input label="值" placeholder="请输入值" v-model="label.value" ></el-input>
+                              </el-form-item>
+                            </el-col>
+                            <el-col :span="2" style="margin-top:30px">
+                              <el-button @click="removeJobLabel(index)"  type="danger">删除标签</el-button>
+                            </el-col>
                         </el-row>
                         <el-row :gutter="24" style="margin-top:10px;margin-left:2px">
                           <el-button @click="addJobLabel" type="primary" plain>添加标签</el-button>
                         </el-row>
                         <H1>注解</H1>
-                        <el-row :gutter="24" v-for="(annotation,index) in initData.option.labelAnnotation.cronJob.annotations" :key="index" style="margin-top:30px"
+                        <el-row :gutter="24"  v-for="(annotation,index) in initData.option.labelAnnotation.cronJob.annotations" :key="index" style="margin-top:30px"
                             v-show="annotation.key != 'kubesphere.io/description'">
                           <el-col :span="6" >
                             <el-form-item label="键" >
@@ -1973,7 +1975,7 @@
                               <el-input label="值" placeholder="请输入值" v-model="annotation.value" ></el-input>
                             </el-form-item>
                           </el-col>
-                          <el-button @click="removeJobAnnotation(index)"  type="danger">删除注解</el-button>
+                          <el-button @click="removeJobAnnotation(index)" style="margin-top:30px"  type="danger">删除注解</el-button>
                         </el-row>
                         <el-row :gutter="24" style="margin-top:10px;margin-left:2px">
                           <el-button @click="addJobAnnotation" type="primary" plain>添加标签</el-button>
@@ -2067,33 +2069,41 @@
                         <el-tab-pane label="资源" name="podResource" />
                         <el-tab-pane label="扩缩容和升级策略" name="podStrategy" />
                         <el-tab-pane label="安全性上下文" name="podContext" />
-                        <el-tab-pane label="存储" name="podVolumes" />
+                        <!-- <el-tab-pane label="存储" name="podVolumes" /> -->
                       </el-tabs>
                     </div>
                     <div class="right" >
                       <div v-show="initData.option.selectPod === 'podLabel'  ? true : false ">
                         <H1>Pod标签</H1>
-                        <el-row :gutter="24" v-for="(label,index) in initData.option.labelAnnotation.pod.labels" :key="index" style="margin-top:30px">
+                        <el-row :gutter="24" v-for="(label,index) in initData.option.labelAnnotation.pod.labels" :key="index" >
                           <el-col :span="6" >
-                            <el-input label="键" placeholder="请输入键" v-model="label.key"></el-input>
+                            <el-form-item label="键">
+                              <el-input label="键" placeholder="请输入键" v-model="label.key"></el-input>
+                            </el-form-item>
                           </el-col>
                           <el-col :span="6" >
-                            <el-input label="值" placeholder="请输入值" v-model="label.value" ></el-input>
+                            <el-form-item label="值">
+                              <el-input label="值" placeholder="请输入值" v-model="label.value" ></el-input>
+                            </el-form-item>
                           </el-col>
-                          <el-button @click="removePodLabel(index)" type="danger" >删除标签</el-button>
+                          <el-button @click="removePodLabel(index)" style="margin-top:30px" type="danger" >删除标签</el-button>
                         </el-row>
                         <el-row :gutter="24" style="margin-top:10px;margin-left:2px">
                           <el-button @click="addPodLabel" type="primary" plain>添加标签</el-button>
                         </el-row>
                         <H1>注解</H1>
-                        <el-row :gutter="24" v-for="(annotation,index) in initData.option.labelAnnotation.pod.annotations" :key="index" style="margin-top:30px">
+                        <el-row :gutter="24" v-for="(annotation,index) in initData.option.labelAnnotation.pod.annotations" :key="index">
                           <el-col :span="6" >
-                            <el-input label="键" placeholder="请输入键" v-model="annotation.key"></el-input>
+                            <el-form-item label="键">
+                              <el-input label="键" placeholder="请输入键" v-model="annotation.key"></el-input>
+                            </el-form-item>
                           </el-col>
                           <el-col :span="6" >
-                            <el-input label="值" placeholder="请输入值" v-model="annotation.value" ></el-input>
+                            <el-form-item label="值">
+                              <el-input label="值" placeholder="请输入值" v-model="annotation.value" ></el-input>
+                            </el-form-item>
                           </el-col>
-                          <el-button @click="removePodAnnotation(index)"  type="danger">删除注解</el-button>
+                          <el-button @click="removePodAnnotation(index)" style="margin-top:30px" type="danger">删除注解</el-button>
                         </el-row>
                         <el-row :gutter="24" style="margin-top:10px;margin-left:2px">
                           <el-button @click="addPodAnnotation" type="primary" plain>添加标签</el-button>
@@ -2199,8 +2209,8 @@
 
                       <div v-show="initData.option.selectPod === 'podNode'  ? true : false ">
                         <H1>节点调度</H1>
-                        <el-row :gutter="24" >
-                          <el-col :span="12">
+                        <el-row :gutter="24">
+                          <el-col :span="24">
                             <el-radio-group v-model="initData.option.nodeAffinity" @change="nodeChange">
                               <el-radio-button
                                       v-for="item in nodeSelector"
@@ -2225,61 +2235,65 @@
                           </el-row>
                         </template>
                         <template v-if="initData.option.nodeAffinity == 'affinity'" >
-                          <template v-for="(node,nodeIndex) in initData.option.freeNode" :key="nodeIndex">
-                            <el-row :gutter="24" style="margin-top:30px">
-                              <el-col :span="14">
-                                <el-form-item label="优先级">
-                                  <el-select v-model="node.nodeLevel" style="width: 100%;" placeholder="请选择">
-                                    <el-option label="首选" value="0"></el-option>
-                                    <el-option label="必须" value="1"></el-option>
-                                  </el-select>
-                                </el-form-item>
-                              </el-col>
-                              <el-col :span="6" v-if="node.nodeLevel == '0'">
-                                <el-form-item label="权重">
-                                  <el-input-number 
-                                            v-model="node.weight"/>
-                                </el-form-item>
-                              </el-col>
-                            </el-row>
-                            <el-row v-for="(item,index) in node.preference.matchExpressions" :key="index">
-                              <el-col :span="6" >
-                                <el-form-item label="键">
-                                  <el-input v-model="item.key"/>
-                                </el-form-item>
-                              </el-col>
-                              <el-col :span="2">
-                                <el-form-item label="运算符">
-                                  <el-select style="width: 100%;" v-model="item.operator" placeholder="请选择">
-                                    <el-option label="包含" value="In"></el-option>
-                                    <el-option label="不包含" value="NotIn"></el-option>
-                                    <el-option label="存在" value="Exists"></el-option>
-                                    <el-option label="不存在" value="DoesNotExist"></el-option>
-                                    <el-option label="小于" value="Gt"></el-option>
-                                    <el-option label="大于" value="Lt"></el-option>
-                                  </el-select>
-                                </el-form-item>
-                              </el-col>
-                              <el-col :span="6">
-                                <el-form-item label="值">
-                                  <el-input v-model="item.values[0]"/>
-                                </el-form-item>
-                              </el-col>
+                          <template v-for="(node,nodeIndex) in initData.option.freeNode" :key="nodeIndex" >
+                            <div class="inline-card">
+                              <el-row :gutter="24" style="margin-top:35px">
+                                <el-col :span="8">
+                                  <div class="icon">
+                                    <DeleteFilled  @click="removeNode(nodeIndex)"></DeleteFilled>
+                                  </div>
+                                </el-col>
+                              </el-row>
+                              <el-row :gutter="24" >
+                                <el-col :span="8">
+                                  <el-form-item label="优先级">
+                                    <el-select v-model="node.nodeLevel" style="width: 100%;" placeholder="请选择">
+                                      <el-option label="首选" value="0"></el-option>
+                                      <el-option label="必须" value="1"></el-option>
+                                    </el-select>
+                                  </el-form-item>
+                                </el-col>
+                                <el-col :span="6" v-if="node.nodeLevel == '0'">
+                                  <el-form-item label="权重">
+                                    <el-input-number 
+                                              v-model="node.weight"/>
+                                  </el-form-item>
+                                </el-col>
+                              </el-row>
+                              <el-row :gutter="24" v-for="(item,index) in node.preference.matchExpressions" :key="index">
+                                <el-col :span="8" >
+                                  <el-form-item label="键">
+                                    <el-input v-model="item.key"/>
+                                  </el-form-item>
+                                </el-col>
+                                <el-col :span="4">
+                                  <el-form-item label="运算符">
+                                    <el-select style="width: 100%;" v-model="item.operator" placeholder="请选择">
+                                      <el-option label="包含" value="In"></el-option>
+                                      <el-option label="不包含" value="NotIn"></el-option>
+                                      <el-option label="存在" value="Exists"></el-option>
+                                      <el-option label="不存在" value="DoesNotExist"></el-option>
+                                      <el-option label="小于" value="Gt"></el-option>
+                                      <el-option label="大于" value="Lt"></el-option>
+                                    </el-select>
+                                  </el-form-item>
+                                </el-col>
+                                <el-col :span="8">
+                                  <el-form-item label="值">
+                                    <el-input v-model="item.values[0]"/>
+                                  </el-form-item>
+                                </el-col>
 
-                              <el-col :span="3" style="margin-top:30px">
-                                <el-button @click="removeRule(node,index)" type="danger" plain>删除</el-button>
-                              </el-col>
-                            </el-row>
-                            <el-row>
-                              <el-col :span="12">
-                                <el-button @click="addRule(node)" type="primary" plain>添加规则</el-button>
-                              </el-col>
-                            </el-row>
-                            <el-row>
-                              <el-col :span="12">
-                                <el-button @click="removeNode(nodeIndex)" type="danger" plain>删除节点调度</el-button>
-                              </el-col>
-                            </el-row>
+                                <el-col :span="2" style="margin-top:30px">
+                                  <el-button @click="removeRule(node,index)" type="danger" plain>删除</el-button>
+                                </el-col>
+                              </el-row>
+                              <el-row>
+                                <el-col :span="12">
+                                  <el-button @click="addRule(node)" type="primary" plain>添加规则</el-button>
+                                </el-col>
+                              </el-row>
+                            </div>
                           </template>
                           <el-button @click="addNode" type="primary" plain>添加节点调度</el-button>
                         </template>
@@ -2287,101 +2301,105 @@
 
                       <div v-show="initData.option.selectPod === 'pod'  ? true : false ">
                         <H1>Pod调度</H1>
-                        <template v-for="(pod,podIndex) in initData.option.freePod" :key="podIndex" >
-                          <el-row :gutter="24" style="margin-top:30px">
-                            <el-col :span="8">
-                              <el-radio-group v-model="pod.podAffinity" >
-                                <el-radio-button :label=true>亲和性</el-radio-button>
-                                <el-radio-button :label=false>反亲和性</el-radio-button>
-                              </el-radio-group>
-                            </el-col>
-                            <el-col :span="12">
-                              <el-radio-group v-model="pod.curNameSpace" @change="changeCurNameSpace(pod)">
-                                <el-radio-button :label=true>当前pod命名空间</el-radio-button>
-                                <el-radio-button :label=false>特定命名空间</el-radio-button>
-                              </el-radio-group>
-                            </el-col>
-                          </el-row>
-                          <el-row :gutter="24" style="margin-top:30px">
-                            <el-col :span="6">
-                              <el-form-item label="优先级">
-                                <el-select v-model="pod.nodeLevel" style="width: 100%;" placeholder="请选择">
-                                  <el-option label="首选" value="0"></el-option>
-                                  <el-option label="必须" value="1"></el-option>
-                                </el-select>
-                              </el-form-item>
-                            </el-col>
-                            <el-col :span="6">
-                              <el-form-item label="拓扑键">
-                                <el-select v-model="pod.topologyKey" style="width: 100%;" placeholder="请选择">
-                                  <el-option label="kubernetes.io/hostname" value="kubernetes.io/hostname"></el-option>
-                                  <el-option label="topology.kubernetes.io/zone" value="topology.kubernetes.io/zone"></el-option>
-                                  <el-option label="topology.kubernetes.io/region" value="topology.kubernetes.io/region"></el-option>
-                                </el-select>
-                              </el-form-item>
-                            </el-col>
-                            <el-col :span="3" v-if="pod.nodeLevel == '0'">
-                              <el-form-item label="权重">
-                                <el-input-number 
-                                          v-model="pod.weight"/>
-                              </el-form-item>
-                            </el-col>
-                            <el-col :span="6" v-if="pod.curNameSpace == false">
-                              <el-form-item label="特定命名空间">
-                                <el-select
-                                        class="search-select"
-                                        v-model="pod.namespaces"
-                                        placeholder="请选择"
-                                        multiple
-                                        clearable
-                                >
-                                  <el-option v-for="namespace in namespaces"
-                                             :key="namespace.value"
-                                             :label="namespace.label"
-                                             :value="namespace.value"/>
-                                </el-select>
-                              </el-form-item>
-                            </el-col>
-                          </el-row>
-                          <el-row v-for="(item,index) in pod.labelSelector.matchExpressions" :key="index">
-                            <el-col :span="6" >
-                              <el-form-item label="键">
-                                <el-input v-model="item.key"/>
-                              </el-form-item>
-                            </el-col>
-                            <el-col :span="2">
-                              <el-form-item label="运算符">
-                                <el-select style="width: 100%;" v-model="item.operator" placeholder="请选择">
-                                  <el-option label="包含" value="In"></el-option>
-                                  <el-option label="不包含" value="NotIn"></el-option>
-                                  <el-option label="存在" value="Exists"></el-option>
-                                  <el-option label="不存在" value="DoesNotExist"></el-option>
-                                  <el-option label="小于" value="Gt"></el-option>
-                                  <el-option label="大于" value="Lt"></el-option>
-                                </el-select>
-                              </el-form-item>
-                            </el-col>
-                            <el-col :span="6">
-                              <el-form-item label="值">
-                                <el-input v-model="item.values[0]"/>
-                              </el-form-item>
-                            </el-col>
+                          <template v-for="(pod,podIndex) in initData.option.freePod" :key="podIndex" >
+                            <div class="inline-card">
+                              <el-row :gutter="24" style="margin-top:35px">
+                                <el-col :span="8">
+                                  <div class="icon">
+                                    <DeleteFilled  @click="removePod(pod,podIndex)"></DeleteFilled>
+                                  </div>
+                                </el-col>
+                              </el-row>
+                              <el-row :gutter="24">
+                                <el-col :span="12">
+                                  <el-radio-group v-model="pod.podAffinity" >
+                                    <el-radio-button :label=true>亲和性</el-radio-button>
+                                    <el-radio-button :label=false>反亲和性</el-radio-button>
+                                  </el-radio-group>
+                                </el-col>
+                                <el-col :span="12">
+                                  <el-radio-group v-model="pod.curNameSpace" @change="changeCurNameSpace(pod)">
+                                    <el-radio-button :label=true>当前pod命名空间</el-radio-button>
+                                    <el-radio-button :label=false>特定命名空间</el-radio-button>
+                                  </el-radio-group>
+                                </el-col>
+                              </el-row>
+                              <el-row :gutter="24" style="margin-top:30px">
+                                <el-col :span="6">
+                                  <el-form-item label="优先级">
+                                    <el-select v-model="pod.nodeLevel" style="width: 100%;" placeholder="请选择">
+                                      <el-option label="首选" value="0"></el-option>
+                                      <el-option label="必须" value="1"></el-option>
+                                    </el-select>
+                                  </el-form-item>
+                                </el-col>
+                                <el-col :span="6">
+                                  <el-form-item label="拓扑键">
+                                    <el-select v-model="pod.topologyKey" style="width: 100%;" placeholder="请选择">
+                                      <el-option label="kubernetes.io/hostname" value="kubernetes.io/hostname"></el-option>
+                                      <el-option label="topology.kubernetes.io/zone" value="topology.kubernetes.io/zone"></el-option>
+                                      <el-option label="topology.kubernetes.io/region" value="topology.kubernetes.io/region"></el-option>
+                                    </el-select>
+                                  </el-form-item>
+                                </el-col>
+                                <el-col :span="3" v-if="pod.nodeLevel == '0'">
+                                  <el-form-item label="权重">
+                                    <el-input-number 
+                                              v-model="pod.weight"/>
+                                  </el-form-item>
+                                </el-col>
+                                <el-col :span="6" v-if="pod.curNameSpace == false">
+                                  <el-form-item label="特定命名空间">
+                                    <el-select
+                                            class="search-select"
+                                            v-model="pod.namespaces"
+                                            placeholder="请选择"
+                                            multiple
+                                            clearable
+                                    >
+                                      <el-option v-for="namespace in namespaces"
+                                                :key="namespace.value"
+                                                :label="namespace.label"
+                                                :value="namespace.value"/>
+                                    </el-select>
+                                  </el-form-item>
+                                </el-col>
+                              </el-row>
+                              <el-row v-for="(item,index) in pod.labelSelector.matchExpressions" :key="index">
+                                <el-col :span="6" >
+                                  <el-form-item label="键">
+                                    <el-input v-model="item.key"/>
+                                  </el-form-item>
+                                </el-col>
+                                <el-col :span="2">
+                                  <el-form-item label="运算符">
+                                    <el-select style="width: 100%;" v-model="item.operator" placeholder="请选择">
+                                      <el-option label="包含" value="In"></el-option>
+                                      <el-option label="不包含" value="NotIn"></el-option>
+                                      <el-option label="存在" value="Exists"></el-option>
+                                      <el-option label="不存在" value="DoesNotExist"></el-option>
+                                      <el-option label="小于" value="Gt"></el-option>
+                                      <el-option label="大于" value="Lt"></el-option>
+                                    </el-select>
+                                  </el-form-item>
+                                </el-col>
+                                <el-col :span="6">
+                                  <el-form-item label="值">
+                                    <el-input v-model="item.values[0]"/>
+                                  </el-form-item>
+                                </el-col>
 
-                            <el-col :span="3" style="margin-top:30px">
-                              <el-button @click="removePodRule(pod,index)" type="danger" plain>删除</el-button>
-                            </el-col>
-                          </el-row>
-                          <el-row>
-                            <el-col :span="12">
-                              <el-button @click="addPodRule(pod)" type="primary" plain>添加规则</el-button>
-                            </el-col>
-                          </el-row>
-                          <el-row>
-                            <el-col :span="12">
-                              <el-button @click="removePod(pod,podIndex)" type="danger" plain>删除节点调度</el-button>
-                            </el-col>
-                          </el-row>
-                        </template>
+                                <el-col :span="3" style="margin-top:30px">
+                                  <el-button @click="removePodRule(pod,index)" type="danger" plain>删除</el-button>
+                                </el-col>
+                              </el-row>
+                              <el-row>
+                                <el-col :span="12">
+                                  <el-button @click="addPodRule(pod)" type="primary" plain>添加规则</el-button>
+                                </el-col>
+                              </el-row>
+                            </div>
+                          </template>
                         <el-button @click="addPod" type="primary" plain>添加节点调度</el-button>
                       </div>
 
@@ -2543,7 +2561,7 @@
                         <el-tab-pane label="健康检查" name="containerCheckHealth"/>
                         <el-tab-pane label="资源" name="containerSource"/>
                         <el-tab-pane label="安全性上下文" name="containerSecurityContext" />
-                        <el-tab-pane label="存储" name="containerVolumes"/>
+                        <!-- <el-tab-pane label="存储" name="containerVolumes"/> -->
                       </el-tabs>
                     </div>
                     <div class="right">
@@ -2610,23 +2628,22 @@
                               </el-select>
                             </el-form-item>
                           </el-col>
-                          <el-col :span="5">
+                          <el-col :span="3">
                             <el-form-item label="名称">
                               <el-input v-model="port.name" placeholder="请输入名称"></el-input>
                             </el-form-item>
                           </el-col>
-                          <el-col :span="3">
+                          <el-col :span="4">
                             <el-form-item label="私有容器端口">
                               <el-input-number v-model="port.containerPort" placeholder="如：8080"></el-input-number>
                             </el-form-item>
                           </el-col>
-                          <el-col :span="2">
+                          <el-col :span="3">
                             <el-form-item label="协议" >
                               <el-select
                                       class="search-select"
                                       v-model="port.protocol"
                                       placeholder="协议"
-                                      clearable
                               >
                                 <el-option v-for="protocol in protocols"
                                            :key="protocol.value"
@@ -2635,7 +2652,7 @@
                               </el-select>
                             </el-form-item>
                           </el-col>
-                          <el-col :span="3">
+                          <el-col :span="4">
                             <el-form-item label="公共主机端口">
                               <el-input-number  v-model="port.hostPort" placeholder="如：80"></el-input-number>
                             </el-form-item>
@@ -2645,7 +2662,7 @@
                               <el-input v-model="port.hostIP" placeholder="如：1.1.1.1"></el-input>
                             </el-form-item>
                           </el-col>
-                          <el-col :span="3">
+                          <el-col :span="2">
                             <el-form-item label="操作" >
                               <el-button @click="removePort(index,portIndex)" type="danger">删除</el-button>
                             </el-form-item>

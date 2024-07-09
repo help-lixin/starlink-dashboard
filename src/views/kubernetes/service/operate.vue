@@ -463,14 +463,14 @@ const $route = useRouter();
                               <el-input v-model="port.name" placeholder="请输入名称"></el-input>
                             </el-form-item>
                           </el-col>
-                          <el-col :span="3">
+                          <el-col :span="5">
                             <el-form-item label="监听端口" :prop="`spec.ports[${portIndex}][port]`" :rules="[
                                 { required: true, message: '监听端口不能为空', trigger: 'blur' }
                               ]">
                               <el-input-number v-model="port.port" placeholder="如：8080"></el-input-number>
                             </el-form-item>
                           </el-col>
-                          <el-col :span="2" v-if="initData.spec.type == 'ClusterIP'">
+                          <el-col :span="4" v-if="initData.spec.type == 'ClusterIP'">
                             <el-form-item label="协议" >
                               <el-select
                                       class="search-select"
@@ -484,21 +484,21 @@ const $route = useRouter();
                               </el-select>
                             </el-form-item>
                           </el-col>
-                          <el-col :span="3">
+                          <el-col :span="4">
                             <el-form-item label="目标端口" :prop="`spec.ports[${portIndex}][targetPort]`" :rules="[
                                 { required: true, message: '目标端口不能为空', trigger: 'blur' }
                               ]">
                               <el-input-number  v-model="port.targetPort" placeholder="如：80"></el-input-number>
                             </el-form-item>
                           </el-col>
-                          <el-col :span="3" v-if="initData.spec.type == 'NodePort'" :prop="`spec.ports[${portIndex}][nodePort]`" :rules="[
+                          <el-col :span="4" v-if="initData.spec.type == 'NodePort'" :prop="`spec.ports[${portIndex}][nodePort]`" :rules="[
                                 { required: true, message: '节点端口不能为空', trigger: 'blur' }
                               ]">
                             <el-form-item label="Node Port">
                               <el-input-number  v-model="port.nodePort" placeholder="如：3000"></el-input-number>
                             </el-form-item>
                           </el-col>
-                          <el-col :span="3">
+                          <el-col :span="2">
                             <el-form-item label="操作" >
                               <el-button @click="removePort(portIndex)" type="danger">删除</el-button>
                             </el-form-item>
@@ -509,7 +509,7 @@ const $route = useRouter();
                       <div v-show="initData.option.curPoint === 'sessionRetention'  ? true : false ">
                         <H1>会话保持</H1>
                         <el-row :gutter="24" style="margin-top:30px">
-                          <el-col :span="8">
+                          <el-col :span="24">
                             <el-radio-group v-model="initData.spec.sessionAffinity" @change="changeSessionRetention">
                               <el-radio-button :label=undefined>未配置会话保持</el-radio-button>
                               <el-radio-button label="ClientIP">客户端ip</el-radio-button>

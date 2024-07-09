@@ -33,7 +33,7 @@ export function nameSpaceList(instanceCode:string) {
     });
 }
 
-// 新增/修改 kubernetes任务
+// 新增/修改 kubernetes命名空间
 export function addNameSpace(data:any) {
 return request({
         url: STARLINK_SERVICE + '/kubernetes/nameSpace/add',

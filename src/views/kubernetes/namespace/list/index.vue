@@ -1,15 +1,9 @@
 <script setup lang="ts">
   // @ts-nocheck
-  import { showStatusOperateFun , status , showStatusFun , addDateRange, getStatusIcon } from "@/utils/common"
+  import { showStatusOperateFun , status , showStatusFun , addDateRange } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
-  import {  Edit } from '@element-plus/icons-vue'
-  // import router from '@/router'
-  import { pageList,nameSpaceList,removeNameSpace,changeStatus} from "@/api/kubernetes/namespace"
-  import { useRouter } from "vue-router";
-
-  const router = useRouter();
-
+  import { pageList,nameSpaceList,removeNameSpace,changeStatus,addNameSpace,nameIsExist} from "@/api/kubernetes/namespace"
 
   const queryFormRef = ref(null);
 
@@ -23,6 +17,14 @@
     instanceCode:undefined,
     name: undefined
   })
+
+  const formDefault = reactive({
+      name: undefined,
+      instanceCode: undefined,
+      remark: undefined
+  });
+
+  const form = reactive(formDefault)
 
   const defaultInstanceCode = ref('')
 
@@ -65,12 +67,45 @@
     );
   }
 
-  const handleAdd = function(){
-    router.push({path : "/kubernetes/nameSpace/operate", query:{ instanceCode: defaultInstanceCode.value } })
+  const handleAdd = (row)=>{
+    title.value = "新增命名空间"
+    form.instanceCode = pluginInstance[0].instanceCode
+    open.value = true;
   }
 
-  const handleUpdate = function(row){
-    router.push({path : "/kubernetes/nameSpace/operate", query:{ instanceCode: defaultInstanceCode.value ,id: row.id} })
+  // 表单取消处理
+  const cancel = ()=>{
+    open.value = false;
+    reset();
+  }
+
+  // 表单提交处理
+  const submitForm = async (isBuild)=>{
+    loading.value = true;
+    await formRef.value?.validate()
+        .catch((err:Error)=>{
+            ElMessage.error('表单验证失败');
+            loading.value = false;
+            throw err;
+        });
+
+    addNameSpace(form).then(response => {
+      if(response?.code == 200){
+        ElMessage({
+              showClose: true,
+              message: '新增成功',
+              type: 'success',
+        });
+        build(form,isBuild)
+      }else{
+        ElMessage.error('新增出现异常');
+        loading.value = false;
+        throw response?.msg;
+      }
+      open.value = false;
+      getList();
+    });
+
   }
 
   const handleDelete = function(row){
@@ -159,6 +194,27 @@
   const handleSelectionChange = function(selection){
 
   }
+
+  const validName = (rule:any,value:any, callback:any)=>{
+    nameIsExist(form.name,form.instanceCode).then((res) =>{
+        if(res.code == 200){
+          if(res.data){
+            callback(new Error('名称已存在，请确认后修改'));
+          }else{
+            callback()
+          }
+        }
+    })
+  }
+
+  // 表单验证规则
+  const rules = reactive<FormRules>({
+      'name' : [
+        { required: true, message: "名称不能为空", trigger: "blur" },
+        { pattern: /^[-_a-z0-9]*$/, message: '名称只可以输入小写字母、数字及中划线', trigger: 'blur' },
+        { validator: validName , trigger: 'blur' }
+      ]
+  })
 
   // 按钮
   const btnList = ref([
@@ -264,13 +320,11 @@
     </yt-card>
     <yt-card>
         <div class="option-wrap">
-          <!-- <router-link :to="{ path: '/kubernetes/nameSpace/index', query: { timestamp: Date.now() }}" > -->
             <el-button
               type="primary"
               plain
               size="default"
               @click="handleAdd" v-hasPerms="['/kubernetes/nameSpace/add']" ><el-icon><Plus /></el-icon>新增</el-button>
-          <!-- </router-link> -->
         </div>
       <!--table  -->
       <div class="table-wrap">
@@ -302,6 +356,43 @@
       </div>
     </yt-card>
 
+    <el-dialog :title="title" v-model="open" width="var(--dialog-md-w)"  append-to-body>
+      <yt-card>
+        <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
+          <el-row :gutter="16">
+              <el-form-item label="插件实例" prop="instanceCode">
+                <el-select
+                  v-model="form.instanceCode"
+                  @keyup.enter.native="handleQuery"
+                  placeholder="请选择实例"
+                  style="width: 240px"
+                >
+                  <el-option v-for="item in pluginInstance"
+                              :key="item.pluginCode"
+                              :label="item.instanceName"
+                              :value="item.instanceCode"/>
+                </el-select>
+              </el-form-item>
+          </el-row>
+          <el-row :gutter="16">
+            <el-form-item label="名称" prop="name">
+              <el-input style="width: 240px" v-model="form.name" placeholder="请输入名称" clearable />
+            </el-form-item>
+          </el-row>
+          <el-row :gutter="16">
+            <el-form-item label="备注" prop="remark">
+              <el-input style="width: 240px" type="textarea" v-model="form.remark" placeholder="请输入备注" clearable />
+            </el-form-item>
+          </el-row>
+        </el-form>
+      </yt-card>
+
+      <template #footer>
+        <el-button @click="submitForm(form)">确 定</el-button>
+        <el-button @click="cancel">取 消</el-button>
+      </template>
+
+    </el-dialog>
 
   </div>
 </template>
