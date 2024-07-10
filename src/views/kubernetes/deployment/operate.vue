@@ -1980,7 +1980,7 @@
                             <el-input label="值" placeholder="请输入值" v-model="label.value" ></el-input>
                           </el-form-item>
                         </el-col>
-                        <el-button @click="removeDeployLabel(index)" type="danger" >删除标签</el-button>
+                        <el-button @click="removeDeployLabel(index)" type="danger" style="margin-top:30px">删除标签</el-button>
                       </el-row>
                       <el-row :gutter="24" style="margin-top:10px;margin-left:2px">
                         <el-button @click="addDeployLabel" type="primary" plain>添加标签</el-button>
@@ -1998,7 +1998,7 @@
                             <el-input label="值" placeholder="请输入值" v-model="annotation.value" ></el-input>
                           </el-form-item>
                         </el-col>
-                        <el-button @click="removeDeployAnnotation(index)"  type="danger">删除注解</el-button>
+                        <el-button @click="removeDeployAnnotation(index)"  type="danger"  style="margin-top:30px">删除注解</el-button>
                       </el-row>
                       <el-row :gutter="24" style="margin-top:10px;margin-left:2px">
                         <el-button @click="addDeployAnnotation" type="primary" plain>添加标签</el-button>
