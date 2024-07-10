@@ -323,6 +323,14 @@ export const dynamicRoutes = [
     }
   },
   {
+    path: '/workflow/instance/index', // 流程实例
+    name: 'workflow-instance-index',
+    component: () => import('../views/workflow/instance/index.vue'),
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
     path: '/nexus/respository/index',
     name: 'nexus-browes',
     component: () => import('../views/nexus/respository/index.vue'),

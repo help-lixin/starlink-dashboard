@@ -4,6 +4,19 @@
 import request from "@/utils/request"
 import { STARLINK_SERVICE } from '@/utils/env';
 
+
+// 查询出所有的流水线实例
+export const getProcessInstances = (queryParams:any)=>{
+    return request({
+        url: STARLINK_SERVICE + '/workflow/instance/list',
+        method: 'GET',
+        params: queryParams
+    }).then((res)=>{
+        return res.data;
+    })
+}
+
+
 // 根据流水线实例,id获得流水线定义信息.
 export const getProcessInstance = (id:any)=>{
     return request({

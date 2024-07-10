@@ -1,9 +1,10 @@
 <script setup lang="ts">
 // @ts-nocheck
-// 流水线定义管理
+// 流水线实例管理
 import { Plus, Delete, Edit, EditPen, Search, RefreshRight, Sort, QuestionFilled } from '@element-plus/icons-vue'
 import { parseTime, status, addDateRange, showStatusFun, showStatusOperateFun, getStatusIcon } from "@/utils/common"
-import { list, get, changeStatus , startWorkFlowById } from "@/api/workflowDefinition"
+import {  get, changeStatus , startWorkFlowById } from "@/api/workflowDefinition"
+import { getProcessInstances } from "@/api/workflow/workflowInstance"
 import { useRouter, useRoute } from "vue-router";
 const router = useRouter();
 
@@ -38,7 +39,7 @@ const queryParams = reactive({
 const getList = () => {
   loading.value = true;
 
-  list(addDateRange(queryParams, daterangeArray.value)).then(response => {
+  getProcessInstances(addDateRange(queryParams, daterangeArray.value)).then(response => {
     loading.value = false
     if (response?.data?.records.length > 0) {
       dataList.splice(0, dataList.length);
@@ -72,131 +73,26 @@ const handleSelectionChange = function (selection) {
 }
 
 
-// 处理新增按钮
-const handleAdd = function () {
-  const state = { processDefinitionBody: undefined, count: 1 }
-  // 跳转到新增
+const handleView = (row)=>{
+  const processInstnaceId = row.pipelineInstanceId
+  // 跳转到页面去查看日志
   router.push({
-    name: "workflow-definition-operate",
-    state
+    name: "workflow-definition-view",
+    params: {
+      processInstnaceId
+    }
   })
-}
-
-
-const handleUpdate = function (row) {
-  const processDefinitionBodyJson = row?.processDefinitionBody
-  if (processDefinitionBodyJson) {
-    const state = { processDefinitionBody: JSON.parse(processDefinitionBodyJson), count: 1 }
-    // 跳转到修改页面
-    router.push({
-      name: "workflow-definition-operate",
-      state
-    })
-  } else {
-    const val = ids.value
-    if (val instanceof Array && val.length > 0) {
-      const value = val[0]
-      get(value).then((res) => {
-        if (res?.code == 200 && res?.data?.processDefinitionBody) {
-          const state = { processDefinitionBody: JSON.parse(res.data.processDefinitionBody), count: 1 }
-          // 跳转到修改页面
-          router.push({
-            name: "workflow-definition-operate",
-            state
-          })
-        }
-      });
-    }
-  }
-}
-
-const handleDelete = function (row) {
-  const id = row.id || ids.value;
-  const status = row.status
-  let msg = ""
-  if (status == 1) {
-    msg = '是否禁用编号为"' + id + '"的数据项？'
-  } else {
-    msg = '是否启用编号为"' + id + '"的数据项？'
-  }
-
-  ElMessageBox.confirm(
-    msg,
-    'Warning',
-    {
-      confirmButtonText: '确认',
-      cancelButtonText: '取消',
-      type: 'warning',
-    }
-  ).then(() => {
-    let tmpStatus;
-    if (status == 0) {
-      tmpStatus = 1
-    } else {
-      tmpStatus = 0
-    }
-
-    changeStatus(id, tmpStatus).then((res) => {
-      if (res.code == 200) {
-        // 重置查询表单,并进行查询
-        queryParams.pageNum = 1
-        getList()
-        ElMessage({
-          type: 'success',
-          message: '操作成功',
-        })
-      }
-    })
-  }).catch(() => { });
-}
-
-const handleRunning = function (row) {
-  const processDefinitionId = row.processDefinitionId
-  const startWorkFlowData = {
-    processDefinitionId
-  }
-
-  // 启动流水线
-  startWorkFlowById(startWorkFlowData)
-    .then((startWorkflowRes) => {
-      if (startWorkflowRes?.code == 200) {
-        const processInstnaceId = startWorkflowRes?.data?.id;
-        router.push({
-            name: "workflow-definition-view",
-            params: {
-              processInstnaceId
-             }
-          })
-      }else{
-        ElMessage.error('运行流水线:"' + row.processDefinitionName + '"失败')
-      }
-    });
 }
 
 
 // 按钮
 const btnList = ref([
 {
-  btnName: '运行',
+  btnName: '查看',
   permArray: ['/workflow/instance/startById'],
   isShow: () => true,
   isDisable: false,
-  clickEvent: handleRunning
-},
-{
-  btnName: '修改',
-  permArray: ['/workflow/definition/operate'],
-  isShow: () => true,
-  isDisable: false,
-  clickEvent: handleUpdate
-},
-{
-  btnName: row =>  showStatusOperateFun(row.status),
-  class: 'yt-color-error-hover',
-  permArray: ['/workflow/definition/changeStatus/**'],
-  isShow: () => true,
-  isDisable: false,
-  clickEvent: handleDelete
+  clickEvent: handleView
 },
 ])
 
@@ -249,20 +145,17 @@ getList()
     </yt-card>
 
     <yt-card>
-      <!--  option-->
-      <div class="option-wrap">
-        <el-button type="primary" plain size="default" @click="handleAdd"
-                   v-hasPerms="['/workflow/definition/operate']"><el-icon>
-          <Plus />
-        </el-icon>新增</el-button>
-      </div>
+
+      <!--  option -->
+
 
       <!--table  -->
       <div class="table-wrap">
         <el-table v-loading="loading" :data="dataList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
+          <el-table-column label="流水线ID" key="pipelineInstanceId" prop="pipelineInstanceId" :show-overflow-tooltip="true" />
           <el-table-column label="流水线名称" key="processDefinitionName" prop="processDefinitionName" :show-overflow-tooltip="true" />
-          <el-table-column label="流水线定义key" key="processDefinitionKey" prop="processDefinitionKey" width="180" :show-overflow-tooltip="true"/>
+          <el-table-column label="流水线定义key" key="processDefinitionKey" prop="processDefinitionKey" :show-overflow-tooltip="true"/>
           <el-table-column label="流水线版本" align="right" key="processDefinitionVersion" prop="processDefinitionVersion" />
           <el-table-column label="状态" align="center" key="status" width="100">
             <template v-slot="scope">
@@ -274,7 +167,7 @@ getList()
               <span>{{ parseTime(scope.row.createTime) }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="操作" align="center" width="280">
+          <el-table-column label="操作" align="center" width="120">
             <template v-slot="scope">
               <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
             </template>
