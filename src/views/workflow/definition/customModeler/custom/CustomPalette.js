@@ -8,7 +8,7 @@ import { useActionMetasStore } from "@/stores/plugin";
 import {STARLINK_SERVICE,ICON_SERVICE} from "@/utils/env"
 
 
-import mockFile from "@/api/mock/formilyjs/ssh-docker-build"
+import mockFile from "@/api/mock/formilyjs/k8s-deploy"
 
 const actionMetasStore = useActionMetasStore();
 
@@ -117,10 +117,14 @@ PaletteProvider.prototype.getPaletteEntries = function (element) {
 	actionMetasStore.initActions()
 	const actions = actionMetasStore.getActions
 	actions.forEach((value, key) => {
-		// TODO lixin 临时测试用
-		// const pluginItem = deserialize(mockFile)
+		var pluginItem;
+		if(key == "k8s-deploy"){ // TODO lixin 临时测试用
+			 pluginItem = deserialize(mockFile)
+		}else{
+			 pluginItem = deserialize(value)
+		}
 
-		const pluginItem = deserialize(value)
+		// var pluginItem = deserialize(value)
 		const pluginMeta = {
 			"plugin": key
 		};

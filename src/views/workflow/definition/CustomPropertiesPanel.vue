@@ -6,7 +6,7 @@ import {STARLINK_SERVICE} from "@/utils/env"
 import { pluginInstanceOptionSelect } from '@/api/common-api'
 import { encode, decode } from 'js-base64';
 
-import mockFile from "@/api/mock/formilyjs/ssh-docker-build"
+import mockFile from "@/api/mock/formilyjs/k8s-deploy"
 
 import {
 	createForm ,
@@ -347,11 +347,11 @@ function init() {
 		// 元数据对象(右侧表单动态展示)
 		if (element.value?.businessObject?.$attrs?.plugin) {
 			// TODO lixin
-			// const pluginInfoStr = mockFile
+			const pluginInfoStr = mockFile
 
 			// 从store里拿数据
-			const plugins = actionMetasStore.getActions
-			const pluginInfoStr = plugins.get(element.value.businessObject.$attrs.plugin)
+			// const plugins = actionMetasStore.getActions
+			// const pluginInfoStr = plugins.get(element.value.businessObject.$attrs.plugin)
 			const pluginInfo = deserialize(pluginInfoStr)
 
 
