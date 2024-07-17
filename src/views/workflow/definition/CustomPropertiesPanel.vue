@@ -481,7 +481,7 @@ init()
 	position: absolute;
 	top: 0;
 	right: 0;
-	width: 300px;
+	width: 400px;
 	height: calc(100vh - var(--el-header-height));
   padding-bottom: 58px;
 	background-color: #f8f8f8;
