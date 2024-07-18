@@ -74,3 +74,24 @@ export function removePod(podId:number) {
     });
 }
 
+// 查询pod容器日志信息
+export function podLog(data:any) {
+    return request({
+      url: STARLINK_SERVICE + '/kubernetes/pod/log',
+      method: 'get',
+      params: data
+    }).then((res)=>{
+        return res?.data;
+    });
+}
+
+// 查询pod容器组信息
+export function containerGroup(data:any) {
+    return request({
+      url: STARLINK_SERVICE + '/kubernetes/pod/containerGroup',
+      method: 'get',
+      params: data
+    }).then((res)=>{
+        return res?.data;
+    });
+}

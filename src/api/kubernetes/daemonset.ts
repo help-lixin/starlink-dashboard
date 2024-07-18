@@ -73,4 +73,3 @@ export function removeDaemonSet(daemonsetId:number) {
         return res?.data;
     });
 }
-

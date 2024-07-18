@@ -159,8 +159,8 @@
 
     <el-dialog :title="title" v-model="detailDialog" width="var(--dialog-lg-w)"  append-to-body>
       <yt-card>
-        <div class="container">
-          <div class="left-panel">
+        <el-row :gutter="24">
+          <el-col :span="24">
             <el-collapse v-model="activeNames" accordion>
               <el-collapse-item
                 v-for="item in items"
@@ -182,19 +182,20 @@
                 </el-form-item>
               </el-collapse-item>
             </el-collapse>
-          </div>
-          <div class="right-panel">
+          </el-col>
+        </el-row>
+        <el-row :gutter="24">
+          <el-col :span="24">
             <el-input
               type="textarea"
               v-model="logContent"
               placeholder="请输入内容"
             />
-          </div>
-        </div>
+          </el-col>
+        </el-row>
       </yt-card>
       <template #footer>
-        <el-button @click="cancel">取 消</el-button>
-        <el-button type="primary" @click="submitForm(false)">确 定</el-button>
+        <el-button @click="cancel">确 定</el-button>
       </template>
     </el-dialog>
 
@@ -203,26 +204,7 @@
 
 
 <style lang="scss" scoped>
-.container {
-  display: flex;
-  height: 100vh;
-}
-.left-panel,
-.right-panel {
-  flex: 1;
-  padding: 10px;
-  height: 100%;
-}
-.el-collapse-item {
-  cursor: pointer;
-}
-.highlighted {
-  background-color: #f5f5f5;
-}
-.selected {
-  background-color: #d3d3d3;
-}
-.el-textarea__inner{
-  height: 100%;
+.el-textarea__inner {
+  height: 400px;
 }
 </style>
