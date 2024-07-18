@@ -70,6 +70,10 @@
     router.push({path : "/kubernetes/deployment/operate", query:{ instanceCode: defaultInstanceCode.value } })
   }
 
+  const handleDetail = function(row){
+    router.push({path : "/kubernetes/deployment/pods", query:{ instanceCode: row.instanceCode, deploymentName: row.name, nameSpace: row.nameSpace } })
+  }
+
   const handleUpdate = function(row){
     router.push({path : "/kubernetes/deployment/operate", query:{ instanceCode: defaultInstanceCode.value ,id: row.id} })
   }
@@ -156,10 +160,6 @@
     handleQuery();
   }
 
-  const showNameSpace = function(id){
-    return nameSpaceMap.get(id)
-  }
-
   // 多选框选中数据
   const handleSelectionChange = function(selection){
 
@@ -187,7 +187,14 @@
       isShow: () => true,
       isDisable: false,
       clickEvent: handleDelete
-    }
+    },
+    {
+      btnName: '详情',
+      permArray: ['/kubernetes/deployment/pods'],
+      isShow: () => true,
+      isDisable: false,
+      clickEvent: handleDetail
+    },
   ])
 
   // 进入页面时,就初始化实例列表
@@ -297,11 +304,7 @@
         <el-table v-loading="loading" :data="tabelDataList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
           <el-table-column label="id" align="left" key="id" prop="id" v-if="false"/>
-          <el-table-column label="命名空间" align="left" key="nameSpace" prop="nameSpace"  :show-overflow-tooltip="true">
-            <template #default="scope">
-              {{ showNameSpace(scope.row.nameSpaceId)   }}
-            </template>
-          </el-table-column>
+          <el-table-column label="命名空间" align="left" key="nameSpace" prop="nameSpace"  :show-overflow-tooltip="true"/>
           <el-table-column label="应用名称" align="left" key="name" prop="name"  :show-overflow-tooltip="true" />
           <el-table-column label="实例编码" align="left" key="instanceCode" prop="instanceCode" :show-overflow-tooltip="true"   />
           <el-table-column label="状态" align="left" key="status" prop="status" :show-overflow-tooltip="true" width="100"  >

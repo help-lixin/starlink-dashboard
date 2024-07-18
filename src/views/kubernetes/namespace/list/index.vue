@@ -191,10 +191,6 @@
     handleQuery();
   }
 
-  const showNameSpace = function(id){
-    return nameSpaceMap.get(id)
-  }
-
   // 多选框选中数据
   const handleSelectionChange = function(selection){
 

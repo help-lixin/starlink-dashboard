@@ -195,6 +195,14 @@ export const dynamicRoutes = [
     }
   },
   {
+    path: '/kubernetes/deployment/pods',
+    name: 'kubernetes-deploy-pods',
+    component: () => import('../views/kubernetes/deployment/pods.vue'),
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
     path: '/kubernetes/cronjob/list/index',
     name: 'kubernetes-cron-job-list',
     component: () => import('../views/kubernetes/cronjob/list/index.vue'),
