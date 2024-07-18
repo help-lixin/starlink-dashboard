@@ -347,11 +347,11 @@ function init() {
 		// 元数据对象(右侧表单动态展示)
 		if (element.value?.businessObject?.$attrs?.plugin) {
 			// TODO lixin
-			const pluginInfoStr = mockFile
+			// const pluginInfoStr = mockFile
 
 			// 从store里拿数据
-			// const plugins = actionMetasStore.getActions
-			// const pluginInfoStr = plugins.get(element.value.businessObject.$attrs.plugin)
+			const plugins = actionMetasStore.getActions
+			const pluginInfoStr = plugins.get(element.value.businessObject.$attrs.plugin)
 			const pluginInfo = deserialize(pluginInfoStr)
 
 
@@ -481,11 +481,43 @@ init()
 	position: absolute;
 	top: 0;
 	right: 0;
-	width: 300px;
+	width: 400px;
 	height: calc(100vh - var(--el-header-height));
   padding-bottom: 58px;
 	background-color: #f8f8f8;
-
+  :deep(.formily-element-plus-form-item-control-content-component) {
+    .formily-element-plus-array-items-list {
+      .formily-element-plus-array-items-item-inner {
+        margin-bottom: 8px;
+      }
+      .formily-element-plus-form-item-colon {
+        line-height: 32px;
+      }
+      .formily-element-plus-space formily-element-plus-space-horizontal {
+        display: flex;
+        align-items: center;
+      }
+      .formily-element-plus-form-item-label-content {
+        min-height: 32px;
+        height: 32px;
+        line-height: 32px;
+        display: flex;
+        align-items: center;
+      }
+      .el-input__wrapper {
+        padding: 1px 8px;
+      }
+      .el-icon {
+        font-size: 16px;
+      }
+      .formily-element-plus-form-item-control-content-component {
+        .el-button {
+          border: 0;
+          padding: 0;
+        }
+      }
+    }
+  }
 	.element-item {
 		padding: 9px 15px;
 
