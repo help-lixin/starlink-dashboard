@@ -406,6 +406,7 @@
               type="textarea"
               v-model="logContent"
               placeholder="请输入内容"
+              rows="10"
             />
           </el-col>
         </el-row>
@@ -419,7 +420,4 @@
 </template>
 
 <style lang="scss" scoped>
-  .el-textarea__inner {
-    height: 400px;
-  }
 </style>
