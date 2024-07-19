@@ -35,7 +35,10 @@
 
   const title = ref(null)
 
-  const containerAmount = ref(0)
+  // 期望运行副本数
+  const replicas = ref(0)
+  // 当前运行副本数
+  const curReplicas = ref(0)
 
   // dialog 属性
   const activeNames = ref();
@@ -59,7 +62,8 @@
           tabelDataList.splice(0,tabelDataList.length);
           if(response?.data?.pods.length > 0){
             Object.assign(tabelDataList, response?.data?.pods)
-            containerAmount.value = response?.data?.replicas
+            replicas.value = response?.data?.replicas
+            curReplicas.value = response?.data?.curReplicas
           }
         } 
     );
@@ -91,7 +95,7 @@
   }
 
   const changeAmount = function(){
-    updateReplicasParams.replicas = containerAmount.value
+    updateReplicasParams.replicas = replicas.value
     updateReplicas(updateReplicasParams).then(res =>{
       if(res.code == 200){
         getList()
@@ -126,9 +130,12 @@
         <el-row :gutter="16">
           <el-col :span="8">
             <el-form-item label="期望容器副本数量" >
-              <el-input-number @click="changeAmount" min="1" v-model="containerAmount"  placeholder="请输入副本数量"></el-input-number>
+              <el-input-number @click="changeAmount" min="1" v-model="replicas"  placeholder="请输入副本数量"></el-input-number>
             </el-form-item>
           </el-col>
+        </el-row>
+        <el-row>
+          当前运行副本数/期望容器副本数：{{  curReplicas }}/{{replicas}}
         </el-row>
     </yt-card>
     <yt-card>
