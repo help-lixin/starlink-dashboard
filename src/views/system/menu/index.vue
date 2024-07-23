@@ -219,6 +219,7 @@
 
     // 取消
     function cancel(){
+      isLoading.value = false;
       open.value = false;
       reset();
     }

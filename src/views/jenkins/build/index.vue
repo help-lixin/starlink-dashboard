@@ -85,6 +85,7 @@
 
   // 表单取消处理
   const cancel = ()=>{
+    loading.value = false;
     open.value = false;
     reset();
   }

@@ -251,7 +251,6 @@ const cancel = ()=>{
   open.value = false;
   loading.value = false;
   reset();
-  getList();
 }
 
 
