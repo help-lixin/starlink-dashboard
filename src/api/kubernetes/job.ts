@@ -47,7 +47,7 @@ return request({
 // 状态修改
 export function changeStatus(jobId:any, status:any) {
     return request({
-        url: STARLINK_SERVICE + '/kubernetes/job/changeStatus/'+status+"/"+jobId,
+        url: STARLINK_SERVICE + '/kubernetes/job/changeStatus/'+jobId+"/"+status,
         method: 'put'
     }).then((res)=>{
         return res?.data;
@@ -57,7 +57,7 @@ export function changeStatus(jobId:any, status:any) {
 // 查询名称是否可用
 export function nameIsExist(jobName:string,instanceCode:string) {
     return request({
-      url: STARLINK_SERVICE + '/kubernetes/job/nameIsExist/' + jobName +"/" + instanceCode,
+      url: STARLINK_SERVICE + '/kubernetes/job/nameIsExist/' + instanceCode +"/" + jobName,
       method: 'get'
     }).then((res)=>{
         return res?.data;

@@ -57,7 +57,7 @@ export function changeStatus(serviceId:any, status:any) {
 // 查询名称是否可用
 export function nameIsExist(serviceName:string,instanceCode:string) {
     return request({
-      url: STARLINK_SERVICE + '/kubernetes/service/nameIsExist/' + serviceName +"/" + instanceCode,
+      url: STARLINK_SERVICE + '/kubernetes/service/nameIsExist/' + instanceCode +"/" + serviceName,
       method: 'get'
     }).then((res)=>{
         return res?.data;

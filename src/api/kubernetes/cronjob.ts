@@ -47,7 +47,7 @@ return request({
 // 状态修改
 export function changeStatus(cronjobId:any, status:any) {
     return request({
-        url: STARLINK_SERVICE + '/kubernetes/cronjob/changeStatus/'+status+"/"+cronjobId,
+        url: STARLINK_SERVICE + '/kubernetes/cronjob/changeStatus/'+cronjobId+"/"+status,
         method: 'put'
     }).then((res)=>{
         return res?.data;
@@ -57,7 +57,7 @@ export function changeStatus(cronjobId:any, status:any) {
 // 查询名称是否可用
 export function nameIsExist(cronjobName:string,instanceCode:string) {
     return request({
-      url: STARLINK_SERVICE + '/kubernetes/cronjob/nameIsExist/' + cronjobName +"/" + instanceCode,
+      url: STARLINK_SERVICE + '/kubernetes/cronjob/nameIsExist/' + instanceCode +"/" + cronjobName,
       method: 'get'
     }).then((res)=>{
         return res?.data;

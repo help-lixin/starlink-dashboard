@@ -48,7 +48,7 @@ return request({
 // deployment状态修改
 export function changeStatus(deploymentId:any, status:any) {
     return request({
-        url: STARLINK_SERVICE + '/kubernetes/deployment/changeStatus/'+status+"/"+deploymentId,
+        url: STARLINK_SERVICE + '/kubernetes/deployment/changeStatus/'+deploymentId+"/"+status,
         method: 'put'
     }).then((res)=>{
         return res?.data;
