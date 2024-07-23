@@ -67,7 +67,7 @@ export default `
       }
     },
 
-    "credentialId": {
+    "credentialName": {
       "type": "string",
       "title": "凭证",
       "required": true,
