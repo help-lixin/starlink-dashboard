@@ -47,7 +47,7 @@ return request({
 // 状态修改
 export function changeStatus(podId:any, status:any) {
     return request({
-        url: STARLINK_SERVICE + '/kubernetes/pod/changeStatus/'+status+"/"+podId,
+        url: STARLINK_SERVICE + '/kubernetes/pod/changeStatus/'+podId+"/"+status,
         method: 'put'
     }).then((res)=>{
         return res?.data;
@@ -57,7 +57,7 @@ export function changeStatus(podId:any, status:any) {
 // 查询名称是否可用
 export function nameIsExist(podName:string,instanceCode:string) {
     return request({
-      url: STARLINK_SERVICE + '/kubernetes/pod/nameIsExist/' + podName +"/" + instanceCode,
+      url: STARLINK_SERVICE + '/kubernetes/pod/nameIsExist/' + instanceCode +"/" + podName,
       method: 'get'
     }).then((res)=>{
         return res?.data;
@@ -74,3 +74,24 @@ export function removePod(podId:number) {
     });
 }
 
+// 查询pod容器日志信息
+export function podLog(data:any) {
+    return request({
+      url: STARLINK_SERVICE + '/kubernetes/pod/log',
+      method: 'get',
+      params: data
+    }).then((res)=>{
+        return res?.data;
+    });
+}
+
+// 查询pod容器组信息
+export function containerGroup(data:any) {
+    return request({
+      url: STARLINK_SERVICE + '/kubernetes/pod/containerGroup',
+      method: 'get',
+      params: data
+    }).then((res)=>{
+        return res?.data;
+    });
+}

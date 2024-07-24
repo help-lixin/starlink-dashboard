@@ -179,6 +179,14 @@ export const dynamicRoutes = [
     }
   },
   {
+    path: '/kubernetes/deployment/template/index',
+    name: 'kubernetes-template-deploy',
+    component: () => import('../views/kubernetes/deployment/template/index.vue'),
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
     path: '/kubernetes/deployment/list/index',
     name: 'kubernetes-deploy-list',
     component: () => import('../views/kubernetes/deployment/list/index.vue'),
@@ -190,6 +198,14 @@ export const dynamicRoutes = [
     path: '/kubernetes/deployment/operate',
     name: 'kubernetes-deploy',
     component: () => import('../views/kubernetes/deployment/operate.vue'),
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/kubernetes/deployment/pods',
+    name: 'kubernetes-deploy-pods',
+    component: () => import('../views/kubernetes/deployment/pods.vue'),
     meta: {
       requiresAuth: true
     }

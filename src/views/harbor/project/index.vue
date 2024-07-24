@@ -345,11 +345,13 @@
   }
   // 表单取消处理
   const cancelDetail = ()=>{
+    loading.value = false;
     detail.value = false;
     reset();
   }
   // 表单取消处理
   const cancelAdd = ()=>{
+    loading.value = false;
     addDialog.value = false;
     reset();
   }

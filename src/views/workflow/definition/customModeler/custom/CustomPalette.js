@@ -117,14 +117,14 @@ PaletteProvider.prototype.getPaletteEntries = function (element) {
 	actionMetasStore.initActions()
 	const actions = actionMetasStore.getActions
 	actions.forEach((value, key) => {
-		var pluginItem;
-		if(key == "k8s-deploy"){ // TODO lixin 临时测试用
-			 pluginItem = deserialize(mockFile)
-		}else{
-			 pluginItem = deserialize(value)
-		}
+		// var pluginItem;
+		// if(key == "k8s-deploy"){ // TODO lixin 临时测试用
+		// 	 pluginItem = deserialize(mockFile)
+		// }else{
+		// 	 pluginItem = deserialize(value)
+		// }
 
-		// var pluginItem = deserialize(value)
+		var pluginItem = deserialize(value)
 		const pluginMeta = {
 			"plugin": key
 		};

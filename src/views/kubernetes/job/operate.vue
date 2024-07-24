@@ -1122,7 +1122,7 @@
     labelAnnotation2Json(initData.value.option.labelAnnotation.job.annotations , initData.value.metadata.annotations)
     labelAnnotation2Json(initData.value.option.labelAnnotation.pod.annotations , initData.value.spec.template.metadata.annotations)
 
-    if(!initData.value.spec.template.metadata.labels.length){
+    if(Object.keys(initData.value.spec.template.metadata.labels).length === 0){
       Object.assign(initData.value.spec.template.metadata.labels,initData.value.metadata.labels)
     }
 

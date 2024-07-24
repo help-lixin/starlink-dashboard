@@ -1132,7 +1132,7 @@
     labelAnnotation2Json(initData.value.option.labelAnnotation.pod.annotations , initData.value.spec.template.metadata.annotations)
 
     if(!initData.value.metadata.labels.length){
-      Object.assign(initData.value.metadata.labels ,{"workload.user.cattle.io/workloadselector":"apps.daemonset-default-undefined"})
+      Object.assign(initData.value.metadata.labels ,{"workload.user.cattle.io/workloadselector":"apps.daemonset-default-"+Date.now()})
     }
 
     if(!initData.value.spec.template.metadata.labels.length){

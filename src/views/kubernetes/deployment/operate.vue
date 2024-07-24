@@ -1137,11 +1137,11 @@
     labelAnnotation2Json(initData.value.option.labelAnnotation.deployment.annotations , initData.value.metadata.annotations)
     labelAnnotation2Json(initData.value.option.labelAnnotation.pod.annotations , initData.value.spec.template.metadata.annotations)
 
-    if(!initData.value.metadata.labels.length){
-      Object.assign(initData.value.metadata.labels ,{"workload.user.cattle.io/workloadselector":"apps.deployment-default-undefined"})
+    if(Object.keys(initData.value.metadata.labels).length === 0){
+      Object.assign(initData.value.metadata.labels ,{"workload.user.cattle.io/workloadselector":"apps.deployment-default-"+Date.now()})
     }
 
-    if(!initData.value.spec.template.metadata.labels.length){
+    if(Object.keys(initData.value.spec.template.metadata.labels).length === 0 ){
       Object.assign(initData.value.spec.template.metadata.labels,initData.value.metadata.labels)
     }
 

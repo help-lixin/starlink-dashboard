@@ -243,7 +243,7 @@
         nameSpaces.splice(0,nameSpaces.length)
       }
     })
-    
+
   }
 
 
@@ -371,6 +371,7 @@
 
   // 表单取消处理
   const cancel = ()=>{
+    loading.value = false;
     open.value = false;
     reset();
   }

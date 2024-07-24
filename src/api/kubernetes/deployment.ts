@@ -48,7 +48,7 @@ return request({
 // deployment状态修改
 export function changeStatus(deploymentId:any, status:any) {
     return request({
-        url: STARLINK_SERVICE + '/kubernetes/deployment/changeStatus/'+status+"/"+deploymentId,
+        url: STARLINK_SERVICE + '/kubernetes/deployment/changeStatus/'+deploymentId+"/"+status,
         method: 'put'
     }).then((res)=>{
         return res?.data;
@@ -71,6 +71,39 @@ export function removeDeployment(deploymentId:number) {
     return request({
       url: STARLINK_SERVICE + '/kubernetes/deployment/del/' + deploymentId,
       method: 'delete'
+    }).then((res)=>{
+        return res?.data;
+    });
+}
+
+// 查询pod容器组列表信息
+export function podGroup(data:any) {
+    return request({
+      url: STARLINK_SERVICE + '/kubernetes/deployment/podGroup',
+      method: 'get',
+      params: data
+    }).then((res)=>{
+        return res?.data;
+    });
+}
+
+// 查询pod容器日志信息
+export function podLog(data:any) {
+    return request({
+      url: STARLINK_SERVICE + '/kubernetes/pod/log',
+      method: 'get',
+      params: data
+    }).then((res)=>{
+        return res?.data;
+    });
+}
+
+// 更新副本数量
+export function updateReplicas(data:any) {
+    return request({
+      url: STARLINK_SERVICE + '/kubernetes/deployment/updateReplicas',
+      method: 'put',
+      params: data
     }).then((res)=>{
         return res?.data;
     });

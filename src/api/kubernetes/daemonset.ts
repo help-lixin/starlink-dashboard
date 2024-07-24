@@ -47,7 +47,7 @@ return request({
 // 状态修改
 export function changeStatus(daemonsetId:any, status:any) {
     return request({
-        url: STARLINK_SERVICE + '/kubernetes/daemonset/changeStatus/'+status+"/"+daemonsetId,
+        url: STARLINK_SERVICE + '/kubernetes/daemonset/changeStatus/'+daemonsetId+"/"+status,
         method: 'put'
     }).then((res)=>{
         return res?.data;
@@ -57,7 +57,7 @@ export function changeStatus(daemonsetId:any, status:any) {
 // 查询名称是否可用
 export function nameIsExist(daemonsetName:string,instanceCode:string) {
     return request({
-      url: STARLINK_SERVICE + '/kubernetes/daemonset/nameIsExist/' + daemonsetName +"/" + instanceCode,
+      url: STARLINK_SERVICE + '/kubernetes/daemonset/nameIsExist/' + instanceCode +"/" + daemonsetName,
       method: 'get'
     }).then((res)=>{
         return res?.data;
@@ -73,4 +73,3 @@ export function removeDaemonSet(daemonsetId:number) {
         return res?.data;
     });
 }
-

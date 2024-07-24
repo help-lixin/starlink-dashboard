@@ -447,7 +447,7 @@
             });
             build(form,isBuild)
           }else{
-            ElMessage.error('修改出现异常');
+            ElMessage.error(response.msg);
             loading.value = false;
             throw response?.msg;
           }
@@ -464,7 +464,7 @@
             });
             build(form,isBuild)
           }else{
-            ElMessage.error('新增出现异常');
+            ElMessage.error(response.msg);
             loading.value = false;
             throw response?.msg;
           }
@@ -532,6 +532,7 @@
 
   // 表单取消处理
   const cancel = ()=>{
+    loading.value = false;
     open.value = false;
     reset();
   }

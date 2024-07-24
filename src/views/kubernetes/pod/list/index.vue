@@ -5,7 +5,7 @@
   import { dayjs } from "@/utils/common-dayjs"
   import {  Edit } from '@element-plus/icons-vue'
   // import router from '@/router'
-  import { pageList,nameSpaceList,removePod,changeStatus} from "@/api/kubernetes/pod"
+  import { pageList,nameSpaceList,removePod,changeStatus,containerGroup,podLog} from "@/api/kubernetes/pod"
   import { useRouter } from "vue-router";
 
   const router = useRouter();
@@ -25,6 +25,12 @@
     kind: "Pod"
   })
 
+  const queryContainerParams = reactive({
+    instanceCode:undefined,
+    nameSpace:undefined,
+    podName:undefined
+  })
+
   const defaultInstanceCode = ref('')
 
   const loading = ref(false)
@@ -35,7 +41,7 @@
   const dateRange = ref([])
   const nameSpaces = reactive([])
   const nameSpaceMap =new Map()
-
+  const detailDialog = ref(false);
 
   const total= ref(0)
   const tabelDataList = reactive([])
@@ -156,14 +162,57 @@
     handleQuery();
   }
 
-  const showNameSpace = function(id){
-    return nameSpaceMap.get(id)
-  }
-
   // 多选框选中数据
   const handleSelectionChange = function(selection){
 
   }
+
+  // dialog 属性
+  const activeNames = ref();
+  const logContent = ref('');
+  const items = ref([]);
+
+  //查询pod容器日志信息
+  const queryPodLogParams = reactive({
+    instanceCode: undefined,
+    containerName: undefined,
+    nameSpace: undefined,
+    podName:undefined
+  })
+
+  const cancel = function(){
+    detailDialog.value = false
+  }
+
+  const selectItem = (name) => {
+    queryPodLogParams.containerName = name
+    podLog(queryPodLogParams).then(res =>{
+      logContent.value = res.data
+    })
+  };
+  // dialog 属性 end
+
+  const handleContainer = function(row){
+    queryContainerParams.instanceCode = row.instanceCode
+    queryContainerParams.nameSpace = row.nameSpace
+    queryContainerParams.podName = row.name
+    containerGroup(queryContainerParams).then(res=>{
+        if(res.code == 200){
+          items.value = []
+          logContent.value = undefined
+          detailDialog.value = true
+
+          res.data.forEach((container)=>{
+            items.value.push(container)
+          })
+
+          queryPodLogParams.instanceCode = row.instanceCode
+          queryPodLogParams.nameSpace = row.nameSpace
+          queryPodLogParams.podName = row.name
+        }
+    })
+  }
+  
 
   // 按钮
   const btnList = ref([
@@ -187,7 +236,14 @@
       isShow: () => true,
       isDisable: false,
       clickEvent: handleDelete
-    }
+    },
+    {
+      btnName: '容器日志',
+      permArray: ['/kubernetes/pod/containers'],
+      isShow: () => true,
+      isDisable: false,
+      clickEvent: handleContainer
+    },
   ])
 
   // 进入页面时,就初始化实例列表
@@ -292,11 +348,7 @@
         <el-table v-loading="loading" :data="tabelDataList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="60" align="center" />
           <el-table-column label="id" align="left" key="id" prop="id" v-if="false"/>
-          <el-table-column label="命名空间" align="left" key="nameSpace" prop="nameSpace"  :show-overflow-tooltip="true">
-            <template #default="scope">
-              {{ showNameSpace(scope.row.nameSpaceId)   }}
-            </template>
-          </el-table-column>
+          <el-table-column label="命名空间" align="left" key="nameSpace" prop="nameSpace"  :show-overflow-tooltip="true"/>
           <el-table-column label="应用名称" align="left" key="name" prop="name"  :show-overflow-tooltip="true" />
           <el-table-column label="实例编码" align="left" key="instanceCode" prop="instanceCode" :show-overflow-tooltip="true"   />
           <el-table-column label="状态" align="left" key="status" prop="status" :show-overflow-tooltip="true" width="100"  >
@@ -321,10 +373,51 @@
       </div>
     </yt-card>
 
+    <el-dialog :title="title" v-model="detailDialog" width="var(--dialog-lg-w)"  append-to-body>
+      <yt-card>
+        <el-row :gutter="24">
+          <el-col :span="24">
+            <el-collapse v-model="activeNames" accordion>
+              <el-collapse-item
+                v-for="item in items"
+                :key="item.containerName"
+                :name="item.containerName"
+                @click="selectItem(item.containerName)"
+              >
+                <template #title>
+                  <span>{{ item.containerName }}</span>
+                </template>
+                <el-form-item label="镜像名称:">
+                  <div>{{ item.imageName }}</div>
+                </el-form-item>
+                <el-form-item label="重启次数:">
+                  <div>{{ item.restartCount }}</div>
+                </el-form-item>
+                <el-form-item label="运行状态:">
+                  <div>{{ showStatusFun(item.status) }}</div>
+                </el-form-item>
+              </el-collapse-item>
+            </el-collapse>
+          </el-col>
+        </el-row>
+        <el-row :gutter="24">
+          <el-col :span="24">
+            <el-input
+              type="textarea"
+              v-model="logContent"
+              placeholder="请输入内容"
+              rows="10"
+            />
+          </el-col>
+        </el-row>
+      </yt-card>
+      <template #footer>
+        <el-button @click="cancel">确 定</el-button>
+      </template>
+    </el-dialog>
 
   </div>
 </template>
 
 <style lang="scss" scoped>
-
 </style>

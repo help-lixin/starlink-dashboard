@@ -47,7 +47,7 @@ return request({
 // 状态修改
 export function changeStatus(nameSpaceId:any, status:any) {
     return request({
-        url: STARLINK_SERVICE + '/kubernetes/nameSpace/changeStatus/'+status+"/"+nameSpaceId,
+        url: STARLINK_SERVICE + '/kubernetes/nameSpace/changeStatus/'+nameSpaceId+"/"+status,
         method: 'put'
     }).then((res)=>{
         return res?.data;

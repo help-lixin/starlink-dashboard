@@ -300,6 +300,7 @@
   // 表单取消处理
   const cancel = ()=>{
     open.value = false;
+    loading.value = false;
     reset();
   }
 
