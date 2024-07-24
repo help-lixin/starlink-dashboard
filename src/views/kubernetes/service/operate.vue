@@ -90,7 +90,7 @@ const $route = useRouter();
     labelAnnotation2Json(initData.value.option.labelAnnotation.selector.labels , initData.value.spec.selector)
     labelAnnotation2Json(initData.value.option.labelAnnotation.service.annotations , initData.value.metadata.annotations)
 
-    if(!initData.value.metadata.labels.length){
+    if(Object.keys(initData.value.metadata.labels).length === 0){
       Object.assign(initData.value.metadata.labels,{"app":initData.value.metadata.name})
     }
   }
