@@ -401,7 +401,7 @@
 
       <template #footer>
         <el-button @click="cancel">取 消</el-button>
-        <el-button @click="submitForm(form)">确 定</el-button>
+        <el-button type="primary" @click="submitForm(form)">确 定</el-button>
       </template>
 
     </el-dialog>

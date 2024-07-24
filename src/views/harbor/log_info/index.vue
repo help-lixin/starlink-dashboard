@@ -116,10 +116,10 @@
               <el-input v-model="queryParams.value" placeholder="请输入内容" clearable style="width: 240px">
                 <template #prepend>
                   <el-select
-                    class="search-select2"
                     v-model="queryParams.key"
                     placeholder="请选择资源"
                     clearable
+                    style="padding: 0 0px;"
                   >
                       <el-option v-for="item in resources"
                               :key="item.value"
@@ -167,5 +167,11 @@
 </template>
 
 <style lang="scss" scoped>
-
+// .el-input-group__append .el-input-group__prepend{
+//   padding-left: 0px;
+//     padding-right: 0px;
+// }
+.el-input-group__prepend{
+  padding:0 0px
+}
 </style>
