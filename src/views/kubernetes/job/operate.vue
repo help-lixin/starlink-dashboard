@@ -985,7 +985,7 @@
       // 安全性上下文
       if(!container.securityContext.runAsNonRoot && !container.securityContext.readOnlyRootFilesystem
               && !container.securityContext.privileged && !container.securityContext.allowPrivilegeEscalation
-            && !container.securityContext.runAsUser 
+            && !container.securityContext.runAsUser
           && container.securityContext.capabilities.add.length == 0 && container.securityContext.capabilities.drop.length == 0){
         delete container.securityContext
       }
@@ -1003,7 +1003,7 @@
     }
 
     copyData.value.spec.template.spec.containers = []
-    
+
     saveContainer.forEach(function(container){
       copyData.value.spec.template.spec.containers.push(container)
     })
@@ -1020,7 +1020,7 @@
           "nodeAffinity": {"preferredDuringSchedulingIgnoredDuringExecution":[],"requiredDuringSchedulingIgnoredDuringExecution":[]}
         }
       })
-      
+
       initData.value.option.freeNode.forEach(function(node){
         // 首选
         if(node.nodeLevel == "0"){
@@ -1889,11 +1889,11 @@
                             :label="item.instanceName"
                             :value="item.instanceCode"/>
                 </el-select>
-              </el-form-item>  
+              </el-form-item>
             </el-col>
             <el-col :span="8">
               <el-form-item label="命名空间">
-                <el-select v-model="initData.metadata.namespace" style="width: 100%;" placeholder="请选择" @change="changeNameSpace" 
+                <el-select v-model="initData.metadata.namespace" style="width: 100%;" placeholder="请选择" @change="changeNameSpace"
                     :disabled="$route.currentRoute.value.query.id != undefined">
                   <el-option v-for="namespace in initData.option.namespaces"
                     :key="namespace.value"
@@ -2206,7 +2206,7 @@
                                 </el-col>
                                 <el-col :span="6" v-if="node.nodeLevel == '0'">
                                   <el-form-item label="权重">
-                                    <el-input-number 
+                                    <el-input-number
                                               v-model="node.weight"/>
                                   </el-form-item>
                                 </el-col>
@@ -2270,8 +2270,8 @@
                                 </el-col>
                                 <el-col :span="12">
                                   <el-radio-group v-model="pod.curNameSpace" @change="changeCurNameSpace(pod)">
-                                    <el-radio-button :label=true>当前pod命名空间</el-radio-button>
-                                    <el-radio-button :label=false>特定命名空间</el-radio-button>
+                                    <el-radio :label=true>当前pod命名空间</el-radio>
+                                    <el-radio :label=false>特定命名空间</el-radio>
                                   </el-radio-group>
                                 </el-col>
                               </el-row>
@@ -2295,7 +2295,7 @@
                                 </el-col>
                                 <el-col :span="3" v-if="pod.nodeLevel == '0'">
                                   <el-form-item label="权重">
-                                    <el-input-number 
+                                    <el-input-number
                                               v-model="pod.weight"/>
                                   </el-form-item>
                                 </el-col>

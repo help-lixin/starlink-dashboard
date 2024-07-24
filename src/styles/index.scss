@@ -153,3 +153,7 @@ html {
     color: var(--el-color-error) !important;
   }
 }
+
+#app  .el-input-group__prepend .el-select {
+  width: 130px;
+}
