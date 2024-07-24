@@ -97,17 +97,15 @@ const handlerLogout = () => {
       </el-breadcrumb>
     </div>
     <div class="layout-right">
-      <div class="theme-model">
-        <div class="msg" @click="isShowMessage=true">
-          <el-badge :value="12" class="item">
-            <el-icon><Message /></el-icon>
-          </el-badge>
-        </div>
-<!--        <el-icon @click="toggleDark">-->
-<!--          <Moon v-if="!isDark" />-->
-<!--          <Sunny v-else />-->
-<!--        </el-icon>-->
-      </div>
+
+<!--      <div class="theme-model">-->
+<!--        <div class="msg" @click="isShowMessage=true">-->
+<!--          <el-badge :value="12" class="item">-->
+<!--            <el-icon><Message /></el-icon>-->
+<!--          </el-badge>-->
+<!--        </div>-->
+<!--      </div>-->
+
       <!-- 用户信息 -->
       <el-dropdown>
             <span class="el-dropdown-link">

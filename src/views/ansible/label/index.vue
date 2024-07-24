@@ -334,6 +334,7 @@
 
   // 取消添加表单处理
   const cancelAdd = ()=>{
+    loading.value = false;
     addDialog.value = false;
     reset();
   }

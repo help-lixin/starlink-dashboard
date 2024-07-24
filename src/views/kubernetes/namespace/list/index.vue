@@ -76,6 +76,7 @@
 
   // 表单取消处理
   const cancel = ()=>{
+    loading.value = false;
     open.value = false;
     reset();
   }
@@ -98,6 +99,7 @@
               type: 'success',
         });
         build(form,isBuild)
+        loading.value = false;
       }else{
         ElMessage.error('新增出现异常');
         loading.value = false;
@@ -398,8 +400,8 @@
       </yt-card>
 
       <template #footer>
-        <el-button @click="submitForm(form)">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
+        <el-button @click="submitForm(form)">确 定</el-button>
       </template>
 
     </el-dialog>
