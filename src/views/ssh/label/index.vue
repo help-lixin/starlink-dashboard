@@ -78,6 +78,7 @@
 
   const form = reactive({
     id:undefined,
+    status:undefined,
     labelKey:undefined,
     labelName:undefined,
     hosts:[]
@@ -173,28 +174,6 @@
     })
   }
 
-  // 更新表单提交处理
-  // const updateForm = async ()=>{
-  //   loading.value = true;
-
-  //   updateLabel(form).then(res =>{
-  //       if(res?.code == 200){
-  //         ElMessage({
-  //             showClose: true,
-  //             message: '修改成功',
-  //             type: 'success',
-  //         });
-  //       }else{
-  //         ElMessage.error('更新出现异常');
-  //         loading.value = false;
-  //         throw response?.msg;
-  //       }
-
-  //       updateDialog.value = false;
-  //       getList();
-  //   })
-  // }
-
   // 新增表单提交处理
   const submitForm = async ()=>{
     loading.value = true;
@@ -284,6 +263,7 @@ const handleDelete = function(row){
     labelKey.value = row.labelKey
     form.labelKey = row.labelKey
     form.labelName = row.labelName
+    form.status = row.status
 
     queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
         if(res.code == 200){
@@ -338,11 +318,6 @@ const handleDelete = function(row){
     reset();
   }
 
-  // 取消更新表单处理
-  // const cancelUpdate = ()=>{
-  //   updateDialog.value = false;
-  //   reset();
-  // }
 
   // 触发查询
   getList();
@@ -471,28 +446,6 @@ const btnList = ref([
             <template v-slot="scope">
               <yt-btn-menu-list :btn-list="btnList" :row-data="scope.row"></yt-btn-menu-list>
             </template>
-
-<!--            <template #default="scope">-->
-<!--              <div class="action-btn">-->
-<!--                <el-button-->
-<!--                  size="small"-->
-<!--                  @click="handleStatusChange(scope.row)"-->
-<!--                  v-hasPerms="['/ssh/label/changeStatus/**']"-->
-<!--                >{{ showStatusOperateFun(scope.row.status)  }}</el-button>-->
-<!--                <el-button-->
-<!--                  size="small"-->
-<!--                  @click="handleUpdate(scope.row)"-->
-<!--                  v-hasPerms="['/ssh/label/add']"-->
-<!--                >修改</el-button>-->
-<!--                <el-button-->
-<!--                  size="small"-->
-<!--                  @click="handleDelete(scope.row)"-->
-<!--                  v-hasPerms="['/ssh/label/del/*']"-->
-<!--                >删除</el-button>-->
-<!--              </div>-->
-<!--            </template>-->
-
-
           </el-table-column>
         </el-table>
       </div>
@@ -505,20 +458,36 @@ const btnList = ref([
     <el-dialog :title="title" v-model="addDialog" width="720px" append-to-body>
       <yt-card>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
-            <el-row :gutter="16">
-              <el-col>
-                <el-form-item label="标签key" prop="labelKey">
-                  <el-input v-model="form.labelKey" placeholder="请输入标签key" maxlength="20" :disabled="form.id != undefined"  style="width: 240px"/>
-                </el-form-item>
-              </el-col>
-            </el-row>
+          <el-row :gutter="24">
+            <el-col :span="12">
+              <el-form-item label="标签key" prop="labelKey">
+                <el-input v-model="form.labelKey" placeholder="请输入标签key" maxlength="20" :disabled="form.id != undefined"  style="width: 240px"/>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="标签名" prop="labelName">
+                <el-input v-model="form.labelName" placeholder="请输入标签名" maxlength="20" style="width: 240px"/>
+              </el-form-item>
+            </el-col>
+          </el-row>
 
-          <el-row :gutter="16">
-            <el-col>
-                <el-form-item label="标签名" prop="labelName">
-                  <el-input v-model="form.labelName" placeholder="请输入标签名" maxlength="20" style="width: 240px"/>
-                </el-form-item>
-              </el-col>
+          <el-row :gutter="24">
+            <el-col :span="12">
+              <el-form-item label="状态" prop="status">
+                <el-select
+                  class="search-select"
+                  v-model="form.status"
+                  placeholder="项目状态"
+                  clearable
+                  style="width:240px"
+                >
+                  <el-option v-for="dict in status"
+                             :key="dict.value"
+                             :label="dict.label"
+                             :value="dict.value"/>
+                </el-select>
+              </el-form-item>
+            </el-col>
           </el-row>
           <el-row :gutter="16">
             <el-col>
