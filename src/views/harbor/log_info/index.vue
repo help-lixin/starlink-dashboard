@@ -113,7 +113,7 @@
           </el-col>
           <el-col :span="8">
             <el-form-item label="资源" prop="instanceCode">
-              <el-input v-model="queryParams.value" placeholder="请输入内容" clearable style="width: 240px">
+              <el-input v-model="queryParams.value" placeholder="请输入内容" clearable>
                 <template #prepend>
                   <el-select
                     v-model="queryParams.key"
