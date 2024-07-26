@@ -79,9 +79,9 @@ const handlerLogout = () => {
 <template>
   <el-header>
     <div class="website-icon">
-      <a href="/" class="logo">
+      <a href="/" class="logo" style="color:#000000">
         <img src="@/assets/logo.svg" style="padding-right: 10px;" alt=""/>
-        <span class="title" :class="isCollapse && 'is-collapse'">星链管理平台</span>
+        <span class="title" :class="isCollapse && 'is-collapse'">星链平台</span>
       </a>
     </div>
     <div class="nav">
