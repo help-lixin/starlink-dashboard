@@ -25,6 +25,9 @@ console.log("当前环境为:"+mode);
 // https://vitejs.dev/config/
 export default defineConfig({
   base: '/',
+  esbuild:{
+    drop: ['console', 'debugger'], // 删除 所有的console 和 debugger
+  },
   plugins: [
     vue(),
     vueJsx(),
