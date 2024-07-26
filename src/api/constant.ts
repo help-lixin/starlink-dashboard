@@ -31,7 +31,7 @@ export const navigation = new Map<string,string[]>([
     [ "/ssh/host/index" ,  ["ssh管理","主机管理"] ],
 
     [ "/kubernetes/deployment/list/index" ,  ["kubernetes管理","Deployment"] ],
-    [ "/kubernetes/deployment/template/index" ,  ["kubernetes管理","Deployment模板"] ],
+    [ "/kubernetes/deployment/template/index" ,  ["kubernetes管理","模板管理"] ],
     [ "/kubernetes/daemonset/list/index" ,  ["kubernetes管理","Daemonset"] ],
     [ "/kubernetes/cronjob/list/index" ,  ["kubernetes管理","CronJob"] ],
     [ "/kubernetes/job/list/index" ,  ["kubernetes管理","Job"] ],

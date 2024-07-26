@@ -125,7 +125,6 @@
     queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
           if(res.code == 200){
             Object.assign(sshInstanceCodes,res?.data)
-            console.log(sshInstanceCodes)
           }
     })
 

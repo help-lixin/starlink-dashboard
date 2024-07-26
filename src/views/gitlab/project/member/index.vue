@@ -323,9 +323,11 @@ const handleChangeStatus = (row)=>{
   queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
       if(res.code == 200){
         Object.assign(pluginInstance,res?.data)
-        groupParams.instanceCode = pluginInstance[0].instanceCode
-        queryParams.instanceCode = pluginInstance[0].instanceCode
-        projectParams.instanceCode = pluginInstance[0].instanceCode
+        if(Object.keys(res?.data).length != 0){
+          groupParams.instanceCode = pluginInstance[0].instanceCode
+          queryParams.instanceCode = pluginInstance[0].instanceCode
+          projectParams.instanceCode = pluginInstance[0].instanceCode
+        }
         projectList(groupParams).then((response) =>{
           Object.assign(projects,response?.data?.records)
         })
@@ -333,7 +335,6 @@ const handleChangeStatus = (row)=>{
           if(response.code == 200){
             Object.assign(projects,response?.data?.records)
           }
-          // queryParams.projectId = projects[0]?.id
           getList();
         })
 

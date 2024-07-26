@@ -217,8 +217,10 @@
   queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
     if(res.code == 200){
       Object.assign(pluginInstance,res?.data)
-      queryParams.instanceCode = pluginInstance[0].instanceCode
-      defaultInstanceCode.value = pluginInstance[0].instanceCode
+      if(Object.keys(res?.data).length != 0){
+        queryParams.instanceCode = pluginInstance[0].instanceCode
+        defaultInstanceCode.value = pluginInstance[0].instanceCode
+      }
 
       nameSpaceList(defaultInstanceCode.value).then((res) =>{
         if(res.code == 200){
