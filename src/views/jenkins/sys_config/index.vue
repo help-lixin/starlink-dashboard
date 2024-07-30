@@ -151,7 +151,7 @@
     form.instanceCode = instanceCode
     form.status = 1
     open.value = true
-    title.value = "添加插件工具信息"
+    title.value = "添加jenkins系统配置"
   }
 
   // 处理更新按钮
@@ -161,7 +161,7 @@
       if(response?.code == 200){
         Object.assign(form,response?.data)
         open.value = true;
-        title.value = "修改插件工具信息";
+        title.value = "修改jenkins系统配置";
       }
     });
   }
