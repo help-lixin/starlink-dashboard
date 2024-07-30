@@ -320,7 +320,17 @@ export const dynamicRoutes = [
     component: () => import('../views/workflow/definition/index.vue'),
     meta: {
       requiresAuth: true
-    }
+    },
+    children: [
+      {
+        path: 'view/:processInstnaceId',
+        name: 'workflow-definition-view',
+        component: () => import('../views/workflow/view/view.vue'),
+        meta: {
+          requiresAuth: false
+        }
+      },
+    ]
   },
   {
     path: '/workflow/definition/operate',
