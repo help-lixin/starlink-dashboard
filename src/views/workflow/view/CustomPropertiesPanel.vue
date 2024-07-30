@@ -143,7 +143,7 @@ init()
 <template>
     <div v-if="isShowProperties" class="custom-properties-panel" :class="[showPosition]">
       <yt-card style="height: 100%;">
-        <el-scrollbar :height="scrollbarHeight" ref="scrollbarRef">
+        <el-scrollbar :height="scrollbarHeight" ref="scrollbarRef" :noresize="true">
           <div class="helper" ref="helperRef">
             <FormProvider :form="form">
               <SchemaField :schema="schema" />
