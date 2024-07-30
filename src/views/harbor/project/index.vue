@@ -25,18 +25,16 @@
   // 复制pull命令
   const copyPullCommand = async (row) => {
       try {
-
           for(const value of menuListRef._rawValue){
-                if(value.id == row.parentId){
-                  await navigator.clipboard.writeText(pullCommand(value.name,row.digest));
-                  ElMessage({
-                      type: 'success',
-                      message: '操作成功',
-                  })
-                  return;
-                }
+            if(value.id == row.parentId){
+              await navigator.clipboard.writeText(pullCommand(value.name,row.tag));
+              ElMessage({
+                  type: 'success',
+                  message: '操作成功',
+              })
+              return;
+            }
           }
-
       } catch (err) {
         ElMessage({
             type: 'error',
@@ -641,10 +639,10 @@
         style="width: 100%"
       >
         <el-table-column prop="name" label="名称" width="60" :show-overflow-tooltip="true"/>
-        <el-table-column prop="digest" label="镜像编码" width="100" :show-overflow-tooltip="true">
-          <template #default="scope">
+        <el-table-column prop="tag" label="TAG" width="100" :show-overflow-tooltip="true">
+          <!-- <template #default="scope">
               {{  scope.row.digest ? scope.row.digest : ''  }}
-          </template>
+          </template> -->
         </el-table-column>
         <el-table-column prop="size" label="镜像大小" width="100" :show-overflow-tooltip="true"/>
         <el-table-column prop="pushTime" label="推送时间" :show-overflow-tooltip="true">

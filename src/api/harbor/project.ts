@@ -52,8 +52,8 @@ export function showIsPublicFun(isPublic:number){
 }
 
 // pull命令
-export function pullCommand(project:string,digest:string){
-    return "docker pull registry.lixin.help/"+ project + "@" + digest
+export function pullCommand(project:string,tag:string){
+    return "docker pull registry.lixin.help/"+ project + ":" + tag
 }
 
 // push命令 

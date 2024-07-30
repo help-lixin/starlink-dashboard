@@ -233,17 +233,27 @@
     queryInstanceInfoByPluginCode(pluginCode).then((res)=>{
       Object.assign(formPluginInstance,res?.data)
 
-      console.log(nameSpaces)
       if(pluginCode == "k8s"){
         nameSpaceList(formPluginInstance[0].instanceCode).then((res)=>{
           Object.assign(nameSpaces ,res.data)
         })
       }else{
-        console.log("=========")
         nameSpaces.splice(0,nameSpaces.length)
       }
+      form.instanceCode = undefined
     })
 
+  }
+
+  const changeInstanceCode = (instanceCode)=>{
+    console.log(form.pluginCode)
+    if(form.pluginCode == "k8s"){
+      nameSpaceList(instanceCode).then((res)=>{
+          nameSpaces.splice(0,nameSpaces.length)
+          Object.assign(nameSpaces ,res.data)
+          form.nameSpace = undefined
+      })
+    }
   }
 
 
@@ -612,6 +622,7 @@ const btnList = ref([
                   placeholder="请选择插件实例"
                   style="width: 240px"
                   :disabled="form.id != undefined"
+                  @change="changeInstanceCode"
               >
                   <el-option v-for="item in formPluginInstance"
                              :key="item.pluginCode"
