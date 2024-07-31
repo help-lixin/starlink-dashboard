@@ -53,7 +53,7 @@ const formSchema = {
 				'x-decorator': "FormItem",
 				'x-component': "Input.TextArea",
 				"x-component-props": {
-					"autosize": true,
+					"autosize": false,
 					"readonly": true,
 				}
 			}
