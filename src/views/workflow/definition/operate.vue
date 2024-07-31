@@ -4,7 +4,7 @@
 		<CustomPropertiesPanel v-if="bpmnModeler" :modeler="bpmnModeler" />
     <YtBottomOperate>
       <el-button @click="$router.go(-1)">取消</el-button>
-      <el-button @click="showSavePage()" type="primary">保存&运行</el-button></YtBottomOperate>
+      <el-button @click="showSavePage()" type="primary">保存</el-button></YtBottomOperate>
 	</div>
 
 	<!-- 弹出层 -->
@@ -75,11 +75,11 @@ const pipelineFormRules = reactive<FormRules>({
 	key: [
 		{ required: true, message: "流水线key不能为空", trigger: "blur" },
 		{ pattern: /[0-9a-zA-Z]{1,6}/, message: '只可以输入数字和字母', trigger: 'blur' },
-		{ min: 2, max: 20, message: '流水线key长度必须介于 2 和 20 之间', trigger: 'blur' }
+		{ min: 2, max: 50, message: '流水线key长度必须介于 2 和 50 之间', trigger: 'blur' }
 	],
 	name: [
 		{ required: true, message: "流水线名称不能为空", trigger: "blur" },
-		{ min: 2, max: 20, message: '流水线名称长度必须介于 2 和 20 之间', trigger: 'blur' }
+		{ min: 2, max: 100, message: '流水线名称长度必须介于 2 和 100 之间', trigger: 'blur' }
 	]
 })
 
