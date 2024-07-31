@@ -124,7 +124,7 @@ import { assign } from 'lodash'
   const handleAdd = ()=>{
     resetForm();
     open.value = true;
-    title.value = "新增组成员";
+    title.value = "添加组成员";
 
 
     selectIdOptions(queryParams.instanceCode).then((response)=>{

@@ -331,7 +331,7 @@
     });
 
     addDialog.value = true
-    title.value = "添加harbor配置信息"
+    title.value = "添加项目信息"
   }
 
   const getAccessLevel = (row)=>{

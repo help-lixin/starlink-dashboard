@@ -124,7 +124,7 @@ const handleAdd = function(){
   reset()
   deployNameReadyOnly.value=false
   open.value = true;
-  title.value = "添加yaml模板";
+  title.value = "添加Deployment YAML";
 }
 
 // 处理更新按钮(仅仅只是把数据拿出来展示一下)
@@ -136,7 +136,7 @@ const handleUpdate = function(row){
     if(response?.code == 200){
       Object.assign(form , response?.data)
       open.value = true;
-      title.value = "修改yaml模板";
+      title.value = "修改Deployment YAML";
     }
   });
 }

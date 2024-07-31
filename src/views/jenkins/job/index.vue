@@ -306,7 +306,7 @@
     });
 
     open.value = true
-    title.value = "添加jenkins配置信息"
+    title.value = "添加Job"
   }
 
   // 处理更新按钮
@@ -322,7 +322,7 @@
     })
 
     open.value = true;
-    title.value = "修改jenkins配置信息";
+    title.value = "修改Job";
   }
 
   // 保存当前查询详情的任务名称（主要用于校验）
