@@ -162,7 +162,7 @@
         })
 
         open.value = true;
-        title.value = "新增项目成员";
+        title.value = "添加项目成员";
       }
 
     });
@@ -359,7 +359,6 @@ const btnList = ref([
     clickEvent: handleDelete
   },
 ])
-
 
 </script>
 

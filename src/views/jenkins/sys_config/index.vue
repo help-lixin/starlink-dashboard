@@ -62,7 +62,7 @@
       ],
       name : [
         { required: true,  message: "别名不能为空", trigger: "blur" },
-        { pattern: /^[-_a-zA-Z0-9]*$/, message: '别名只可以输入字母、数字、下划线及中划线', trigger: 'blur' },
+        { pattern: /^[.-_a-zA-Z0-9]*$/, message: '别名只可以输入字母、数字、下划线、英文句号及中划线', trigger: 'blur' },
         { min: 2, max: 200, message: '别名长度必须介于 2 和 200 之间', trigger: 'blur' }
       ],
       value : [

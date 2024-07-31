@@ -140,28 +140,6 @@
   }
 
   const namespaces = [{label:"default",value:"default"},{label:"my-project",value:"my-project"}]
-  // 添加pod调度
-  const addPod = ()=>{
-    initData.value.option.freePod.push(
-            {
-              "podAffinity":true,
-              "namespaces":[],
-              "weight":1,
-              "nodeLevel":"0",
-              "curNameSpace":true,
-              "topologyKey":"",
-              "labelSelector": {
-                "matchExpressions": [
-                  {
-                    "key": "",
-                    "operator": "In",
-                    "values": [""]
-                  }
-                ]
-              }
-            }
-    )
-  }
   // 删除pod节点调度
   const removePod = (index)=>{
     initData.value.option.freePod.splice(index, 1);

@@ -181,11 +181,6 @@ const btnList = ref([
               {{ dayjs(scope.row.startTime).format("YYYY-MM-DD HH:mm:ss")   }}
             </template>
           </el-table-column>
-          <el-table-column label="结束时间" align="left" prop="endTime" width="180">
-            <template #default="scope">
-              {{ dayjs(scope.row.endTime).format("YYYY-MM-DD HH:mm:ss")   }}
-            </template>
-          </el-table-column>
           <el-table-column
             label="操作"
             align="center"

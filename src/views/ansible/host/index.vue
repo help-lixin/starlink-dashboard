@@ -274,14 +274,14 @@
         }
     })
     addDialog.value = true
-    title.value = "修改 "+row.serverName+" 主机配置信息"
+    title.value = "修改ansible主机配置信息"
   }
 
   // 处理新增按钮
   const handleAdd = function(){
     reset()
     addDialog.value = true
-    title.value = "添加ansible主机配置信息"
+    title.value = "添加ansible主机信息"
   }
 
   // 表单取消处理

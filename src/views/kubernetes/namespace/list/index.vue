@@ -69,7 +69,7 @@
   }
 
   const handleAdd = (row)=>{
-    title.value = "新增命名空间"
+    title.value = "添加命名空间"
     form.instanceCode = pluginInstance[0].instanceCode
     open.value = true;
   }

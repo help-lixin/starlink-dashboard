@@ -306,7 +306,7 @@
     });
 
     open.value = true
-    title.value = "添加jenkins配置信息"
+    title.value = "添加Job"
   }
 
   // 处理更新按钮
@@ -322,7 +322,7 @@
     })
 
     open.value = true;
-    title.value = "修改jenkins配置信息";
+    title.value = "修改Job";
   }
 
   // 保存当前查询详情的任务名称（主要用于校验）
@@ -445,7 +445,6 @@
                   message: '修改成功',
                   type: 'success',
             });
-            build(form,isBuild)
           }else{
             ElMessage.error(response.msg);
             loading.value = false;
@@ -462,7 +461,6 @@
                   message: '新增成功',
                   type: 'success',
             });
-            build(form,isBuild)
           }else{
             ElMessage.error(response.msg);
             loading.value = false;
@@ -475,21 +473,20 @@
 
   }
 
-  const build = (form,isBuild)=>{
-    if(isBuild){
-      const buildParams = reactive({});
-      buildParams.instanceCode = form.instanceCode
-      buildParams.jobId = form.id
-      buildJob(buildParams).then(response => {
-        ElMessage({
-            showClose: true,
-            message: '已开启构建，请等待构建...',
-            type: 'success',
-        });
-        getList();
-      })
-    }
+  const build = (row)=>{
+    const buildParams = reactive({});
+    buildParams.instanceCode = row.instanceCode
+    buildParams.jobId = row.id
+    buildJob(buildParams).then(response => {
+      ElMessage({
+          showClose: true,
+          message: '已开启构建，请等待构建...',
+          type: 'success',
+      });
+      getList();
+    })
   }
+
 
   const handleStatusChange = (row)=>{
     const jobName = row.jobName
@@ -561,7 +558,7 @@ const btnList = ref([
     permArray: ['/jenkins/job/buildJob'],
     isShow: () => true,
     isDisable: false,
-    clickEvent: handleUpdate
+    clickEvent: build
   },
   {
     btnName: row => showStatusOperateFun(row.status),
