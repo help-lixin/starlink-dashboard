@@ -126,7 +126,8 @@ const setNodeLog = async () => {
       console.log(helperRef.value?.clientHeight, scrollbarRef.value, 'test123')
       const clientHeight = helperRef.value?.clientHeight
       if (clientHeight > 300) {
-        scrollbarRef.value?.setScrollTop?.(clientHeight - 100)
+        ele.scrollTop = clientHeight;
+        // scrollbarRef.value?.setScrollTop?.(clientHeight - 100)
       }
     })
   }
