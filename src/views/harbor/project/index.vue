@@ -4,6 +4,7 @@
   import { showStatusOperateFun , status , showStatusFun , addDateRange,getStatusIcon, handleTree } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
+  import XEClipboard from "xe-clipboard"
   import {  Edit, List, CopyDocument, Unlock, Lock } from '@element-plus/icons-vue'
   import { changeStatus, pageList, queryNodeList, addProject, projectNameIsExist,
     units, pullCommand, pushCommand, showIsPublicFun, changeAccessLevel, showAccessLevelOperateFun, isPublic, removeProject} from "@/api/harbor/project"
@@ -23,15 +24,18 @@
   }
 
   // 复制pull命令
-  const copyPullCommand = async (row) => {
+  const copyPullCommand = (row) => {
       try {
           for(const value of menuListRef._rawValue){
             if(value.id == row.parentId){
-              await navigator.clipboard.writeText(pullCommand(value.name,row.tag));
-              ElMessage({
-                  type: 'success',
-                  message: '操作成功',
-              })
+              if (XEClipboard.copy(pullCommand(value.name,row.tag))) {
+                ElMessage({
+                    type: 'success',
+                    message: '操作成功',
+                })
+              } else {
+                ElMessage.error("浏览器不兼容此操作")
+              }
               return;
             }
           }

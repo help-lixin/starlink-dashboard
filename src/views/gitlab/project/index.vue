@@ -3,6 +3,7 @@
   import { showStatusOperateFun , status , showStatusFun , addDateRange , enable, getStatusIcon } from "@/utils/common"
   import { queryInstanceInfoByPluginCode } from "@/api/common-api"
   import { dayjs } from "@/utils/common-dayjs"
+  import XEClipboard from "xe-clipboard"
   import {  Edit ,Delete} from '@element-plus/icons-vue'
   import { pageList , addProject , queryProjectInfoById , changeProjectStatus, removeProject} from "@/api/gitlab/projects"
   import {selectGitlabIdOptions, queryGitlabAddr} from "@/api/gitlab/groups"
@@ -302,33 +303,43 @@
       getList();
   });
 
+  // 复制文本
+  const clickCopy = (row, column, cell, event)=>{
+    if (XEClipboard.copy(row[column.property])) {
+      ElMessage({
+          type: 'success',
+          message: '复制成功',
+      })
+    } else {
+      ElMessage.error("浏览器不兼容此操作")
+    }
+  }
 
-
-// 按钮
-const btnList = ref([
-  {
-    btnName: '修改',
-    permArray: ['/gitlab/project/add'],
-    isShow: () => true,
-    isDisable: false,
-    clickEvent: handleUpdate
-  },
-  {
-    btnName: row => showStatusOperateFun(row.status),
-    permArray: ['/gitlab/project/changeStatus'],
-    isShow: () => true,
-    isDisable: false,
-    clickEvent: handleStatusChange
-  },
-  {
-    btnName: '删除',
-    class: 'yt-color-error-hover',
-    permArray: ['/gitlab/project/changeStatus'],
-    isShow: () => true,
-    isDisable: false,
-    clickEvent: handleDelete
-  },
-])
+  // 按钮
+  const btnList = ref([
+    {
+      btnName: '修改',
+      permArray: ['/gitlab/project/add'],
+      isShow: () => true,
+      isDisable: false,
+      clickEvent: handleUpdate
+    },
+    {
+      btnName: row => showStatusOperateFun(row.status),
+      permArray: ['/gitlab/project/changeStatus'],
+      isShow: () => true,
+      isDisable: false,
+      clickEvent: handleStatusChange
+    },
+    {
+      btnName: '删除',
+      class: 'yt-color-error-hover',
+      permArray: ['/gitlab/project/changeStatus'],
+      isShow: () => true,
+      isDisable: false,
+      clickEvent: handleDelete
+    },
+  ])
 
 </script>
 
@@ -431,12 +442,12 @@ const btnList = ref([
       </div>
       <!--table  -->
       <div class="table-wrap">
-        <el-table v-loading="loading" :data="projectList" @selection-change="handleSelectionChange">
+        <el-table v-loading="loading" :data="projectList" @selection-change="handleSelectionChange" @cell-click="clickCopy">
             <el-table-column type="selection" width="60" align="left" />
             <el-table-column label="项目编号" align="left" key="id" prop="id" v-if="false"/>
             <el-table-column label="项目名称" align="left" key="projectName" prop="projectName"  :show-overflow-tooltip="true" />
             <el-table-column label="项目标识符" align="left" key="path" prop="path" :show-overflow-tooltip="true" />
-            <el-table-column label="webUrl" align="left" key="webUrl" prop="webUrl" :show-overflow-tooltip="true"  />
+            <el-table-column label="webUrl" align="left" key="webUrl" prop="webUrl"  :show-overflow-tooltip="true"  />
             <el-table-column label="sshUrl" align="left" key="sshUrl" prop="sshUrl" :show-overflow-tooltip="true" />
             <el-table-column label="备注" align="left" key="remark" prop="remark" :show-overflow-tooltip="true" />
             <el-table-column label="状态" align="center" key="status" prop="status">

@@ -35,7 +35,7 @@ export function nameSpaceList(instanceCode:string) {
 
 // 新增/修改 kubernetes任务
 export function addPod(data:any) {
-return request({
+    return request({
         url: STARLINK_SERVICE + '/kubernetes/pod/add',
         method: 'post',
         data: data
