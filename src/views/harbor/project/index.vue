@@ -369,7 +369,7 @@
         // 把菜单打平,渲染成一颗树
         menuListRef.value = handleTree(menuResult.data,"id");
     } else {
-        ElMessage.error("获取菜单信息失败");
+        ElMessage.error("获取harbor详细信息失败");
     }
 
     detail.value = true
