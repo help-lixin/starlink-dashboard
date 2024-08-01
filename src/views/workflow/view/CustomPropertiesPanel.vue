@@ -53,7 +53,7 @@ const formSchema = {
 				'x-decorator': "FormItem",
 				'x-component': "Input.TextArea",
 				"x-component-props": {
-					"autosize": false,
+					"autosize": true,
 					"readonly": true,
 				}
 			}
@@ -126,8 +126,7 @@ const setNodeLog = async () => {
       console.log(helperRef.value?.clientHeight, scrollbarRef.value, 'test123')
       const clientHeight = helperRef.value?.clientHeight
       if (clientHeight > 300) {
-        ele.scrollTop = clientHeight;
-        // scrollbarRef.value?.setScrollTop?.(clientHeight - 100)
+        scrollbarRef.value?.setScrollTop?.(clientHeight - 100)
       }
     })
   }
@@ -144,7 +143,7 @@ init()
 <template>
     <div v-if="isShowProperties" class="custom-properties-panel" :class="[showPosition]">
       <yt-card style="height: 100%;">
-        <el-scrollbar :height="scrollbarHeight" ref="scrollbarRef" :noresize="true">
+        <el-scrollbar :height="scrollbarHeight" ref="scrollbarRef">
           <div class="helper" ref="helperRef">
             <FormProvider :form="form">
               <SchemaField :schema="schema" />
