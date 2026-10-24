@@ -3,7 +3,6 @@ import AppLayoutVue from '@/components/layout/AppLayout.vue'
 import IndexView from '@/views/IndexView.vue'
 import { useTokenStore } from '@/stores/token'
 import { useMenuStore } from "@/stores/menu.ts";
-import StompClient from "@/utils/StompClient.ts";
 
 const publicRoutes = [
   {
@@ -73,14 +72,6 @@ export const dynamicRoutes = [
     meta: {
       requiresAuth: true
     }
-  },
-  {
-    path: '/system/credential/index',
-    name: 'sys-credential',
-    component: () => import('../views/system/credential/index.vue'),
-    meta: {
-      requiresAuth: true
-    }
   }
 ]
 
@@ -110,15 +101,6 @@ router.beforeEach(async (to, from, next) => {
     if (!token?.accessToken) { // token不存在,跳转到login
       next({ name: 'login', query: { redirect: to.fullPath } })
     } else {
-      try {
-        // 建立连接
-        const stompClient = StompClient.getInstance()
-        // 链接并订阅
-        await stompClient.connect()
-      } catch (e) {
-        console.log(e, 'err')
-      }
-
     }
   }
   // 继续往下走

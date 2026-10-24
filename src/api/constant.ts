@@ -4,7 +4,6 @@ export const navigation = new Map<string,string[]>([
     [ "/system/menu/index" , ["系统管理","菜单管理"] ],
     [ "/system/env/index" ,  ["系统管理","环境管理"] ],
     [ "/system/group/index" ,  ["系统管理","环境组管理"] ],
-    [ "/system/credential/index" ,  ["系统管理","凭证管理"] ],
     [ "/system/plugin/definition/index" ,  ["系统管理","插件管理"] ],
     [ "/system/plugin/instance/index" ,  ["系统管理","插件实例管理"] ],
 

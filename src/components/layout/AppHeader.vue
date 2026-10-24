@@ -10,7 +10,6 @@ import { useMenuStore } from '@/stores/menu'
 import { usePermsStore } from '@/stores/perms'
 import { useRouteStore } from '@/stores/route'
 import { useNavStore } from '@/stores/nav'
-import { useActionMetasStore } from '@/stores/plugin'
 import { useDark, useToggle } from '@vueuse/core'
 import { Message, Moon, Sunny } from "@element-plus/icons-vue";
 import SystemMsg from "@/components/layout/SystemMsg.vue";
@@ -19,9 +18,7 @@ const routeStore = useRouteStore()
 const menuStore = useMenuStore()
 const permsStore = usePermsStore()
 const navStore = useNavStore()
-const actionMetasStore = useActionMetasStore()
 const isShowMessage = ref(false)
-import StompClient from "@/utils/StompClient.ts";
 
 // 手工触发一次解析
 navStore.triggerParse()
@@ -55,10 +52,6 @@ getProfile().then((userProfile) => {
 const handlerLogout = () => {
   const tokenStore = useTokenStore()
 
-  // 退出时,消毁连接
-  const stompClient = StompClient.getInstance()
-  stompClient.destroy()
-
   // 调用后端退出
   // TODO lixin
   // logout()
@@ -70,7 +63,6 @@ const handlerLogout = () => {
   routeStore.removeRoutes()
   permsStore.removePerms()
   navStore.removeNavigation()
-  actionMetasStore.removeActions()
   // 跳转到登录页面
   router.push('/login')
 }

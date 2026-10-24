@@ -106,12 +106,6 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
-      // '/ws': {
-      //   ws: true,
-      //   target: loadEnv(mode,process.cwd()).VITE_GATEWAY_WS_URL,
-      //   changeOrigin: true,
-      //   // rewrite: (path) => path.replace(/^\/ws/, ''),
-      // }
     }
   }
 })

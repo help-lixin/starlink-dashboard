@@ -9,13 +9,11 @@ import { useRouter, useRoute } from 'vue-router'
 import type { FormInstance, FormRules } from 'element-plus'
 import { processRoutes } from '@/api/router'
 import { usePermsStore } from '@/stores/perms'
-import { useActionMetasStore } from '@/stores/plugin'
 
 const tokenStore = useTokenStore()
 const permsStore = usePermsStore()
 const router = useRouter()
 const route = useRoute()
-const actionMetasStore = useActionMetasStore()
 
 const form = reactive({
   username: 'admin',
@@ -67,8 +65,6 @@ async function onSubmit() {
         await permsStore.initPermList()
         // 对路由进行处理
         await processRoutes()
-        // 初始化所有的action meta
-        await actionMetasStore.initActions()
         ElMessage({ message: '登录成功', type: 'success' })
         isLoading.value = false
         // 跳转到首页
